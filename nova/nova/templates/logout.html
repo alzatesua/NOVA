@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logout</title>
+</head>
+<body>
+    <form id="logoutForm">
+        {% csrf_token %}
+        <button id="logoutButton">Cerrar Sesión</button>
+    </form>
+  <script>
+    document.getElementById("logoutButton").addEventListener("click", function(event) {
+      event.preventDefault();
+      // Recupera el token CSRF
+      let csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      
+      fetch("http://127.0.0.1:8000/api/logout/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrf_token
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+            if (data.redirect) {
+                window.location.href = data.redirect;
+                window.alert("¡Nos vemos pronto!")
+            }})
+      .catch(error => console.error("Error:", error));
+    });
+  </script>
+</body>
+</html>

@@ -16,9 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import holamundo
-
+from .views import login_view, login_page, logout_view, logout_page
 urlpatterns = [
+    path('', login_page),
     path('admin/', admin.site.urls),
-    path('login/', holamundo)
+    path('login/', login_page, name='login_page'),  # Muestra el HTML
+    path('api/login/', login_view, name='login_api'),  # API para autenticación
+    path('api/logout/', logout_view, name='logout'),
+    path('logout/', logout_page, name='login_page'),  # Muestra el HTML
+
 ]

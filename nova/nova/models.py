@@ -6,7 +6,8 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.db import models
 
 class ApellidosUsuarioNatural(models.Model):
     id_apellido = models.AutoField(primary_key=True)
@@ -115,7 +116,7 @@ class DjangoAdminLog(models.Model):
     action_flag = models.SmallIntegerField()
     change_message = models.TextField()
     content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)
-    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+    user = models.ForeignKey('LoginUsuario', models.DO_NOTHING)
 
     class Meta:
         managed = False
@@ -300,14 +301,61 @@ class InfProveedores(models.Model):
         db_table = 'inf_proveedores'
 
 
-class LoginUsuario(models.Model):
+class UsuarioManager(BaseUserManager):
+    def create_user(self, correo_usuario, password=None, id_tienda=None):
+        if not correo_usuario:
+            raise ValueError("El usuario debe tener un correo electrónico")
+        
+        user = self.model(
+            correo_usuario=self.normalize_email(correo_usuario),
+            id_tienda=id_tienda,
+        )
+        user.set_password(password)  # Usa set_password para encriptar
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, correo_usuario, password):
+        user = self.create_user(
+            correo_usuario=correo_usuario,
+            password=password,
+        )
+        user.is_admin = True
+        user.save(using=self._db)
+        return user
+
+class LoginUsuario(AbstractBaseUser):
     id_login_usuario = models.AutoField(primary_key=True)
     id_tienda = models.IntegerField(blank=True, null=True)
-    password_usuario = models.CharField(max_length=250, blank=True, null=True)
-    correo_usuario = models.CharField(max_length=255, blank=True, null=True)
+    password = models.CharField(max_length=250)
+    correo_usuario = models.EmailField(unique=True, max_length=255)
+    last_login = models.DateTimeField(auto_now=True)  # Agrega este campo
 
+    is_active = models.BooleanField(default=True)
+    is_admin = models.BooleanField(default=False)
+
+    objects = UsuarioManager()
+
+    USERNAME_FIELD = 'correo_usuario'
+    REQUIRED_FIELDS = []
     class Meta:
         db_table = 'login_usuario'
+
+    def __str__(self):
+        return self.correo_usuario
+
+    def has_perm(self, perm, obj=None):
+        return True
+
+    def has_module_perms(self, app_label):
+        return True
+
+    @property
+    def is_staff(self):
+        return self.is_admin
+    
+    class Meta:
+        db_table = 'login_usuario'
+
 
 
 class MediosPago(models.Model):
