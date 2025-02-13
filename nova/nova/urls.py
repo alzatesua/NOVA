@@ -15,8 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from .views import login_view, login_page, logout_view, logout_page
+from django.urls import path, include
+from .views import login_view, login_page, logout_view, logout_page, email_request, reset_password_confirm, recuperar_contrasena
 urlpatterns = [
     path('', login_page),
     path('admin/', admin.site.urls),
@@ -24,5 +24,8 @@ urlpatterns = [
     path('api/login/', login_view, name='login_api'),  # API para autenticación
     path('api/logout/', logout_view, name='logout'),
     path('logout/', logout_page, name='login_page'),  # Muestra el HTML
+    path('api/restablecer-contrasena/', email_request, name='restablecer-contrasena'),
+    path('api/reset-password-confirm/<uidb64>/<token>/', reset_password_confirm, name='peticion_restablecer'),
+    path('pedir_cambio_contrasena/', recuperar_contrasena , name='recuperar_contrasena'),
 
 ]
