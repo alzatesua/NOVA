@@ -267,7 +267,7 @@ class Sucursal(models.Model):
     estatus = models.BooleanField(default=True)
 
     class Meta:
-        db_table = 'main_dashboard_sucursales'
+        db_table = 'nova_sucursal'
 
     def __str__(self):
         return self.nombre

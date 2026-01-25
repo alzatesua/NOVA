@@ -6,7 +6,7 @@ class LoginUsuarioGeneral(models.Model):
 
 
     class Meta:
-        db_table = "usuarios"
+        db_table = "login_usuarios"
 
 class InfProveedores(models.Model):
     razon_social = models.CharField(max_length=255)

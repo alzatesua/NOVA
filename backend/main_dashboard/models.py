@@ -2,6 +2,7 @@ from django.db import models
 from django.db import models, transaction        # ← añade transaction aquí
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.conf import settings
 
 
 class Sucursales(models.Model):
@@ -262,7 +263,7 @@ class Bodega(models.Model):
     estatus = models.BooleanField(default=True)
 
     responsable = models.ForeignKey(
-        'auth.User', on_delete=models.SET_NULL,
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='bodegas_responsables'
     )
 
@@ -352,7 +353,7 @@ class Traslado(models.Model):
     usar_bodega_transito = models.BooleanField(default=True, help_text='Si está activo, usa una bodega TRN durante el envío.')
 
     observaciones = models.TextField(blank=True, null=True)
-    creado_por = models.ForeignKey('auth.User', null=True, blank=True, on_delete=models.SET_NULL, related_name='traslados_creados')
+    creado_por = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='traslados_creados')
     enviado_en = models.DateTimeField(blank=True, null=True)
     recibido_en = models.DateTimeField(blank=True, null=True)
     creado_en = models.DateTimeField(auto_now_add=True)

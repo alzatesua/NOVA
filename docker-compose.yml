@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: bd_madre
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: zuleta18
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - nova_network
+
+  backend:
+    build: ./backend
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=django-insecure-9)6^ej5!o6d^y)n7+#p+i6)_%3_$=o*^liuplt)^mqhwbmz9*f
+      - DB_NAME=bd_madre
+      - DB_USER=postgres
+      - DB_PASSWORD=zuleta18
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+      - staticfiles:/app/staticfiles
+      - media:/app/media
+    networks:
+      - nova_network
+
+  frontend:
+    build: ./frontend
+    networks:
+      - nova_network
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - staticfiles:/app/static/
+      - media:/app/media/
+      - /etc/letsencrypt/live/portafolio-juan.dagi.co/fullchain.pem:/etc/ssl/certs/fullchain.pem
+      - /etc/letsencrypt/live/portafolio-juan.dagi.co/privkey.pem:/etc/ssl/private/privkey.pem
+    networks:
+      - nova_network
+
+volumes:
+  postgres_data:
+  staticfiles:
+  media:
+
+networks:
+  nova_network:
+    driver: bridge

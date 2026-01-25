@@ -18,6 +18,7 @@ from django.utils import timezone
 
 import datetime
 from datetime import timedelta  # esto está bien si usas timedelta
+import os
 
 
 
@@ -36,17 +37,20 @@ dt_aware = timezone.make_aware(dt_naive, timezone=datetime.timezone.utc)
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9)6^ej5!o6d^y)n7+#p+i6)_%3_$=o*^liuplt)^mqhwbmz9*f'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-9)6^ej5!o6d^y)n7+#p+i6)_%3_$=o*^liuplt)^mqhwbmz9*f')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = [
                 'dagi.co',
                 '31.97.14.61',
                 'localhost', 
                 '127.0.0.1',
-                '.dagi.co'
+                '.dagi.co',
+                'backend',
+                'nginx',
+                'frontend'
                 ]
 
 
@@ -151,11 +155,11 @@ AUTH_USER_MODEL = 'nova.LoginUsuario'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'bd_madre',
-        'USER': 'postgres',
-        'PASSWORD': 'zuleta18',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ.get('DB_NAME', 'bd_madre'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'zuleta18'),
+        'HOST': os.environ.get('DB_HOST', 'db'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     },
 }
 
