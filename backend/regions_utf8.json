@@ -1,0 +1,6596 @@
+[
+{
+  "model": "cities_light.region",
+  "pk": 1,
+  "fields": {
+    "name": "Misiones",
+    "name_ascii": "Misiones",
+    "slug": "misiones",
+    "geoname_id": 3430657,
+    "alternate_names": "Provincia de Misiones",
+    "display_name": "Misiones, Argentina",
+    "geoname_code": "14",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 2,
+  "fields": {
+    "name": "Formosa",
+    "name_ascii": "Formosa",
+    "slug": "formosa",
+    "geoname_id": 3433896,
+    "alternate_names": "Provincia de Formosa",
+    "display_name": "Formosa, Argentina",
+    "geoname_code": "09",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 3,
+  "fields": {
+    "name": "Buenos Aires F.D.",
+    "name_ascii": "Buenos Aires F.D.",
+    "slug": "buenos-aires-fd",
+    "geoname_id": 3433955,
+    "alternate_names": "Capital Federal;Ciudad Autónoma de Buenos Aires;Ciudad de Buenos Aires",
+    "display_name": "Buenos Aires F.D., Argentina",
+    "geoname_code": "07",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 4,
+  "fields": {
+    "name": "Entre Rios",
+    "name_ascii": "Entre Rios",
+    "slug": "entre-rios",
+    "geoname_id": 3434137,
+    "alternate_names": "Provincia de Entre Ríos",
+    "display_name": "Entre Rios, Argentina",
+    "geoname_code": "08",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 5,
+  "fields": {
+    "name": "Corrientes",
+    "name_ascii": "Corrientes",
+    "slug": "corrientes",
+    "geoname_id": 3435214,
+    "alternate_names": "Provincia de Corrientes",
+    "display_name": "Corrientes, Argentina",
+    "geoname_code": "06",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 6,
+  "fields": {
+    "name": "Buenos Aires",
+    "name_ascii": "Buenos Aires",
+    "slug": "buenos-aires",
+    "geoname_id": 3435907,
+    "alternate_names": "",
+    "display_name": "Buenos Aires, Argentina",
+    "geoname_code": "01",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 7,
+  "fields": {
+    "name": "Tucuman",
+    "name_ascii": "Tucuman",
+    "slug": "tucuman",
+    "geoname_id": 3833578,
+    "alternate_names": "Provincia de Tucumán",
+    "display_name": "Tucuman, Argentina",
+    "geoname_code": "24",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 8,
+  "fields": {
+    "name": "Tierra del Fuego",
+    "name_ascii": "Tierra del Fuego",
+    "slug": "tierra-del-fuego",
+    "geoname_id": 3834450,
+    "alternate_names": "Provincia de Tierra del Fuego, Antártida e Islas del Atlántico Sur",
+    "display_name": "Tierra del Fuego, Argentina",
+    "geoname_code": "23",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 9,
+  "fields": {
+    "name": "Santiago del Estero",
+    "name_ascii": "Santiago del Estero",
+    "slug": "santiago-del-estero",
+    "geoname_id": 3835868,
+    "alternate_names": "Provincia de Santiago del Estero",
+    "display_name": "Santiago del Estero, Argentina",
+    "geoname_code": "22",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 10,
+  "fields": {
+    "name": "Santa Fe",
+    "name_ascii": "Santa Fe",
+    "slug": "santa-fe",
+    "geoname_id": 3836276,
+    "alternate_names": "Provincia de Santa Fe",
+    "display_name": "Santa Fe, Argentina",
+    "geoname_code": "21",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 11,
+  "fields": {
+    "name": "Santa Cruz",
+    "name_ascii": "Santa Cruz",
+    "slug": "santa-cruz",
+    "geoname_id": 3836350,
+    "alternate_names": "Provincia de Santa Cruz",
+    "display_name": "Santa Cruz, Argentina",
+    "geoname_code": "20",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 12,
+  "fields": {
+    "name": "San Luis",
+    "name_ascii": "San Luis",
+    "slug": "san-luis",
+    "geoname_id": 3837029,
+    "alternate_names": "Provincia de San Luis",
+    "display_name": "San Luis, Argentina",
+    "geoname_code": "19",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 13,
+  "fields": {
+    "name": "San Juan",
+    "name_ascii": "San Juan",
+    "slug": "san-juan",
+    "geoname_id": 3837152,
+    "alternate_names": "Provincia de San Juan",
+    "display_name": "San Juan, Argentina",
+    "geoname_code": "18",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 14,
+  "fields": {
+    "name": "Salta",
+    "name_ascii": "Salta",
+    "slug": "salta",
+    "geoname_id": 3838231,
+    "alternate_names": "Provincia de Salta",
+    "display_name": "Salta, Argentina",
+    "geoname_code": "17",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 15,
+  "fields": {
+    "name": "Rio Negro",
+    "name_ascii": "Rio Negro",
+    "slug": "rio-negro",
+    "geoname_id": 3838830,
+    "alternate_names": "Provincia de Río Negro",
+    "display_name": "Rio Negro, Argentina",
+    "geoname_code": "16",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 16,
+  "fields": {
+    "name": "Neuquen",
+    "name_ascii": "Neuquen",
+    "slug": "neuquen",
+    "geoname_id": 3843122,
+    "alternate_names": "Provincia del Neuquén",
+    "display_name": "Neuquen, Argentina",
+    "geoname_code": "15",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 17,
+  "fields": {
+    "name": "Mendoza",
+    "name_ascii": "Mendoza",
+    "slug": "mendoza",
+    "geoname_id": 3844419,
+    "alternate_names": "Provincia de Mendoza",
+    "display_name": "Mendoza, Argentina",
+    "geoname_code": "13",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 18,
+  "fields": {
+    "name": "La Rioja",
+    "name_ascii": "La Rioja",
+    "slug": "la-rioja",
+    "geoname_id": 3848949,
+    "alternate_names": "Provincia de La Rioja",
+    "display_name": "La Rioja, Argentina",
+    "geoname_code": "12",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 19,
+  "fields": {
+    "name": "La Pampa",
+    "name_ascii": "La Pampa",
+    "slug": "la-pampa",
+    "geoname_id": 3849574,
+    "alternate_names": "Provincia de La Pampa",
+    "display_name": "La Pampa, Argentina",
+    "geoname_code": "11",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 20,
+  "fields": {
+    "name": "Jujuy",
+    "name_ascii": "Jujuy",
+    "slug": "jujuy",
+    "geoname_id": 3853404,
+    "alternate_names": "Provincia de Jujuy",
+    "display_name": "Jujuy, Argentina",
+    "geoname_code": "10",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 21,
+  "fields": {
+    "name": "Cordoba",
+    "name_ascii": "Cordoba",
+    "slug": "cordoba",
+    "geoname_id": 3860255,
+    "alternate_names": "Provincia de Córdoba",
+    "display_name": "Cordoba, Argentina",
+    "geoname_code": "05",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 22,
+  "fields": {
+    "name": "Chubut",
+    "name_ascii": "Chubut",
+    "slug": "chubut",
+    "geoname_id": 3861244,
+    "alternate_names": "Provincia del Chubut",
+    "display_name": "Chubut, Argentina",
+    "geoname_code": "04",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 23,
+  "fields": {
+    "name": "Chaco",
+    "name_ascii": "Chaco",
+    "slug": "chaco",
+    "geoname_id": 3861887,
+    "alternate_names": "Provincia del Chaco",
+    "display_name": "Chaco, Argentina",
+    "geoname_code": "03",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 24,
+  "fields": {
+    "name": "Catamarca",
+    "name_ascii": "Catamarca",
+    "slug": "catamarca",
+    "geoname_id": 3862286,
+    "alternate_names": "Provincia de Catamarca",
+    "display_name": "Catamarca, Argentina",
+    "geoname_code": "02",
+    "country": 1
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 25,
+  "fields": {
+    "name": "Tarija Department",
+    "name_ascii": "Tarija Department",
+    "slug": "tarija-department",
+    "geoname_id": 3903319,
+    "alternate_names": "Departamento de Tarija",
+    "display_name": "Tarija Department, Bolivia",
+    "geoname_code": "09",
+    "country": 2
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 26,
+  "fields": {
+    "name": "Santa Cruz Department",
+    "name_ascii": "Santa Cruz Department",
+    "slug": "santa-cruz-department",
+    "geoname_id": 3904907,
+    "alternate_names": "Departamento de Santa Cruz",
+    "display_name": "Santa Cruz Department, Bolivia",
+    "geoname_code": "08",
+    "country": 2
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 27,
+  "fields": {
+    "name": "Potosí Department",
+    "name_ascii": "Potosi Department",
+    "slug": "potosi-department",
+    "geoname_id": 3907580,
+    "alternate_names": "Departamento de Potosí",
+    "display_name": "Potosí Department, Bolivia",
+    "geoname_code": "07",
+    "country": 2
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 28,
+  "fields": {
+    "name": "Pando",
+    "name_ascii": "Pando",
+    "slug": "pando",
+    "geoname_id": 3908600,
+    "alternate_names": "Departamento de Pando",
+    "display_name": "Pando, Bolivia",
+    "geoname_code": "06",
+    "country": 2
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 29,
+  "fields": {
+    "name": "Oruro",
+    "name_ascii": "Oruro",
+    "slug": "oruro",
+    "geoname_id": 3909233,
+    "alternate_names": "Departamento de Oruro",
+    "display_name": "Oruro, Bolivia",
+    "geoname_code": "05",
+    "country": 2
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 30,
+  "fields": {
+    "name": "La Paz Department",
+    "name_ascii": "La Paz Department",
+    "slug": "la-paz-department",
+    "geoname_id": 3911924,
+    "alternate_names": "Departamento de La Paz",
+    "display_name": "La Paz Department, Bolivia",
+    "geoname_code": "04",
+    "country": 2
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 31,
+  "fields": {
+    "name": "Cochabamba",
+    "name_ascii": "Cochabamba",
+    "slug": "cochabamba",
+    "geoname_id": 3919966,
+    "alternate_names": "Departamento de Cochabamba",
+    "display_name": "Cochabamba, Bolivia",
+    "geoname_code": "02",
+    "country": 2
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 32,
+  "fields": {
+    "name": "Chuquisaca Department",
+    "name_ascii": "Chuquisaca Department",
+    "slug": "chuquisaca-department",
+    "geoname_id": 3920177,
+    "alternate_names": "Departamento de Chuquisaca",
+    "display_name": "Chuquisaca Department, Bolivia",
+    "geoname_code": "01",
+    "country": 2
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 33,
+  "fields": {
+    "name": "Beni Department",
+    "name_ascii": "Beni Department",
+    "slug": "beni-department",
+    "geoname_id": 3923172,
+    "alternate_names": "Departamento del Beni",
+    "display_name": "Beni Department, Bolivia",
+    "geoname_code": "03",
+    "country": 2
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 34,
+  "fields": {
+    "name": "Rio Grande do Norte",
+    "name_ascii": "Rio Grande do Norte",
+    "slug": "rio-grande-do-norte",
+    "geoname_id": 3390290,
+    "alternate_names": "Estado de Río Grande del Norte",
+    "display_name": "Rio Grande do Norte, Brazil",
+    "geoname_code": "22",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 35,
+  "fields": {
+    "name": "Piauí",
+    "name_ascii": "Piaui",
+    "slug": "piaui",
+    "geoname_id": 3392213,
+    "alternate_names": "Estado de Piauí",
+    "display_name": "Piauí, Brazil",
+    "geoname_code": "20",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 36,
+  "fields": {
+    "name": "Pernambuco",
+    "name_ascii": "Pernambuco",
+    "slug": "pernambuco",
+    "geoname_id": 3392268,
+    "alternate_names": "Estado de Pernambuco",
+    "display_name": "Pernambuco, Brazil",
+    "geoname_code": "30",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 37,
+  "fields": {
+    "name": "Paraíba",
+    "name_ascii": "Paraiba",
+    "slug": "paraiba",
+    "geoname_id": 3393098,
+    "alternate_names": "Estado de Paraíba",
+    "display_name": "Paraíba, Brazil",
+    "geoname_code": "17",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 38,
+  "fields": {
+    "name": "Pará",
+    "name_ascii": "Para",
+    "slug": "para",
+    "geoname_id": 3393129,
+    "alternate_names": "Estado de Pará",
+    "display_name": "Pará, Brazil",
+    "geoname_code": "16",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 39,
+  "fields": {
+    "name": "Maranhão",
+    "name_ascii": "Maranhao",
+    "slug": "maranhao",
+    "geoname_id": 3395443,
+    "alternate_names": "Estado de Maranhão",
+    "display_name": "Maranhão, Brazil",
+    "geoname_code": "13",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 40,
+  "fields": {
+    "name": "Ceará",
+    "name_ascii": "Ceara",
+    "slug": "ceara",
+    "geoname_id": 3402362,
+    "alternate_names": "Estado de Ceará",
+    "display_name": "Ceará, Brazil",
+    "geoname_code": "06",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 41,
+  "fields": {
+    "name": "Amapá",
+    "name_ascii": "Amapa",
+    "slug": "amapa",
+    "geoname_id": 3407762,
+    "alternate_names": "Estado de Amapá",
+    "display_name": "Amapá, Brazil",
+    "geoname_code": "03",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 42,
+  "fields": {
+    "name": "Alagoas",
+    "name_ascii": "Alagoas",
+    "slug": "alagoas",
+    "geoname_id": 3408096,
+    "alternate_names": "Estado de Alagoas",
+    "display_name": "Alagoas, Brazil",
+    "geoname_code": "02",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 43,
+  "fields": {
+    "name": "Sergipe",
+    "name_ascii": "Sergipe",
+    "slug": "sergipe",
+    "geoname_id": 3447799,
+    "alternate_names": "Estado de Sergipe",
+    "display_name": "Sergipe, Brazil",
+    "geoname_code": "28",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 44,
+  "fields": {
+    "name": "São Paulo",
+    "name_ascii": "Sao Paulo",
+    "slug": "sao-paulo",
+    "geoname_id": 3448433,
+    "alternate_names": "Estado de São Paulo",
+    "display_name": "São Paulo, Brazil",
+    "geoname_code": "27",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 45,
+  "fields": {
+    "name": "Santa Catarina",
+    "name_ascii": "Santa Catarina",
+    "slug": "santa-catarina",
+    "geoname_id": 3450387,
+    "alternate_names": "Estado de Santa Catarina",
+    "display_name": "Santa Catarina, Brazil",
+    "geoname_code": "26",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 46,
+  "fields": {
+    "name": "Rio Grande do Sul",
+    "name_ascii": "Rio Grande do Sul",
+    "slug": "rio-grande-do-sul",
+    "geoname_id": 3451133,
+    "alternate_names": "Estado de Río Grande del Sur",
+    "display_name": "Rio Grande do Sul, Brazil",
+    "geoname_code": "23",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 47,
+  "fields": {
+    "name": "Rio de Janeiro",
+    "name_ascii": "Rio de Janeiro",
+    "slug": "rio-de-janeiro",
+    "geoname_id": 3451189,
+    "alternate_names": "Estado de Río de Janeiro",
+    "display_name": "Rio de Janeiro, Brazil",
+    "geoname_code": "21",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 48,
+  "fields": {
+    "name": "Paraná",
+    "name_ascii": "Parana",
+    "slug": "parana",
+    "geoname_id": 3455077,
+    "alternate_names": "Estado de Paraná",
+    "display_name": "Paraná, Brazil",
+    "geoname_code": "18",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 49,
+  "fields": {
+    "name": "Minas Gerais",
+    "name_ascii": "Minas Gerais",
+    "slug": "minas-gerais",
+    "geoname_id": 3457153,
+    "alternate_names": "Estado de Minas Gerais",
+    "display_name": "Minas Gerais, Brazil",
+    "geoname_code": "15",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 50,
+  "fields": {
+    "name": "Mato Grosso do Sul",
+    "name_ascii": "Mato Grosso do Sul",
+    "slug": "mato-grosso-do-sul",
+    "geoname_id": 3457415,
+    "alternate_names": "",
+    "display_name": "Mato Grosso do Sul, Brazil",
+    "geoname_code": "11",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 51,
+  "fields": {
+    "name": "Mato Grosso",
+    "name_ascii": "Mato Grosso",
+    "slug": "mato-grosso",
+    "geoname_id": 3457419,
+    "alternate_names": "Estado de Mato Grosso",
+    "display_name": "Mato Grosso, Brazil",
+    "geoname_code": "14",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 52,
+  "fields": {
+    "name": "Goiás",
+    "name_ascii": "Goias",
+    "slug": "goias",
+    "geoname_id": 3462372,
+    "alternate_names": "Estado de Goiás",
+    "display_name": "Goiás, Brazil",
+    "geoname_code": "29",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 53,
+  "fields": {
+    "name": "Federal District",
+    "name_ascii": "Federal District",
+    "slug": "federal-district",
+    "geoname_id": 3463504,
+    "alternate_names": "",
+    "display_name": "Federal District, Brazil",
+    "geoname_code": "07",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 54,
+  "fields": {
+    "name": "Espírito Santo",
+    "name_ascii": "Espirito Santo",
+    "slug": "espirito-santo",
+    "geoname_id": 3463930,
+    "alternate_names": "Estado de Espírito Santo",
+    "display_name": "Espírito Santo, Brazil",
+    "geoname_code": "08",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 55,
+  "fields": {
+    "name": "Bahia",
+    "name_ascii": "Bahia",
+    "slug": "bahia",
+    "geoname_id": 3471168,
+    "alternate_names": "",
+    "display_name": "Bahia, Brazil",
+    "geoname_code": "05",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 56,
+  "fields": {
+    "name": "Tocantins",
+    "name_ascii": "Tocantins",
+    "slug": "tocantins",
+    "geoname_id": 3474575,
+    "alternate_names": "Estado de Tocantins",
+    "display_name": "Tocantins, Brazil",
+    "geoname_code": "31",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 57,
+  "fields": {
+    "name": "Roraima",
+    "name_ascii": "Roraima",
+    "slug": "roraima",
+    "geoname_id": 3662560,
+    "alternate_names": "Estado de Roraima",
+    "display_name": "Roraima, Brazil",
+    "geoname_code": "25",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 58,
+  "fields": {
+    "name": "Amazonas",
+    "name_ascii": "Amazonas",
+    "slug": "amazonas",
+    "geoname_id": 3665361,
+    "alternate_names": "Estado de Amazonas",
+    "display_name": "Amazonas, Brazil",
+    "geoname_code": "04",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 59,
+  "fields": {
+    "name": "Acre",
+    "name_ascii": "Acre",
+    "slug": "acre",
+    "geoname_id": 3665474,
+    "alternate_names": "Estado de Acre",
+    "display_name": "Acre, Brazil",
+    "geoname_code": "01",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 60,
+  "fields": {
+    "name": "Rondônia",
+    "name_ascii": "Rondonia",
+    "slug": "rondonia",
+    "geoname_id": 3924825,
+    "alternate_names": "Estado de Rondonia",
+    "display_name": "Rondônia, Brazil",
+    "geoname_code": "24",
+    "country": 3
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 61,
+  "fields": {
+    "name": "Valparaíso",
+    "name_ascii": "Valparaiso",
+    "slug": "valparaiso",
+    "geoname_id": 3868621,
+    "alternate_names": "Región de Valparaíso",
+    "display_name": "Valparaíso, Chile",
+    "geoname_code": "01",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 62,
+  "fields": {
+    "name": "Tarapacá",
+    "name_ascii": "Tarapaca",
+    "slug": "tarapaca",
+    "geoname_id": 3870116,
+    "alternate_names": "Región de Tarapacá",
+    "display_name": "Tarapacá, Chile",
+    "geoname_code": "15",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 63,
+  "fields": {
+    "name": "Santiago Metropolitan",
+    "name_ascii": "Santiago Metropolitan",
+    "slug": "santiago-metropolitan",
+    "geoname_id": 3873544,
+    "alternate_names": "Región Metropolitana de Santiago de Chile",
+    "display_name": "Santiago Metropolitan, Chile",
+    "geoname_code": "12",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 64,
+  "fields": {
+    "name": "Maule Region",
+    "name_ascii": "Maule Region",
+    "slug": "maule-region",
+    "geoname_id": 3880306,
+    "alternate_names": "Región del Maule;VII Región del Maule",
+    "display_name": "Maule Region, Chile",
+    "geoname_code": "11",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 65,
+  "fields": {
+    "name": "Los Lagos Region",
+    "name_ascii": "Los Lagos Region",
+    "slug": "los-lagos-region",
+    "geoname_id": 3881974,
+    "alternate_names": "Región de Los Lagos",
+    "display_name": "Los Lagos Region, Chile",
+    "geoname_code": "14",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 66,
+  "fields": {
+    "name": "O'Higgins Region",
+    "name_ascii": "O'Higgins Region",
+    "slug": "ohiggins-region",
+    "geoname_id": 3883281,
+    "alternate_names": "Región del Libertador General Bernardo O'Higgins",
+    "display_name": "O'Higgins Region, Chile",
+    "geoname_code": "08",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 67,
+  "fields": {
+    "name": "Coquimbo Region",
+    "name_ascii": "Coquimbo Region",
+    "slug": "coquimbo-region",
+    "geoname_id": 3893623,
+    "alternate_names": "Región de Coquimbo",
+    "display_name": "Coquimbo Region, Chile",
+    "geoname_code": "07",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 68,
+  "fields": {
+    "name": "Biobío",
+    "name_ascii": "Biobio",
+    "slug": "biobio",
+    "geoname_id": 3898380,
+    "alternate_names": "Región del Biobío",
+    "display_name": "Biobío, Chile",
+    "geoname_code": "06",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 69,
+  "fields": {
+    "name": "Atacama",
+    "name_ascii": "Atacama",
+    "slug": "atacama",
+    "geoname_id": 3899191,
+    "alternate_names": "Región de Atacama",
+    "display_name": "Atacama, Chile",
+    "geoname_code": "05",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 70,
+  "fields": {
+    "name": "Araucanía",
+    "name_ascii": "Araucania",
+    "slug": "araucania",
+    "geoname_id": 3899463,
+    "alternate_names": "Región de la Araucanía",
+    "display_name": "Araucanía, Chile",
+    "geoname_code": "04",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 71,
+  "fields": {
+    "name": "Antofagasta",
+    "name_ascii": "Antofagasta",
+    "slug": "antofagasta",
+    "geoname_id": 3899537,
+    "alternate_names": "Región de Antofagasta",
+    "display_name": "Antofagasta, Chile",
+    "geoname_code": "03",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 72,
+  "fields": {
+    "name": "Aysén",
+    "name_ascii": "Aysen",
+    "slug": "aysen",
+    "geoname_id": 3900333,
+    "alternate_names": "Región Aysén del General Carlos Ibáñez del Campo",
+    "display_name": "Aysén, Chile",
+    "geoname_code": "02",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 73,
+  "fields": {
+    "name": "Region of Magallanes",
+    "name_ascii": "Region of Magallanes",
+    "slug": "region-of-magallanes",
+    "geoname_id": 4036650,
+    "alternate_names": "Región de Magallanes y de la Antártica Chilena",
+    "display_name": "Region of Magallanes, Chile",
+    "geoname_code": "10",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 74,
+  "fields": {
+    "name": "Arica y Parinacota Region",
+    "name_ascii": "Arica y Parinacota Region",
+    "slug": "arica-y-parinacota-region",
+    "geoname_id": 6693562,
+    "alternate_names": "Región de Arica y Parinacota",
+    "display_name": "Arica y Parinacota Region, Chile",
+    "geoname_code": "16",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 75,
+  "fields": {
+    "name": "Los Ríos Region",
+    "name_ascii": "Los Rios Region",
+    "slug": "los-rios-region",
+    "geoname_id": 6693563,
+    "alternate_names": "Región de Los Ríos",
+    "display_name": "Los Ríos Region, Chile",
+    "geoname_code": "17",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 76,
+  "fields": {
+    "name": "Ñuble",
+    "name_ascii": "Nuble",
+    "slug": "nuble",
+    "geoname_id": 11979367,
+    "alternate_names": "Región de Ñuble",
+    "display_name": "Ñuble, Chile",
+    "geoname_code": "18",
+    "country": 4
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 77,
+  "fields": {
+    "name": "Vichada Department",
+    "name_ascii": "Vichada Department",
+    "slug": "vichada-department",
+    "geoname_id": 3666082,
+    "alternate_names": "Departamento del Vichada",
+    "display_name": "Vichada Department, Colombia",
+    "geoname_code": "31",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 78,
+  "fields": {
+    "name": "Vaupés",
+    "name_ascii": "Vaupes",
+    "slug": "vaupes",
+    "geoname_id": 3666254,
+    "alternate_names": "",
+    "display_name": "Vaupés, Colombia",
+    "geoname_code": "30",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 79,
+  "fields": {
+    "name": "Valle del Cauca Department",
+    "name_ascii": "Valle del Cauca Department",
+    "slug": "valle-del-cauca-department",
+    "geoname_id": 3666313,
+    "alternate_names": "Valle del Cauca",
+    "display_name": "Valle del Cauca Department, Colombia",
+    "geoname_code": "29",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 80,
+  "fields": {
+    "name": "Tolima Department",
+    "name_ascii": "Tolima Department",
+    "slug": "tolima-department",
+    "geoname_id": 3666951,
+    "alternate_names": "Tolima",
+    "display_name": "Tolima Department, Colombia",
+    "geoname_code": "28",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 81,
+  "fields": {
+    "name": "Sucre Department",
+    "name_ascii": "Sucre Department",
+    "slug": "sucre-department",
+    "geoname_id": 3667725,
+    "alternate_names": "Sucre",
+    "display_name": "Sucre Department, Colombia",
+    "geoname_code": "27",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 82,
+  "fields": {
+    "name": "Santander Department",
+    "name_ascii": "Santander Department",
+    "slug": "santander-department",
+    "geoname_id": 3668578,
+    "alternate_names": "Santander",
+    "display_name": "Santander Department, Colombia",
+    "geoname_code": "26",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 83,
+  "fields": {
+    "name": "San Andres y Providencia",
+    "name_ascii": "San Andres y Providencia",
+    "slug": "san-andres-y-providencia",
+    "geoname_id": 3670205,
+    "alternate_names": "",
+    "display_name": "San Andres y Providencia, Colombia",
+    "geoname_code": "25",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 84,
+  "fields": {
+    "name": "Risaralda Department",
+    "name_ascii": "Risaralda Department",
+    "slug": "risaralda-department",
+    "geoname_id": 3670698,
+    "alternate_names": "Risaralda",
+    "display_name": "Risaralda Department, Colombia",
+    "geoname_code": "24",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 85,
+  "fields": {
+    "name": "Quindío Department",
+    "name_ascii": "Quindio Department",
+    "slug": "quindio-department",
+    "geoname_id": 3671087,
+    "alternate_names": "Departamento del Quindío",
+    "display_name": "Quindío Department, Colombia",
+    "geoname_code": "23",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 86,
+  "fields": {
+    "name": "Putumayo Department",
+    "name_ascii": "Putumayo Department",
+    "slug": "putumayo-department",
+    "geoname_id": 3671178,
+    "alternate_names": "Putumayo",
+    "display_name": "Putumayo Department, Colombia",
+    "geoname_code": "22",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 87,
+  "fields": {
+    "name": "Norte de Santander Department",
+    "name_ascii": "Norte de Santander Department",
+    "slug": "norte-de-santander-department",
+    "geoname_id": 3673798,
+    "alternate_names": "Norte de Santander",
+    "display_name": "Norte de Santander Department, Colombia",
+    "geoname_code": "21",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 88,
+  "fields": {
+    "name": "Nariño",
+    "name_ascii": "Narino",
+    "slug": "narino",
+    "geoname_id": 3674021,
+    "alternate_names": "",
+    "display_name": "Nariño, Colombia",
+    "geoname_code": "20",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 89,
+  "fields": {
+    "name": "Meta Department",
+    "name_ascii": "Meta Department",
+    "slug": "meta-department",
+    "geoname_id": 3674810,
+    "alternate_names": "Departamento del Meta",
+    "display_name": "Meta Department, Colombia",
+    "geoname_code": "19",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 90,
+  "fields": {
+    "name": "Magdalena Department",
+    "name_ascii": "Magdalena Department",
+    "slug": "magdalena-department",
+    "geoname_id": 3675686,
+    "alternate_names": "Magdalena",
+    "display_name": "Magdalena Department, Colombia",
+    "geoname_code": "38",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 91,
+  "fields": {
+    "name": "La Guajira Department",
+    "name_ascii": "La Guajira Department",
+    "slug": "la-guajira-department",
+    "geoname_id": 3678847,
+    "alternate_names": "La Guajira",
+    "display_name": "La Guajira Department, Colombia",
+    "geoname_code": "17",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 92,
+  "fields": {
+    "name": "Huila Department",
+    "name_ascii": "Huila Department",
+    "slug": "huila-department",
+    "geoname_id": 3680692,
+    "alternate_names": "Huila",
+    "display_name": "Huila Department, Colombia",
+    "geoname_code": "16",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 93,
+  "fields": {
+    "name": "Guaviare Department",
+    "name_ascii": "Guaviare Department",
+    "slug": "guaviare-department",
+    "geoname_id": 3681344,
+    "alternate_names": "Guaviare",
+    "display_name": "Guaviare Department, Colombia",
+    "geoname_code": "14",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 94,
+  "fields": {
+    "name": "Guainía Department",
+    "name_ascii": "Guainia Department",
+    "slug": "guainia-department",
+    "geoname_id": 3681652,
+    "alternate_names": "Guainía",
+    "display_name": "Guainía Department, Colombia",
+    "geoname_code": "15",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 95,
+  "fields": {
+    "name": "Cundinamarca",
+    "name_ascii": "Cundinamarca",
+    "slug": "cundinamarca",
+    "geoname_id": 3685413,
+    "alternate_names": "",
+    "display_name": "Cundinamarca, Colombia",
+    "geoname_code": "33",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 96,
+  "fields": {
+    "name": "Córdoba",
+    "name_ascii": "Cordoba",
+    "slug": "cordoba",
+    "geoname_id": 3685889,
+    "alternate_names": "",
+    "display_name": "Córdoba, Colombia",
+    "geoname_code": "12",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 97,
+  "fields": {
+    "name": "Chocó",
+    "name_ascii": "Choco",
+    "slug": "choco",
+    "geoname_id": 3686431,
+    "alternate_names": "",
+    "display_name": "Chocó, Colombia",
+    "geoname_code": "11",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 98,
+  "fields": {
+    "name": "Cesar Department",
+    "name_ascii": "Cesar Department",
+    "slug": "cesar-department",
+    "geoname_id": 3686880,
+    "alternate_names": "Cesar",
+    "display_name": "Cesar Department, Colombia",
+    "geoname_code": "10",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 99,
+  "fields": {
+    "name": "Cauca Department",
+    "name_ascii": "Cauca Department",
+    "slug": "cauca-department",
+    "geoname_id": 3687029,
+    "alternate_names": "Cauca",
+    "display_name": "Cauca Department, Colombia",
+    "geoname_code": "09",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 100,
+  "fields": {
+    "name": "Casanare Department",
+    "name_ascii": "Casanare Department",
+    "slug": "casanare-department",
+    "geoname_id": 3687173,
+    "alternate_names": "Casanare",
+    "display_name": "Casanare Department, Colombia",
+    "geoname_code": "32",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 101,
+  "fields": {
+    "name": "Caquetá",
+    "name_ascii": "Caqueta",
+    "slug": "caqueta",
+    "geoname_id": 3687479,
+    "alternate_names": "",
+    "display_name": "Caquetá, Colombia",
+    "geoname_code": "08",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 102,
+  "fields": {
+    "name": "Caldas Department",
+    "name_ascii": "Caldas Department",
+    "slug": "caldas-department",
+    "geoname_id": 3687951,
+    "alternate_names": "Caldas",
+    "display_name": "Caldas Department, Colombia",
+    "geoname_code": "37",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 103,
+  "fields": {
+    "name": "Boyacá",
+    "name_ascii": "Boyaca",
+    "slug": "boyaca",
+    "geoname_id": 3688536,
+    "alternate_names": "",
+    "display_name": "Boyacá, Colombia",
+    "geoname_code": "36",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 104,
+  "fields": {
+    "name": "Bolívar",
+    "name_ascii": "Bolivar",
+    "slug": "bolivar",
+    "geoname_id": 3688650,
+    "alternate_names": "",
+    "display_name": "Bolívar, Colombia",
+    "geoname_code": "35",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 105,
+  "fields": {
+    "name": "Bogota D.C.",
+    "name_ascii": "Bogota D.C.",
+    "slug": "bogota-dc",
+    "geoname_id": 3688685,
+    "alternate_names": "Bogotá Distrito Especial;Distrito Capital;Distrito Capital de Bogotá;Distrito Capital de Santafé de Bogotá",
+    "display_name": "Bogota D.C., Colombia",
+    "geoname_code": "34",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 106,
+  "fields": {
+    "name": "Atlántico",
+    "name_ascii": "Atlantico",
+    "slug": "atlantico",
+    "geoname_id": 3689436,
+    "alternate_names": "",
+    "display_name": "Atlántico, Colombia",
+    "geoname_code": "04",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 107,
+  "fields": {
+    "name": "Arauca Department",
+    "name_ascii": "Arauca Department",
+    "slug": "arauca-department",
+    "geoname_id": 3689717,
+    "alternate_names": "",
+    "display_name": "Arauca Department, Colombia",
+    "geoname_code": "03",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 108,
+  "fields": {
+    "name": "Antioquia",
+    "name_ascii": "Antioquia",
+    "slug": "antioquia",
+    "geoname_id": 3689815,
+    "alternate_names": "",
+    "display_name": "Antioquia, Colombia",
+    "geoname_code": "02",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 109,
+  "fields": {
+    "name": "Amazonas Department",
+    "name_ascii": "Amazonas Department",
+    "slug": "amazonas-department",
+    "geoname_id": 3689982,
+    "alternate_names": "Departamento del Amazonas",
+    "display_name": "Amazonas Department, Colombia",
+    "geoname_code": "01",
+    "country": 5
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 110,
+  "fields": {
+    "name": "San José",
+    "name_ascii": "San Jose",
+    "slug": "san-jose",
+    "geoname_id": 3621837,
+    "alternate_names": "",
+    "display_name": "San José, Costa Rica",
+    "geoname_code": "08",
+    "country": 6
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 111,
+  "fields": {
+    "name": "Puntarenas Province",
+    "name_ascii": "Puntarenas Province",
+    "slug": "puntarenas-province",
+    "geoname_id": 3622226,
+    "alternate_names": "Provincia de Puntarenas",
+    "display_name": "Puntarenas Province, Costa Rica",
+    "geoname_code": "07",
+    "country": 6
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 112,
+  "fields": {
+    "name": "Limón Province",
+    "name_ascii": "Limon Province",
+    "slug": "limon-province",
+    "geoname_id": 3623064,
+    "alternate_names": "Provincia de Limón",
+    "display_name": "Limón Province, Costa Rica",
+    "geoname_code": "06",
+    "country": 6
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 113,
+  "fields": {
+    "name": "Heredia Province",
+    "name_ascii": "Heredia Province",
+    "slug": "heredia-province",
+    "geoname_id": 3623484,
+    "alternate_names": "Provincia de Heredia",
+    "display_name": "Heredia Province, Costa Rica",
+    "geoname_code": "04",
+    "country": 6
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 114,
+  "fields": {
+    "name": "Guanacaste Province",
+    "name_ascii": "Guanacaste Province",
+    "slug": "guanacaste-province",
+    "geoname_id": 3623582,
+    "alternate_names": "Provincia de Guanacaste",
+    "display_name": "Guanacaste Province, Costa Rica",
+    "geoname_code": "03",
+    "country": 6
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 115,
+  "fields": {
+    "name": "Cartago Province",
+    "name_ascii": "Cartago Province",
+    "slug": "cartago-province",
+    "geoname_id": 3624368,
+    "alternate_names": "Provincia de Cartago",
+    "display_name": "Cartago Province, Costa Rica",
+    "geoname_code": "02",
+    "country": 6
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 116,
+  "fields": {
+    "name": "Alajuela Province",
+    "name_ascii": "Alajuela Province",
+    "slug": "alajuela-province",
+    "geoname_id": 3624953,
+    "alternate_names": "Provincia de Alajuela",
+    "display_name": "Alajuela Province, Costa Rica",
+    "geoname_code": "01",
+    "country": 6
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 117,
+  "fields": {
+    "name": "Villa Clara Province",
+    "name_ascii": "Villa Clara Province",
+    "slug": "villa-clara-province",
+    "geoname_id": 3534168,
+    "alternate_names": "Provincia de Villa Clara",
+    "display_name": "Villa Clara Province, Cuba",
+    "geoname_code": "16",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 118,
+  "fields": {
+    "name": "Santiago de Cuba Province",
+    "name_ascii": "Santiago de Cuba Province",
+    "slug": "santiago-de-cuba-province",
+    "geoname_id": 3536725,
+    "alternate_names": "Provincia de Santiago de Cuba",
+    "display_name": "Santiago de Cuba Province, Cuba",
+    "geoname_code": "15",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 119,
+  "fields": {
+    "name": "Sancti Spíritus Province",
+    "name_ascii": "Sancti Spiritus Province",
+    "slug": "sancti-spiritus-province",
+    "geoname_id": 3540665,
+    "alternate_names": "Provincia de Sancti Spíritus",
+    "display_name": "Sancti Spíritus Province, Cuba",
+    "geoname_code": "14",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 120,
+  "fields": {
+    "name": "Pinar del Río",
+    "name_ascii": "Pinar del Rio",
+    "slug": "pinar-del-rio",
+    "geoname_id": 3544088,
+    "alternate_names": "",
+    "display_name": "Pinar del Río, Cuba",
+    "geoname_code": "01",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 121,
+  "fields": {
+    "name": "Matanzas Province",
+    "name_ascii": "Matanzas Province",
+    "slug": "matanzas-province",
+    "geoname_id": 3547394,
+    "alternate_names": "provincia de Matanzas",
+    "display_name": "Matanzas Province, Cuba",
+    "geoname_code": "03",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 122,
+  "fields": {
+    "name": "Las Tunas Province",
+    "name_ascii": "Las Tunas Province",
+    "slug": "las-tunas-province",
+    "geoname_id": 3550595,
+    "alternate_names": "Provincia de Las Tunas",
+    "display_name": "Las Tunas Province, Cuba",
+    "geoname_code": "13",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 123,
+  "fields": {
+    "name": "Isla de la Juventud",
+    "name_ascii": "Isla de la Juventud",
+    "slug": "isla-de-la-juventud",
+    "geoname_id": 3556608,
+    "alternate_names": "",
+    "display_name": "Isla de la Juventud, Cuba",
+    "geoname_code": "04",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 124,
+  "fields": {
+    "name": "Holguín Province",
+    "name_ascii": "Holguin Province",
+    "slug": "holguin-province",
+    "geoname_id": 3556965,
+    "alternate_names": "Provincia de Holguín",
+    "display_name": "Holguín Province, Cuba",
+    "geoname_code": "12",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 125,
+  "fields": {
+    "name": "Guantánamo Province",
+    "name_ascii": "Guantanamo Province",
+    "slug": "guantanamo-province",
+    "geoname_id": 3557685,
+    "alternate_names": "provincia de Guantánamo",
+    "display_name": "Guantánamo Province, Cuba",
+    "geoname_code": "10",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 126,
+  "fields": {
+    "name": "Granma Province",
+    "name_ascii": "Granma Province",
+    "slug": "granma-province",
+    "geoname_id": 3558052,
+    "alternate_names": "provincia de Granma",
+    "display_name": "Granma Province, Cuba",
+    "geoname_code": "09",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 127,
+  "fields": {
+    "name": "Havana",
+    "name_ascii": "Havana",
+    "slug": "havana",
+    "geoname_id": 3564073,
+    "alternate_names": "Provincia de La Habana",
+    "display_name": "Havana, Cuba",
+    "geoname_code": "02",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 128,
+  "fields": {
+    "name": "Cienfuegos Province",
+    "name_ascii": "Cienfuegos Province",
+    "slug": "cienfuegos-province",
+    "geoname_id": 3564120,
+    "alternate_names": "Provincia de Cienfuegos",
+    "display_name": "Cienfuegos Province, Cuba",
+    "geoname_code": "08",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 129,
+  "fields": {
+    "name": "Ciego de Ávila Province",
+    "name_ascii": "Ciego de Avila Province",
+    "slug": "ciego-de-avila-province",
+    "geoname_id": 3564175,
+    "alternate_names": "Provincia de Ciego de Ávila",
+    "display_name": "Ciego de Ávila Province, Cuba",
+    "geoname_code": "07",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 130,
+  "fields": {
+    "name": "Camagüey",
+    "name_ascii": "Camaguey",
+    "slug": "camaguey",
+    "geoname_id": 3566062,
+    "alternate_names": "",
+    "display_name": "Camagüey, Cuba",
+    "geoname_code": "05",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 131,
+  "fields": {
+    "name": "Artemisa",
+    "name_ascii": "Artemisa",
+    "slug": "artemisa",
+    "geoname_id": 7668824,
+    "alternate_names": "Provincia de Artemisa",
+    "display_name": "Artemisa, Cuba",
+    "geoname_code": "AR",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 132,
+  "fields": {
+    "name": "Mayabeque",
+    "name_ascii": "Mayabeque",
+    "slug": "mayabeque",
+    "geoname_id": 7668827,
+    "alternate_names": "Provincia de Mayabeque",
+    "display_name": "Mayabeque, Cuba",
+    "geoname_code": "MA",
+    "country": 7
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 133,
+  "fields": {
+    "name": "Valverde Province",
+    "name_ascii": "Valverde Province",
+    "slug": "valverde-province",
+    "geoname_id": 3492112,
+    "alternate_names": "Provincia Valverde;Valverde",
+    "display_name": "Valverde Province, Dominican Republic",
+    "geoname_code": "27",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 134,
+  "fields": {
+    "name": "Santiago Rodríguez",
+    "name_ascii": "Santiago Rodriguez",
+    "slug": "santiago-rodriguez",
+    "geoname_id": 3492912,
+    "alternate_names": "Provincia Santiago Rodríguez",
+    "display_name": "Santiago Rodríguez, Dominican Republic",
+    "geoname_code": "26",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 135,
+  "fields": {
+    "name": "Santiago Province",
+    "name_ascii": "Santiago Province",
+    "slug": "santiago-province",
+    "geoname_id": 3492918,
+    "alternate_names": "Provincia Santiago;Provincia de Santiago",
+    "display_name": "Santiago Province, Dominican Republic",
+    "geoname_code": "25",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 136,
+  "fields": {
+    "name": "San Pedro de Macorís",
+    "name_ascii": "San Pedro de Macoris",
+    "slug": "san-pedro-de-macoris",
+    "geoname_id": 3493031,
+    "alternate_names": "Provincia San Pedro de Macorís",
+    "display_name": "San Pedro de Macorís, Dominican Republic",
+    "geoname_code": "24",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 137,
+  "fields": {
+    "name": "San Juan Province",
+    "name_ascii": "San Juan Province",
+    "slug": "san-juan-province",
+    "geoname_id": 3493091,
+    "alternate_names": "Provincia San Juan;Provincia de San Juan",
+    "display_name": "San Juan Province, Dominican Republic",
+    "geoname_code": "23",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 138,
+  "fields": {
+    "name": "San Cristóbal",
+    "name_ascii": "San Cristobal",
+    "slug": "san-cristobal",
+    "geoname_id": 3493186,
+    "alternate_names": "Provincia San Cristóbal",
+    "display_name": "San Cristóbal, Dominican Republic",
+    "geoname_code": "33",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 139,
+  "fields": {
+    "name": "Sánchez Ramírez",
+    "name_ascii": "Sanchez Ramirez",
+    "slug": "sanchez-ramirez",
+    "geoname_id": 3493192,
+    "alternate_names": "",
+    "display_name": "Sánchez Ramírez, Dominican Republic",
+    "geoname_code": "21",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 140,
+  "fields": {
+    "name": "Samaná",
+    "name_ascii": "Samana",
+    "slug": "samana",
+    "geoname_id": 3493232,
+    "alternate_names": "Distrito de Samana;Provincia de Samaná",
+    "display_name": "Samaná, Dominican Republic",
+    "geoname_code": "20",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 141,
+  "fields": {
+    "name": "Hermanas Mirabal",
+    "name_ascii": "Hermanas Mirabal",
+    "slug": "hermanas-mirabal",
+    "geoname_id": 3493282,
+    "alternate_names": "",
+    "display_name": "Hermanas Mirabal, Dominican Republic",
+    "geoname_code": "19",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 142,
+  "fields": {
+    "name": "Puerto Plata",
+    "name_ascii": "Puerto Plata",
+    "slug": "puerto-plata",
+    "geoname_id": 3494267,
+    "alternate_names": "Provincia Puerto Plata",
+    "display_name": "Puerto Plata, Dominican Republic",
+    "geoname_code": "18",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 143,
+  "fields": {
+    "name": "Peravia",
+    "name_ascii": "Peravia",
+    "slug": "peravia",
+    "geoname_id": 3495015,
+    "alternate_names": "Provincia Peravia",
+    "display_name": "Peravia, Dominican Republic",
+    "geoname_code": "35",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 144,
+  "fields": {
+    "name": "Pedernales Province",
+    "name_ascii": "Pedernales Province",
+    "slug": "pedernales-province",
+    "geoname_id": 3495136,
+    "alternate_names": "Pedernales;Provincia Pedernales",
+    "display_name": "Pedernales Province, Dominican Republic",
+    "geoname_code": "16",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 145,
+  "fields": {
+    "name": "Nacional",
+    "name_ascii": "Nacional",
+    "slug": "nacional",
+    "geoname_id": 3496024,
+    "alternate_names": "Distrito de Santo Domingo",
+    "display_name": "Nacional, Dominican Republic",
+    "geoname_code": "34",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 146,
+  "fields": {
+    "name": "Monte Plata Province",
+    "name_ascii": "Monte Plata Province",
+    "slug": "monte-plata-province",
+    "geoname_id": 3496132,
+    "alternate_names": "Monte Plata;Provincia Monte Plata",
+    "display_name": "Monte Plata Province, Dominican Republic",
+    "geoname_code": "32",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 147,
+  "fields": {
+    "name": "Monte Cristi Province",
+    "name_ascii": "Monte Cristi Province",
+    "slug": "monte-cristi-province",
+    "geoname_id": 3496200,
+    "alternate_names": "Monte Cristi;Provincia Monte Cristi",
+    "display_name": "Monte Cristi Province, Dominican Republic",
+    "geoname_code": "15",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 148,
+  "fields": {
+    "name": "Monseñor Nouel",
+    "name_ascii": "Monsenor Nouel",
+    "slug": "monsenor-nouel",
+    "geoname_id": 3496274,
+    "alternate_names": "Provincia Monseñor Nouel",
+    "display_name": "Monseñor Nouel, Dominican Republic",
+    "geoname_code": "31",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 149,
+  "fields": {
+    "name": "María Trinidad Sánchez",
+    "name_ascii": "Maria Trinidad Sanchez",
+    "slug": "maria-trinidad-sanchez",
+    "geoname_id": 3496772,
+    "alternate_names": "",
+    "display_name": "María Trinidad Sánchez, Dominican Republic",
+    "geoname_code": "14",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 150,
+  "fields": {
+    "name": "La Vega",
+    "name_ascii": "La Vega",
+    "slug": "la-vega",
+    "geoname_id": 3499977,
+    "alternate_names": "Provincia La Vega",
+    "display_name": "La Vega, Dominican Republic",
+    "geoname_code": "30",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 151,
+  "fields": {
+    "name": "La Romana",
+    "name_ascii": "La Romana",
+    "slug": "la-romana",
+    "geoname_id": 3500955,
+    "alternate_names": "Provincia La Romana",
+    "display_name": "La Romana, Dominican Republic",
+    "geoname_code": "12",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 152,
+  "fields": {
+    "name": "La Altagracia Province",
+    "name_ascii": "La Altagracia Province",
+    "slug": "la-altagracia-province",
+    "geoname_id": 3503706,
+    "alternate_names": "La Altagracia",
+    "display_name": "La Altagracia Province, Dominican Republic",
+    "geoname_code": "10",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 153,
+  "fields": {
+    "name": "Independencia",
+    "name_ascii": "Independencia",
+    "slug": "independencia",
+    "geoname_id": 3504326,
+    "alternate_names": "Provincia Independencia",
+    "display_name": "Independencia, Dominican Republic",
+    "geoname_code": "09",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 154,
+  "fields": {
+    "name": "Hato Mayor Province",
+    "name_ascii": "Hato Mayor Province",
+    "slug": "hato-mayor-province",
+    "geoname_id": 3504766,
+    "alternate_names": "Hato Mayor;Provincia Hato Mayor",
+    "display_name": "Hato Mayor Province, Dominican Republic",
+    "geoname_code": "29",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 155,
+  "fields": {
+    "name": "Espaillat Province",
+    "name_ascii": "Espaillat Province",
+    "slug": "espaillat-province",
+    "geoname_id": 3505867,
+    "alternate_names": "Espaillat",
+    "display_name": "Espaillat Province, Dominican Republic",
+    "geoname_code": "08",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 156,
+  "fields": {
+    "name": "El Seíbo",
+    "name_ascii": "El Seibo",
+    "slug": "el-seibo",
+    "geoname_id": 3506189,
+    "alternate_names": "Provincia El Seibo",
+    "display_name": "El Seíbo, Dominican Republic",
+    "geoname_code": "28",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 157,
+  "fields": {
+    "name": "Elías Piña",
+    "name_ascii": "Elias Pina",
+    "slug": "elias-pina",
+    "geoname_id": 3507269,
+    "alternate_names": "Provincia Elías Piña",
+    "display_name": "Elías Piña, Dominican Republic",
+    "geoname_code": "11",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 158,
+  "fields": {
+    "name": "Duarte Province",
+    "name_ascii": "Duarte Province",
+    "slug": "duarte-province",
+    "geoname_id": 3508718,
+    "alternate_names": "Duarte",
+    "display_name": "Duarte Province, Dominican Republic",
+    "geoname_code": "06",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 159,
+  "fields": {
+    "name": "Dajabón",
+    "name_ascii": "Dajabon",
+    "slug": "dajabon",
+    "geoname_id": 3508951,
+    "alternate_names": "Provincia Dajabón",
+    "display_name": "Dajabón, Dominican Republic",
+    "geoname_code": "04",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 160,
+  "fields": {
+    "name": "Barahona Province",
+    "name_ascii": "Barahona Province",
+    "slug": "barahona-province",
+    "geoname_id": 3512042,
+    "alternate_names": "Barahona;Provincia Barahona",
+    "display_name": "Barahona Province, Dominican Republic",
+    "geoname_code": "03",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 161,
+  "fields": {
+    "name": "Baoruco Province",
+    "name_ascii": "Baoruco Province",
+    "slug": "baoruco-province",
+    "geoname_id": 3512050,
+    "alternate_names": "Bahoruco;Provincia Baoruco",
+    "display_name": "Baoruco Province, Dominican Republic",
+    "geoname_code": "02",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 162,
+  "fields": {
+    "name": "Azua Province",
+    "name_ascii": "Azua Province",
+    "slug": "azua-province",
+    "geoname_id": 3512209,
+    "alternate_names": "Provincia Azua;Provincia de Azua",
+    "display_name": "Azua Province, Dominican Republic",
+    "geoname_code": "01",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 163,
+  "fields": {
+    "name": "San José de Ocoa",
+    "name_ascii": "San Jose de Ocoa",
+    "slug": "san-jose-de-ocoa",
+    "geoname_id": 6201372,
+    "alternate_names": "",
+    "display_name": "San José de Ocoa, Dominican Republic",
+    "geoname_code": "36",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 164,
+  "fields": {
+    "name": "Santo Domingo Province",
+    "name_ascii": "Santo Domingo Province",
+    "slug": "santo-domingo-province",
+    "geoname_id": 6201373,
+    "alternate_names": "Provincia Santo Domingo",
+    "display_name": "Santo Domingo Province, Dominican Republic",
+    "geoname_code": "37",
+    "country": 8
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 165,
+  "fields": {
+    "name": "Zamora Chinchipe",
+    "name_ascii": "Zamora Chinchipe",
+    "slug": "zamora-chinchipe",
+    "geoname_id": 3649953,
+    "alternate_names": "Provincia de Zamora Chinchipe",
+    "display_name": "Zamora Chinchipe, Ecuador",
+    "geoname_code": "20",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 166,
+  "fields": {
+    "name": "Tungurahua Province",
+    "name_ascii": "Tungurahua Province",
+    "slug": "tungurahua-province",
+    "geoname_id": 3650445,
+    "alternate_names": "Provincia de Tungurahua",
+    "display_name": "Tungurahua Province, Ecuador",
+    "geoname_code": "19",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 167,
+  "fields": {
+    "name": "Pichincha",
+    "name_ascii": "Pichincha",
+    "slug": "pichincha",
+    "geoname_id": 3653224,
+    "alternate_names": "",
+    "display_name": "Pichincha, Ecuador",
+    "geoname_code": "18",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 168,
+  "fields": {
+    "name": "Pastaza Province",
+    "name_ascii": "Pastaza Province",
+    "slug": "pastaza-province",
+    "geoname_id": 3653392,
+    "alternate_names": "Provincia de Pastaza",
+    "display_name": "Pastaza Province, Ecuador",
+    "geoname_code": "17",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 169,
+  "fields": {
+    "name": "Napo",
+    "name_ascii": "Napo",
+    "slug": "napo",
+    "geoname_id": 3653890,
+    "alternate_names": "",
+    "display_name": "Napo, Ecuador",
+    "geoname_code": "23",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 170,
+  "fields": {
+    "name": "Morona-Santiago Province",
+    "name_ascii": "Morona-Santiago Province",
+    "slug": "morona-santiago-province",
+    "geoname_id": 3654005,
+    "alternate_names": "Morona Santiago;Provincia de Morona Santiago",
+    "display_name": "Morona-Santiago Province, Ecuador",
+    "geoname_code": "15",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 171,
+  "fields": {
+    "name": "Manabí",
+    "name_ascii": "Manabi",
+    "slug": "manabi",
+    "geoname_id": 3654451,
+    "alternate_names": "",
+    "display_name": "Manabí, Ecuador",
+    "geoname_code": "14",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 172,
+  "fields": {
+    "name": "Los Ríos",
+    "name_ascii": "Los Rios",
+    "slug": "los-rios",
+    "geoname_id": 3654592,
+    "alternate_names": "Provincia de Los Ríos",
+    "display_name": "Los Ríos, Ecuador",
+    "geoname_code": "13",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 173,
+  "fields": {
+    "name": "Loja",
+    "name_ascii": "Loja",
+    "slug": "loja",
+    "geoname_id": 3654665,
+    "alternate_names": "",
+    "display_name": "Loja, Ecuador",
+    "geoname_code": "12",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 174,
+  "fields": {
+    "name": "Imbabura",
+    "name_ascii": "Imbabura",
+    "slug": "imbabura",
+    "geoname_id": 3655635,
+    "alternate_names": "",
+    "display_name": "Imbabura, Ecuador",
+    "geoname_code": "11",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 175,
+  "fields": {
+    "name": "Guayas",
+    "name_ascii": "Guayas",
+    "slug": "guayas",
+    "geoname_id": 3657505,
+    "alternate_names": "",
+    "display_name": "Guayas, Ecuador",
+    "geoname_code": "10",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 176,
+  "fields": {
+    "name": "Galápagos",
+    "name_ascii": "Galapagos",
+    "slug": "galapagos",
+    "geoname_id": 3657879,
+    "alternate_names": "Archipiélago de Galápagos",
+    "display_name": "Galápagos, Ecuador",
+    "geoname_code": "01",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 177,
+  "fields": {
+    "name": "Esmeraldas",
+    "name_ascii": "Esmeraldas",
+    "slug": "esmeraldas",
+    "geoname_id": 3657986,
+    "alternate_names": "",
+    "display_name": "Esmeraldas, Ecuador",
+    "geoname_code": "09",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 178,
+  "fields": {
+    "name": "El Oro",
+    "name_ascii": "El Oro",
+    "slug": "el-oro",
+    "geoname_id": 3658195,
+    "alternate_names": "",
+    "display_name": "El Oro, Ecuador",
+    "geoname_code": "08",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 179,
+  "fields": {
+    "name": "Cotopaxi",
+    "name_ascii": "Cotopaxi",
+    "slug": "cotopaxi",
+    "geoname_id": 3658766,
+    "alternate_names": "",
+    "display_name": "Cotopaxi, Ecuador",
+    "geoname_code": "07",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 180,
+  "fields": {
+    "name": "Chimborazo Province",
+    "name_ascii": "Chimborazo Province",
+    "slug": "chimborazo-province",
+    "geoname_id": 3659237,
+    "alternate_names": "Provincia de Chimborazo",
+    "display_name": "Chimborazo Province, Ecuador",
+    "geoname_code": "06",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 181,
+  "fields": {
+    "name": "Carchi",
+    "name_ascii": "Carchi",
+    "slug": "carchi",
+    "geoname_id": 3659718,
+    "alternate_names": "",
+    "display_name": "Carchi, Ecuador",
+    "geoname_code": "05",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 182,
+  "fields": {
+    "name": "Cañar",
+    "name_ascii": "Canar",
+    "slug": "canar",
+    "geoname_id": 3659849,
+    "alternate_names": "Provincia de Cañar",
+    "display_name": "Cañar, Ecuador",
+    "geoname_code": "04",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 183,
+  "fields": {
+    "name": "Bolívar",
+    "name_ascii": "Bolivar",
+    "slug": "bolivar",
+    "geoname_id": 3660130,
+    "alternate_names": "",
+    "display_name": "Bolívar, Ecuador",
+    "geoname_code": "03",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 184,
+  "fields": {
+    "name": "Azuay",
+    "name_ascii": "Azuay",
+    "slug": "azuay",
+    "geoname_id": 3660431,
+    "alternate_names": "",
+    "display_name": "Azuay, Ecuador",
+    "geoname_code": "02",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 185,
+  "fields": {
+    "name": "Sucumbíos",
+    "name_ascii": "Sucumbios",
+    "slug": "sucumbios",
+    "geoname_id": 3830305,
+    "alternate_names": "",
+    "display_name": "Sucumbíos, Ecuador",
+    "geoname_code": "22",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 186,
+  "fields": {
+    "name": "Orellana Province",
+    "name_ascii": "Orellana Province",
+    "slug": "orellana-province",
+    "geoname_id": 3830306,
+    "alternate_names": "Provincia de Orellana",
+    "display_name": "Orellana Province, Ecuador",
+    "geoname_code": "24",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 187,
+  "fields": {
+    "name": "Santo Domingo de los Tsáchilas",
+    "name_ascii": "Santo Domingo de los Tsachilas",
+    "slug": "santo-domingo-de-los-tsachilas",
+    "geoname_id": 7062136,
+    "alternate_names": "",
+    "display_name": "Santo Domingo de los Tsáchilas, Ecuador",
+    "geoname_code": "26",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 188,
+  "fields": {
+    "name": "Santa Elena",
+    "name_ascii": "Santa Elena",
+    "slug": "santa-elena",
+    "geoname_id": 7062138,
+    "alternate_names": "Provincia de Santa Elena",
+    "display_name": "Santa Elena, Ecuador",
+    "geoname_code": "25",
+    "country": 9
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 189,
+  "fields": {
+    "name": "Zacapa",
+    "name_ascii": "Zacapa",
+    "slug": "zacapa",
+    "geoname_id": 3587586,
+    "alternate_names": "Departamento de Zacapa",
+    "display_name": "Zacapa, Guatemala",
+    "geoname_code": "22",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 190,
+  "fields": {
+    "name": "Totonicapán",
+    "name_ascii": "Totonicapan",
+    "slug": "totonicapan",
+    "geoname_id": 3588257,
+    "alternate_names": "",
+    "display_name": "Totonicapán, Guatemala",
+    "geoname_code": "21",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 191,
+  "fields": {
+    "name": "Suchitepeque",
+    "name_ascii": "Suchitepeque",
+    "slug": "suchitepeque",
+    "geoname_id": 3588668,
+    "alternate_names": "",
+    "display_name": "Suchitepeque, Guatemala",
+    "geoname_code": "20",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 192,
+  "fields": {
+    "name": "Sololá",
+    "name_ascii": "Solola",
+    "slug": "solola",
+    "geoname_id": 3588697,
+    "alternate_names": "Departamento de Sololá",
+    "display_name": "Sololá, Guatemala",
+    "geoname_code": "19",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 193,
+  "fields": {
+    "name": "Santa Rosa Department",
+    "name_ascii": "Santa Rosa Department",
+    "slug": "santa-rosa-department",
+    "geoname_id": 3589172,
+    "alternate_names": "Departamento de Santa Rosa",
+    "display_name": "Santa Rosa Department, Guatemala",
+    "geoname_code": "18",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 194,
+  "fields": {
+    "name": "San Marcos",
+    "name_ascii": "San Marcos",
+    "slug": "san-marcos",
+    "geoname_id": 3589801,
+    "alternate_names": "Departamento de San Marcos",
+    "display_name": "San Marcos, Guatemala",
+    "geoname_code": "17",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 195,
+  "fields": {
+    "name": "Sacatepéquez",
+    "name_ascii": "Sacatepequez",
+    "slug": "sacatepequez",
+    "geoname_id": 3590686,
+    "alternate_names": "Departamento de Sacatepéquez",
+    "display_name": "Sacatepéquez, Guatemala",
+    "geoname_code": "16",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 196,
+  "fields": {
+    "name": "Retalhuleu",
+    "name_ascii": "Retalhuleu",
+    "slug": "retalhuleu",
+    "geoname_id": 3590857,
+    "alternate_names": "",
+    "display_name": "Retalhuleu, Guatemala",
+    "geoname_code": "15",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 197,
+  "fields": {
+    "name": "Quiché",
+    "name_ascii": "Quiche",
+    "slug": "quiche",
+    "geoname_id": 3590964,
+    "alternate_names": "Departamento de Quiché",
+    "display_name": "Quiché, Guatemala",
+    "geoname_code": "14",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 198,
+  "fields": {
+    "name": "Quetzaltenango",
+    "name_ascii": "Quetzaltenango",
+    "slug": "quetzaltenango",
+    "geoname_id": 3590978,
+    "alternate_names": "Departamento de Quetzaltenango",
+    "display_name": "Quetzaltenango, Guatemala",
+    "geoname_code": "13",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 199,
+  "fields": {
+    "name": "Petén",
+    "name_ascii": "Peten",
+    "slug": "peten",
+    "geoname_id": 3591410,
+    "alternate_names": "Departamento de Petén",
+    "display_name": "Petén, Guatemala",
+    "geoname_code": "12",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 200,
+  "fields": {
+    "name": "Jutiapa",
+    "name_ascii": "Jutiapa",
+    "slug": "jutiapa",
+    "geoname_id": 3595067,
+    "alternate_names": "",
+    "display_name": "Jutiapa, Guatemala",
+    "geoname_code": "11",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 201,
+  "fields": {
+    "name": "Jalapa",
+    "name_ascii": "Jalapa",
+    "slug": "jalapa",
+    "geoname_id": 3595236,
+    "alternate_names": "",
+    "display_name": "Jalapa, Guatemala",
+    "geoname_code": "10",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 202,
+  "fields": {
+    "name": "Izabal Department",
+    "name_ascii": "Izabal Department",
+    "slug": "izabal-department",
+    "geoname_id": 3595259,
+    "alternate_names": "Departamento de Izabal",
+    "display_name": "Izabal Department, Guatemala",
+    "geoname_code": "09",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 203,
+  "fields": {
+    "name": "Huehuetenango",
+    "name_ascii": "Huehuetenango",
+    "slug": "huehuetenango",
+    "geoname_id": 3595415,
+    "alternate_names": "",
+    "display_name": "Huehuetenango, Guatemala",
+    "geoname_code": "08",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 204,
+  "fields": {
+    "name": "Guatemala",
+    "name_ascii": "Guatemala",
+    "slug": "guatemala",
+    "geoname_id": 3595530,
+    "alternate_names": "Departamento de Guatemala",
+    "display_name": "Guatemala, Guatemala",
+    "geoname_code": "07",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 205,
+  "fields": {
+    "name": "Escuintla",
+    "name_ascii": "Escuintla",
+    "slug": "escuintla",
+    "geoname_id": 3595802,
+    "alternate_names": "",
+    "display_name": "Escuintla, Guatemala",
+    "geoname_code": "06",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 206,
+  "fields": {
+    "name": "El Progreso",
+    "name_ascii": "El Progreso",
+    "slug": "el-progreso",
+    "geoname_id": 3596416,
+    "alternate_names": "Departamento de El Progreso",
+    "display_name": "El Progreso, Guatemala",
+    "geoname_code": "05",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 207,
+  "fields": {
+    "name": "Chiquimula",
+    "name_ascii": "Chiquimula",
+    "slug": "chiquimula",
+    "geoname_id": 3598464,
+    "alternate_names": "Departamento de Chiquimula",
+    "display_name": "Chiquimula, Guatemala",
+    "geoname_code": "04",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 208,
+  "fields": {
+    "name": "Chimaltenango",
+    "name_ascii": "Chimaltenango",
+    "slug": "chimaltenango",
+    "geoname_id": 3598571,
+    "alternate_names": "Departamento de Chimaltenango",
+    "display_name": "Chimaltenango, Guatemala",
+    "geoname_code": "03",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 209,
+  "fields": {
+    "name": "Baja Verapaz",
+    "name_ascii": "Baja Verapaz",
+    "slug": "baja-verapaz",
+    "geoname_id": 3599602,
+    "alternate_names": "Departamento de Baja Verapaz",
+    "display_name": "Baja Verapaz, Guatemala",
+    "geoname_code": "02",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 210,
+  "fields": {
+    "name": "Alta Verapaz",
+    "name_ascii": "Alta Verapaz",
+    "slug": "alta-verapaz",
+    "geoname_id": 3599773,
+    "alternate_names": "Departamento de Alta Verapaz",
+    "display_name": "Alta Verapaz, Guatemala",
+    "geoname_code": "01",
+    "country": 10
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 211,
+  "fields": {
+    "name": "Yoro Department",
+    "name_ascii": "Yoro Department",
+    "slug": "yoro-department",
+    "geoname_id": 3600193,
+    "alternate_names": "Departamento de Yoro",
+    "display_name": "Yoro Department, Honduras",
+    "geoname_code": "18",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 212,
+  "fields": {
+    "name": "Valle Department",
+    "name_ascii": "Valle Department",
+    "slug": "valle-department",
+    "geoname_id": 3600456,
+    "alternate_names": "Departamento de Valle",
+    "display_name": "Valle Department, Honduras",
+    "geoname_code": "17",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 213,
+  "fields": {
+    "name": "Santa Bárbara Department",
+    "name_ascii": "Santa Barbara Department",
+    "slug": "santa-barbara-department",
+    "geoname_id": 3601689,
+    "alternate_names": "",
+    "display_name": "Santa Bárbara Department, Honduras",
+    "geoname_code": "16",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 214,
+  "fields": {
+    "name": "Olancho Department",
+    "name_ascii": "Olancho Department",
+    "slug": "olancho-department",
+    "geoname_id": 3604249,
+    "alternate_names": "Departamento de Olancho",
+    "display_name": "Olancho Department, Honduras",
+    "geoname_code": "15",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 215,
+  "fields": {
+    "name": "Ocotepeque Department",
+    "name_ascii": "Ocotepeque Department",
+    "slug": "ocotepeque-department",
+    "geoname_id": 3604318,
+    "alternate_names": "Departamento de Ocotepeque",
+    "display_name": "Ocotepeque Department, Honduras",
+    "geoname_code": "14",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 216,
+  "fields": {
+    "name": "Lempira Department",
+    "name_ascii": "Lempira Department",
+    "slug": "lempira-department",
+    "geoname_id": 3606066,
+    "alternate_names": "Departamento de Lempira",
+    "display_name": "Lempira Department, Honduras",
+    "geoname_code": "13",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 217,
+  "fields": {
+    "name": "La Paz Department",
+    "name_ascii": "La Paz Department",
+    "slug": "la-paz-department",
+    "geoname_id": 3607251,
+    "alternate_names": "Departamento de La Paz",
+    "display_name": "La Paz Department, Honduras",
+    "geoname_code": "12",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 218,
+  "fields": {
+    "name": "Bay Islands",
+    "name_ascii": "Bay Islands",
+    "slug": "bay-islands",
+    "geoname_id": 3608814,
+    "alternate_names": "",
+    "display_name": "Bay Islands, Honduras",
+    "geoname_code": "11",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 219,
+  "fields": {
+    "name": "Intibucá Department",
+    "name_ascii": "Intibuca Department",
+    "slug": "intibuca-department",
+    "geoname_id": 3608833,
+    "alternate_names": "Departamento de Intibucá",
+    "display_name": "Intibucá Department, Honduras",
+    "geoname_code": "10",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 220,
+  "fields": {
+    "name": "Gracias a Dios Department",
+    "name_ascii": "Gracias a Dios Department",
+    "slug": "gracias-a-dios-department",
+    "geoname_id": 3609583,
+    "alternate_names": "Departamento de Gracias a Dios",
+    "display_name": "Gracias a Dios Department, Honduras",
+    "geoname_code": "09",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 221,
+  "fields": {
+    "name": "Francisco Morazán Department",
+    "name_ascii": "Francisco Morazan Department",
+    "slug": "francisco-morazan-department",
+    "geoname_id": 3609672,
+    "alternate_names": "Departamento de Francisco Morazán",
+    "display_name": "Francisco Morazán Department, Honduras",
+    "geoname_code": "08",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 222,
+  "fields": {
+    "name": "El Paraíso Department",
+    "name_ascii": "El Paraiso Department",
+    "slug": "el-paraiso-department",
+    "geoname_id": 3610942,
+    "alternate_names": "Departamento de El Paraíso",
+    "display_name": "El Paraíso Department, Honduras",
+    "geoname_code": "07",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 223,
+  "fields": {
+    "name": "Cortés Department",
+    "name_ascii": "Cortes Department",
+    "slug": "cortes-department",
+    "geoname_id": 3613140,
+    "alternate_names": "Departamento de Cortés",
+    "display_name": "Cortés Department, Honduras",
+    "geoname_code": "06",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 224,
+  "fields": {
+    "name": "Copán Department",
+    "name_ascii": "Copan Department",
+    "slug": "copan-department",
+    "geoname_id": 3613229,
+    "alternate_names": "Departamento de Copán",
+    "display_name": "Copán Department, Honduras",
+    "geoname_code": "05",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 225,
+  "fields": {
+    "name": "Comayagua Department",
+    "name_ascii": "Comayagua Department",
+    "slug": "comayagua-department",
+    "geoname_id": 3613319,
+    "alternate_names": "Departamento de Comayagua",
+    "display_name": "Comayagua Department, Honduras",
+    "geoname_code": "04",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 226,
+  "fields": {
+    "name": "Colón Department",
+    "name_ascii": "Colon Department",
+    "slug": "colon-department",
+    "geoname_id": 3613358,
+    "alternate_names": "Departamento de Colón",
+    "display_name": "Colón Department, Honduras",
+    "geoname_code": "03",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 227,
+  "fields": {
+    "name": "Choluteca Department",
+    "name_ascii": "Choluteca Department",
+    "slug": "choluteca-department",
+    "geoname_id": 3613527,
+    "alternate_names": "Departamento de Choluteca",
+    "display_name": "Choluteca Department, Honduras",
+    "geoname_code": "02",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 228,
+  "fields": {
+    "name": "Atlántida Department",
+    "name_ascii": "Atlantida Department",
+    "slug": "atlantida-department",
+    "geoname_id": 3615027,
+    "alternate_names": "Departamento de Atlántida",
+    "display_name": "Atlántida Department, Honduras",
+    "geoname_code": "01",
+    "country": 11
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 229,
+  "fields": {
+    "name": "Yucatán",
+    "name_ascii": "Yucatan",
+    "slug": "yucatan",
+    "geoname_id": 3514211,
+    "alternate_names": "Estado de Yucatán",
+    "display_name": "Yucatán, Mexico",
+    "geoname_code": "31",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 230,
+  "fields": {
+    "name": "Veracruz",
+    "name_ascii": "Veracruz",
+    "slug": "veracruz",
+    "geoname_id": 3514780,
+    "alternate_names": "Estado Libre y Soberano de Veracruz de Ignacio de la Llave;Estado de Veracruz-Llave",
+    "display_name": "Veracruz, Mexico",
+    "geoname_code": "30",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 231,
+  "fields": {
+    "name": "Tlaxcala",
+    "name_ascii": "Tlaxcala",
+    "slug": "tlaxcala",
+    "geoname_id": 3515359,
+    "alternate_names": "Estado de Tlaxcala",
+    "display_name": "Tlaxcala, Mexico",
+    "geoname_code": "29",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 232,
+  "fields": {
+    "name": "Tamaulipas",
+    "name_ascii": "Tamaulipas",
+    "slug": "tamaulipas",
+    "geoname_id": 3516391,
+    "alternate_names": "Estado de Tamaulipas",
+    "display_name": "Tamaulipas, Mexico",
+    "geoname_code": "28",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 233,
+  "fields": {
+    "name": "Tabasco",
+    "name_ascii": "Tabasco",
+    "slug": "tabasco",
+    "geoname_id": 3516458,
+    "alternate_names": "Estado de Tabasco",
+    "display_name": "Tabasco, Mexico",
+    "geoname_code": "27",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 234,
+  "fields": {
+    "name": "Quintana Roo",
+    "name_ascii": "Quintana Roo",
+    "slug": "quintana-roo",
+    "geoname_id": 3520887,
+    "alternate_names": "Estado de Quintana Roo",
+    "display_name": "Quintana Roo, Mexico",
+    "geoname_code": "23",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 235,
+  "fields": {
+    "name": "Querétaro",
+    "name_ascii": "Queretaro",
+    "slug": "queretaro",
+    "geoname_id": 3520914,
+    "alternate_names": "Estado de Querétaro de Arteaga",
+    "display_name": "Querétaro, Mexico",
+    "geoname_code": "22",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 236,
+  "fields": {
+    "name": "Puebla",
+    "name_ascii": "Puebla",
+    "slug": "puebla",
+    "geoname_id": 3521082,
+    "alternate_names": "Estado de Puebla",
+    "display_name": "Puebla, Mexico",
+    "geoname_code": "21",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 237,
+  "fields": {
+    "name": "Oaxaca",
+    "name_ascii": "Oaxaca",
+    "slug": "oaxaca",
+    "geoname_id": 3522509,
+    "alternate_names": "Estado de Oaxaca",
+    "display_name": "Oaxaca, Mexico",
+    "geoname_code": "20",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 238,
+  "fields": {
+    "name": "Nuevo León",
+    "name_ascii": "Nuevo Leon",
+    "slug": "nuevo-leon",
+    "geoname_id": 3522542,
+    "alternate_names": "Estado de Nuevo León",
+    "display_name": "Nuevo León, Mexico",
+    "geoname_code": "19",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 239,
+  "fields": {
+    "name": "Morelos",
+    "name_ascii": "Morelos",
+    "slug": "morelos",
+    "geoname_id": 3522961,
+    "alternate_names": "Estado de Morelos",
+    "display_name": "Morelos, Mexico",
+    "geoname_code": "17",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 240,
+  "fields": {
+    "name": "México",
+    "name_ascii": "Mexico",
+    "slug": "mexico",
+    "geoname_id": 3523272,
+    "alternate_names": "Estado de México",
+    "display_name": "México, Mexico",
+    "geoname_code": "15",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 241,
+  "fields": {
+    "name": "Hidalgo",
+    "name_ascii": "Hidalgo",
+    "slug": "hidalgo",
+    "geoname_id": 3527115,
+    "alternate_names": "Estado de Hidalgo",
+    "display_name": "Hidalgo, Mexico",
+    "geoname_code": "13",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 242,
+  "fields": {
+    "name": "Guerrero",
+    "name_ascii": "Guerrero",
+    "slug": "guerrero",
+    "geoname_id": 3527213,
+    "alternate_names": "Estado de Guerrero",
+    "display_name": "Guerrero, Mexico",
+    "geoname_code": "12",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 243,
+  "fields": {
+    "name": "Mexico City",
+    "name_ascii": "Mexico City",
+    "slug": "mexico-city",
+    "geoname_id": 3527646,
+    "alternate_names": "Ciudad de México",
+    "display_name": "Mexico City, Mexico",
+    "geoname_code": "09",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 244,
+  "fields": {
+    "name": "Chiapas",
+    "name_ascii": "Chiapas",
+    "slug": "chiapas",
+    "geoname_id": 3531011,
+    "alternate_names": "Estado de Chiapas",
+    "display_name": "Chiapas, Mexico",
+    "geoname_code": "05",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 245,
+  "fields": {
+    "name": "Campeche",
+    "name_ascii": "Campeche",
+    "slug": "campeche",
+    "geoname_id": 3531730,
+    "alternate_names": "Estado de Campeche",
+    "display_name": "Campeche, Mexico",
+    "geoname_code": "04",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 246,
+  "fields": {
+    "name": "Zacatecas",
+    "name_ascii": "Zacatecas",
+    "slug": "zacatecas",
+    "geoname_id": 3979840,
+    "alternate_names": "Estado de Zacatecas",
+    "display_name": "Zacatecas, Mexico",
+    "geoname_code": "32",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 247,
+  "fields": {
+    "name": "Sonora",
+    "name_ascii": "Sonora",
+    "slug": "sonora",
+    "geoname_id": 3982846,
+    "alternate_names": "Estado de Sonora",
+    "display_name": "Sonora, Mexico",
+    "geoname_code": "26",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 248,
+  "fields": {
+    "name": "Sinaloa",
+    "name_ascii": "Sinaloa",
+    "slug": "sinaloa",
+    "geoname_id": 3983035,
+    "alternate_names": "Estado de Sinaloa",
+    "display_name": "Sinaloa, Mexico",
+    "geoname_code": "25",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 249,
+  "fields": {
+    "name": "San Luis Potosí",
+    "name_ascii": "San Luis Potosi",
+    "slug": "san-luis-potosi",
+    "geoname_id": 3985605,
+    "alternate_names": "Estado de San Luis Potosí",
+    "display_name": "San Luis Potosí, Mexico",
+    "geoname_code": "24",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 250,
+  "fields": {
+    "name": "Nayarit",
+    "name_ascii": "Nayarit",
+    "slug": "nayarit",
+    "geoname_id": 3995012,
+    "alternate_names": "Estado de Nayarit",
+    "display_name": "Nayarit, Mexico",
+    "geoname_code": "18",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 251,
+  "fields": {
+    "name": "Michoacán",
+    "name_ascii": "Michoacan",
+    "slug": "michoacan",
+    "geoname_id": 3995955,
+    "alternate_names": "Estado de Michoacán de Ocampo",
+    "display_name": "Michoacán, Mexico",
+    "geoname_code": "16",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 252,
+  "fields": {
+    "name": "Jalisco",
+    "name_ascii": "Jalisco",
+    "slug": "jalisco",
+    "geoname_id": 4004156,
+    "alternate_names": "Estado de Jalisco",
+    "display_name": "Jalisco, Mexico",
+    "geoname_code": "14",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 253,
+  "fields": {
+    "name": "Guanajuato",
+    "name_ascii": "Guanajuato",
+    "slug": "guanajuato",
+    "geoname_id": 4005267,
+    "alternate_names": "Estado de Guanajuato",
+    "display_name": "Guanajuato, Mexico",
+    "geoname_code": "11",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 254,
+  "fields": {
+    "name": "Durango",
+    "name_ascii": "Durango",
+    "slug": "durango",
+    "geoname_id": 4011741,
+    "alternate_names": "Estado de Durango",
+    "display_name": "Durango, Mexico",
+    "geoname_code": "10",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 255,
+  "fields": {
+    "name": "Colima",
+    "name_ascii": "Colima",
+    "slug": "colima",
+    "geoname_id": 4013513,
+    "alternate_names": "Estado de Colima",
+    "display_name": "Colima, Mexico",
+    "geoname_code": "08",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 256,
+  "fields": {
+    "name": "Coahuila",
+    "name_ascii": "Coahuila",
+    "slug": "coahuila",
+    "geoname_id": 4013674,
+    "alternate_names": "Estado de Coahuila de Zaragoza",
+    "display_name": "Coahuila, Mexico",
+    "geoname_code": "07",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 257,
+  "fields": {
+    "name": "Chihuahua",
+    "name_ascii": "Chihuahua",
+    "slug": "chihuahua",
+    "geoname_id": 4014336,
+    "alternate_names": "Estado de Chihuahua",
+    "display_name": "Chihuahua, Mexico",
+    "geoname_code": "06",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 258,
+  "fields": {
+    "name": "Baja California Sur",
+    "name_ascii": "Baja California Sur",
+    "slug": "baja-california-sur",
+    "geoname_id": 4017698,
+    "alternate_names": "Estado de Baja California Sur",
+    "display_name": "Baja California Sur, Mexico",
+    "geoname_code": "03",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 259,
+  "fields": {
+    "name": "Baja California",
+    "name_ascii": "Baja California",
+    "slug": "baja-california",
+    "geoname_id": 4017700,
+    "alternate_names": "Estado Libre y Soberano de Baja California;Estado de Baja California",
+    "display_name": "Baja California, Mexico",
+    "geoname_code": "02",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 260,
+  "fields": {
+    "name": "Aguascalientes",
+    "name_ascii": "Aguascalientes",
+    "slug": "aguascalientes",
+    "geoname_id": 4019231,
+    "alternate_names": "Estado de Aguascalientes",
+    "display_name": "Aguascalientes, Mexico",
+    "geoname_code": "01",
+    "country": 12
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 261,
+  "fields": {
+    "name": "Rivas Department",
+    "name_ascii": "Rivas Department",
+    "slug": "rivas-department",
+    "geoname_id": 3617051,
+    "alternate_names": "Departamento de Rivas",
+    "display_name": "Rivas Department, Nicaragua",
+    "geoname_code": "15",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 262,
+  "fields": {
+    "name": "Río San Juan Department",
+    "name_ascii": "Rio San Juan Department",
+    "slug": "rio-san-juan-department",
+    "geoname_id": 3617056,
+    "alternate_names": "Departamento de Río San Juan",
+    "display_name": "Río San Juan Department, Nicaragua",
+    "geoname_code": "14",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 263,
+  "fields": {
+    "name": "Nueva Segovia Department",
+    "name_ascii": "Nueva Segovia Department",
+    "slug": "nueva-segovia-department",
+    "geoname_id": 3617458,
+    "alternate_names": "Departamento de Nueva Segovia",
+    "display_name": "Nueva Segovia Department, Nicaragua",
+    "geoname_code": "13",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 264,
+  "fields": {
+    "name": "Matagalpa Department",
+    "name_ascii": "Matagalpa Department",
+    "slug": "matagalpa-department",
+    "geoname_id": 3617707,
+    "alternate_names": "Departamento de Matagalpa",
+    "display_name": "Matagalpa Department, Nicaragua",
+    "geoname_code": "12",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 265,
+  "fields": {
+    "name": "Masaya Department",
+    "name_ascii": "Masaya Department",
+    "slug": "masaya-department",
+    "geoname_id": 3617722,
+    "alternate_names": "Departamento de Masaya",
+    "display_name": "Masaya Department, Nicaragua",
+    "geoname_code": "11",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 266,
+  "fields": {
+    "name": "Managua Department",
+    "name_ascii": "Managua Department",
+    "slug": "managua-department",
+    "geoname_id": 3617762,
+    "alternate_names": "",
+    "display_name": "Managua Department, Nicaragua",
+    "geoname_code": "10",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 267,
+  "fields": {
+    "name": "Madriz Department",
+    "name_ascii": "Madriz Department",
+    "slug": "madriz-department",
+    "geoname_id": 3617796,
+    "alternate_names": "Departamento de Madriz",
+    "display_name": "Madriz Department, Nicaragua",
+    "geoname_code": "09",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 268,
+  "fields": {
+    "name": "León Department",
+    "name_ascii": "Leon Department",
+    "slug": "leon-department",
+    "geoname_id": 3618029,
+    "alternate_names": "Departamento de León",
+    "display_name": "León Department, Nicaragua",
+    "geoname_code": "08",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 269,
+  "fields": {
+    "name": "Jinotega Department",
+    "name_ascii": "Jinotega Department",
+    "slug": "jinotega-department",
+    "geoname_id": 3618928,
+    "alternate_names": "Departamento de Jinotega",
+    "display_name": "Jinotega Department, Nicaragua",
+    "geoname_code": "07",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 270,
+  "fields": {
+    "name": "Granada Department",
+    "name_ascii": "Granada Department",
+    "slug": "granada-department",
+    "geoname_id": 3619135,
+    "alternate_names": "Departamento de Granada",
+    "display_name": "Granada Department, Nicaragua",
+    "geoname_code": "06",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 271,
+  "fields": {
+    "name": "Estelí Department",
+    "name_ascii": "Esteli Department",
+    "slug": "esteli-department",
+    "geoname_id": 3619193,
+    "alternate_names": "Departamento de Estelí",
+    "display_name": "Estelí Department, Nicaragua",
+    "geoname_code": "05",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 272,
+  "fields": {
+    "name": "Chontales Department",
+    "name_ascii": "Chontales Department",
+    "slug": "chontales-department",
+    "geoname_id": 3620368,
+    "alternate_names": "Departamento de Chontales",
+    "display_name": "Chontales Department, Nicaragua",
+    "geoname_code": "04",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 273,
+  "fields": {
+    "name": "Chinandega Department",
+    "name_ascii": "Chinandega Department",
+    "slug": "chinandega-department",
+    "geoname_id": 3620380,
+    "alternate_names": "Departamento de Chinandega",
+    "display_name": "Chinandega Department, Nicaragua",
+    "geoname_code": "03",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 274,
+  "fields": {
+    "name": "Carazo Department",
+    "name_ascii": "Carazo Department",
+    "slug": "carazo-department",
+    "geoname_id": 3620481,
+    "alternate_names": "Departamento de Carazo",
+    "display_name": "Carazo Department, Nicaragua",
+    "geoname_code": "02",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 275,
+  "fields": {
+    "name": "Boaco Department",
+    "name_ascii": "Boaco Department",
+    "slug": "boaco-department",
+    "geoname_id": 3620673,
+    "alternate_names": "Departamento de Boaco",
+    "display_name": "Boaco Department, Nicaragua",
+    "geoname_code": "01",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 276,
+  "fields": {
+    "name": "North Caribbean Coast",
+    "name_ascii": "North Caribbean Coast",
+    "slug": "north-caribbean-coast",
+    "geoname_id": 3830307,
+    "alternate_names": "Región Autónoma de la Costa Caribe Norte",
+    "display_name": "North Caribbean Coast, Nicaragua",
+    "geoname_code": "17",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 277,
+  "fields": {
+    "name": "South Caribbean Coast",
+    "name_ascii": "South Caribbean Coast",
+    "slug": "south-caribbean-coast",
+    "geoname_id": 3830308,
+    "alternate_names": "Región Autónoma de la Costa Caribe Sur",
+    "display_name": "South Caribbean Coast, Nicaragua",
+    "geoname_code": "18",
+    "country": 13
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 278,
+  "fields": {
+    "name": "Veraguas Province",
+    "name_ascii": "Veraguas Province",
+    "slug": "veraguas-province",
+    "geoname_id": 3700159,
+    "alternate_names": "Provincia de Veraguas",
+    "display_name": "Veraguas Province, Panama",
+    "geoname_code": "10",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 279,
+  "fields": {
+    "name": "Guna Yala",
+    "name_ascii": "Guna Yala",
+    "slug": "guna-yala",
+    "geoname_id": 3701537,
+    "alternate_names": "",
+    "display_name": "Guna Yala, Panama",
+    "geoname_code": "09",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 280,
+  "fields": {
+    "name": "Panamá",
+    "name_ascii": "Panama",
+    "slug": "panama",
+    "geoname_id": 3703433,
+    "alternate_names": "",
+    "display_name": "Panamá, Panama",
+    "geoname_code": "08",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 281,
+  "fields": {
+    "name": "Los Santos Province",
+    "name_ascii": "Los Santos Province",
+    "slug": "los-santos-province",
+    "geoname_id": 3704961,
+    "alternate_names": "Provincia de Los Santos",
+    "display_name": "Los Santos Province, Panama",
+    "geoname_code": "07",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 282,
+  "fields": {
+    "name": "Herrera Province",
+    "name_ascii": "Herrera Province",
+    "slug": "herrera-province",
+    "geoname_id": 3708710,
+    "alternate_names": "Provincia de Herrera",
+    "display_name": "Herrera Province, Panama",
+    "geoname_code": "06",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 283,
+  "fields": {
+    "name": "Darién",
+    "name_ascii": "Darien",
+    "slug": "darien",
+    "geoname_id": 3711671,
+    "alternate_names": "",
+    "display_name": "Darién, Panama",
+    "geoname_code": "05",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 284,
+  "fields": {
+    "name": "Colón",
+    "name_ascii": "Colon",
+    "slug": "colon",
+    "geoname_id": 3712073,
+    "alternate_names": "",
+    "display_name": "Colón, Panama",
+    "geoname_code": "04",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 285,
+  "fields": {
+    "name": "Coclé",
+    "name_ascii": "Cocle",
+    "slug": "cocle",
+    "geoname_id": 3712162,
+    "alternate_names": "",
+    "display_name": "Coclé, Panama",
+    "geoname_code": "03",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 286,
+  "fields": {
+    "name": "Chiriquí Province",
+    "name_ascii": "Chiriqui Province",
+    "slug": "chiriqui-province",
+    "geoname_id": 3712410,
+    "alternate_names": "Provincia de Chiriquí",
+    "display_name": "Chiriquí Province, Panama",
+    "geoname_code": "02",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 287,
+  "fields": {
+    "name": "Bocas del Toro Province",
+    "name_ascii": "Bocas del Toro Province",
+    "slug": "bocas-del-toro-province",
+    "geoname_id": 3713954,
+    "alternate_names": "Provincia de Bocas del Toro",
+    "display_name": "Bocas del Toro Province, Panama",
+    "geoname_code": "01",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 288,
+  "fields": {
+    "name": "Emberá",
+    "name_ascii": "Embera",
+    "slug": "embera",
+    "geoname_id": 7303686,
+    "alternate_names": "",
+    "display_name": "Emberá, Panama",
+    "geoname_code": "11",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 289,
+  "fields": {
+    "name": "Ngöbe-Buglé Comarca",
+    "name_ascii": "Ngoebe-Bugle Comarca",
+    "slug": "ngoebe-bugle-comarca",
+    "geoname_id": 7303688,
+    "alternate_names": "Comarca Ngäbe-Buglé",
+    "display_name": "Ngöbe-Buglé Comarca, Panama",
+    "geoname_code": "12",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 290,
+  "fields": {
+    "name": "Panamá Oeste Province",
+    "name_ascii": "Panama Oeste Province",
+    "slug": "panama-oeste-province",
+    "geoname_id": 11353126,
+    "alternate_names": "Panamá Oeste;Provincia de Panamá Oeste",
+    "display_name": "Panamá Oeste Province, Panama",
+    "geoname_code": "13",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 291,
+  "fields": {
+    "name": "Naso Tjër Di",
+    "name_ascii": "Naso Tjer Di",
+    "slug": "naso-tjer-di",
+    "geoname_id": 12508964,
+    "alternate_names": "",
+    "display_name": "Naso Tjër Di, Panama",
+    "geoname_code": "NT",
+    "country": 14
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 292,
+  "fields": {
+    "name": "Ucayali",
+    "name_ascii": "Ucayali",
+    "slug": "ucayali",
+    "geoname_id": 3691099,
+    "alternate_names": "",
+    "display_name": "Ucayali, Peru",
+    "geoname_code": "25",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 293,
+  "fields": {
+    "name": "Tumbes",
+    "name_ascii": "Tumbes",
+    "slug": "tumbes",
+    "geoname_id": 3691146,
+    "alternate_names": "Departamento de Tumbes",
+    "display_name": "Tumbes, Peru",
+    "geoname_code": "24",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 294,
+  "fields": {
+    "name": "San Martín Department",
+    "name_ascii": "San Martin Department",
+    "slug": "san-martin-department",
+    "geoname_id": 3692385,
+    "alternate_names": "Departamento de San Martín",
+    "display_name": "San Martín Department, Peru",
+    "geoname_code": "22",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 295,
+  "fields": {
+    "name": "Piura",
+    "name_ascii": "Piura",
+    "slug": "piura",
+    "geoname_id": 3693525,
+    "alternate_names": "Departamento de Piura",
+    "display_name": "Piura, Peru",
+    "geoname_code": "20",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 296,
+  "fields": {
+    "name": "Loreto",
+    "name_ascii": "Loreto",
+    "slug": "loreto",
+    "geoname_id": 3695238,
+    "alternate_names": "Departamento de Loreto",
+    "display_name": "Loreto, Peru",
+    "geoname_code": "16",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 297,
+  "fields": {
+    "name": "Lambayeque",
+    "name_ascii": "Lambayeque",
+    "slug": "lambayeque",
+    "geoname_id": 3695753,
+    "alternate_names": "Departamento de Lambayeque",
+    "display_name": "Lambayeque, Peru",
+    "geoname_code": "14",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 298,
+  "fields": {
+    "name": "La Libertad",
+    "name_ascii": "La Libertad",
+    "slug": "la-libertad",
+    "geoname_id": 3695781,
+    "alternate_names": "Departamento de La Libertad",
+    "display_name": "La Libertad, Peru",
+    "geoname_code": "13",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 299,
+  "fields": {
+    "name": "Huánuco Department",
+    "name_ascii": "Huanuco Department",
+    "slug": "huanuco-department",
+    "geoname_id": 3696416,
+    "alternate_names": "Departamento de Huánuco",
+    "display_name": "Huánuco Department, Peru",
+    "geoname_code": "10",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 300,
+  "fields": {
+    "name": "Cajamarca Department",
+    "name_ascii": "Cajamarca Department",
+    "slug": "cajamarca-department",
+    "geoname_id": 3699087,
+    "alternate_names": "Departamento de Cajamarca",
+    "display_name": "Cajamarca Department, Peru",
+    "geoname_code": "06",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 301,
+  "fields": {
+    "name": "Ancash",
+    "name_ascii": "Ancash",
+    "slug": "ancash",
+    "geoname_id": 3699674,
+    "alternate_names": "Departamento de Áncash;Áncash",
+    "display_name": "Ancash, Peru",
+    "geoname_code": "02",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 302,
+  "fields": {
+    "name": "Amazonas",
+    "name_ascii": "Amazonas",
+    "slug": "amazonas",
+    "geoname_id": 3699699,
+    "alternate_names": "Departamento de Amazonas",
+    "display_name": "Amazonas, Peru",
+    "geoname_code": "01",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 303,
+  "fields": {
+    "name": "Tacna",
+    "name_ascii": "Tacna",
+    "slug": "tacna",
+    "geoname_id": 3928127,
+    "alternate_names": "Departamento de Tacna",
+    "display_name": "Tacna, Peru",
+    "geoname_code": "23",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 304,
+  "fields": {
+    "name": "Puno",
+    "name_ascii": "Puno",
+    "slug": "puno",
+    "geoname_id": 3931275,
+    "alternate_names": "",
+    "display_name": "Puno, Peru",
+    "geoname_code": "21",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 305,
+  "fields": {
+    "name": "Pasco",
+    "name_ascii": "Pasco",
+    "slug": "pasco",
+    "geoname_id": 3932834,
+    "alternate_names": "Departamento de Pasco",
+    "display_name": "Pasco, Peru",
+    "geoname_code": "19",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 306,
+  "fields": {
+    "name": "Moquegua Department",
+    "name_ascii": "Moquegua Department",
+    "slug": "moquegua-department",
+    "geoname_id": 3934607,
+    "alternate_names": "Departamento de Moquegua",
+    "display_name": "Moquegua Department, Peru",
+    "geoname_code": "18",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 307,
+  "fields": {
+    "name": "Madre de Dios",
+    "name_ascii": "Madre de Dios",
+    "slug": "madre-de-dios",
+    "geoname_id": 3935619,
+    "alternate_names": "Departamento de Madre de Dios",
+    "display_name": "Madre de Dios, Peru",
+    "geoname_code": "17",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 308,
+  "fields": {
+    "name": "Lima Province",
+    "name_ascii": "Lima Province",
+    "slug": "lima-province",
+    "geoname_id": 3936451,
+    "alternate_names": "Provincia de Lima",
+    "display_name": "Lima Province, Peru",
+    "geoname_code": "LMA",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 309,
+  "fields": {
+    "name": "Lima region",
+    "name_ascii": "Lima region",
+    "slug": "lima-region",
+    "geoname_id": 3936452,
+    "alternate_names": "Departamento de Lima",
+    "display_name": "Lima region, Peru",
+    "geoname_code": "15",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 310,
+  "fields": {
+    "name": "Junin",
+    "name_ascii": "Junin",
+    "slug": "junin",
+    "geoname_id": 3937485,
+    "alternate_names": "Departamento de Junín",
+    "display_name": "Junin, Peru",
+    "geoname_code": "12",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 311,
+  "fields": {
+    "name": "Ica",
+    "name_ascii": "Ica",
+    "slug": "ica",
+    "geoname_id": 3938526,
+    "alternate_names": "Departamento de Ica",
+    "display_name": "Ica, Peru",
+    "geoname_code": "11",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 312,
+  "fields": {
+    "name": "Huancavelica",
+    "name_ascii": "Huancavelica",
+    "slug": "huancavelica",
+    "geoname_id": 3939467,
+    "alternate_names": "Departamento de Huancavelica",
+    "display_name": "Huancavelica, Peru",
+    "geoname_code": "09",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 313,
+  "fields": {
+    "name": "Cuzco Department",
+    "name_ascii": "Cuzco Department",
+    "slug": "cuzco-department",
+    "geoname_id": 3941583,
+    "alternate_names": "Departamento de Cusco",
+    "display_name": "Cuzco Department, Peru",
+    "geoname_code": "08",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 314,
+  "fields": {
+    "name": "Callao",
+    "name_ascii": "Callao",
+    "slug": "callao",
+    "geoname_id": 3946080,
+    "alternate_names": "",
+    "display_name": "Callao, Peru",
+    "geoname_code": "07",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 315,
+  "fields": {
+    "name": "Ayacucho",
+    "name_ascii": "Ayacucho",
+    "slug": "ayacucho",
+    "geoname_id": 3947018,
+    "alternate_names": "Departamento de Ayacucho",
+    "display_name": "Ayacucho, Peru",
+    "geoname_code": "05",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 316,
+  "fields": {
+    "name": "Arequipa",
+    "name_ascii": "Arequipa",
+    "slug": "arequipa",
+    "geoname_id": 3947319,
+    "alternate_names": "Departamento de Arequipa",
+    "display_name": "Arequipa, Peru",
+    "geoname_code": "04",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 317,
+  "fields": {
+    "name": "Apurímac Department",
+    "name_ascii": "Apurimac Department",
+    "slug": "apurimac-department",
+    "geoname_id": 3947421,
+    "alternate_names": "Apurímac",
+    "display_name": "Apurímac Department, Peru",
+    "geoname_code": "03",
+    "country": 15
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 318,
+  "fields": {
+    "name": "Adjuntas",
+    "name_ascii": "Adjuntas",
+    "slug": "adjuntas",
+    "geoname_id": 4562487,
+    "alternate_names": "",
+    "display_name": "Adjuntas, Puerto Rico",
+    "geoname_code": "001",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 319,
+  "fields": {
+    "name": "Aguada",
+    "name_ascii": "Aguada",
+    "slug": "aguada",
+    "geoname_id": 4562503,
+    "alternate_names": "",
+    "display_name": "Aguada, Puerto Rico",
+    "geoname_code": "003",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 320,
+  "fields": {
+    "name": "Aguadilla",
+    "name_ascii": "Aguadilla",
+    "slug": "aguadilla",
+    "geoname_id": 4562512,
+    "alternate_names": "",
+    "display_name": "Aguadilla, Puerto Rico",
+    "geoname_code": "005",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 321,
+  "fields": {
+    "name": "Aguas Buenas",
+    "name_ascii": "Aguas Buenas",
+    "slug": "aguas-buenas",
+    "geoname_id": 4562516,
+    "alternate_names": "",
+    "display_name": "Aguas Buenas, Puerto Rico",
+    "geoname_code": "007",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 322,
+  "fields": {
+    "name": "Aibonito",
+    "name_ascii": "Aibonito",
+    "slug": "aibonito",
+    "geoname_id": 4562531,
+    "alternate_names": "",
+    "display_name": "Aibonito, Puerto Rico",
+    "geoname_code": "009",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 323,
+  "fields": {
+    "name": "Añasco",
+    "name_ascii": "Anasco",
+    "slug": "anasco",
+    "geoname_id": 4562605,
+    "alternate_names": "",
+    "display_name": "Añasco, Puerto Rico",
+    "geoname_code": "011",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 324,
+  "fields": {
+    "name": "Arecibo",
+    "name_ascii": "Arecibo",
+    "slug": "arecibo",
+    "geoname_id": 4562640,
+    "alternate_names": "",
+    "display_name": "Arecibo, Puerto Rico",
+    "geoname_code": "013",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 325,
+  "fields": {
+    "name": "Arroyo",
+    "name_ascii": "Arroyo",
+    "slug": "arroyo",
+    "geoname_id": 4562682,
+    "alternate_names": "",
+    "display_name": "Arroyo, Puerto Rico",
+    "geoname_code": "015",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 326,
+  "fields": {
+    "name": "Barceloneta",
+    "name_ascii": "Barceloneta",
+    "slug": "barceloneta",
+    "geoname_id": 4562771,
+    "alternate_names": "",
+    "display_name": "Barceloneta, Puerto Rico",
+    "geoname_code": "017",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 327,
+  "fields": {
+    "name": "Barranquitas",
+    "name_ascii": "Barranquitas",
+    "slug": "barranquitas",
+    "geoname_id": 4562779,
+    "alternate_names": "",
+    "display_name": "Barranquitas, Puerto Rico",
+    "geoname_code": "019",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 328,
+  "fields": {
+    "name": "Bayamón",
+    "name_ascii": "Bayamon",
+    "slug": "bayamon",
+    "geoname_id": 4562837,
+    "alternate_names": "",
+    "display_name": "Bayamón, Puerto Rico",
+    "geoname_code": "021",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 329,
+  "fields": {
+    "name": "Cabo Rojo",
+    "name_ascii": "Cabo Rojo",
+    "slug": "cabo-rojo",
+    "geoname_id": 4562997,
+    "alternate_names": "",
+    "display_name": "Cabo Rojo, Puerto Rico",
+    "geoname_code": "023",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 330,
+  "fields": {
+    "name": "Caguas",
+    "name_ascii": "Caguas",
+    "slug": "caguas",
+    "geoname_id": 4563011,
+    "alternate_names": "",
+    "display_name": "Caguas, Puerto Rico",
+    "geoname_code": "025",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 331,
+  "fields": {
+    "name": "Camuy",
+    "name_ascii": "Camuy",
+    "slug": "camuy",
+    "geoname_id": 4563065,
+    "alternate_names": "",
+    "display_name": "Camuy, Puerto Rico",
+    "geoname_code": "027",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 332,
+  "fields": {
+    "name": "Canóvanas",
+    "name_ascii": "Canovanas",
+    "slug": "canovanas",
+    "geoname_id": 4563169,
+    "alternate_names": "",
+    "display_name": "Canóvanas, Puerto Rico",
+    "geoname_code": "029",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 333,
+  "fields": {
+    "name": "Carolina",
+    "name_ascii": "Carolina",
+    "slug": "carolina",
+    "geoname_id": 4563244,
+    "alternate_names": "",
+    "display_name": "Carolina, Puerto Rico",
+    "geoname_code": "031",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 334,
+  "fields": {
+    "name": "Cataño",
+    "name_ascii": "Catano",
+    "slug": "catano",
+    "geoname_id": 4563299,
+    "alternate_names": "",
+    "display_name": "Cataño, Puerto Rico",
+    "geoname_code": "033",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 335,
+  "fields": {
+    "name": "Cayey",
+    "name_ascii": "Cayey",
+    "slug": "cayey",
+    "geoname_id": 4563309,
+    "alternate_names": "",
+    "display_name": "Cayey, Puerto Rico",
+    "geoname_code": "035",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 336,
+  "fields": {
+    "name": "Ceiba",
+    "name_ascii": "Ceiba",
+    "slug": "ceiba",
+    "geoname_id": 4563380,
+    "alternate_names": "",
+    "display_name": "Ceiba, Puerto Rico",
+    "geoname_code": "037",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 337,
+  "fields": {
+    "name": "Ciales",
+    "name_ascii": "Ciales",
+    "slug": "ciales",
+    "geoname_id": 4563774,
+    "alternate_names": "",
+    "display_name": "Ciales, Puerto Rico",
+    "geoname_code": "039",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 338,
+  "fields": {
+    "name": "Cidra",
+    "name_ascii": "Cidra",
+    "slug": "cidra",
+    "geoname_id": 4563778,
+    "alternate_names": "",
+    "display_name": "Cidra, Puerto Rico",
+    "geoname_code": "041",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 339,
+  "fields": {
+    "name": "Coamo",
+    "name_ascii": "Coamo",
+    "slug": "coamo",
+    "geoname_id": 4563812,
+    "alternate_names": "",
+    "display_name": "Coamo, Puerto Rico",
+    "geoname_code": "043",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 340,
+  "fields": {
+    "name": "Comerío",
+    "name_ascii": "Comerio",
+    "slug": "comerio",
+    "geoname_id": 4563921,
+    "alternate_names": "",
+    "display_name": "Comerío, Puerto Rico",
+    "geoname_code": "045",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 341,
+  "fields": {
+    "name": "Corozal",
+    "name_ascii": "Corozal",
+    "slug": "corozal",
+    "geoname_id": 4564004,
+    "alternate_names": "",
+    "display_name": "Corozal, Puerto Rico",
+    "geoname_code": "047",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 342,
+  "fields": {
+    "name": "Culebra",
+    "name_ascii": "Culebra",
+    "slug": "culebra",
+    "geoname_id": 4564071,
+    "alternate_names": "",
+    "display_name": "Culebra, Puerto Rico",
+    "geoname_code": "049",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 343,
+  "fields": {
+    "name": "Dorado",
+    "name_ascii": "Dorado",
+    "slug": "dorado",
+    "geoname_id": 4564134,
+    "alternate_names": "",
+    "display_name": "Dorado, Puerto Rico",
+    "geoname_code": "051",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 344,
+  "fields": {
+    "name": "Fajardo",
+    "name_ascii": "Fajardo",
+    "slug": "fajardo",
+    "geoname_id": 4564949,
+    "alternate_names": "",
+    "display_name": "Fajardo, Puerto Rico",
+    "geoname_code": "053",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 345,
+  "fields": {
+    "name": "Florida",
+    "name_ascii": "Florida",
+    "slug": "florida",
+    "geoname_id": 4564993,
+    "alternate_names": "",
+    "display_name": "Florida, Puerto Rico",
+    "geoname_code": "054",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 346,
+  "fields": {
+    "name": "Guánica",
+    "name_ascii": "Guanica",
+    "slug": "guanica",
+    "geoname_id": 4565091,
+    "alternate_names": "",
+    "display_name": "Guánica, Puerto Rico",
+    "geoname_code": "055",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 347,
+  "fields": {
+    "name": "Guayama",
+    "name_ascii": "Guayama",
+    "slug": "guayama",
+    "geoname_id": 4565107,
+    "alternate_names": "",
+    "display_name": "Guayama, Puerto Rico",
+    "geoname_code": "057",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 348,
+  "fields": {
+    "name": "Guayanilla",
+    "name_ascii": "Guayanilla",
+    "slug": "guayanilla",
+    "geoname_id": 4565112,
+    "alternate_names": "",
+    "display_name": "Guayanilla, Puerto Rico",
+    "geoname_code": "059",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 349,
+  "fields": {
+    "name": "Guaynabo",
+    "name_ascii": "Guaynabo",
+    "slug": "guaynabo",
+    "geoname_id": 4565120,
+    "alternate_names": "",
+    "display_name": "Guaynabo, Puerto Rico",
+    "geoname_code": "061",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 350,
+  "fields": {
+    "name": "Gurabo",
+    "name_ascii": "Gurabo",
+    "slug": "gurabo",
+    "geoname_id": 4565126,
+    "alternate_names": "",
+    "display_name": "Gurabo, Puerto Rico",
+    "geoname_code": "063",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 351,
+  "fields": {
+    "name": "Hatillo",
+    "name_ascii": "Hatillo",
+    "slug": "hatillo",
+    "geoname_id": 4565348,
+    "alternate_names": "",
+    "display_name": "Hatillo, Puerto Rico",
+    "geoname_code": "065",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 352,
+  "fields": {
+    "name": "Hormigueros",
+    "name_ascii": "Hormigueros",
+    "slug": "hormigueros",
+    "geoname_id": 4565381,
+    "alternate_names": "",
+    "display_name": "Hormigueros, Puerto Rico",
+    "geoname_code": "067",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 353,
+  "fields": {
+    "name": "Humacao",
+    "name_ascii": "Humacao",
+    "slug": "humacao",
+    "geoname_id": 4565449,
+    "alternate_names": "",
+    "display_name": "Humacao, Puerto Rico",
+    "geoname_code": "069",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 354,
+  "fields": {
+    "name": "Isabela",
+    "name_ascii": "Isabela",
+    "slug": "isabela",
+    "geoname_id": 4565581,
+    "alternate_names": "",
+    "display_name": "Isabela, Puerto Rico",
+    "geoname_code": "071",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 355,
+  "fields": {
+    "name": "Jayuya",
+    "name_ascii": "Jayuya",
+    "slug": "jayuya",
+    "geoname_id": 4565684,
+    "alternate_names": "",
+    "display_name": "Jayuya, Puerto Rico",
+    "geoname_code": "073",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 356,
+  "fields": {
+    "name": "Juana Díaz",
+    "name_ascii": "Juana Diaz",
+    "slug": "juana-diaz",
+    "geoname_id": 4565713,
+    "alternate_names": "",
+    "display_name": "Juana Díaz, Puerto Rico",
+    "geoname_code": "075",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 357,
+  "fields": {
+    "name": "Juncos",
+    "name_ascii": "Juncos",
+    "slug": "juncos",
+    "geoname_id": 4565720,
+    "alternate_names": "",
+    "display_name": "Juncos, Puerto Rico",
+    "geoname_code": "077",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 358,
+  "fields": {
+    "name": "Lajas",
+    "name_ascii": "Lajas",
+    "slug": "lajas",
+    "geoname_id": 4565900,
+    "alternate_names": "",
+    "display_name": "Lajas, Puerto Rico",
+    "geoname_code": "079",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 359,
+  "fields": {
+    "name": "Lares",
+    "name_ascii": "Lares",
+    "slug": "lares",
+    "geoname_id": 4565910,
+    "alternate_names": "",
+    "display_name": "Lares, Puerto Rico",
+    "geoname_code": "081",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 360,
+  "fields": {
+    "name": "Las Marías",
+    "name_ascii": "Las Marias",
+    "slug": "las-marias",
+    "geoname_id": 4565961,
+    "alternate_names": "",
+    "display_name": "Las Marías, Puerto Rico",
+    "geoname_code": "083",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 361,
+  "fields": {
+    "name": "Las Piedras",
+    "name_ascii": "Las Piedras",
+    "slug": "las-piedras",
+    "geoname_id": 4565981,
+    "alternate_names": "",
+    "display_name": "Las Piedras, Puerto Rico",
+    "geoname_code": "085",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 362,
+  "fields": {
+    "name": "Loíza",
+    "name_ascii": "Loiza",
+    "slug": "loiza",
+    "geoname_id": 4566025,
+    "alternate_names": "",
+    "display_name": "Loíza, Puerto Rico",
+    "geoname_code": "087",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 363,
+  "fields": {
+    "name": "Luquillo",
+    "name_ascii": "Luquillo",
+    "slug": "luquillo",
+    "geoname_id": 4566106,
+    "alternate_names": "",
+    "display_name": "Luquillo, Puerto Rico",
+    "geoname_code": "089",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 364,
+  "fields": {
+    "name": "Manatí",
+    "name_ascii": "Manati",
+    "slug": "manati",
+    "geoname_id": 4566138,
+    "alternate_names": "",
+    "display_name": "Manatí, Puerto Rico",
+    "geoname_code": "091",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 365,
+  "fields": {
+    "name": "Maricao",
+    "name_ascii": "Maricao",
+    "slug": "maricao",
+    "geoname_id": 4566180,
+    "alternate_names": "",
+    "display_name": "Maricao, Puerto Rico",
+    "geoname_code": "093",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 366,
+  "fields": {
+    "name": "Maunabo",
+    "name_ascii": "Maunabo",
+    "slug": "maunabo",
+    "geoname_id": 4566209,
+    "alternate_names": "",
+    "display_name": "Maunabo, Puerto Rico",
+    "geoname_code": "095",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 367,
+  "fields": {
+    "name": "Mayagüez",
+    "name_ascii": "Mayagueez",
+    "slug": "mayagueez",
+    "geoname_id": 4566217,
+    "alternate_names": "",
+    "display_name": "Mayagüez, Puerto Rico",
+    "geoname_code": "097",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 368,
+  "fields": {
+    "name": "Moca",
+    "name_ascii": "Moca",
+    "slug": "moca",
+    "geoname_id": 4566272,
+    "alternate_names": "",
+    "display_name": "Moca, Puerto Rico",
+    "geoname_code": "099",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 369,
+  "fields": {
+    "name": "Morovis",
+    "name_ascii": "Morovis",
+    "slug": "morovis",
+    "geoname_id": 4566334,
+    "alternate_names": "",
+    "display_name": "Morovis, Puerto Rico",
+    "geoname_code": "101",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 370,
+  "fields": {
+    "name": "Naguabo",
+    "name_ascii": "Naguabo",
+    "slug": "naguabo",
+    "geoname_id": 4566397,
+    "alternate_names": "",
+    "display_name": "Naguabo, Puerto Rico",
+    "geoname_code": "103",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 371,
+  "fields": {
+    "name": "Naranjito",
+    "name_ascii": "Naranjito",
+    "slug": "naranjito",
+    "geoname_id": 4566403,
+    "alternate_names": "",
+    "display_name": "Naranjito, Puerto Rico",
+    "geoname_code": "105",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 372,
+  "fields": {
+    "name": "Orocovis",
+    "name_ascii": "Orocovis",
+    "slug": "orocovis",
+    "geoname_id": 4566456,
+    "alternate_names": "",
+    "display_name": "Orocovis, Puerto Rico",
+    "geoname_code": "107",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 373,
+  "fields": {
+    "name": "Patillas",
+    "name_ascii": "Patillas",
+    "slug": "patillas",
+    "geoname_id": 4566654,
+    "alternate_names": "",
+    "display_name": "Patillas, Puerto Rico",
+    "geoname_code": "109",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 374,
+  "fields": {
+    "name": "Peñuelas",
+    "name_ascii": "Penuelas",
+    "slug": "penuelas",
+    "geoname_id": 4566689,
+    "alternate_names": "",
+    "display_name": "Peñuelas, Puerto Rico",
+    "geoname_code": "111",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 375,
+  "fields": {
+    "name": "Ponce",
+    "name_ascii": "Ponce",
+    "slug": "ponce",
+    "geoname_id": 4566886,
+    "alternate_names": "",
+    "display_name": "Ponce, Puerto Rico",
+    "geoname_code": "113",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 376,
+  "fields": {
+    "name": "Rincón",
+    "name_ascii": "Rincon",
+    "slug": "rincon",
+    "geoname_id": 4567727,
+    "alternate_names": "",
+    "display_name": "Rincón, Puerto Rico",
+    "geoname_code": "117",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 377,
+  "fields": {
+    "name": "Quebradillas",
+    "name_ascii": "Quebradillas",
+    "slug": "quebradillas",
+    "geoname_id": 4567734,
+    "alternate_names": "",
+    "display_name": "Quebradillas, Puerto Rico",
+    "geoname_code": "115",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 378,
+  "fields": {
+    "name": "Río Grande",
+    "name_ascii": "Rio Grande",
+    "slug": "rio-grande",
+    "geoname_id": 4567823,
+    "alternate_names": "",
+    "display_name": "Río Grande, Puerto Rico",
+    "geoname_code": "119",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 379,
+  "fields": {
+    "name": "Sabana Grande",
+    "name_ascii": "Sabana Grande",
+    "slug": "sabana-grande",
+    "geoname_id": 4568015,
+    "alternate_names": "",
+    "display_name": "Sabana Grande, Puerto Rico",
+    "geoname_code": "121",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 380,
+  "fields": {
+    "name": "Salinas",
+    "name_ascii": "Salinas",
+    "slug": "salinas",
+    "geoname_id": 4568043,
+    "alternate_names": "",
+    "display_name": "Salinas, Puerto Rico",
+    "geoname_code": "123",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 381,
+  "fields": {
+    "name": "San Germán",
+    "name_ascii": "San German",
+    "slug": "san-german",
+    "geoname_id": 4568105,
+    "alternate_names": "",
+    "display_name": "San Germán, Puerto Rico",
+    "geoname_code": "125",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 382,
+  "fields": {
+    "name": "San Juan",
+    "name_ascii": "San Juan",
+    "slug": "san-juan",
+    "geoname_id": 4568138,
+    "alternate_names": "",
+    "display_name": "San Juan, Puerto Rico",
+    "geoname_code": "127",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 383,
+  "fields": {
+    "name": "San Lorenzo",
+    "name_ascii": "San Lorenzo",
+    "slug": "san-lorenzo",
+    "geoname_id": 4568150,
+    "alternate_names": "",
+    "display_name": "San Lorenzo, Puerto Rico",
+    "geoname_code": "129",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 384,
+  "fields": {
+    "name": "San Sebastián",
+    "name_ascii": "San Sebastian",
+    "slug": "san-sebastian",
+    "geoname_id": 4568177,
+    "alternate_names": "",
+    "display_name": "San Sebastián, Puerto Rico",
+    "geoname_code": "131",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 385,
+  "fields": {
+    "name": "Santa Isabel",
+    "name_ascii": "Santa Isabel",
+    "slug": "santa-isabel",
+    "geoname_id": 4568213,
+    "alternate_names": "",
+    "display_name": "Santa Isabel, Puerto Rico",
+    "geoname_code": "133",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 386,
+  "fields": {
+    "name": "Toa Alta",
+    "name_ascii": "Toa Alta",
+    "slug": "toa-alta",
+    "geoname_id": 4568404,
+    "alternate_names": "",
+    "display_name": "Toa Alta, Puerto Rico",
+    "geoname_code": "135",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 387,
+  "fields": {
+    "name": "Toa Baja",
+    "name_ascii": "Toa Baja",
+    "slug": "toa-baja",
+    "geoname_id": 4568408,
+    "alternate_names": "",
+    "display_name": "Toa Baja, Puerto Rico",
+    "geoname_code": "137",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 388,
+  "fields": {
+    "name": "Trujillo Alto",
+    "name_ascii": "Trujillo Alto",
+    "slug": "trujillo-alto",
+    "geoname_id": 4568452,
+    "alternate_names": "",
+    "display_name": "Trujillo Alto, Puerto Rico",
+    "geoname_code": "139",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 389,
+  "fields": {
+    "name": "Utuado",
+    "name_ascii": "Utuado",
+    "slug": "utuado",
+    "geoname_id": 4568491,
+    "alternate_names": "",
+    "display_name": "Utuado, Puerto Rico",
+    "geoname_code": "141",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 390,
+  "fields": {
+    "name": "Vega Alta",
+    "name_ascii": "Vega Alta",
+    "slug": "vega-alta",
+    "geoname_id": 4568529,
+    "alternate_names": "",
+    "display_name": "Vega Alta, Puerto Rico",
+    "geoname_code": "143",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 391,
+  "fields": {
+    "name": "Vega Baja",
+    "name_ascii": "Vega Baja",
+    "slug": "vega-baja",
+    "geoname_id": 4568534,
+    "alternate_names": "",
+    "display_name": "Vega Baja, Puerto Rico",
+    "geoname_code": "145",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 392,
+  "fields": {
+    "name": "Villalba",
+    "name_ascii": "Villalba",
+    "slug": "villalba",
+    "geoname_id": 4568684,
+    "alternate_names": "",
+    "display_name": "Villalba, Puerto Rico",
+    "geoname_code": "149",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 393,
+  "fields": {
+    "name": "Yabucoa",
+    "name_ascii": "Yabucoa",
+    "slug": "yabucoa",
+    "geoname_id": 4568909,
+    "alternate_names": "",
+    "display_name": "Yabucoa, Puerto Rico",
+    "geoname_code": "151",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 394,
+  "fields": {
+    "name": "Yauco",
+    "name_ascii": "Yauco",
+    "slug": "yauco",
+    "geoname_id": 4568918,
+    "alternate_names": "",
+    "display_name": "Yauco, Puerto Rico",
+    "geoname_code": "153",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 395,
+  "fields": {
+    "name": "Vieques",
+    "name_ascii": "Vieques",
+    "slug": "vieques",
+    "geoname_id": 4568924,
+    "alternate_names": "Vieques Municipio",
+    "display_name": "Vieques, Puerto Rico",
+    "geoname_code": "147",
+    "country": 16
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 396,
+  "fields": {
+    "name": "San Pedro Department",
+    "name_ascii": "San Pedro Department",
+    "slug": "san-pedro-department",
+    "geoname_id": 3437027,
+    "alternate_names": "San Pedro",
+    "display_name": "San Pedro Department, Paraguay",
+    "geoname_code": "17",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 397,
+  "fields": {
+    "name": "Presidente Hayes",
+    "name_ascii": "Presidente Hayes",
+    "slug": "presidente-hayes",
+    "geoname_id": 3437443,
+    "alternate_names": "",
+    "display_name": "Presidente Hayes, Paraguay",
+    "geoname_code": "16",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 398,
+  "fields": {
+    "name": "Paraguarí",
+    "name_ascii": "Paraguari",
+    "slug": "paraguari",
+    "geoname_id": 3437599,
+    "alternate_names": "",
+    "display_name": "Paraguarí, Paraguay",
+    "geoname_code": "15",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 399,
+  "fields": {
+    "name": "Ñeembucú Department",
+    "name_ascii": "Neembucu Department",
+    "slug": "neembucu-department",
+    "geoname_id": 3437677,
+    "alternate_names": "",
+    "display_name": "Ñeembucú Department, Paraguay",
+    "geoname_code": "13",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 400,
+  "fields": {
+    "name": "Misiones Department",
+    "name_ascii": "Misiones Department",
+    "slug": "misiones-department",
+    "geoname_id": 3437727,
+    "alternate_names": "Misiones",
+    "display_name": "Misiones Department, Paraguay",
+    "geoname_code": "12",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 401,
+  "fields": {
+    "name": "Itapúa",
+    "name_ascii": "Itapua",
+    "slug": "itapua",
+    "geoname_id": 3437923,
+    "alternate_names": "",
+    "display_name": "Itapúa, Paraguay",
+    "geoname_code": "11",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 402,
+  "fields": {
+    "name": "Guairá",
+    "name_ascii": "Guaira",
+    "slug": "guaira",
+    "geoname_id": 3438049,
+    "alternate_names": "",
+    "display_name": "Guairá, Paraguay",
+    "geoname_code": "10",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 403,
+  "fields": {
+    "name": "Cordillera Department",
+    "name_ascii": "Cordillera Department",
+    "slug": "cordillera-department",
+    "geoname_id": 3438827,
+    "alternate_names": "Cordillera",
+    "display_name": "Cordillera Department, Paraguay",
+    "geoname_code": "08",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 404,
+  "fields": {
+    "name": "Concepción",
+    "name_ascii": "Concepcion",
+    "slug": "concepcion",
+    "geoname_id": 3438833,
+    "alternate_names": "",
+    "display_name": "Concepción, Paraguay",
+    "geoname_code": "07",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 405,
+  "fields": {
+    "name": "Central Department",
+    "name_ascii": "Central Department",
+    "slug": "central-department",
+    "geoname_id": 3439137,
+    "alternate_names": "Departamento Central",
+    "display_name": "Central Department, Paraguay",
+    "geoname_code": "06",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 406,
+  "fields": {
+    "name": "Canindeyú",
+    "name_ascii": "Canindeyu",
+    "slug": "canindeyu",
+    "geoname_id": 3439216,
+    "alternate_names": "",
+    "display_name": "Canindeyú, Paraguay",
+    "geoname_code": "19",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 407,
+  "fields": {
+    "name": "Caazapá",
+    "name_ascii": "Caazapa",
+    "slug": "caazapa",
+    "geoname_id": 3439296,
+    "alternate_names": "",
+    "display_name": "Caazapá, Paraguay",
+    "geoname_code": "05",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 408,
+  "fields": {
+    "name": "Caaguazú Department",
+    "name_ascii": "Caaguazu Department",
+    "slug": "caaguazu-department",
+    "geoname_id": 3439312,
+    "alternate_names": "",
+    "display_name": "Caaguazú Department, Paraguay",
+    "geoname_code": "04",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 409,
+  "fields": {
+    "name": "Amambay Department",
+    "name_ascii": "Amambay Department",
+    "slug": "amambay-department",
+    "geoname_id": 3439433,
+    "alternate_names": "Amambay",
+    "display_name": "Amambay Department, Paraguay",
+    "geoname_code": "02",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 410,
+  "fields": {
+    "name": "Alto Paraná Department",
+    "name_ascii": "Alto Parana Department",
+    "slug": "alto-parana-department",
+    "geoname_id": 3439440,
+    "alternate_names": "",
+    "display_name": "Alto Paraná Department, Paraguay",
+    "geoname_code": "01",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 411,
+  "fields": {
+    "name": "Alto Paraguay",
+    "name_ascii": "Alto Paraguay",
+    "slug": "alto-paraguay",
+    "geoname_id": 3439441,
+    "alternate_names": "",
+    "display_name": "Alto Paraguay, Paraguay",
+    "geoname_code": "23",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 412,
+  "fields": {
+    "name": "Asunción",
+    "name_ascii": "Asuncion",
+    "slug": "asuncion",
+    "geoname_id": 3474570,
+    "alternate_names": "",
+    "display_name": "Asunción, Paraguay",
+    "geoname_code": "22",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 413,
+  "fields": {
+    "name": "Boquerón Department",
+    "name_ascii": "Boqueron Department",
+    "slug": "boqueron-department",
+    "geoname_id": 3867442,
+    "alternate_names": "",
+    "display_name": "Boquerón Department, Paraguay",
+    "geoname_code": "24",
+    "country": 17
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 414,
+  "fields": {
+    "name": "Usulután",
+    "name_ascii": "Usulutan",
+    "slug": "usulutan",
+    "geoname_id": 3582882,
+    "alternate_names": "",
+    "display_name": "Usulután, El Salvador",
+    "geoname_code": "14",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 415,
+  "fields": {
+    "name": "Sonsonate Department",
+    "name_ascii": "Sonsonate Department",
+    "slug": "sonsonate-department",
+    "geoname_id": 3583101,
+    "alternate_names": "Departamento de Sonsonate",
+    "display_name": "Sonsonate Department, El Salvador",
+    "geoname_code": "13",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 416,
+  "fields": {
+    "name": "San Vicente Department",
+    "name_ascii": "San Vicente Department",
+    "slug": "san-vicente-department",
+    "geoname_id": 3583176,
+    "alternate_names": "Departamento de San Vicente",
+    "display_name": "San Vicente Department, El Salvador",
+    "geoname_code": "12",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 417,
+  "fields": {
+    "name": "Santa Ana Department",
+    "name_ascii": "Santa Ana Department",
+    "slug": "santa-ana-department",
+    "geoname_id": 3583332,
+    "alternate_names": "Departamento de Santa Ana",
+    "display_name": "Santa Ana Department, El Salvador",
+    "geoname_code": "11",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 418,
+  "fields": {
+    "name": "San Salvador Department",
+    "name_ascii": "San Salvador Department",
+    "slug": "san-salvador-department",
+    "geoname_id": 3583360,
+    "alternate_names": "Departamento de San Salvador",
+    "display_name": "San Salvador Department, El Salvador",
+    "geoname_code": "10",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 419,
+  "fields": {
+    "name": "San Miguel Department",
+    "name_ascii": "San Miguel Department",
+    "slug": "san-miguel-department",
+    "geoname_id": 3583462,
+    "alternate_names": "Departamento de San Miguel",
+    "display_name": "San Miguel Department, El Salvador",
+    "geoname_code": "09",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 420,
+  "fields": {
+    "name": "Morazán",
+    "name_ascii": "Morazan",
+    "slug": "morazan",
+    "geoname_id": 3584317,
+    "alternate_names": "",
+    "display_name": "Morazán, El Salvador",
+    "geoname_code": "08",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 421,
+  "fields": {
+    "name": "La Unión",
+    "name_ascii": "La Union",
+    "slug": "la-union",
+    "geoname_id": 3584767,
+    "alternate_names": "",
+    "display_name": "La Unión, El Salvador",
+    "geoname_code": "07",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 422,
+  "fields": {
+    "name": "La Paz Department",
+    "name_ascii": "La Paz Department",
+    "slug": "la-paz-department",
+    "geoname_id": 3585087,
+    "alternate_names": "Departamento de La Paz",
+    "display_name": "La Paz Department, El Salvador",
+    "geoname_code": "06",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 423,
+  "fields": {
+    "name": "La Libertad Department",
+    "name_ascii": "La Libertad Department",
+    "slug": "la-libertad-department",
+    "geoname_id": 3585155,
+    "alternate_names": "Departamento de La Libertad",
+    "display_name": "La Libertad Department, El Salvador",
+    "geoname_code": "05",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 424,
+  "fields": {
+    "name": "Cuscatlán",
+    "name_ascii": "Cuscatlan",
+    "slug": "cuscatlan",
+    "geoname_id": 3586831,
+    "alternate_names": "",
+    "display_name": "Cuscatlán, El Salvador",
+    "geoname_code": "04",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 425,
+  "fields": {
+    "name": "Chalatenango Department",
+    "name_ascii": "Chalatenango Department",
+    "slug": "chalatenango-department",
+    "geoname_id": 3587090,
+    "alternate_names": "Departamento de Chalatenango",
+    "display_name": "Chalatenango Department, El Salvador",
+    "geoname_code": "03",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 426,
+  "fields": {
+    "name": "Cabañas",
+    "name_ascii": "Cabanas",
+    "slug": "cabanas",
+    "geoname_id": 3587217,
+    "alternate_names": "",
+    "display_name": "Cabañas, El Salvador",
+    "geoname_code": "02",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 427,
+  "fields": {
+    "name": "Ahuachapán",
+    "name_ascii": "Ahuachapan",
+    "slug": "ahuachapan",
+    "geoname_id": 3587425,
+    "alternate_names": "",
+    "display_name": "Ahuachapán, El Salvador",
+    "geoname_code": "01",
+    "country": 18
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 428,
+  "fields": {
+    "name": "Treinta y Tres Department",
+    "name_ascii": "Treinta y Tres Department",
+    "slug": "treinta-y-tres-department",
+    "geoname_id": 3439780,
+    "alternate_names": "Departamento de Treinta y Tres",
+    "display_name": "Treinta y Tres Department, Uruguay",
+    "geoname_code": "19",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 429,
+  "fields": {
+    "name": "Tacuarembó Department",
+    "name_ascii": "Tacuarembo Department",
+    "slug": "tacuarembo-department",
+    "geoname_id": 3440033,
+    "alternate_names": "Departamento de Tacuarembó",
+    "display_name": "Tacuarembó Department, Uruguay",
+    "geoname_code": "18",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 430,
+  "fields": {
+    "name": "Soriano",
+    "name_ascii": "Soriano",
+    "slug": "soriano",
+    "geoname_id": 3440054,
+    "alternate_names": "Departamento de Soriano",
+    "display_name": "Soriano, Uruguay",
+    "geoname_code": "17",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 431,
+  "fields": {
+    "name": "San José Department",
+    "name_ascii": "San Jose Department",
+    "slug": "san-jose-department",
+    "geoname_id": 3440645,
+    "alternate_names": "Departamento de San José",
+    "display_name": "San José Department, Uruguay",
+    "geoname_code": "16",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 432,
+  "fields": {
+    "name": "Salto Department",
+    "name_ascii": "Salto Department",
+    "slug": "salto-department",
+    "geoname_id": 3440711,
+    "alternate_names": "Departamento de Salto",
+    "display_name": "Salto Department, Uruguay",
+    "geoname_code": "15",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 433,
+  "fields": {
+    "name": "Rocha Department",
+    "name_ascii": "Rocha Department",
+    "slug": "rocha-department",
+    "geoname_id": 3440771,
+    "alternate_names": "Departamento de Rocha",
+    "display_name": "Rocha Department, Uruguay",
+    "geoname_code": "14",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 434,
+  "fields": {
+    "name": "Rivera Department",
+    "name_ascii": "Rivera Department",
+    "slug": "rivera-department",
+    "geoname_id": 3440780,
+    "alternate_names": "Departamento de Rivera",
+    "display_name": "Rivera Department, Uruguay",
+    "geoname_code": "13",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 435,
+  "fields": {
+    "name": "Río Negro Department",
+    "name_ascii": "Rio Negro Department",
+    "slug": "rio-negro-department",
+    "geoname_id": 3440789,
+    "alternate_names": "Departamento de Río Negro",
+    "display_name": "Río Negro Department, Uruguay",
+    "geoname_code": "12",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 436,
+  "fields": {
+    "name": "Paysandú Department",
+    "name_ascii": "Paysandu Department",
+    "slug": "paysandu-department",
+    "geoname_id": 3441242,
+    "alternate_names": "Departamento de Paysandú",
+    "display_name": "Paysandú Department, Uruguay",
+    "geoname_code": "11",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 437,
+  "fields": {
+    "name": "Montevideo Department",
+    "name_ascii": "Montevideo Department",
+    "slug": "montevideo-department",
+    "geoname_id": 3441572,
+    "alternate_names": "Departamento de Montevideo",
+    "display_name": "Montevideo Department, Uruguay",
+    "geoname_code": "10",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 438,
+  "fields": {
+    "name": "Maldonado",
+    "name_ascii": "Maldonado",
+    "slug": "maldonado",
+    "geoname_id": 3441890,
+    "alternate_names": "Departamento de Maldonado",
+    "display_name": "Maldonado, Uruguay",
+    "geoname_code": "09",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 439,
+  "fields": {
+    "name": "Lavalleja",
+    "name_ascii": "Lavalleja",
+    "slug": "lavalleja",
+    "geoname_id": 3442007,
+    "alternate_names": "Departamento de Lavalleja",
+    "display_name": "Lavalleja, Uruguay",
+    "geoname_code": "08",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 440,
+  "fields": {
+    "name": "Florida",
+    "name_ascii": "Florida",
+    "slug": "florida",
+    "geoname_id": 3442584,
+    "alternate_names": "departamento de Florida",
+    "display_name": "Florida, Uruguay",
+    "geoname_code": "07",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 441,
+  "fields": {
+    "name": "Flores Department",
+    "name_ascii": "Flores Department",
+    "slug": "flores-department",
+    "geoname_id": 3442587,
+    "alternate_names": "",
+    "display_name": "Flores Department, Uruguay",
+    "geoname_code": "06",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 442,
+  "fields": {
+    "name": "Durazno Department",
+    "name_ascii": "Durazno Department",
+    "slug": "durazno-department",
+    "geoname_id": 3442720,
+    "alternate_names": "Departamento de Durazno",
+    "display_name": "Durazno Department, Uruguay",
+    "geoname_code": "05",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 443,
+  "fields": {
+    "name": "Colonia",
+    "name_ascii": "Colonia",
+    "slug": "colonia",
+    "geoname_id": 3443025,
+    "alternate_names": "Departamento de Colonia",
+    "display_name": "Colonia, Uruguay",
+    "geoname_code": "04",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 444,
+  "fields": {
+    "name": "Cerro Largo",
+    "name_ascii": "Cerro Largo",
+    "slug": "cerro-largo",
+    "geoname_id": 3443173,
+    "alternate_names": "",
+    "display_name": "Cerro Largo, Uruguay",
+    "geoname_code": "03",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 445,
+  "fields": {
+    "name": "Canelones",
+    "name_ascii": "Canelones",
+    "slug": "canelones",
+    "geoname_id": 3443411,
+    "alternate_names": "Departamento de Canelones",
+    "display_name": "Canelones, Uruguay",
+    "geoname_code": "02",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 446,
+  "fields": {
+    "name": "Artigas",
+    "name_ascii": "Artigas",
+    "slug": "artigas",
+    "geoname_id": 3443756,
+    "alternate_names": "Departamento de Artigas",
+    "display_name": "Artigas, Uruguay",
+    "geoname_code": "01",
+    "country": 19
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 447,
+  "fields": {
+    "name": "Zulia",
+    "name_ascii": "Zulia",
+    "slug": "zulia",
+    "geoname_id": 3625035,
+    "alternate_names": "Estado Zulia",
+    "display_name": "Zulia, Venezuela",
+    "geoname_code": "23",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 448,
+  "fields": {
+    "name": "Yaracuy",
+    "name_ascii": "Yaracuy",
+    "slug": "yaracuy",
+    "geoname_id": 3625210,
+    "alternate_names": "Estado Yaracuy",
+    "display_name": "Yaracuy, Venezuela",
+    "geoname_code": "22",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 449,
+  "fields": {
+    "name": "Trujillo",
+    "name_ascii": "Trujillo",
+    "slug": "trujillo",
+    "geoname_id": 3625974,
+    "alternate_names": "Estado Trujillo",
+    "display_name": "Trujillo, Venezuela",
+    "geoname_code": "21",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 450,
+  "fields": {
+    "name": "Táchira",
+    "name_ascii": "Tachira",
+    "slug": "tachira",
+    "geoname_id": 3626553,
+    "alternate_names": "Estado Táchira",
+    "display_name": "Táchira, Venezuela",
+    "geoname_code": "20",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 451,
+  "fields": {
+    "name": "Sucre",
+    "name_ascii": "Sucre",
+    "slug": "sucre",
+    "geoname_id": 3626655,
+    "alternate_names": "Estado Sucre",
+    "display_name": "Sucre, Venezuela",
+    "geoname_code": "19",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 452,
+  "fields": {
+    "name": "Portuguesa",
+    "name_ascii": "Portuguesa",
+    "slug": "portuguesa",
+    "geoname_id": 3629941,
+    "alternate_names": "Estado Portuguesa",
+    "display_name": "Portuguesa, Venezuela",
+    "geoname_code": "18",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 453,
+  "fields": {
+    "name": "Nueva Esparta",
+    "name_ascii": "Nueva Esparta",
+    "slug": "nueva-esparta",
+    "geoname_id": 3631462,
+    "alternate_names": "Estado Nueva Esparta;Margarita",
+    "display_name": "Nueva Esparta, Venezuela",
+    "geoname_code": "17",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 454,
+  "fields": {
+    "name": "Monagas",
+    "name_ascii": "Monagas",
+    "slug": "monagas",
+    "geoname_id": 3632100,
+    "alternate_names": "Estado Maturín;Estado Monagas",
+    "display_name": "Monagas, Venezuela",
+    "geoname_code": "16",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 455,
+  "fields": {
+    "name": "Miranda",
+    "name_ascii": "Miranda",
+    "slug": "miranda",
+    "geoname_id": 3632191,
+    "alternate_names": "Estado Miranda",
+    "display_name": "Miranda, Venezuela",
+    "geoname_code": "15",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 456,
+  "fields": {
+    "name": "Mérida",
+    "name_ascii": "Merida",
+    "slug": "merida",
+    "geoname_id": 3632306,
+    "alternate_names": "Estado Mérida",
+    "display_name": "Mérida, Venezuela",
+    "geoname_code": "14",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 457,
+  "fields": {
+    "name": "Lara",
+    "name_ascii": "Lara",
+    "slug": "lara",
+    "geoname_id": 3636539,
+    "alternate_names": "Barquisimeto;Estado Lara",
+    "display_name": "Lara, Venezuela",
+    "geoname_code": "13",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 458,
+  "fields": {
+    "name": "Guárico",
+    "name_ascii": "Guarico",
+    "slug": "guarico",
+    "geoname_id": 3640017,
+    "alternate_names": "Estado Guárico",
+    "display_name": "Guárico, Venezuela",
+    "geoname_code": "12",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 459,
+  "fields": {
+    "name": "Dependencias Federales",
+    "name_ascii": "Dependencias Federales",
+    "slug": "dependencias-federales",
+    "geoname_id": 3640846,
+    "alternate_names": "",
+    "display_name": "Dependencias Federales, Venezuela",
+    "geoname_code": "24",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 460,
+  "fields": {
+    "name": "Distrito Federal",
+    "name_ascii": "Distrito Federal",
+    "slug": "distrito-federal",
+    "geoname_id": 3640847,
+    "alternate_names": "",
+    "display_name": "Distrito Federal, Venezuela",
+    "geoname_code": "25",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 461,
+  "fields": {
+    "name": "Falcón",
+    "name_ascii": "Falcon",
+    "slug": "falcon",
+    "geoname_id": 3640873,
+    "alternate_names": "Coro;Estado Falcón",
+    "display_name": "Falcón, Venezuela",
+    "geoname_code": "11",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 462,
+  "fields": {
+    "name": "Delta Amacuro",
+    "name_ascii": "Delta Amacuro",
+    "slug": "delta-amacuro",
+    "geoname_id": 3644541,
+    "alternate_names": "Territorio Delta Amacuro",
+    "display_name": "Delta Amacuro, Venezuela",
+    "geoname_code": "09",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 463,
+  "fields": {
+    "name": "Cojedes",
+    "name_ascii": "Cojedes",
+    "slug": "cojedes",
+    "geoname_id": 3645386,
+    "alternate_names": "Estado Cojedes",
+    "display_name": "Cojedes, Venezuela",
+    "geoname_code": "08",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 464,
+  "fields": {
+    "name": "Carabobo",
+    "name_ascii": "Carabobo",
+    "slug": "carabobo",
+    "geoname_id": 3646751,
+    "alternate_names": "Estado Carabobo",
+    "display_name": "Carabobo, Venezuela",
+    "geoname_code": "07",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 465,
+  "fields": {
+    "name": "Bolívar",
+    "name_ascii": "Bolivar",
+    "slug": "bolivar",
+    "geoname_id": 3648106,
+    "alternate_names": "Estado Bolívar;Guayana",
+    "display_name": "Bolívar, Venezuela",
+    "geoname_code": "06",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 466,
+  "fields": {
+    "name": "Barinas",
+    "name_ascii": "Barinas",
+    "slug": "barinas",
+    "geoname_id": 3648544,
+    "alternate_names": "Estado Barinas",
+    "display_name": "Barinas, Venezuela",
+    "geoname_code": "05",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 467,
+  "fields": {
+    "name": "Aragua",
+    "name_ascii": "Aragua",
+    "slug": "aragua",
+    "geoname_id": 3649110,
+    "alternate_names": "Estado Aragua",
+    "display_name": "Aragua, Venezuela",
+    "geoname_code": "04",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 468,
+  "fields": {
+    "name": "Apure",
+    "name_ascii": "Apure",
+    "slug": "apure",
+    "geoname_id": 3649151,
+    "alternate_names": "Estado Apure",
+    "display_name": "Apure, Venezuela",
+    "geoname_code": "03",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 469,
+  "fields": {
+    "name": "Anzoátegui",
+    "name_ascii": "Anzoategui",
+    "slug": "anzoategui",
+    "geoname_id": 3649198,
+    "alternate_names": "",
+    "display_name": "Anzoátegui, Venezuela",
+    "geoname_code": "02",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 470,
+  "fields": {
+    "name": "Amazonas",
+    "name_ascii": "Amazonas",
+    "slug": "amazonas",
+    "geoname_id": 3649302,
+    "alternate_names": "Estado Amazonas",
+    "display_name": "Amazonas, Venezuela",
+    "geoname_code": "01",
+    "country": 20
+  }
+},
+{
+  "model": "cities_light.region",
+  "pk": 471,
+  "fields": {
+    "name": "Vargas",
+    "name_ascii": "Vargas",
+    "slug": "vargas",
+    "geoname_id": 3830309,
+    "alternate_names": "Estado La Guaira;La Guaira",
+    "display_name": "Vargas, Venezuela",
+    "geoname_code": "26",
+    "country": 20
+  }
+}
+]

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <form id="loginForm">
+        {% csrf_token %}
+        <input type="email" id="correo" placeholder="Correo" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
+        <button type="submit">Iniciar sesión</button>
+        <a href="http://127.0.0.1:8000/pedir_cambio_contrasena/">Olvidé mi contraseña</a>
+    </form>
+    
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        let correo = document.getElementById("correo").value;
+        let password = document.getElementById("password").value;
+        let csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch("http://127.0.0.1:8000/api/login/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" , "X-CSRFToken": csrf_token},
+            body: JSON.stringify({ correo_usuario: correo, password: password})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.redirect) {
+                window.location.href = data.redirect;
+                window.alert("Bienvenido, ¡ingresa con confianza!")
+            } else if (data.error === "Los administradores no pueden iniciar sesión aquí.") {
+                window.alert("El ingreso de los administradores no es permitido por este login")
+            }else{
+                window.alert("No dudamos que eres tu, ¡pero no te encontramos en la base de datos!")
+            }})
+        .catch(error => console.error("Error:", error));
+    });
+    </script>
+    
+</body>
+</html>

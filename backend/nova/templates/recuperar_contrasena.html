@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <form id="loginForm">
+        {% csrf_token %}
+        <label for="email">ingresa tu correo electronico: </label>
+        <input type="email" id="correo" placeholder="Correo" required>
+        <button type="submit">Enviar correo</button>
+    </form>
+    
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        let correo = document.getElementById("correo").value;
+        let csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        fetch("http://127.0.0.1:8000/api/restablecer-contrasena/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": csrf_token},
+            body: JSON.stringify({correo_usuario: correo})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success){
+                window.alert("Si el correo existe en la base de datos espéralo en la bandeja de entrada!")
+            }
+            })
+    });
+    </script>
+    
+</body>
+</html>

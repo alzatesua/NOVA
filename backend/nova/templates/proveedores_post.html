@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingresar Proveedores</title>
+</head>
+<body>
+    <form id="proveedorform">
+        {% csrf_token %}
+        <label for="razon_social" class="razon_zocial">Ingrese la razon social: </label>
+        <input type="input" id="razon_social" placeholder="Razon Social" required>
+
+        <label for="email">Ingrese el correo: </label>
+        <input type="email" id="correo" placeholder="Correo" required>
+
+        <label for="telefono">Ingrese el número de teléfono: </label>
+        <input type="number" id="telefono" placeholder="Telefono">
+
+        <label for="direccion">Ingrese la dirección: </label>
+        <input type="input" id="direccion" placeholder="Direccion" required>
+
+        <label for="n_registro_mercantil">Ingrese el número de registro mercantil: </label>
+        <input type="input" id="n_registro_mercantil" placeholder="Numero de registro mercantil">
+
+        <label for="nit">Ingrese el NIT: </label>
+        <input type="number" id="nit" placeholder="NIT" required>
+
+        <button type="submit">Guardar proveedor</button>
+    </form>
+    
+    <script>
+        document.getElementById("proveedorform").addEventListener("submit", function(event) {
+        event.preventDefault();
+        let razon_social = document.getElementById("razon_social").value;
+        let correo = document.getElementById("correo").value;
+        let telefono = document.getElementById("telefono").value;
+        let direccion = document.getElementById("direccion").value;
+        let n_registro_mercantil = document.getElementById("n_registro_mercantil").value;
+        let nit = document.getElementById("nit").value;
+        let csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch("http://127.0.0.1:8000/api/post/proveedores/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": csrf_token},
+            body: JSON.stringify({
+                razon_social: razon_social,
+                correo: correo,
+                telefono: telefono,
+                direccion: direccion,
+                n_registro_mercantil: n_registro_mercantil,
+                nit: nit
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            }})
+        .catch(error => console.error("Error:", error));
+    });
+    </script>
+    
+</body>
+</html>

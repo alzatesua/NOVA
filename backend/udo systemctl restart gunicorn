@@ -1,0 +1,20 @@
+[0;1;32m●[0m gunicorn.service - gunicorn daemon for Django
+     Loaded: loaded (]8;;file://srv805861/etc/systemd/system/gunicorn.service/etc/systemd/system/gunicorn.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Sun 2025-06-22 03:53:02 UTC; 1min 3s ago
+   Main PID: 533383 (gunicorn)
+      Tasks: 4 (limit: 4654)
+     Memory: 133.9M (peak: 134.1M)
+        CPU: 1.171s
+     CGroup: /system.slice/gunicorn.service
+             ├─[0;38;5;245m533383 /home/ubuntu/dagi/nova/backend/env/bin/python3 /home/ubuntu/dagi/nova/backend/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/ubuntu/dagi/nova/backend/gunicorn.sock nova.wsgi:application[0m
+             ├─[0;38;5;245m533396 /home/ubuntu/dagi/nova/backend/env/bin/python3 /home/ubuntu/dagi/nova/backend/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/ubuntu/dagi/nova/backend/gunicorn.sock nova.wsgi:application[0m
+             ├─[0;38;5;245m533397 /home/ubuntu/dagi/nova/backend/env/bin/python3 /home/ubuntu/dagi/nova/backend/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/ubuntu/dagi/nova/backend/gunicorn.sock nova.wsgi:application[0m
+             └─[0;38;5;245m533398 /home/ubuntu/dagi/nova/backend/env/bin/python3 /home/ubuntu/dagi/nova/backend/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/ubuntu/dagi/nova/backend/gunicorn.sock nova.wsgi:application[0m
+
+Jun 22 03:53:02 srv805861 systemd[1]: Started gunicorn.service - gunicorn daemon for Django.
+Jun 22 03:53:02 srv805861 gunicorn[533383]: [2025-06-22 03:53:02 +0000] [533383] [INFO] Starting gunicorn 23.0.0
+Jun 22 03:53:02 srv805861 gunicorn[533383]: [2025-06-22 03:53:02 +0000] [533383] [INFO] Listening at: unix:/home/ubuntu/dagi/nova/backend/gunicorn.sock (533383)
+Jun 22 03:53:02 srv805861 gunicorn[533383]: [2025-06-22 03:53:02 +0000] [533383] [INFO] Using worker: sync
+Jun 22 03:53:02 srv805861 gunicorn[533396]: [2025-06-22 03:53:02 +0000] [533396] [INFO] Booting worker with pid: 533396
+Jun 22 03:53:02 srv805861 gunicorn[533397]: [2025-06-22 03:53:02 +0000] [533397] [INFO] Booting worker with pid: 533397
+Jun 22 03:53:02 srv805861 gunicorn[533398]: [2025-06-22 03:53:02 +0000] [533398] [INFO] Booting worker with pid: 533398
