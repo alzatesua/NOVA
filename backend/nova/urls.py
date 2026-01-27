@@ -21,6 +21,7 @@ urlpatterns = [
     path('api/subir/', include('main_dashboard.urls')),
 
     # >>>>> SOLO UNA VEZ montas el API DRF <<<<<
+    path('api/', include(router.urls)),  # Add router before urls_traslados to avoid conflicts
     path('api/', include('main_dashboard.urls_traslados')),
 
     path('api/refresh_custom/', views.refresh_token_custom_view),
@@ -28,7 +29,6 @@ urlpatterns = [
     path('api/regions/', views.get_regions, name='get_regions'),
     path('api/subregions/', views.get_subregions, name='get_subregions'),
     path('api/cities/', views.get_cities, name='get_cities'),
-    path('', include(router.urls)),
     path('api/activar-tienda/', views.activar_tienda, name='activar_tienda'),
     path("api/test-correo/", test_enviar_correo, name="test_correo"),
 ]

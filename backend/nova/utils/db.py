@@ -12,7 +12,7 @@ def conectar_db_tienda(alias, tienda):
         'NAME': tienda.db_nombre,
         'USER': tienda.db_usuario,
         'PASSWORD': tienda.db_password,
-        'HOST': 'localhost',
+        'HOST': settings.DATABASES['default']['HOST'],
         'PORT': '5432',
         'OPTIONS': {
             'options': '-c search_path=public'

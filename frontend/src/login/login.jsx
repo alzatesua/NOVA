@@ -17,7 +17,7 @@ function Login() {
     const subdominio = hostname.split('.')[0];
 
     try {
-      const response = await fetch("api/validar/", {
+      const response = await fetch(`${API_URL}/validar/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

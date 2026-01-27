@@ -1230,10 +1230,7 @@ export default function ProductsView({
       )}
 
 
-    
-
-
-
+  
 
 
       {/* ——— Listado de Productos ——— */}

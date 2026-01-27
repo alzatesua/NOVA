@@ -4,7 +4,6 @@ class LoginUsuarioGeneral(models.Model):
     correo_usuario = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
 
-
     class Meta:
         db_table = "login_usuarios"
 

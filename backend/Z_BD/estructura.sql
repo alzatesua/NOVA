@@ -5,7 +5,7 @@ CREATE TABLE main_dashboard_sucursales (
     ciudad VARCHAR(100),
     pais VARCHAR(100),
     fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    estatus BOOLEAN DEFAULT TRUE 
+    estatus BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE IF NOT EXISTS login_usuario (
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS login_usuario (
     usuario VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(128) NOT NULL,
     rol VARCHAR(20) NOT NULL DEFAULT 'admin',
-    tienda_id INTEGER,  
+    tienda_id INTEGER,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     is_admin BOOLEAN NOT NULL DEFAULT FALSE,
     is_superuser BOOLEAN NOT NULL DEFAULT FALSE,
@@ -27,19 +27,14 @@ CREATE TABLE IF NOT EXISTS login_usuario (
         ON DELETE SET NULL
 );
 
-
-
 CREATE TABLE IF NOT EXISTS tipo_documento (
     id        SERIAL PRIMARY KEY,
     nombre    VARCHAR(50) NOT NULL UNIQUE
 );
 
-
 INSERT INTO tipo_documento (nombre)
   VALUES ('C.C.'), ('NIT'), ('Pasaporte')
   ON CONFLICT (nombre) DO NOTHING;
-
-
 
 CREATE TABLE IF NOT EXISTS documento (
     id           SERIAL PRIMARY KEY,
@@ -53,7 +48,6 @@ CREATE TABLE IF NOT EXISTS documento (
 CREATE INDEX IF NOT EXISTS idx_documento_tipo   ON documento(tipo_id);
 CREATE INDEX IF NOT EXISTS idx_documento_numero ON documento(documento);
 
-
 CREATE TABLE IF NOT EXISTS dominios (
     id            SERIAL PRIMARY KEY,
     dominio       VARCHAR(255) NOT NULL UNIQUE,
@@ -62,9 +56,6 @@ CREATE TABLE IF NOT EXISTS dominios (
 );
 
 CREATE INDEX IF NOT EXISTS idx_dominios_dominio ON dominios(dominio);
-
-
-
 
 CREATE TABLE IF NOT EXISTS main_dashboard_categoria (
     id_categoria SERIAL PRIMARY KEY,
@@ -97,15 +88,35 @@ CREATE TABLE IF NOT EXISTS main_dashboard_iva (
     creado_en   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- MOVED BEFORE productos to fix FK dependency issue
+CREATE TABLE IF NOT EXISTS inventario_bodega (
+  id                  SERIAL PRIMARY KEY,
+  sucursal_id         INTEGER NOT NULL REFERENCES main_dashboard_sucursales(id) ON DELETE RESTRICT,
+  nombre              VARCHAR(100) NOT NULL,
+  codigo              VARCHAR(20),
+  tipo                CHAR(3) NOT NULL DEFAULT 'SUC',
+  direccion           VARCHAR(255),
+  es_predeterminada   BOOLEAN NOT NULL DEFAULT FALSE,
+  estatus             BOOLEAN NOT NULL DEFAULT TRUE,
+  responsable_id      INTEGER REFERENCES login_usuario(id_login_usuario) ON DELETE SET NULL,
+  notas               TEXT,
+  fecha_creacion      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_actualizacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_bodega_nombre_por_sucursal ON inventario_bodega (sucursal_id, nombre);
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_bodega_codigo_por_sucursal ON inventario_bodega (sucursal_id, codigo);
 
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_bodega_predeterminada_por_sucursal
+  ON inventario_bodega (sucursal_id) WHERE es_predeterminada = TRUE;
 
+CREATE INDEX IF NOT EXISTS idx_bodega_sucursal_estatus ON inventario_bodega (sucursal_id, estatus);
+CREATE INDEX IF NOT EXISTS idx_bodega_sucursal_tipo   ON inventario_bodega (sucursal_id, tipo);
 
-
-
+-- productos can now reference inventario_bodega
 CREATE TABLE IF NOT EXISTS productos (
     id               SERIAL PRIMARY KEY,
-    nombre           VARCHAR(255)      NOT NULL,  
+    nombre           VARCHAR(255)      NOT NULL,
     sku              VARCHAR(50)       NOT NULL UNIQUE,
     descripcion      TEXT,
     precio           NUMERIC(10,2)     NOT NULL,
@@ -127,46 +138,6 @@ CREATE TABLE IF NOT EXISTS productos (
 
 CREATE INDEX IF NOT EXISTS producto_sku_idx ON productos (sku);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CREATE TABLE IF NOT EXISTS inventario_bodega (
-  id                  SERIAL PRIMARY KEY,
-  sucursal_id         INTEGER NOT NULL REFERENCES main_dashboard_sucursales(id) ON DELETE RESTRICT,
-  nombre              VARCHAR(100) NOT NULL,
-  codigo              VARCHAR(20),
-  tipo                CHAR(3) NOT NULL DEFAULT 'SUC', 
-  direccion           VARCHAR(255),
-  es_predeterminada   BOOLEAN NOT NULL DEFAULT FALSE,
-  estatus             BOOLEAN NOT NULL DEFAULT TRUE,
-  responsable_id      INTEGER REFERENCES login_usuario(id_login_usuario) ON DELETE SET NULL,  
-  notas               TEXT,
-  fecha_creacion      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  fecha_actualizacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS uniq_bodega_nombre_por_sucursal ON inventario_bodega (sucursal_id, nombre);
-CREATE UNIQUE INDEX IF NOT EXISTS uniq_bodega_codigo_por_sucursal ON inventario_bodega (sucursal_id, codigo);
-
-CREATE UNIQUE INDEX IF NOT EXISTS uniq_bodega_predeterminada_por_sucursal
-  ON inventario_bodega (sucursal_id) WHERE es_predeterminada = TRUE;
-
-CREATE INDEX IF NOT EXISTS idx_bodega_sucursal_estatus ON inventario_bodega (sucursal_id, estatus);
-CREATE INDEX IF NOT EXISTS idx_bodega_sucursal_tipo   ON inventario_bodega (sucursal_id, tipo);
-
-
 CREATE TABLE IF NOT EXISTS inventario_existencia (
   id             SERIAL PRIMARY KEY,
   producto_id    INTEGER NOT NULL REFERENCES productos(id) ON DELETE RESTRICT,
@@ -183,15 +154,14 @@ CREATE TABLE IF NOT EXISTS inventario_existencia (
 CREATE INDEX IF NOT EXISTS idx_existencia_bodega   ON inventario_existencia (bodega_id);
 CREATE INDEX IF NOT EXISTS idx_existencia_producto ON inventario_existencia (producto_id);
 
-
 CREATE TABLE IF NOT EXISTS inventario_traslado (
   id                SERIAL PRIMARY KEY,
   bodega_origen_id  INTEGER NOT NULL REFERENCES inventario_bodega(id) ON DELETE RESTRICT,
   bodega_destino_id INTEGER NOT NULL REFERENCES inventario_bodega(id) ON DELETE RESTRICT,
-  estado            CHAR(3)  NOT NULL DEFAULT 'BOR',  
+  estado            CHAR(3)  NOT NULL DEFAULT 'BOR',
   usar_bodega_transito BOOLEAN NOT NULL DEFAULT TRUE,
   observaciones     TEXT,
-  creado_por_id     INTEGER REFERENCES login_usuario(id_login_usuario) ON DELETE SET NULL,   
+  creado_por_id     INTEGER REFERENCES login_usuario(id_login_usuario) ON DELETE SET NULL,
   enviado_en        TIMESTAMP,
   recibido_en       TIMESTAMP,
   creado_en         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -199,7 +169,6 @@ CREATE TABLE IF NOT EXISTS inventario_traslado (
   CONSTRAINT chk_traslado_estado CHECK (estado IN ('BOR','ENV','REC','CAN')),
   CONSTRAINT chk_traslado_bodegas_distintas CHECK (bodega_origen_id <> bodega_destino_id)
 );
-
 
 CREATE TABLE IF NOT EXISTS inventario_traslado_linea (
   id                 SERIAL PRIMARY KEY,
