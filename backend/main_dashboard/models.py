@@ -1,5 +1,5 @@
 from django.db import models
-from django.db import models, transaction        # ← añade transaction aquí
+from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.conf import settings
@@ -554,3 +554,302 @@ def _actualizar_cache_de_productos_de_traslado(traslado: Traslado):
     mapa = {r['producto_id']: (r['total'] or 0) for r in totales}
     for pid in ids:
         Producto.objects.filter(pk=pid).update(stock=mapa.get(pid, 0))
+
+
+# =========================
+# FACTURACIÓN POS
+# =========================
+
+class Cliente(models.Model):
+    """
+    Cliente para facturación (Persona Natural o Jurídica)
+    """
+    TIPO_PERSONA_CHOICES = [
+        ('NAT', 'Natural'),
+        ('JUR', 'Jurídica'),
+    ]
+    TIPO_DOCUMENTO_CHOICES = [
+        ('CC', 'Cédula de Ciudadanía'),
+        ('NIT', 'NIT'),
+        ('CE', 'Cédula de Extranjería'),
+        ('TI', 'Tarjeta de Identidad'),
+        ('PP', 'Pasaporte'),
+    ]
+
+    tipo_persona = models.CharField(max_length=3, choices=TIPO_PERSONA_CHOICES, default='NAT')
+
+    # Persona Natural
+    primer_nombre = models.CharField(max_length=100, blank=True, null=True)
+    segundo_nombre = models.CharField(max_length=100, blank=True, null=True)
+    apellidos = models.CharField(max_length=100, blank=True, null=True)
+
+    # Persona Jurídica
+    razon_social = models.CharField(max_length=255, blank=True, null=True)
+    n_registro_mercantil = models.CharField(max_length=100, blank=True, null=True)
+
+    # Comunes
+    tipo_documento = models.CharField(max_length=3, choices=TIPO_DOCUMENTO_CHOICES, blank=True, null=True)
+    numero_documento = models.CharField(max_length=50, blank=True, null=True, db_index=True)
+    correo = models.EmailField(blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    direccion = models.CharField(max_length=255, blank=True, null=True)
+    ciudad = models.CharField(max_length=100, blank=True, null=True)
+
+    # Límite de crédito (opcional para ventas a crédito)
+    limite_credito = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    dias_credito = models.IntegerField(default=0)
+
+    estatus = models.BooleanField(default=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'facturacion_cliente'
+        verbose_name = 'Cliente'
+        verbose_name_plural = 'Clientes'
+        indexes = [
+            models.Index(fields=['numero_documento']),
+            models.Index(fields=['tipo_documento', 'numero_documento']),
+        ]
+
+    def __str__(self):
+        if self.tipo_persona == 'JUR':
+            return self.razon_social or 'Cliente Jurídico'
+        nombre = f'{self.primer_nombre or ""} {self.segundo_nombre or ""} {self.apellidos or ""}'.strip()
+        return nombre or 'Cliente Natural'
+
+    @property
+    def nombre_completo(self):
+        """Retorna el nombre completo formateado"""
+        return self.__str__()
+
+
+class FormaPago(models.Model):
+    """
+    Maestro de formas de pago
+    """
+    codigo = models.CharField(max_length=10, unique=True)  # EFE, TDC, TDE, TRF, CDP
+    nombre = models.CharField(max_length=50)
+    activo = models.BooleanField(default=True)
+    requiere_referencia = models.BooleanField(default=False)  # Para tarjeta/transf
+    permite_cambio = models.BooleanField(default=True)  # ¿Permite dar cambio?
+
+    class Meta:
+        db_table = 'facturacion_forma_pago'
+        verbose_name = 'Forma de Pago'
+        verbose_name_plural = 'Formas de Pago'
+
+    def __str__(self):
+        return f'{self.codigo} - {self.nombre}'
+
+
+class Factura(models.Model):
+    """
+    Cabecera de Factura
+    """
+    ESTADO_CHOICES = [
+        ('BOR', 'Borrador'),      # En creación
+        ('PAG', 'Pagada'),        # Pagada completa
+        ('ANU', 'Anulada'),       # Anulada con reversión de stock
+    ]
+
+    # Datos básicos
+    numero_factura = models.CharField(max_length=50, unique=True, db_index=True)  # FACT-000001
+    estado = models.CharField(max_length=3, choices=ESTADO_CHOICES, default='BOR')
+
+    # Cliente (opcional para venta al público)
+    cliente = models.ForeignKey(
+        Cliente,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='facturas'
+    )
+
+    # Vendedor y sucursal
+    vendedor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='facturas_vendedor'
+    )
+    sucursal = models.ForeignKey(
+        Sucursales,
+        on_delete=models.PROTECT,
+        related_name='facturas'
+    )
+    bodega = models.ForeignKey(
+        Bodega,
+        on_delete=models.PROTECT,
+        related_name='facturas'
+    )
+
+    # Fechas
+    fecha_venta = models.DateTimeField(auto_now_add=True, db_index=True)
+    fecha_anulacion = models.DateTimeField(blank=True, null=True)
+
+    # Totales (calculados pero cacheados)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_descuento = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_iva = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    # Pagos
+    total_pagado = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    cambio = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    # Observaciones
+    observaciones = models.TextField(blank=True, null=True)
+
+    # Anulación
+    motivo_anulacion = models.TextField(blank=True, null=True)
+    anulada_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='facturas_anuladas'
+    )
+
+    class Meta:
+        db_table = 'facturacion_factura'
+        verbose_name = 'Factura'
+        verbose_name_plural = 'Facturas'
+        ordering = ('-fecha_venta',)
+        indexes = [
+            models.Index(fields=['numero_factura']),
+            models.Index(fields=['fecha_venta']),
+            models.Index(fields=['estado']),
+            models.Index(fields=['cliente']),
+        ]
+
+    def __str__(self):
+        return f'Factura #{self.numero_factura} - ${self.total}'
+
+
+class FacturaDetalle(models.Model):
+    """
+    Detalles de Factura (líneas de productos)
+    """
+    factura = models.ForeignKey(
+        Factura,
+        on_delete=models.CASCADE,
+        related_name='detalles'
+    )
+    producto = models.ForeignKey(
+        Producto,
+        on_delete=models.PROTECT,
+        related_name='detalles_factura'
+    )
+
+    # Datos del producto al momento de la venta
+    producto_nombre = models.CharField(max_length=255)
+    producto_sku = models.CharField(max_length=50)
+    producto_imei = models.CharField(max_length=50, blank=True, null=True)  # Opcional
+
+    # Cantidades y precios
+    cantidad = models.PositiveIntegerField()
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    descuento_porcentaje = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    descuento_valor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # IVA
+    iva_porcentaje = models.DecimalField(max_digits=5, decimal_places=2)
+    iva_valor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # Total línea
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # Devoluciones
+    cantidad_devuelta = models.PositiveIntegerField(default=0)
+
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'facturacion_factura_detalle'
+        verbose_name = 'Detalle de Factura'
+        verbose_name_plural = 'Detalles de Factura'
+        indexes = [
+            models.Index(fields=['factura', 'producto']),
+        ]
+
+    def __str__(self):
+        return f'{self.producto_nombre} x{self.cantidad}'
+
+
+class Pago(models.Model):
+    """
+    Múltiples formas de pago por factura
+    """
+    factura = models.ForeignKey(
+        Factura,
+        on_delete=models.CASCADE,
+        related_name='pagos'
+    )
+    forma_pago = models.ForeignKey(
+        FormaPago,
+        on_delete=models.PROTECT
+    )
+
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    referencia = models.CharField(max_length=100, blank=True, null=True)  # Últimos 4 dígitos, código auth
+    autorizacion = models.CharField(max_length=100, blank=True, null=True)  # Código de autorización
+
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'facturacion_pago'
+        verbose_name = 'Pago'
+        verbose_name_plural = 'Pagos'
+
+    def __str__(self):
+        return f'{self.forma_pago.nombre}: ${self.monto}'
+
+
+class ConfiguracionFactura(models.Model):
+    """
+    Configuración de facturación por sucursal
+    """
+    FORMATO_CHOICES = [
+        ('58mm', 'Térmico 58mm'),
+        ('80mm', 'Térmico 80mm'),
+        ('a4', 'Papel A4'),
+    ]
+
+    sucursal = models.OneToOneField(
+        Sucursales,
+        on_delete=models.PROTECT,
+        related_name='config_facturacion'
+    )
+
+    # Numeración
+    prefijo_factura = models.CharField(max_length=10, default='FACT')
+    consecutivo_actual = models.IntegerField(default=1)
+    longitud_consecutivo = models.IntegerField(default=6)  # FACT-000001
+
+    # Impresión
+    formato_impresion = models.CharField(
+        max_length=10,
+        choices=FORMATO_CHOICES,
+        default='80mm'
+    )
+
+    # Info en encabezado
+    nombre_empresa = models.CharField(max_length=255)
+    nit_empresa = models.CharField(max_length=50)
+    direccion_empresa = models.CharField(max_length=255)
+    telefono_empresa = models.CharField(max_length=20)
+    ciudad_empresa = models.CharField(max_length=100, blank=True, null=True)
+
+    # Mensajes
+    pie_de_pagina = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'facturacion_config'
+        verbose_name = 'Configuración de Facturación'
+        verbose_name_plural = 'Configuraciones de Facturación'
+
+    def __str__(self):
+        return f'Config {self.sucursal.nombre}'

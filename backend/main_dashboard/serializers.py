@@ -1,5 +1,9 @@
 from rest_framework import serializers
-from .models import Sucursales, Categoria, Marca, Iva, Producto, Descuento, TipoMedida, Bodega, Existencia, Traslado, TrasladoLinea
+from .models import (
+    Sucursales, Categoria, Marca, Iva, Producto, Descuento, TipoMedida,
+    Bodega, Existencia, Traslado, TrasladoLinea,
+    Cliente, FormaPago, Factura, FacturaDetalle, Pago, ConfiguracionFactura
+)
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
 from django.db import transaction, IntegrityError
@@ -465,6 +469,237 @@ class TrasladoSerializer(DbAliasModelSerializer):
             for ln in lineas:
                 TrasladoLinea.objects.using(alias).create(traslado=instance, **ln)
         return instance
+
+
+# =========================
+# FACTURACIÓN SERIALIZERS
+# =========================
+
+class ClienteSerializer(DbAliasModelSerializer):
+    """Serializer para Cliente con nombre completo calculado"""
+    nombre_completo = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Cliente
+        fields = [
+            'id', 'tipo_persona', 'primer_nombre', 'segundo_nombre', 'apellidos',
+            'razon_social', 'n_registro_mercantil', 'tipo_documento',
+            'numero_documento', 'correo', 'telefono', 'direccion', 'ciudad',
+            'limite_credito', 'dias_credito', 'estatus', 'creado_en', 'actualizado_en',
+            'nombre_completo'
+        ]
+        read_only_fields = ['id', 'creado_en', 'actualizado_en']
+
+    def get_nombre_completo(self, obj):
+        return obj.nombre_completo
+
+
+class FormaPagoSerializer(DbAliasModelSerializer):
+    """Serializer para Forma de Pago (solo lectura para POS)"""
+    class Meta:
+        model = FormaPago
+        fields = ['id', 'codigo', 'nombre', 'activo', 'requiere_referencia', 'permite_cambio']
+
+
+class FacturaDetalleSerializer(DbAliasModelSerializer):
+    """Serializer para detalles de factura"""
+    producto_nombre = serializers.CharField(read_only=True)
+    producto_sku = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = FacturaDetalle
+        fields = [
+            'id', 'factura', 'producto', 'producto_nombre', 'producto_sku',
+            'producto_imei', 'cantidad', 'precio_unitario',
+            'descuento_porcentaje', 'descuento_valor',
+            'iva_porcentaje', 'iva_valor', 'subtotal', 'total',
+            'cantidad_devuelta', 'creado_en'
+        ]
+        read_only_fields = ['id', 'creado_en']
+
+
+class PagoSerializer(DbAliasModelSerializer):
+    """Serializer para pagos de factura"""
+    forma_pago_nombre = serializers.CharField(source='forma_pago.nombre', read_only=True)
+
+    class Meta:
+        model = Pago
+        fields = ['id', 'factura', 'forma_pago', 'forma_pago_nombre', 'monto', 'referencia', 'autorizacion', 'creado_en']
+        read_only_fields = ['id', 'creado_en']
+
+
+class FacturaSerializer(DbAliasModelSerializer):
+    """Serializer para leer facturas (con detalles y pagos anidados)"""
+    cliente_nombre = serializers.SerializerMethodField()
+    vendedor_nombre = serializers.CharField(source='vendedor.username', read_only=True, allow_null=True)
+    sucursal_nombre = serializers.CharField(source='sucursal.nombre', read_only=True)
+    bodega_nombre = serializers.CharField(source='bodega.nombre', read_only=True)
+    detalles = FacturaDetalleSerializer(many=True, read_only=True)
+    pagos = PagoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Factura
+        fields = [
+            'id', 'numero_factura', 'estado', 'cliente', 'cliente_nombre',
+            'vendedor', 'vendedor_nombre', 'sucursal', 'sucursal_nombre',
+            'bodega', 'bodega_nombre', 'fecha_venta', 'fecha_anulacion',
+            'subtotal', 'total_descuento', 'total_iva', 'total',
+            'total_pagado', 'cambio', 'observaciones',
+            'motivo_anulacion', 'anulada_por',
+            'detalles', 'pagos'
+        ]
+        read_only_fields = [
+            'id', 'numero_factura', 'fecha_venta', 'fecha_anulacion'
+        ]
+
+    def get_cliente_nombre(self, obj):
+        if obj.cliente:
+            return obj.cliente.nombre_completo
+        return 'Consumidor Final'
+
+
+class FacturaDetalleInlineSerializer(DbAliasModelSerializer):
+    """Serializer para crear detalles desde FacturaCreateSerializer"""
+    class Meta:
+        model = FacturaDetalle
+        fields = [
+            'producto', 'producto_nombre', 'producto_sku',
+            'producto_imei', 'cantidad', 'precio_unitario',
+            'descuento_porcentaje', 'descuento_valor',
+            'iva_porcentaje', 'iva_valor', 'subtotal', 'total'
+        ]
+
+
+class PagoInlineSerializer(DbAliasModelSerializer):
+    """Serializer para crear pagos desde FacturaCreateSerializer"""
+    class Meta:
+        model = Pago
+        fields = ['forma_pago', 'monto', 'referencia', 'autorizacion']
+
+
+class FacturaCreateSerializer(DbAliasModelSerializer):
+    """
+    Serializer para crear factura con líneas y pagos en una sola transacción atómica.
+    Maneja:
+    1. Generación de número de factura
+    2. Validación y reserva de stock
+    3. Creación de detalles y pagos
+    4. Confirmación de reserva (mover de reservado a cantidad real)
+    """
+    detalles = FacturaDetalleInlineSerializer(many=True)
+    pagos = PagoInlineSerializer(many=True)
+
+    class Meta:
+        model = Factura
+        fields = [
+            'cliente', 'vendedor', 'sucursal', 'bodega',
+            'subtotal', 'total_descuento', 'total_iva', 'total',
+            'total_pagado', 'cambio', 'observaciones',
+            'detalles', 'pagos'
+        ]
+
+    def create(self, validated_data):
+        from django.utils import timezone
+        from .models import ConfiguracionFactura
+
+        alias = self.context.get('db_alias', 'default')
+        detalles_data = validated_data.pop('detalles', [])
+        pagos_data = validated_data.pop('pagos', [])
+
+        with transaction.atomic(using=alias):
+            # 1. Generar número de factura
+            sucursal = validated_data.get('sucursal')
+            config = ConfiguracionFactura.objects.using(alias).filter(
+                sucursal=sucursal
+            ).first()
+
+            if config:
+                numero = f"{config.prefijo_factura}-{config.consecutivo_actual:0{config.longitud_consecutivo}d}"
+                config.consecutivo_actual += 1
+                config.save(using=alias)
+            else:
+                # Fallback si no hay config: usar timestamp
+                numero = f"FACT-{timezone.now().strftime('%Y%m%d%H%M%S')}"
+
+            validated_data['numero_factura'] = numero
+            validated_data['estado'] = 'PAG'
+
+            # 2. Crear factura
+            factura = Factura.objects.using(alias).create(**validated_data)
+
+            # 3. Crear detalles y reservar stock
+            for detalle_data in detalles_data:
+                producto = detalle_data['producto']
+
+                # Validar y reservar stock
+                existencia = Existencia.objects.using(alias).filter(
+                    producto=producto,
+                    bodega=validated_data['bodega']
+                ).select_for_update().first()
+
+                if not existencia:
+                    raise serializers.ValidationError(
+                        f'El producto {producto.nombre} no tiene existencia en esta bodega'
+                    )
+
+                if existencia.disponible < detalle_data['cantidad']:
+                    raise serializers.ValidationError(
+                        f'Stock insuficiente para {producto.nombre}. '
+                        f'Disponible: {existencia.disponible}, Solicitado: {detalle_data["cantidad"]}'
+                    )
+
+                # Reservar stock
+                existencia.reservado += detalle_data['cantidad']
+                existencia.save(using=alias)
+
+                # Crear detalle
+                FacturaDetalle.objects.using(alias).create(
+                    factura=factura,
+                    **detalle_data
+                )
+
+            # 4. Crear pagos
+            for pago_data in pagos_data:
+                Pago.objects.using(alias).create(
+                    factura=factura,
+                    **pago_data
+                )
+
+            # 5. Confirmar reserva (mover de reservado a cantidad real)
+            for detalle in factura.detalles.all().using(alias):
+                existencia = Existencia.objects.using(alias).get(
+                    producto=detalle.producto,
+                    bodega=factura.bodega
+                )
+                existencia.cantidad -= detalle.cantidad
+                existencia.reservado -= detalle.cantidad
+                existencia.save(using=alias)
+
+                # Actualizar cache de stock del producto
+                self._actualizar_cache_stock_producto(alias, detalle.producto_id)
+
+        return factura
+
+    def _actualizar_cache_stock_producto(self, alias, producto_id):
+        """Mantiene Producto.stock como cache"""
+        from django.db.models import Sum
+        total = (Existencia.objects.using(alias).filter(producto_id=producto_id)
+                 .aggregate(total=Sum('cantidad') - Sum('reservado'))['total'] or 0)
+        Producto.objects.using(alias).filter(pk=producto_id).update(stock=total)
+
+
+class ConfiguracionFacturaSerializer(DbAliasModelSerializer):
+    """Serializer para configuración de facturación por sucursal"""
+    sucursal_nombre = serializers.CharField(source='sucursal.nombre', read_only=True)
+
+    class Meta:
+        model = ConfiguracionFactura
+        fields = [
+            'id', 'sucursal', 'sucursal_nombre', 'prefijo_factura',
+            'consecutivo_actual', 'longitud_consecutivo', 'formato_impresion',
+            'nombre_empresa', 'nit_empresa', 'direccion_empresa',
+            'telefono_empresa', 'ciudad_empresa', 'pie_de_pagina'
+        ]
 
 
 

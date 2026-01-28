@@ -302,6 +302,51 @@ export function createProduct({ usuario, token, subdominio, datos }) {
   });
 }
 
+export function crearCategoriaTienda({ usuario, token, subdominio, datos }) {
+  return post('api/crear/nuevos/categorias-tienda/', {
+    usuario,
+    token,
+    subdominio,
+    datos
+  });
+}
+
+export function crearMarca({ usuario, token, subdominio, datos }) {
+  return post('api/crear/nuevos/marcas/', {
+    usuario,
+    token,
+    subdominio,
+    datos
+  });
+}
+
+export function crearIva({ usuario, token, subdominio, datos }) {
+  return post('api/crear/nuevos/iva/', {
+    usuario,
+    token,
+    subdominio,
+    datos
+  });
+}
+
+export function crearDescuento({ usuario, token, subdominio, datos }) {
+  return post('api/crear/nuevos/descuentos/', {
+    usuario,
+    token,
+    subdominio,
+    datos
+  });
+}
+
+export function crearMedida({ usuario, token, subdominio, datos }) {
+  return post('api/crear/nuevos/medida/', {
+    usuario,
+    token,
+    subdominio,
+    datos
+  });
+}
+
 export async function subirImagenProducto({
   id, usuario, token, subdominio, categoriaId, imagen
 }) {
@@ -594,4 +639,131 @@ export function ajustarExistencia({
     delta
   }, token);
 }
+
+
+
+
+
+
+//--------------------------------------------------------
+
+
+
+//-------------------- APIS DE FACTURACION --------------------
+
+// Clientes
+export function buscarCliente({ query, token, usuario, subdominio }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/clientes/buscar/', {
+    query,
+    usuario,
+    token,
+    subdominio
+  }, token);
+}
+
+export function crearCliente({ token, usuario, subdominio, datos }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/clientes/', {
+    usuario,
+    token,
+    subdominio,
+    ...datos
+  }, token);
+}
+
+// Formas de Pago
+export function fetchFormasPago({ token, usuario, subdominio }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/formas-pago/', {
+    usuario,
+    token,
+    subdominio
+  }, token);
+}
+
+// Productos para POS
+export function buscarProductosPOS({
+  token,
+  usuario,
+  subdominio,
+  bodega_id,
+  query,
+  incluir_sin_stock = false
+}) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/facturas/productos-pos/', {
+    usuario,
+    token,
+    subdominio,
+    bodega_id,
+    query,
+    incluir_sin_stock
+  }, token);
+}
+
+// Crear Factura
+export function crearFactura({
+  token,
+  usuario,
+  subdominio,
+  datos_factura
+}) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/facturas/', {
+    usuario,
+    token,
+    subdominio,
+    ...datos_factura
+  }, token);
+}
+
+// Anular Factura
+export function anularFactura({
+  token,
+  usuario,
+  subdominio,
+  factura_id,
+  motivo
+}) {
+  token = token || localStorage.getItem('token_usuario');
+  return post(`api/facturacion/facturas/${factura_id}/anular/`, {
+    usuario,
+    token,
+    subdominio,
+    motivo_anulacion: motivo
+  }, token);
+}
+
+// Estadísticas
+export function fetchVentasHoy({ token, usuario, subdominio }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/facturas/ventas-hoy/', {
+    usuario,
+    token,
+    subdominio
+  }, token);
+}
+
+// Listar facturas
+export function fetchFacturas({
+  token,
+  usuario,
+  subdominio,
+  fecha_inicio,
+  fecha_fin,
+  estado
+}) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/facturas/', {
+    usuario,
+    token,
+    subdominio,
+    fecha_inicio,
+    fecha_fin,
+    estado
+  }, token);
+}
+
+
 

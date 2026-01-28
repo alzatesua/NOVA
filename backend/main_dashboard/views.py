@@ -36,9 +36,14 @@ from nova.utils.email import enviar_correo_mailjet
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 
-from .serializers import BodegaSerializer, ExistenciaSerializer, TrasladoSerializer, ProductoConExistenciasSerializer
+from .serializers import (
+    BodegaSerializer, ExistenciaSerializer, TrasladoSerializer, ProductoConExistenciasSerializer,
+    ClienteSerializer, FormaPagoSerializer, FacturaSerializer, FacturaCreateSerializer,
+    ConfiguracionFacturaSerializer
+)
 from .models import (
-    ajustar_stock, enviar_traslado, recibir_traslado, cancelar_traslado
+    ajustar_stock, enviar_traslado, recibir_traslado, cancelar_traslado,
+    Cliente, FormaPago, Factura, FacturaDetalle, Pago, ConfiguracionFactura
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
@@ -2366,3 +2371,208 @@ class ProductoExistenciasView(TenantMixin, APIView):
             "sucursal": user.id_sucursal_default.nombre if user.id_sucursal_default and user.rol != 'admin' else None,
             "data": data
         }, status=status.HTTP_200_OK)
+
+
+# =========================
+# FACTURACIÓN POS VIEWSETS
+# =========================
+
+class ClienteViewSet(TenantMixin, viewsets.ModelViewSet):
+    """
+    CRUD de Clientes con búsqueda por documento/nombre
+    """
+    serializer_class = ClienteSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        alias = self._resolve_alias(self.request)
+        return Cliente.objects.using(alias).filter(estatus=True)
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['db_alias'] = self._resolve_alias(self.request)
+        return ctx
+
+    @action(detail=False, methods=['post'])
+    def buscar(self, request):
+        """Búsqueda rápida por documento o nombre"""
+        alias = self._resolve_alias(request)
+        query = request.data.get('query', '').strip()
+
+        if not query:
+            return Response({'datos': []})
+
+        clientes = Cliente.objects.using(alias).filter(
+            models.Q(numero_documento__icontains=query) |
+            models.Q(primer_nombre__icontains=query) |
+            models.Q(apellidos__icontains=query) |
+            models.Q(razon_social__icontains=query),
+            estatus=True
+        )[:10]
+
+        serializer = self.get_serializer(clientes, many=True)
+        return Response({'datos': serializer.data})
+
+
+class FormaPagoViewSet(TenantMixin, viewsets.ReadOnlyModelViewSet):
+    """
+    Maestro de formas de pago (solo lectura, se crean por admin)
+    """
+    serializer_class = FormaPagoSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        alias = self._resolve_alias(self.request)
+        return FormaPago.objects.using(alias).filter(activo=True)
+
+
+class FacturaViewSet(TenantMixin, viewsets.ModelViewSet):
+    """
+    Gestión de Facturas POS
+    """
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        alias = self._resolve_alias(self.request)
+        return Factura.objects.using(alias).select_related(
+            'cliente', 'vendedor', 'sucursal', 'bodega'
+        ).prefetch_related('detalles', 'pagos')
+
+    def get_serializer(self, *args, **kwargs):
+        if self.action == 'create':
+            return FacturaCreateSerializer(*args, **kwargs)
+        return FacturaSerializer(*args, **kwargs)
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['db_alias'] = self._resolve_alias(self.request)
+        return ctx
+
+    @action(detail=False, methods=['post'])
+    def productos_pos(self, request):
+        """
+        Buscar productos para POS con stock disponible
+        Body: { bodega_id, query, incluir_sin_stock }
+        """
+        alias = self._resolve_alias(request)
+        bodega_id = request.data.get('bodega_id')
+        query = request.data.get('query', '').strip()
+        incluir_sin_stock = request.data.get('incluir_sin_stock', False)
+
+        if not bodega_id:
+            return Response(
+                {'error': 'Se requiere bodega_id'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        qs = Producto.objects.using(alias).filter(activo=True)
+
+        if query:
+            qs = qs.filter(
+                models.Q(sku__icontains=query) |
+                models.Q(nombre__icontains=query) |
+                models.Q(codigo_barras__icontains=query)
+            )
+
+        productos_data = []
+        for prod in qs[:20]:
+            existencia = Existencia.objects.using(alias).filter(
+                producto=prod,
+                bodega_id=bodega_id
+            ).first()
+
+            disponible = existencia.disponible if existencia else 0
+
+            if incluir_sin_stock or disponible > 0:
+                productos_data.append({
+                    'id': prod.id,
+                    'sku': prod.sku,
+                    'nombre': prod.nombre,
+                    'precio': float(prod.precio),
+                    'iva_porcentaje': float(prod.iva_id.porcentaje) if prod.iva_id else 0,
+                    'disponible': disponible,
+                    'requiere_imei': bool(prod.imei),
+                })
+
+        return Response({'datos': productos_data})
+
+    @action(detail=True, methods=['post'])
+    def anular(self, request, pk=None):
+        """
+        Anular factura y revertir stock
+        Body: { motivo_anulacion }
+        """
+        from django.utils import timezone
+
+        alias = self._resolve_alias(request)
+        factura = self.get_object()
+
+        if factura.estado == 'ANU':
+            return Response(
+                {'error': 'La factura ya está anulada'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        motivo = request.data.get('motivo_anulacion', '').strip()
+        if not motivo:
+            return Response(
+                {'error': 'Debe proporcionar motivo de anulación'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            with transaction.atomic(using=alias):
+                # Revertir stock
+                for detalle in factura.detalles.all().using(alias):
+                    existencia = Existencia.objects.using(alias).get(
+                        producto=detalle.producto,
+                        bodega=factura.bodega
+                    )
+                    existencia.cantidad += detalle.cantidad
+                    existencia.save(using=alias)
+
+                    # Actualizar cache
+                    self._actualizar_cache_stock_producto(alias, detalle.producto_id)
+
+                # Marcar como anulada
+                factura.estado = 'ANU'
+                factura.fecha_anulacion = timezone.now()
+                factura.motivo_anulacion = motivo
+                factura.anulada_por = self._tenant_user
+                factura.save(using=alias)
+
+            return Response({'mensaje': 'Factura anulada correctamente'})
+
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['get'])
+    def ventas_hoy(self, request):
+        """Estadísticas de ventas del día para dashboard"""
+        alias = self._resolve_alias(request)
+        from django.utils import timezone
+        hoy = timezone.now().date()
+
+        ventas = Factura.objects.using(alias).filter(
+            fecha_venta__date=hoy,
+            estado='PAG'
+        ).aggregate(
+            total_facturado=models.Sum('total'),
+            cantidad=models.Count('id'),
+            promedio=models.Avg('total')
+        )
+
+        return Response({
+            'total_facturado': ventas['total_facturado'] or 0,
+            'cantidad': ventas['cantidad'] or 0,
+            'promedio': ventas['promedio'] or 0
+        })
+
+    def _actualizar_cache_stock_producto(self, alias, producto_id):
+        """Mantiene Producto.stock como cache"""
+        total = (Existencia.objects.using(alias).filter(producto_id=producto_id)
+                 .aggregate(total=models.Sum('cantidad') - models.Sum('reservado'))['total'] or 0)
+        Producto.objects.using(alias).filter(pk=producto_id).update(stock=total)

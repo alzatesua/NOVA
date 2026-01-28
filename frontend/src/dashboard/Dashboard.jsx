@@ -6,6 +6,7 @@ import ProductosView from '../components/ProductosView';
 import FacturacionView from '../components/FacturacionView';
 import ReportesView from '../components/ReportesView';
 import SucursalesGrid from '../components/SucursalesGrid';
+import ConfiguracionView from '../components/ConfiguracionView';
 import { useFetchUsers } from '../hooks/useFetchUsers';
 import { useFetchSucursales } from '../hooks/useFetchSucursales';
 import { useAuth } from '../hooks/useAuth';
@@ -164,9 +165,17 @@ export default function Dashboard() {
 
         {/* VISTA DE FACTURACIÓN - SIN PROPS, USA DATOS INTERNOS */}
         {view === 'facturacion' && (
-          <div className="relative w-full mb-8 p-8 rounded-3xl 
+          <div className="relative w-full mb-8 p-8 rounded-3xl
             bg-white/20 backdrop-blur-md ring-1 ring-white/30 shadow-lg">
             <FacturacionView />
+          </div>
+        )}
+
+        {/* VISTA DE CONFIGURACIÓN - SIN PROPS, USA DATOS INTERNOS */}
+        {view === 'configuracion' && (
+          <div className="relative w-full mb-8 p-8 rounded-3xl
+            bg-white/20 backdrop-blur-md ring-1 ring-white/30 shadow-lg">
+            <ConfiguracionView />
           </div>
         )}
 
