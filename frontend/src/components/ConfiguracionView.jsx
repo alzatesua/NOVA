@@ -28,6 +28,12 @@ export default function ConfiguracionView() {
   // Tab activa
   const [activeTab, setActiveTab] = useState('categorias');
 
+  // Configuración de la tienda
+  const [tiendaConfig, setTiendaConfig] = useState({
+    nombre_tienda: localStorage.getItem('nombre_tienda') || '',
+    whatsapp_number: localStorage.getItem('whatsapp_number') || ''
+  });
+
   // Estados para cada entidad
   const [categorias, setCategorias] = useState([]);
   const [marcas, setMarcas] = useState([]);
@@ -170,29 +176,44 @@ export default function ConfiguracionView() {
       } else {
         // Crear - usamos las APIs específicas de creación
         let response;
-        let apiError;
+        let creacionExitosa = false;
         try {
           switch (activeTab) {
             case 'categorias':
               response = await crearCategoriaTienda({ usuario, token, subdominio, datos });
+              creacionExitosa = !!response;
               break;
             case 'marcas':
               response = await crearMarca({ usuario, token, subdominio, datos });
+              creacionExitosa = !!response;
               break;
             case 'ivas':
               response = await crearIva({ usuario, token, subdominio, datos });
+              creacionExitosa = !!response;
               break;
             case 'descuentos':
+              console.log('🔵 Intentando crear descuento con datos:', datos);
               response = await crearDescuento({ usuario, token, subdominio, datos });
+              console.log('🔵 Respuesta descuento:', response);
+              // Para descuentos, validamos que tenga un campo de éxito o no sea un error
+              creacionExitosa = response && !response.error && !response.mensaje?.toLowerCase().includes('error');
+              console.log('🔵 creacionExitosa:', creacionExitosa);
               break;
             case 'medidas':
               response = await crearMedida({ usuario, token, subdominio, datos });
+              creacionExitosa = !!response;
               break;
           }
           console.log('📥 Respuesta de la API:', response);
-          showToast('success', 'Creado correctamente');
+          if (creacionExitosa) {
+            showToast('success', 'Creado correctamente');
+          } else if (activeTab === 'descuentos') {
+            // Si es descuentos y no hubo éxito, mostrar error
+            console.error('❌ No se pudo crear el descuento, response:', response);
+            showToast('error', response?.mensaje || response?.error || 'Error al crear descuento');
+            return; // Detener ejecución
+          }
         } catch (error) {
-          apiError = error;
           console.log('🔍 Error capturado, propiedades:', {
             activeTab,
             status: error.status,
@@ -214,6 +235,13 @@ export default function ConfiguracionView() {
           } else {
             // Otros endpoints = mostrar el error al usuario
             console.error('❌ Error real al crear, mostrando al usuario');
+            console.error('Detalles del error para ' + activeTab + ':', {
+              status: error.status,
+              statusText: error.statusText,
+              message: error.message,
+              details: error.details
+            });
+            showToast('error', error.message || `Error al crear ${activeTab}`);
             throw error;
           }
         }
@@ -294,12 +322,20 @@ export default function ConfiguracionView() {
   };
 
   const tabs = [
+    { id: 'tienda', label: 'Mi Tienda', icon: '🏪' },
     { id: 'categorias', label: 'Categorías', icon: '📁' },
     { id: 'marcas', label: 'Marcas', icon: '🏷️' },
     { id: 'ivas', label: 'IVA', icon: '💰' },
     { id: 'descuentos', label: 'Descuentos', icon: '🏷️' },
     { id: 'medidas', label: 'Medidas', icon: '📏' },
   ];
+
+  // Guardar configuración de la tienda
+  const handleSaveTiendaConfig = () => {
+    localStorage.setItem('nombre_tienda', tiendaConfig.nombre_tienda);
+    localStorage.setItem('whatsapp_number', tiendaConfig.whatsapp_number);
+    showToast('success', 'Configuración de tienda guardada correctamente');
+  };
 
   const renderList = () => {
     const items = {
@@ -411,18 +447,81 @@ export default function ConfiguracionView() {
 
       {/* Contenido */}
       <div className="space-y-6">
-        {/* Botón de crear */}
-        <div className="flex justify-end">
-          <button
-            onClick={handleCreate}
-            className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-md transition font-semibold"
-          >
-            <PlusIcon className="h-5 w-5" />
-            <span>
-              {editingItem ? 'Editar' : 'Crear'} {tabs.find(t => t.id === activeTab)?.label.slice(0, -1)}
-            </span>
-          </button>
-        </div>
+        {/* Botón de crear (ocultar en tab tienda) */}
+        {activeTab !== 'tienda' && (
+          <div className="flex justify-end">
+            <button
+              onClick={handleCreate}
+              className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-md transition font-semibold"
+            >
+              <PlusIcon className="h-5 w-5" />
+              <span>
+                {editingItem ? 'Editar' : 'Crear'} {tabs.find(t => t.id === activeTab)?.label.slice(0, -1)}
+              </span>
+            </button>
+          </div>
+        )}
+
+        {/* Configuración de la Tienda */}
+        {activeTab === 'tienda' && (
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Configuración de Tienda Online</h3>
+            <p className="text-gray-600 mb-6">
+              Configura los datos de tu tienda para que los clientes puedan contactarte por WhatsApp.
+            </p>
+
+            <div className="space-y-4 max-w-2xl">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre de la Tienda
+                </label>
+                <input
+                  type="text"
+                  value={tiendaConfig.nombre_tienda}
+                  onChange={(e) => setTiendaConfig({ ...tiendaConfig, nombre_tienda: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Ej: Mi Tienda Online"
+                />
+                <p className="text-xs text-gray-500 mt-1">Este nombre se mostrará en el header de tu tienda</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Número de WhatsApp
+                </label>
+                <input
+                  type="text"
+                  value={tiendaConfig.whatsapp_number}
+                  onChange={(e) => setTiendaConfig({ ...tiendaConfig, whatsapp_number: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Ej: 573000000000"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Código de país + número (sin el signo +). Ej: 57 para Colombia, 54 para Argentina
+                </p>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-900 mb-2">ℹ️ ¿Cómo funciona?</h4>
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li>• Los clientes agregan productos al carrito</li>
+                  <li>• Al completar el pedido, se genera un mensaje automático</li>
+                  <li>• El mensaje se envía a este número de WhatsApp</li>
+                  <li>• Tú recibes el detalle completo del pedido para gestionarlo</li>
+                </ul>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <button
+                  onClick={handleSaveTiendaConfig}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold"
+                >
+                  Guardar Configuración
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Formulario de creación/edición */}
         {showCreateForm && (
@@ -540,10 +639,12 @@ export default function ConfiguracionView() {
           </div>
         )}
 
-        {/* Lista de items */}
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-          {renderList()}
-        </div>
+        {/* Lista de items (ocultar en tab tienda) */}
+        {activeTab !== 'tienda' && (
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+            {renderList()}
+          </div>
+        )}
       </div>
     </div>
   );

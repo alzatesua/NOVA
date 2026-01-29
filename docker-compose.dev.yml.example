@@ -1,0 +1,22 @@
+# =============================================================================
+# DOCKER COMPOSE PARA DESARROLLO
+# =============================================================================
+# Usar este archivo para desarrollo local:
+# docker-compose -f docker-compose.yml -f docker-compose.dev.yml.example up
+
+version: '3.8'
+
+services:
+  backend:
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-dev-only-not-for-production
+      - DB_NAME=bd_madre
+      - DB_USER=postgres
+      - DB_PASSWORD=zuleta18
+      - DB_HOST=db
+      - DB_PORT=5432
+    volumes:
+      - ./backend:/app  # Hot reload en desarrollo
+    command: python manage.py runserver 0.0.0.0:8000

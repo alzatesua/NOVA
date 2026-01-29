@@ -53,7 +53,7 @@ def autenticar_usuario(subdom, usuario, password):
     if not tienda.es_activo:
         raise ValueError("Tienda inactiva")
 
-    return user, tienda, dominio_obj
+    return user, tienda, dominio_obj, alias  # ← Retornar alias también
 
 
 @api_view(['POST'])
@@ -77,9 +77,20 @@ def login_view(request):
         if not subdom:
             return Response({'error': 'Subdominio no proporcionado'}, status=status.HTTP_400_BAD_REQUEST)
 
-        user, tienda, dominio_obj = autenticar_usuario(subdom, usuario, password)
+        user, tienda, dominio_obj, alias = autenticar_usuario(subdom, usuario, password)
         sucursal = user.id_sucursal_default
+
+        # Generar token JWT personalizado
+        from nova.utils.db import generar_token_jwt
+        token_jwt = generar_token_jwt(usuario)
+
+        # Guardar token en BD
+        user.token = token_jwt
+        user.save(using=alias)
+
+        # Generar tokens de simplejwt para refresh
         refresh = RefreshToken.for_user(user)
+
         return Response({
             'message':   'Login exitoso',
             'usuario':   user.usuario,
@@ -90,9 +101,9 @@ def login_view(request):
             "rol": user.rol,
             "tienda": tienda.nombre_tienda,
             "tienda_slug": tienda.slug,
-            "token_usuario": user.token,
+            "token_usuario": token_jwt,  # Usar siempre el token JWT personalizado
             'id_sucursal_default': sucursal.id if sucursal else None,
-            'nombre_sucursal': sucursal.nombre if sucursal else None, 
+            'nombre_sucursal': sucursal.nombre if sucursal else None,
 
         }, status=status.HTTP_200_OK)
 

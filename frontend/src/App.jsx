@@ -1,34 +1,62 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './login/login';
-
-// Importa el Dashboard que creamos antes
 import Dashboard from './dashboard/Dashboard';
-
 import CrearTienda from "./tiendas/crear";
+
+// Importar el componente de tienda que ya existe
+import TiendaPage from "./tienda/TiendaPage";
 
 //estilos de notificacion
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Componente para rutas privadas
-function PrivateRoute({ children }) {
-  const token = localStorage.getItem("accessToken");
+// Componente wrapper para verificar autenticación
+function RequireAuth({ children }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
 
-  if (!token) {
-    // No autenticado → redirige a login
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    setIsAuthenticated(!!token);
+    setIsChecked(true);
+  }, []);
+
+  if (!isChecked) {
+    return null;
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Si autenticado, renderiza los hijos
   return children;
+}
+
+// Componente wrapper para redirección según autenticación
+function HomeRedirect() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    setIsAuthenticated(!!token);
+    setIsChecked(true);
+  }, []);
+
+  if (!isChecked) {
+    return null;
+  }
+
+  return isAuthenticated
+    ? <Navigate to="/dashboard" replace />
+    : <Navigate to="/login" replace />;
 }
 
 function App() {
   return (
-
     <BrowserRouter>
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}
@@ -41,25 +69,30 @@ function App() {
         theme="colored"
       />
       <Routes>
+        {/* RUTAS PÚBLICAS */}
+        <Route path="/tienda" element={<TiendaPage />} />
+        <Route path="/shop" element={<TiendaPage />} />
+        <Route path="/catalogo" element={<TiendaPage />} />
+        <Route path="/productos" element={<TiendaPage />} />
+        
         <Route path="/login" element={<Login />} />
         <Route path="/registro/tienda" element={<CrearTienda />} />
 
+        {/* Ruta raíz */}
+        <Route path="/" element={<HomeRedirect />} />
 
-        {/* Ruta protegida para dashboard */}
-        <Route 
-          path="/dashboard" 
+        {/* RUTAS PROTEGIDAS */}
+        <Route
+          path="/dashboard"
           element={
-            <PrivateRoute>
+            <RequireAuth>
               <Dashboard />
-            </PrivateRoute>
-          } 
+            </RequireAuth>
+          }
         />
 
-        {/* Ruta por defecto (opcional), redirigir a login */}
-        <Route 
-          path="*" 
-          element={<Navigate to="/login" replace />} 
-        />
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

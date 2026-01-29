@@ -11,14 +11,17 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+import datetime
+from datetime import timedelta
 from django.utils import timezone
 from corsheaders.defaults import default_headers
-from django.utils import timezone
 
-
-import datetime
-from datetime import timedelta  # esto está bien si usas timedelta
-import os
+# Cargar variables de entorno desde .env
+env_file = BASE_DIR / '.env'
+if env_file.exists():
+    from dotenv import load_dotenv
+    load_dotenv(env_file)
 
 
 
@@ -43,19 +46,15 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-9)6^ej5!o6d^y)n7+#p+i
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = [
-                'dagi.co',
-                '31.97.14.61',
-                'localhost', 
-                '127.0.0.1',
-                '.dagi.co',
-                'backend',
-                'nginx',
-                'frontend'
-                ]
-
-
-
-AUTH_USER_MODEL = 'nova.Usuarios'
+    'dagi.co',
+    '31.97.14.61',
+    'localhost',
+    '127.0.0.1',
+    '.dagi.co',
+    'backend',
+    'nginx',
+    'frontend'
+]
 
 
 
@@ -208,9 +207,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MAILJET_API_KEY = '78eeb3d1a064eee752054c93d5317fbf'
-MAILJET_API_SECRET = 'ef3c1d75feaebea65382a59a7e4546f7'
-MAILJET_EMAIL_FROM = 'nova@dagi.co'
+# Credenciales de Mailjet - USAR VARIABLES DE ENTORNO EN PRODUCCIÓN
+MAILJET_API_KEY = os.environ.get('MAILJET_API_KEY', '78eeb3d1a064eee752054c93d5317fbf')
+MAILJET_API_SECRET = os.environ.get('MAILJET_API_SECRET', 'ef3c1d75feaebea65382a59a7e4546f7')
+MAILJET_EMAIL_FROM = os.environ.get('MAILJET_EMAIL_FROM', 'nova@dagi.co')
 
 
 
@@ -249,12 +249,7 @@ SIMPLE_JWT = {
 
 
 #dominio
-BASE_DOMAIN = "dagi.co" #dominio principal
-
-
-#para el token jwt
-SECRET_KEY = 'Dagi+nova01desc.'
-
+BASE_DOMAIN = os.environ.get('BASE_DOMAIN', 'dagi.co')  # dominio principal
 
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
@@ -284,15 +279,7 @@ LOGGING = {
 
 
 
-#configuracion para la api de imagendes
-# settings.py
-
-import os
-
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
+# Configuración para archivos multimedia
 MEDIA_URL = '/media/'
-STATIC_URL = '/static/'
-
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 

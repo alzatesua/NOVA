@@ -5,7 +5,9 @@ const BASE_URL = 'https://dagi.co/';
 const id_sucursal = localStorage.getItem("id_sucursal");
 
 async function post(endpoint, body, token) {
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
+  const url = `${BASE_URL}${endpoint}`;
+  console.log(`POST ${url}`, body);
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -15,12 +17,23 @@ async function post(endpoint, body, token) {
   });
 
   const json = await res.json().catch(() => null);
+  console.log(`Response ${res.status}:`, json);
+
   if (!res.ok) {
     console.error('API Error:', {
       status: res.status,
       statusText: res.statusText,
       responseBody: json
     });
+
+    // Detectar CUALQUIER error 401 y limpiar sesión
+    if (res.status === 401) {
+      console.warn('⚠️ Error 401 detectado. Limpiando sesión y redirigiendo al login...');
+      localStorage.clear();
+      window.location.href = '/login';
+      throw { message: 'Sesión expirada. Por favor inicia sesión nuevamente.', details: json };
+    }
+
     const msg = json?.mensaje || json?.detail || res.statusText;
     throw { message: msg, details: json };
   }
@@ -44,6 +57,15 @@ async function get(endpoint, token) {
       statusText: res.statusText,
       responseBody: json
     });
+
+    // Detectar CUALQUIER error 401 y limpiar sesión
+    if (res.status === 401) {
+      console.warn('⚠️ Error 401 detectado. Limpiando sesión y redirigiendo al login...');
+      localStorage.clear();
+      window.location.href = '/login';
+      throw { message: 'Sesión expirada. Por favor inicia sesión nuevamente.', details: json };
+    }
+
     const msg = json?.mensaje || json?.detail || res.statusText;
     throw { message: msg, details: json };
   }
@@ -53,6 +75,7 @@ async function get(endpoint, token) {
 
 export function fetchUsers({rol, token, usuario, tokenUsuario, accessToken, nombre, nombreTienda, hostname, tienda, subdominio}) {
   token = tokenUsuario;
+  console.log("fetchUsers llamado con:", { usuario, tokenUsuario, subdominio, tabla: 'login_usuario' });
   return post('api/obtener/datos/info-tienda/', {usuario, token, subdominio, tabla: 'login_usuario'
   }, token);
 }

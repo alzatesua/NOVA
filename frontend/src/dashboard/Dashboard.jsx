@@ -4,23 +4,35 @@ import Navbar from '../components/Navbar';
 import UsersView from '../components/UsersView';
 import ProductosView from '../components/ProductosView';
 import FacturacionView from '../components/FacturacionView';
-import ReportesView from '../components/ReportesView';
+import NoticiasView from '../components/NoticiasView';
+import DashboardView from '../components/DashboardView';
 import SucursalesGrid from '../components/SucursalesGrid';
 import ConfiguracionView from '../components/ConfiguracionView';
 import { useFetchUsers } from '../hooks/useFetchUsers';
 import { useFetchSucursales } from '../hooks/useFetchSucursales';
 import { useAuth } from '../hooks/useAuth';
 import { fetchProducts } from '../services/api';
-import { showToast } from '../utils/toast';
-import DashboardCarousel from '../components/DashboardCarousel';
 
 
 export default function Dashboard() {
-  const { rol, usuario, tienda, logout, tokenUsuario, subdominio } = useAuth();
+  const { rol, usuario, logout, tokenUsuario, subdominio } = useAuth();
 
   // Usuarios y sucursales existentes
-  const users = useFetchUsers();
-  const { sucursales, isLoading: loadingSuc, ref: gridRef, reload: reloadSuc } = useFetchSucursales();
+  const { users: usersData, refetchRef: usersRefetchRef } = useFetchUsers();
+  const [users, setUsers] = useState(usersData);
+  const { sucursales, isLoading: loadingSuc, ref: gridRef } = useFetchSucursales();
+
+  // Sincronizar users cuando cambie usersData
+  useEffect(() => {
+    if (usersData && Array.isArray(usersData.datos)) {
+      setUsers(usersData.datos);
+    }
+  }, [usersData]);
+
+  // Función para recargar usuarios después de crear uno nuevo
+  const reloadUsers = () => {
+    usersRefetchRef.current?.();
+  };
 
   // 1) Estado para productos
   const [products, setProducts] = useState([]);
@@ -59,76 +71,19 @@ export default function Dashboard() {
       />
 
       <main className="pt-16 flex-grow flex flex-col items-center px-4 pb-10 w-full">
-        {/* Vistas */}
+        {/* VISTA DE DASHBOARD - Nuevas gráficas y métricas */}
         {view === 'dashboard' && (
-          <>
-            <DashboardCarousel />
-            <div className="max-w-screen-xl mx-auto mt-6 px-6 py-4 bg-white rounded-lg shadow-md flex items-center justify-between space-x-6">
-              {/* Izquierda: input + botones */}
-              <div className="flex items-center space-x-4 flex-shrink-0">
-                <input
-                  type="text"
-                  readOnly
-                  value="https://mi-tienda.com/catalogo"
-                  className="
-                    w-64 px-5 py-3
-                    border border-gray-300 rounded-lg
-                    text-blue-600 text-sm font-medium
-                    cursor-pointer select-all
-                    focus:outline-none focus:ring-2 focus:ring-blue-400
-                    transition
-                  "
-                  onClick={e => e.target.select()}
-                />
-                <a
-                  href="https://mi-tienda.com/catalogo"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="
-                    bg-blue-600 hover:bg-blue-700
-                    text-white font-semibold text-sm
-                    px-6 py-3 rounded-lg shadow-md
-                    transition
-                    duration-300
-                    ease-in-out
-                  "
-                >
-                  Mi Catálogo
-                </a>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText('https://mi-tienda.com/catalogo');
-                    showToast('success', '¡Link copiado!');
-                  }}
-                  className="
-                    px-6 py-3
-                    rounded-lg font-semibold text-sm
-                    bg-gray-200 text-gray-700
-                    hover:bg-gray-300
-                    transition
-                    duration-300
-                    ease-in-out
-                    shadow-sm
-                  "
-                >
-                  Copiar
-                </button>
-              </div>
-
-              {/* Derecha: descripción */}
-              <p className="text-gray-700 max-w-md text-sm leading-relaxed">
-                Comparte el link de tu catálogo para que tus clientes puedan ver todos tus productos fácilmente.
-              </p>
-            </div>
-          </>
+          <div className="relative w-full max-w-7xl">
+            <DashboardView />
+          </div>
         )}
 
         {view === 'usuarios' && (
-          <div className="relative w-full mb-8 p-8 rounded-3xl 
+          <div className="relative w-full mb-8 p-8 rounded-3xl
             bg-white/20 backdrop-blur-md ring-1 ring-white/30 shadow-lg">
             <section className="w-full max-w-4xl">
               <h3 className="text-2xl font-bold mb-4">Gestión de Usuarios</h3>
-              <UsersView users={users} />
+              <UsersView users={usersData} onCreated={reloadUsers} />
             </section>
           </div>
         )}
@@ -145,7 +100,7 @@ export default function Dashboard() {
         )}
 
         {view === 'productos' && (
-          <div className="relative w-full mb-8 p-8 rounded-3xl 
+          <div className="relative w-full mb-8 p-8 rounded-3xl
             bg-white/20 backdrop-blur-md ring-1 ring-white/30 shadow-lg">
             <ProductosView
               products={products}
@@ -155,11 +110,11 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* VISTA DE REPORTES - SIN PROPS, USA DATOS INTERNOS */}
-        {view === 'reportes' && (
-          <div className="relative w-full mb-8 p-8 rounded-3xl 
+        {/* VISTA DE NOTICIAS - Carrusel + link del catálogo */}
+        {view === 'noticias' && (
+          <div className="relative w-full mb-8 p-8 rounded-3xl
             bg-white/20 backdrop-blur-md ring-1 ring-white/30 shadow-lg">
-            <ReportesView />
+            <NoticiasView />
           </div>
         )}
 

@@ -13,6 +13,9 @@ urlpatterns = [
     path('api/tiendas/', crear_tienda, name='crear_tienda'),
     path('api/validar/', include('login.urls')),
 
+    # Analytics API
+    path('api/analytics/', include('analytics.urls')),
+
     # tus includes existentes (si los necesitas)
     path('api/obtener/datos/', include('main_dashboard.urls')),
     path('api/actualizar/datos/', include('main_dashboard.urls')),
