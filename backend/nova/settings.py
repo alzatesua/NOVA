@@ -281,5 +281,6 @@ LOGGING = {
 
 # Configuración para archivos multimedia
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_ROOT debe apuntar a /app/media (no /app/nova/media)
+MEDIA_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/media'
 

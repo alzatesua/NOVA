@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css'; // TailwindCSS debe estar importado aquí
+import 'bootstrap/dist/css/bootstrap.min.css'; // Bootstrap CSS
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const clientId = 'TU_CLIENT_ID_GOOGLE';

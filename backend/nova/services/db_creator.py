@@ -161,23 +161,52 @@ def crear_db(db_nombre, db_password, db_usuario, usuario_data):
         else:
             print("⚠️ No se insertó el usuario porque la tabla 'login_usuario' no existe.")
 
-        # 7) Otorgar permisos al usuario sobre el esquema y objetos
+        # 7) Cambiar el owner de todas las tablas y secuencias al usuario de la tienda
+        # Primero obtenemos todas las tablas del esquema public
+        cur.execute("""
+            SELECT tablename FROM pg_tables
+            WHERE schemaname = 'public'
+        """)
+        tablas = [row[0] for row in cur.fetchall()]
+
+        for tabla in tablas:
+            cur.execute(sql.SQL("ALTER TABLE {} OWNER TO {};").format(
+                sql.Identifier(tabla),
+                sql.Identifier(db_usuario)
+            ))
+            print(f"✅ Tabla {tabla} -> owner {db_usuario}")
+
+        # Cambiar el owner de todas las secuencias
+        cur.execute("""
+            SELECT sequencename FROM pg_sequences
+            WHERE schemaname = 'public'
+        """)
+        secuencias = [row[0] for row in cur.fetchall()]
+
+        for secuencia in secuencias:
+            cur.execute(sql.SQL("ALTER SEQUENCE {} OWNER TO {};").format(
+                sql.Identifier(secuencia),
+                sql.Identifier(db_usuario)
+            ))
+            print(f"✅ Secuencia {secuencia} -> owner {db_usuario}")
+
+        # Otorgar permisos adicionales por seguridad
         cur.execute(sql.SQL("GRANT USAGE ON SCHEMA public TO {};").format(
             sql.Identifier(db_usuario)
         ))
-        cur.execute(sql.SQL("GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO {};").format(
+        cur.execute(sql.SQL("GRANT ALL ON ALL TABLES IN SCHEMA public TO {};").format(
             sql.Identifier(db_usuario)
         ))
-        cur.execute(sql.SQL("GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO {};").format(
+        cur.execute(sql.SQL("GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO {};").format(
             sql.Identifier(db_usuario)
         ))
-        cur.execute(sql.SQL("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {};").format(
+        cur.execute(sql.SQL("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO {};").format(
             sql.Identifier(db_usuario)
         ))
-        cur.execute(sql.SQL("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO {};").format(
+        cur.execute(sql.SQL("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO {};").format(
             sql.Identifier(db_usuario)
         ))
-        print(f"✅ Permisos otorgados a {db_usuario}")
+        print(f"✅ Owner y permisos configurados para {db_usuario}")
 
         cur.close()
         conn.close()

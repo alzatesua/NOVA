@@ -26,7 +26,7 @@ services:
     volumes:
       - ./backend:/app
       - staticfiles:/app/staticfiles
-      - media:/app/media
+      - ./backend/media:/app/media
     networks:
       - nova_network
 
@@ -45,7 +45,7 @@ services:
       - frontend
     volumes:
       - staticfiles:/app/static/
-      - media:/app/media/
+      - ./backend/media:/app/media/
       - /etc/letsencrypt/live/portafolio-juan.dagi.co/fullchain.pem:/etc/ssl/certs/fullchain.pem
       - /etc/letsencrypt/live/portafolio-juan.dagi.co/privkey.pem:/etc/ssl/private/privkey.pem
     networks:
@@ -54,7 +54,6 @@ services:
 volumes:
   postgres_data:
   staticfiles:
-  media:
 
 networks:
   nova_network:

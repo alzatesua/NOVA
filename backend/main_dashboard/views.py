@@ -30,6 +30,9 @@ from jwt import decode as jwt_decode, ExpiredSignatureError, InvalidTokenError
 import traceback
 from django.utils.text import slugify
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 from nova.utils.email import enviar_correo_mailjet
 
@@ -706,21 +709,46 @@ def actualizar_datos_tienda(request):
         if not isinstance(nuevos_datos, dict):
             return Response({'error': 'Datos debe ser un diccionario con campos a actualizar'}, status=400)
 
+        # Validar que las columnas a actualizar existan en la tabla
+        with connections[alias].cursor() as cursor:
+            cursor.execute("""
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_schema = 'public' AND table_name = %s
+            """, [tabla])
+            columnas_validas = {row[0] for row in cursor.fetchall()}
+
+        # Verificar que todas las columnas a actualizar existan
+        columnas_invalidas = set(nuevos_datos.keys()) - columnas_validas
+        if columnas_invalidas:
+            return Response({
+                'error': f'Las siguientes columnas no existen en la tabla {tabla}: {", ".join(columnas_invalidas)}',
+                'columnas_validas': sorted(columnas_validas)
+            }, status=400)
+        values = list(nuevos_datos.values()) + [filtro_valor]
         # Armar consulta
         set_clause = ", ".join([f"{key} = %s" for key in nuevos_datos.keys()])
-        values = list(nuevos_datos.values()) + [filtro_valor] #agragar condicional para el error if int(values[4]) <= 5:   en caso de que no se envia un string en el valor 4
-                                                                                                #   ^^^^^^^^^^^^^^             
+
+        # Enviar correo de alerta si el stock es bajo (solo para tabla de productos)
         stock = nuevos_datos.get('stock')
-        if stock is not None:
+        if stock is not None and tabla == 'productos':
             try:
                 if int(stock) <= 5:
+                    # Obtener el nombre del producto de la base de datos
+                    with connections[alias].cursor() as cursor:
+                        cursor.execute(f"SELECT nombre FROM productos WHERE {filtro_columna} = %s", [filtro_valor])
+                        result = cursor.fetchone()
+                        nombre_producto = result[0] if result else "Desconocido"
+
                     email = "zuletajonathan18@gmail.com"
-                    asunto = f"Alerta 🚨 el stock del producto: {values[1]} es de {values[4]}"
-                    html = f"<h2>Hola 👋</h2><p>Este es un correo para avisarte que el stock de tu producto es bajo</p><p>Alerta 🚨 el stock del producto: {values[1]} es de {values[4]}</p>"
-                    texto = "Este es el texto alternativo"
+                    asunto = f"Alerta: el stock del producto: {nombre_producto} es de {stock}"
+                    html = f"<h2>Hola</h2><p>Este es un correo para avisarte que el stock de tu producto es bajo</p><p>Alerta: el stock del producto: {nombre_producto} es de {stock}</p>"
+                    texto = "Este es un texto alternativo"
                     enviar_correo_mailjet(email, asunto, html, texto)
             except ValueError:
                 print("Stock no es un número válido")
+            except Exception as e:
+                print(f"Error enviando correo: {e}")
                 
         query = f"""
             UPDATE {tabla}
@@ -1363,16 +1391,36 @@ def subir_imagen_producto(request, producto_id):
 
         # Ruta completa: MEDIA_ROOT/<subdominio>/<slug_categoria>/
         folder = os.path.join(settings.MEDIA_ROOT, subdom, slug_cat)
+
+        # LOG: Depuración
+        print(f"[IMAGEN] MEDIA_ROOT: {settings.MEDIA_ROOT}")
+        print(f"[IMAGEN] Subdominio: {subdom}, Categoría: {slug_cat}")
+        print(f"[IMAGEN] Folder path: {folder}")
+
         os.makedirs(folder, exist_ok=True)
+
+        # LOG: Verificar carpeta creada
+        print(f"[IMAGEN] Carpeta existe: {os.path.exists(folder)}")
+        print(f"[IMAGEN] Permisos: {oct(os.stat(folder).st_mode) if os.path.exists(folder) else 'N/A'}")
 
         # Nombre del archivo: <producto_id>.<ext>
         filename = f"{producto_id}.{ext}"
         fullpath = os.path.join(folder, filename)
 
+        # LOG: Antes de escribir
+        print(f"[IMAGEN] Archivo: {filename}, Ruta: {fullpath}")
+        print(f"[IMAGEN] Tamaño imagen: {imagen_f.size} bytes")
+
         # Escribir archivo
         with open(fullpath, 'wb+') as dest:
             for chunk in imagen_f.chunks():
                 dest.write(chunk)
+
+        # LOG: Verificar archivo creado
+        if os.path.exists(fullpath):
+            print(f"[IMAGEN] ✓ Archivo creado. Tamaño: {os.path.getsize(fullpath)} bytes")
+        else:
+            print(f"[IMAGEN] ✗ ERROR: Archivo NO creado")
 
         # ------------------------------
         # 6) Actualizar URL pública y guardar en BD

@@ -258,21 +258,6 @@ class Dominios(models.Model):
     def __str__(self):
         return self.dominio
 
-class Sucursal(models.Model):
-    nombre = models.CharField(max_length=100)
-    direccion = models.CharField(max_length=255, blank=True, null=True)
-    ciudad = models.CharField(max_length=100, blank=True, null=True)
-    pais = models.CharField(max_length=100, blank=True, null=True)
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
-    estatus = models.BooleanField(default=True)
-
-    class Meta:
-        db_table = 'nova_sucursal'
-
-    def __str__(self):
-        return self.nombre
-
-
 
 """
 class LoginUsuario(AbstractBaseUser, PermissionsMixin):
@@ -369,7 +354,7 @@ class LoginUsuario(AbstractBaseUser, PermissionsMixin):
 
     # ✅ Deja SOLO el FK apuntando a la misma columna física
     id_sucursal_default = models.ForeignKey(
-        'Sucursal',
+        'main_dashboard.Sucursales',
         on_delete=models.SET_NULL,
         null=True,
         db_column='id_sucursal_default',
