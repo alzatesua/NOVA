@@ -1,6 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { fetchProducts } from '../services/api';
-import { Navbar, Nav, NavDropdown, Form, Container, Button } from 'react-bootstrap';
+import { Navbar, Nav, Form, Container, Button } from 'react-bootstrap';
+import {
+  House,
+  Users,
+  ShoppingCart,
+  Phone,
+  Grid3x3,
+  ChevronDown
+} from 'lucide-react';
 
 // Paleta de colores ecológica para movilidad eléctrica
 const COLORS = {
@@ -38,11 +46,31 @@ export default function EcommerceView() {
 
   // Estados para secciones
   const [activeSection, setActiveSection] = useState('inicio');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   // Configuración de la tienda
   const nombreTienda = localStorage.getItem('nombre_tienda') || 'EcoMotion';
   const whatsappNumber = localStorage.getItem('whatsapp_number') || '573000000000';
   const subdominio = window.location.hostname.split('.')[0];
+
+  // Cerrar dropdown cuando se cambia de sección o se hace clic fuera
+  useEffect(() => {
+    setIsDropdownOpen(false);
+  }, [activeSection]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Cargar productos
   useEffect(() => {
@@ -396,6 +424,71 @@ export default function EcommerceView() {
             to { opacity: 1; }
           }
 
+          @keyframes glow {
+            0%, 100% {
+              box-shadow: 0 0 5px rgba(255, 255, 255, 0.5),
+                          0 0 10px rgba(255, 255, 255, 0.3),
+                          0 0 15px rgba(255, 255, 255, 0.2);
+              text-shadow: 0 0 5px rgba(255, 255, 255, 0.8),
+                          0 0 10px rgba(255, 255, 255, 0.5);
+            }
+            50% {
+              box-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
+                          0 0 20px rgba(255, 255, 255, 0.5),
+                          0 0 30px rgba(255, 255, 255, 0.3);
+              text-shadow: 0 0 10px rgba(255, 255, 255, 1),
+                          0 0 20px rgba(255, 255, 255, 0.8),
+                          0 0 30px rgba(255, 255, 255, 0.6);
+            }
+          }
+
+          @keyframes glow-futuristic {
+            0%, 100% {
+              box-shadow: 0 0 20px rgba(255, 215, 0, 0.6),
+                          0 0 40px rgba(255, 167, 38, 0.4),
+                          inset 0 0 20px rgba(255, 255, 255, 0.3),
+                          0 0 60px rgba(255, 215, 0, 0.3);
+            }
+            50% {
+              box-shadow: 0 0 40px rgba(255, 215, 0, 1),
+                          0 0 80px rgba(255, 167, 38, 0.6),
+                          inset 0 0 30px rgba(255, 255, 255, 0.5),
+                          0 0 100px rgba(255, 215, 0, 0.5);
+            }
+          }
+
+          @keyframes shimmer {
+            0% {
+              background-position: -200% center;
+            }
+            100% {
+              background-position: 200% center;
+            }
+          }
+
+          @keyframes pulse-border {
+            0%, 100% {
+              border-color: rgba(255, 215, 0, 0.6);
+              box-shadow: 0 0 20px rgba(255, 215, 0, 0.5),
+                          0 0 40px rgba(255, 167, 38, 0.3);
+            }
+            50% {
+              border-color: rgba(255, 215, 0, 1);
+              box-shadow: 0 0 40px rgba(255, 215, 0, 1),
+                          0 0 80px rgba(255, 167, 38, 0.8),
+                          0 0 120px rgba(255, 215, 0, 0.5);
+            }
+          }
+
+          /* Scrollbar hide utility */
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+
           .animated-bg {
             background: linear-gradient(
               -45deg,
@@ -407,6 +500,95 @@ export default function EcommerceView() {
             );
             background-size: 400% 400%;
             animation: gradientShift 15s ease infinite;
+          }
+
+          /* Botones del navbar con efecto futurista sobrio */
+          .nav-btn-futuristic {
+            position: relative !important;
+            padding: 12px 24px !important;
+            border-radius: 25px !important;
+            background: rgba(46, 125, 50, 0.15) !important;
+            backdrop-filter: blur(10px) !important;
+            border: 2px solid rgba(46, 125, 50, 0.4) !important;
+            color: #E8F5E9 !important;
+            font-weight: 600 !important;
+            font-size: 15px !important;
+            cursor: pointer !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            overflow: hidden !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            text-decoration: none !important;
+            user-select: none !important;
+            white-space: nowrap !important;
+          }
+
+          .nav-btn-futuristic::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+              90deg,
+              transparent,
+              rgba(129, 199, 132, 0.3),
+              transparent
+            );
+            transition: left 0.6s ease;
+          }
+
+          .nav-btn-futuristic:hover::before {
+            left: 100%;
+          }
+
+          .nav-btn-futuristic:hover {
+            background: rgba(46, 125, 50, 0.25) !important;
+            border-color: rgba(76, 175, 80, 0.7) !important;
+            box-shadow: 0 0 25px rgba(76, 175, 80, 0.4),
+                        inset 0 0 20px rgba(76, 175, 80, 0.15) !important;
+            transform: translateY(-2px) scale(1.03) !important;
+          }
+
+          .nav-btn-futuristic.active {
+            background: rgba(76, 175, 80, 0.3) !important;
+            border-color: rgba(76, 175, 80, 0.8) !important;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.4),
+                        inset 0 0 15px rgba(76, 175, 80, 0.2) !important;
+            transform: scale(1.05) !important;
+          }
+
+          /* Dropdown futurista */
+          .nav-dropdown-futuristic {
+            background: rgba(27, 94, 32, 0.98) !important;
+            backdrop-filter: blur(20px) !important;
+            border: 2px solid rgba(76, 175, 80, 0.5) !important;
+            border-radius: 12px !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                        0 0 15px rgba(76, 175, 80, 0.3) !important;
+          }
+
+          .dropdown-item {
+            color: #FFF !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            border-radius: 10px !important;
+            margin: 4px 8px !important;
+          }
+
+          .dropdown-item:hover {
+            background: linear-gradient(135deg, ${COLORS.acentoNaranja}, ${COLORS.acentoTurquesa}) !important;
+            color: #000 !important;
+            transform: translateX(10px) !important;
+            box-shadow: 0 0 15px rgba(255, 167, 38, 0.6) !important;
+          }
+
+          .dropdown-divider {
+            border-color: rgba(255, 215, 0, 0.5) !important;
+            margin: 8px 0 !important;
           }
 
           .floating-shape {
@@ -436,11 +618,161 @@ export default function EcommerceView() {
             animation: fadeIn 0.8s ease-out forwards;
             opacity: 0;
           }
+
+          /* Responsive improvements */
+          @media (min-width: 992px) {
+            /* Better spacing on large screens */
+            .navbar > .container-fluid {
+              display: flex;
+              align-items: center;
+            }
+
+            .navbar-collapse {
+              flex: 1;
+              display: flex !important;
+            }
+          }
+
+          @media (min-width: 768px) and (max-width: 1199px) {
+            /* Medium screens - adjust button size and search */
+            .nav-btn-futuristic {
+              padding: 8px 14px !important;
+              font-size: 13px !important;
+            }
+
+            .navbar .form-control {
+              width: 140px !important;
+            }
+          }
+
+          @media (max-width: 991px) {
+            .navbar-collapse {
+              max-height: 85vh;
+              overflow-y: auto;
+              padding: 15px 0;
+            }
+
+            .nav-btn-futuristic {
+              padding: 10px 18px !important;
+              font-size: 14px !important;
+            }
+
+            /* Centrar contenedor en móvil */
+            .navbar-collapse > div {
+              justify-content: center !important;
+            }
+
+            /* Search bar y carrito centrados */
+            .navbar-collapse .d-flex {
+              width: 100%;
+              justify-content: center !important;
+            }
+
+            .navbar .form-control {
+              width: 180px !important;
+            }
+          }
+
+          @media (max-width: 768px) {
+            /* Modal responsive */
+            .modal-content-custom {
+              margin: 10px;
+              max-height: calc(100vh - 100px) !important;
+            }
+
+            /* Navbar adjustments */
+            .navbar-brand {
+              font-size: 1.1rem !important;
+            }
+
+            .navbar-brand span {
+              font-size: 16px !important;
+            }
+
+            /* Botones más pequeños en móvil */
+            .nav-btn-futuristic {
+              padding: 8px 14px !important;
+              font-size: 13px !important;
+            }
+
+            .nav-btn-futuristic svg {
+              width: 16px !important;
+              height: 16px !important;
+            }
+
+            /* Contenedor de búsqueda y carrito en móvil */
+            .navbar-collapse .d-flex.flex-column {
+              width: 100%;
+              padding: 10px 0;
+            }
+
+            .navbar .form-control {
+              width: 100% !important;
+              max-width: 200px !important;
+            }
+
+            /* Hero responsive text */
+            .hero-title {
+              font-size: 2rem !important;
+            }
+
+            /* Categorías responsive */
+            .category-card {
+              padding: 12px !important;
+            }
+
+            /* Productos grid responsive */
+            .product-card h3 {
+              font-size: 14px !important;
+            }
+          }
+
+          @media (max-width: 576px) {
+            /* Extra small screens */
+            .navbar-brand {
+              font-size: 1rem !important;
+            }
+
+            .nav-btn-futuristic {
+              padding: 7px 12px !important;
+              font-size: 12px !important;
+            }
+
+            .nav-btn-futuristic svg {
+              width: 14px !important;
+              height: 14px !important;
+            }
+
+            /* Ajustar formulario de búsqueda */
+            .navbar .form-control {
+              font-size: 13px !important;
+              padding: 6px 10px !important;
+            }
+
+            /* Hero más pequeño */
+            .hero-title {
+              font-size: 1.6rem !important;
+            }
+
+            /* Productos */
+            .grid-cols-2 {
+              grid-template-columns: repeat(2, 1fr) !important;
+              gap: 8px !important;
+            }
+
+            .product-card p.text-2xl {
+              font-size: 1.2rem !important;
+            }
+          }
         `}
       </style>
 
       {/* Header con Bootstrap Navbar */}
-      <Navbar bg="success" variant="dark" expand="lg" className="sticky-top shadow-lg" style={{ backgroundColor: COLORS.verdePrincipal + ' !important' }}>
+      <Navbar bg="success" variant="dark" expand="lg" className="sticky-top shadow-lg" style={{
+        background: `linear-gradient(135deg, ${COLORS.verdePrincipal}99, ${COLORS.verdeOscuro}CC) !important`,
+        backdropFilter: 'blur(20px)',
+        boxShadow: `0 4px 30px rgba(0, 0, 0, 0.3), 0 0 20px ${COLORS.acentoNaranja}66`
+      }}>
         <Container fluid>
           {/* Logo */}
           <Navbar.Brand
@@ -462,103 +794,194 @@ export default function EcommerceView() {
 
           {/* Contenido colapsable */}
           <Navbar.Collapse id="navbarSupportedContent">
-            <Nav className="flex-grow-1 justify-content-center">
-              <Nav.Link
-                active={activeSection === 'inicio'}
-                onClick={() => setActiveSection('inicio')}
-                className={`mx-3 ${activeSection === 'inicio' ? 'fw-bold' : ''}`}
-              >
-                Inicio
-              </Nav.Link>
-              <Nav.Link
-                active={activeSection === 'nosotros'}
-                onClick={() => setActiveSection('nosotros')}
-                className={`mx-3 ${activeSection === 'nosotros' ? 'fw-bold' : ''}`}
-              >
-                Nosotros
-              </Nav.Link>
-              <Nav.Link
-                active={activeSection === 'productos'}
-                onClick={() => setActiveSection('productos')}
-                className={`mx-3 ${activeSection === 'productos' ? 'fw-bold' : ''}`}
-              >
-                Productos
-              </Nav.Link>
-              <Nav.Link
-                active={activeSection === 'contacto'}
-                onClick={() => setActiveSection('contacto')}
-                className={`mx-3 ${activeSection === 'contacto' ? 'fw-bold' : ''}`}
-              >
-                Contacto
-              </Nav.Link>
-
-              {/* Dropdown de Categorías */}
-              {categories.length > 0 && (
-                <NavDropdown title="Categorías" id="categoriesDropdown" className="mx-3">
-                  <NavDropdown.Item onClick={() => { setActiveSection('productos'); setActiveCategory(null); }}>
-                    Todas
-                  </NavDropdown.Item>
-                  <NavDropdown.Divider />
-                  {categories.map((category) => (
-                    <NavDropdown.Item
-                      key={category}
-                      onClick={() => { setActiveSection('productos'); setActiveCategory(category); }}
-                    >
-                      {category}
-                    </NavDropdown.Item>
-                  ))}
-                </NavDropdown>
-              )}
-            </Nav>
-
-            {/* Barra de búsqueda */}
-            <Form className="d-flex me-3">
-              <Form.Control
-                type="search"
-                placeholder="Buscar productos..."
-                className="me-2"
-                aria-label="Search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ maxWidth: '200px' }}
-              />
-              <Button variant="outline-light">🔍</Button>
-            </Form>
-
-            {/* Carrito - Enviar directamente a WhatsApp */}
-            <Button
-              variant="light"
-              className="position-relative"
-              onClick={() => {
-                if (cart.length > 0) {
-                  sendToWhatsApp();
-                } else {
-                  alert('Tu carrito está vacío');
-                }
-              }}
-              style={{ color: COLORS.verdePrincipal }}
-              title="Completar pedido por WhatsApp"
-            >
-              <svg
-                style={{ width: '20px', height: '20px' }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              {cartItemCount > 0 && (
-                <span
-                  className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
-                  style={{ backgroundColor: COLORS.acentoNaranja }}
+            {/* Todos los elementos en una línea centrada */}
+            <div className="d-flex align-items-center justify-content-lg-center w-100 gap-2 gap-lg-3">
+              {/* Botones de navegación - Todos en una línea */}
+              <Nav className="d-flex justify-content-center align-items-center gap-2 gap-lg-3 flex-wrap flex-row">
+                <button
+                  onClick={() => setActiveSection('inicio')}
+                  className={`nav-btn-futuristic ${activeSection === 'inicio' ? 'active' : ''}`}
                 >
-                  {cartItemCount}
-                </span>
-              )}
-            </Button>
+                  <House size={18} strokeWidth={2} />
+                  <span>Inicio</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveSection('nosotros')}
+                  className={`nav-btn-futuristic ${activeSection === 'nosotros' ? 'active' : ''}`}
+                >
+                  <Users size={18} strokeWidth={2} />
+                  <span>Nosotros</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveSection('productos')}
+                  className={`nav-btn-futuristic ${activeSection === 'productos' ? 'active' : ''}`}
+                >
+                  <ShoppingCart size={18} strokeWidth={2} />
+                  <span>Productos</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveSection('contacto')}
+                  className={`nav-btn-futuristic ${activeSection === 'contacto' ? 'active' : ''}`}
+                >
+                  <Phone size={18} strokeWidth={2} />
+                  <span>Contacto</span>
+                </button>
+
+                {/* Dropdown de Categorías */}
+                {categories.length > 0 && (
+                  <div style={{ position: 'relative', display: 'inline-block' }} ref={dropdownRef}>
+                    <button
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className={`nav-btn-futuristic ${isDropdownOpen ? 'active' : ''}`}
+                    >
+                      <Grid3x3 size={18} strokeWidth={2} />
+                      <span>Categorías</span>
+                      <ChevronDown
+                        size={16}
+                        strokeWidth={2.5}
+                        style={{
+                          transition: 'transform 0.3s ease',
+                          transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+                        }}
+                      />
+                    </button>
+                    {isDropdownOpen && (
+                      <div className="nav-dropdown-futuristic" style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        marginTop: '10px',
+                        padding: '8px',
+                        minWidth: '200px',
+                        zIndex: 1000,
+                        animation: 'fadeIn 0.2s ease-out'
+                      }}>
+                        <div
+                          onClick={() => { setActiveSection('productos'); setActiveCategory(null); setIsDropdownOpen(false); }}
+                          style={{
+                            padding: '10px 15px',
+                            color: '#E8F5E9',
+                            fontWeight: '500',
+                            borderRadius: '8px',
+                            margin: '2px 4px',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(76, 175, 80, 0.2)';
+                            e.currentTarget.style.transform = 'translateX(5px)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.transform = 'translateX(0)';
+                          }}
+                        >
+                          ✨ Todas
+                        </div>
+                        <div style={{ borderColor: 'rgba(76, 175, 80, 0.3)', margin: '6px 8px', borderBottom: '1px solid' }}></div>
+                        {categories.map((category) => (
+                          <div
+                            key={category}
+                            onClick={() => { setActiveSection('productos'); setActiveCategory(category); setIsDropdownOpen(false); }}
+                            style={{
+                              padding: '10px 15px',
+                              color: '#E8F5E9',
+                              fontWeight: '500',
+                              borderRadius: '8px',
+                              margin: '2px 4px',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = 'rgba(76, 175, 80, 0.2)';
+                              e.currentTarget.style.transform = 'translateX(5px)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'transparent';
+                              e.currentTarget.style.transform = 'translateX(0)';
+                            }}
+                          >
+                            {getCategoryEmoji(category)} {category}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Nav>
+
+              {/* Separador visual - Solo en desktop */}
+              <div className="d-none d-lg-block" style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.3)', margin: '0 10px' }}></div>
+
+              {/* Carrito y Búsqueda - Alineados */}
+              <div className="d-flex align-items-center gap-2 gap-lg-3">
+                {/* Carrito - Enviar directamente a WhatsApp */}
+                <Button
+                  variant="light"
+                  className="position-relative flex-shrink-0"
+                  onClick={() => {
+                    if (cart.length > 0) {
+                      sendToWhatsApp();
+                    } else {
+                      alert('Tu carrito está vacío');
+                    }
+                  }}
+                  style={{
+                    color: COLORS.verdePrincipal,
+                    minWidth: '50px',
+                    height: '45px'
+                  }}
+                  title="Completar pedido por WhatsApp"
+                >
+                  <svg
+                    style={{ width: '20px', height: '20px' }}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  {cartItemCount > 0 && (
+                    <span
+                      className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                      style={{ backgroundColor: COLORS.acentoNaranja }}
+                    >
+                      {cartItemCount}
+                    </span>
+                  )}
+                </Button>
+
+                {/* Barra de búsqueda */}
+                <Form className="d-flex">
+                  <Form.Control
+                    type="search"
+                    placeholder="Buscar..."
+                    className="me-1"
+                    aria-label="Search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{
+                      width: '200px',
+                      height: '45px',
+                      fontSize: '14px'
+                    }}
+                  />
+                  <Button
+                    variant="outline-light"
+                    style={{ height: '45px', padding: '0 12px' }}
+                  >
+                    🔍
+                  </Button>
+                </Form>
+              </div>
+            </div>
           </Navbar.Collapse>
         </Container>
-      </Navbar>
+      </Navbar>               
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
@@ -645,7 +1068,7 @@ export default function EcommerceView() {
 
                   {/* Título Principal */}
                   <h1
-                    className="text-6xl md:text-7xl font-extrabold mb-6 text-white"
+                    className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 text-white"
                     style={{ textShadow: '2px 2px 8px rgba(0, 0, 0, 0.3)' }}
                   >
                     Bienvenidos
@@ -653,7 +1076,7 @@ export default function EcommerceView() {
 
                   {/* Subtítulo con gradiente */}
                   <p
-                    className="text-2xl md:text-3xl font-semibold mb-8 text-white"
+                    className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold mb-8 text-white"
                     style={{ textShadow: '1px 1px 4px rgba(0, 0, 0, 0.3)' }}
                   >
                     Tu destino para{' '}
@@ -667,10 +1090,10 @@ export default function EcommerceView() {
                   </p>
 
                   {/* Botones CTA */}
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
                     <button
                       onClick={() => setActiveSection('productos')}
-                      className="px-10 py-4 rounded-full font-bold text-white text-xl shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
+                      className="px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-white text-base sm:text-lg md:text-xl shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
                       style={{
                         backgroundColor: COLORS.blanco,
                         color: COLORS.verdePrincipal,
@@ -681,7 +1104,7 @@ export default function EcommerceView() {
                     </button>
                     <button
                       onClick={() => setActiveSection('nosotros')}
-                      className="px-10 py-4 rounded-full font-bold text-white text-xl shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
+                      className="px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-white text-base sm:text-lg md:text-xl shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
                       style={{
                         backgroundColor: 'rgba(255, 255, 255, 0.15)',
                         backdropFilter: 'blur(10px)',
@@ -693,24 +1116,24 @@ export default function EcommerceView() {
                   </div>
 
                   {/* Stats */}
-                  <div className="mt-12 grid grid-cols-3 gap-8 max-w-3xl mx-auto">
+                  <div className="mt-8 sm:mt-12 grid grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-3xl mx-auto px-4">
                     <div className="text-center">
-                      <div className="text-4xl font-bold text-white mb-1" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
+                      <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
                         8+
                       </div>
-                      <div className="text-white/90 text-sm">Productos</div>
+                      <div className="text-white/90 text-xs sm:text-sm">Productos</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-4xl font-bold text-white mb-1" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
+                      <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
                         100%
                       </div>
-                      <div className="text-white/90 text-sm">Ecológico</div>
+                      <div className="text-white/90 text-xs sm:text-sm">Ecológico</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-4xl font-bold text-white mb-1" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
+                      <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1" style={{ textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)' }}>
                         60km
                       </div>
-                      <div className="text-white/90 text-sm">Autonomía</div>
+                      <div className="text-white/90 text-xs sm:text-sm">Autonomía</div>
                     </div>
                   </div>
                 </div>
@@ -718,11 +1141,11 @@ export default function EcommerceView() {
             </div>
 
             {/* Categorías destacadas */}
-            <div className="mb-12">
-              <h2 className="text-3xl font-bold mb-6 text-center" style={{ color: COLORS.verdeOscuro }}>
+            <div className="mb-8 md:mb-12">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center" style={{ color: COLORS.verdeOscuro }}>
                 Categorías Destacadas
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 px-2">
                 {categories.slice(0, 4).map((category, index) => (
                   <button
                     key={category}
@@ -737,8 +1160,8 @@ export default function EcommerceView() {
                       animationDelay: `${index * 0.15}s`
                     }}
                   >
-                    <div className="text-4xl mb-2">{getCategoryEmoji(category)}</div>
-                    <h3 className="font-semibold" style={{ color: COLORS.verdeOscuro }}>{category}</h3>
+                    <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">{getCategoryEmoji(category)}</div>
+                    <h3 className="font-semibold text-sm sm:text-base" style={{ color: COLORS.verdeOscuro }}>{category}</h3>
                   </button>
                 ))}
               </div>
@@ -746,10 +1169,10 @@ export default function EcommerceView() {
 
             {/* Productos destacados */}
             <div>
-              <h2 className="text-3xl font-bold mb-6 text-center" style={{ color: COLORS.verdeOscuro }}>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center" style={{ color: COLORS.verdeOscuro }}>
                 Productos Destacados
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 px-2">
                 {products.slice(0, 3).map((product, index) => (
                   <div
                     key={product.id}
@@ -764,23 +1187,23 @@ export default function EcommerceView() {
                     }}
                   >
                     <div
-                      className="w-full h-48 flex items-center justify-center"
+                      className="w-full h-36 sm:h-40 md:h-48 flex items-center justify-center"
                       style={{ backgroundColor: COLORS.grisClaro }}
                     >
                       {product.imagen ? (
                         <img src={product.imagen} alt={product.nombre} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-6xl">{getCategoryEmoji(product.categoria_nombre)}</span>
+                        <span className="text-4xl sm:text-5xl md:text-6xl">{getCategoryEmoji(product.categoria_nombre)}</span>
                       )}
                     </div>
-                    <div className="p-4">
-                      <h3 className="font-bold text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>
+                    <div className="p-3 sm:p-4">
+                      <h3 className="font-bold text-base sm:text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>
                         {product.nombre}
                       </h3>
-                      <p className="text-sm mb-3 line-clamp-2" style={{ color: COLORS.grisMedio }}>
+                      <p className="text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2" style={{ color: COLORS.grisMedio }}>
                         {product.descripcion}
                       </p>
-                      <p className="text-2xl font-bold" style={{ color: COLORS.verdePrincipal }}>
+                      <p className="text-xl sm:text-2xl font-bold" style={{ color: COLORS.verdePrincipal }}>
                         ${parseFloat(product.precio_venta || 0).toFixed(2)}
                       </p>
                     </div>
@@ -793,55 +1216,55 @@ export default function EcommerceView() {
 
         {/* Sección NOSOTROS */}
         {activeSection === 'nosotros' && (
-          <div className="py-12">
+          <div className="py-8 sm:py-12 px-2 sm:px-4">
             <div className="max-w-4xl mx-auto">
-              <h1 className="text-5xl font-bold mb-8 text-center" style={{ color: COLORS.verdeOscuro }}>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8 text-center" style={{ color: COLORS.verdeOscuro }}>
                 Sobre Nosotros
               </h1>
 
-              <div className="rounded-2xl shadow-xl p-8 mb-8" style={{ backgroundColor: COLORS.beigeCrema }}>
-                <h2 className="text-3xl font-bold mb-4" style={{ color: COLORS.verdePrincipal }}>
+              <div className="rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.beigeCrema }}>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdePrincipal }}>
                   Nuestra Misión
                 </h2>
-                <p className="text-lg leading-relaxed mb-6" style={{ color: COLORS.grisOscuro }}>
+                <p className="text-base sm:text-lg leading-relaxed mb-4 sm:mb-6" style={{ color: COLORS.grisOscuro }}>
                   En {nombreTienda}, estamos comprometidos con revolucionar la forma en que las personas se mueven.
                   Nuestra misión es proporcionar soluciones de movilidad eléctrica accesibles, sostenibles y de alta calidad
                   que contribuyan a un futuro más limpio y verde para todos.
                 </p>
 
-                <h2 className="text-3xl font-bold mb-4" style={{ color: COLORS.verdePrincipal }}>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdePrincipal }}>
                   Por Qué Elegirnos
                 </h2>
-                <div className="grid md:grid-cols-3 gap-6 mt-6">
-                  <div className="text-center p-4">
-                    <div className="text-5xl mb-2">🌱</div>
-                    <h3 className="font-bold text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>100% Ecológico</h3>
-                    <p className="text-sm" style={{ color: COLORS.grisMedio }}>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-6">
+                  <div className="text-center p-3 sm:p-4">
+                    <div className="text-4xl sm:text-5xl mb-2">🌱</div>
+                    <h3 className="font-bold text-base sm:text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>100% Ecológico</h3>
+                    <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
                       Todos nuestros productos son cero emisiones
                     </p>
                   </div>
-                  <div className="text-center p-4">
-                    <div className="text-5xl mb-2">⚡</div>
-                    <h3 className="font-bold text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>Alta Potencia</h3>
-                    <p className="text-sm" style={{ color: COLORS.grisMedio }}>
+                  <div className="text-center p-3 sm:p-4">
+                    <div className="text-4xl sm:text-5xl mb-2">⚡</div>
+                    <h3 className="font-bold text-base sm:text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>Alta Potencia</h3>
+                    <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
                       Baterías de larga duración y rendimiento
                     </p>
                   </div>
-                  <div className="text-center p-4">
-                    <div className="text-5xl mb-2">🛡️</div>
-                    <h3 className="font-bold text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>Garantía Premium</h3>
-                    <p className="text-sm" style={{ color: COLORS.grisMedio }}>
+                  <div className="text-center p-3 sm:p-4">
+                    <div className="text-4xl sm:text-5xl mb-2">🛡️</div>
+                    <h3 className="font-bold text-base sm:text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>Garantía Premium</h3>
+                    <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
                       Soporte técnico y garantía extendida
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-2xl shadow-xl p-8" style={{ backgroundColor: COLORS.verdeMenta + '20' }}>
-                <h2 className="text-3xl font-bold mb-4" style={{ color: COLORS.verdePrincipal }}>
+              <div className="rounded-2xl shadow-xl p-4 sm:p-6 md:p-8" style={{ backgroundColor: COLORS.verdeMenta + '20' }}>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdePrincipal }}>
                   Nuestro Compromiso Ambiental
                 </h2>
-                <p className="text-lg leading-relaxed" style={{ color: COLORS.grisOscuro }}>
+                <p className="text-base sm:text-lg leading-relaxed" style={{ color: COLORS.grisOscuro }}>
                   Cada producto que vendemos ayuda a reducir la huella de carbono. Trabajamos directamente con
                   fabricantes que utilizan materiales reciclables y procesos de producción sostenibles.
                   Además, donamos el 5% de nuestras utilidades a organizaciones dedicadas a la reforestación
@@ -856,18 +1279,19 @@ export default function EcommerceView() {
         {activeSection === 'productos' && (
           <div>
             {/* Filtros de categoría */}
-            <div className="mb-8">
-              <div className="flex items-center space-x-4 overflow-x-auto pb-2">
+            <div className="mb-6 md:mb-8">
+              <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-2 px-2 scrollbar-hide">
                 <button
                   onClick={() => setActiveCategory(null)}
-                  className={`px-6 py-3 rounded-full font-semibold whitespace-nowrap transition-all ${
+                  className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold whitespace-nowrap transition-all ${
                     activeCategory === null
                       ? 'text-white shadow-lg'
                       : 'bg-white hover:shadow-md'
                   }`}
                   style={{
                     backgroundColor: activeCategory === null ? COLORS.verdePrincipal : COLORS.blanco,
-                    color: activeCategory === null ? COLORS.blanco : COLORS.verdePrincipal
+                    color: activeCategory === null ? COLORS.blanco : COLORS.verdePrincipal,
+                    fontSize: '13px'
                   }}
                 >
                   Todas
@@ -876,24 +1300,25 @@ export default function EcommerceView() {
                   <button
                     key={category}
                     onClick={() => setActiveCategory(category)}
-                    className={`px-6 py-3 rounded-full font-semibold whitespace-nowrap transition-all ${
+                    className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold whitespace-nowrap transition-all ${
                       activeCategory === category
                         ? 'text-white shadow-lg'
                         : 'bg-white hover:shadow-md'
                     }`}
                     style={{
                       backgroundColor: activeCategory === category ? COLORS.verdePrincipal : COLORS.blanco,
-                      color: activeCategory === category ? COLORS.blanco : COLORS.verdePrincipal
+                      color: activeCategory === category ? COLORS.blanco : COLORS.verdePrincipal,
+                      fontSize: '13px'
                     }}
                   >
-                    {category}
+                    {getCategoryEmoji(category)} {category}
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Grid de productos */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 px-2">
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
@@ -911,22 +1336,22 @@ export default function EcommerceView() {
                     {product.imagen ? (
                       <img src={product.imagen} alt={product.nombre} className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-6xl">{getCategoryEmoji(product.categoria_nombre)}</span>
+                      <span className="text-4xl sm:text-5xl md:text-6xl">{getCategoryEmoji(product.categoria_nombre)}</span>
                     )}
                   </div>
-                  <div className="p-4">
+                  <div className="p-2 sm:p-3 md:p-4">
                     {product.categoria_nombre && (
-                      <span className="inline-block px-2 py-1 text-xs rounded-full mb-2 text-white" style={{ backgroundColor: COLORS.verdePrincipal }}>
+                      <span className="inline-block px-2 py-0.5 text-[10px] sm:text-xs rounded-full mb-1 sm:mb-2 text-white" style={{ backgroundColor: COLORS.verdePrincipal }}>
                         {product.categoria_nombre}
                       </span>
                     )}
-                    <h3 className="font-bold text-lg mb-2 line-clamp-2" style={{ color: COLORS.verdeOscuro }}>
+                    <h3 className="font-bold text-xs sm:text-sm md:text-base mb-1 sm:mb-2 line-clamp-2" style={{ color: COLORS.verdeOscuro }}>
                       {product.nombre}
                     </h3>
-                    <p className="text-sm mb-3 line-clamp-2" style={{ color: COLORS.grisMedio }}>
+                    <p className="text-[10px] sm:text-xs md:text-sm mb-2 sm:mb-3 line-clamp-1 sm:line-clamp-2" style={{ color: COLORS.grisMedio }}>
                       {product.descripcion}
                     </p>
-                    <p className="text-2xl font-bold" style={{ color: COLORS.verdePrincipal }}>
+                    <p className="text-lg sm:text-xl md:text-2xl font-bold" style={{ color: COLORS.verdePrincipal }}>
                       ${parseFloat(product.precio_venta || 0).toFixed(2)}
                     </p>
                     <button
@@ -934,7 +1359,7 @@ export default function EcommerceView() {
                         e.stopPropagation();
                         addToCart(product);
                       }}
-                      className="w-full mt-3 px-4 py-2 rounded-lg font-semibold text-white shadow-md hover:shadow-lg transition-all"
+                      className="w-full mt-2 sm:mt-3 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-white shadow-md hover:shadow-lg transition-all text-xs sm:text-sm"
                       style={{ backgroundColor: COLORS.acentoNaranja }}
                     >
                       Agregar al Carrito
@@ -957,49 +1382,49 @@ export default function EcommerceView() {
 
         {/* Sección CONTACTO */}
         {activeSection === 'contacto' && (
-          <div className="py-12">
+          <div className="py-8 sm:py-12 px-2 sm:px-4">
             <div className="max-w-4xl mx-auto">
-              <h1 className="text-5xl font-bold mb-12 text-center" style={{ color: COLORS.verdeOscuro }}>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8 md:mb-12 text-center" style={{ color: COLORS.verdeOscuro }}>
                 Contáctanos
               </h1>
 
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="rounded-2xl shadow-xl p-8" style={{ backgroundColor: COLORS.beigeCrema }}>
-                  <h2 className="text-2xl font-bold mb-6" style={{ color: COLORS.verdePrincipal }}>
+              <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+                <div className="rounded-2xl shadow-xl p-4 sm:p-6 md:p-8" style={{ backgroundColor: COLORS.beigeCrema }}>
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: COLORS.verdePrincipal }}>
                     Información de Contacto
                   </h2>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">📍</span>
-                      <p style={{ color: COLORS.grisOscuro }}>Calle Principal #123, Ciudad</p>
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <span className="text-xl sm:text-2xl">📍</span>
+                      <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>Calle Principal #123, Ciudad</p>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">📞</span>
-                      <p style={{ color: COLORS.grisOscuro }}>Tel: {whatsappNumber}</p>
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <span className="text-xl sm:text-2xl">📞</span>
+                      <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>Tel: {whatsappNumber}</p>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">✉️</span>
-                      <p style={{ color: COLORS.grisOscuro }}>info@ecomotion.com</p>
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <span className="text-xl sm:text-2xl">✉️</span>
+                      <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>info@ecomotion.com</p>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">⏰</span>
-                      <p style={{ color: COLORS.grisOscuro }}>Lun-Sáb: 9:00 AM - 7:00 PM</p>
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <span className="text-xl sm:text-2xl">⏰</span>
+                      <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>Lun-Sáb: 9:00 AM - 7:00 PM</p>
                     </div>
                   </div>
 
-                  <div className="mt-8">
-                    <h3 className="text-xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+                  <div className="mt-6 sm:mt-8">
+                    <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdeOscuro }}>
                       Síguenos en Redes
                     </h3>
-                    <div className="flex space-x-4">
+                    <div className="flex space-x-3 sm:space-x-4">
                       <a
                         href={`https://wa.me/${whatsappNumber}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
                         style={{ backgroundColor: '#25D366' }}
                       >
-                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                         </svg>
                       </a>
@@ -1007,10 +1432,10 @@ export default function EcommerceView() {
                         href="https://facebook.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
                         style={{ backgroundColor: '#1877F2' }}
                       >
-                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                         </svg>
                       </a>
@@ -1018,10 +1443,10 @@ export default function EcommerceView() {
                         href="https://instagram.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
                         style={{ backgroundColor: '#E4405F' }}
                       >
-                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                         </svg>
                       </a>
@@ -1029,10 +1454,10 @@ export default function EcommerceView() {
                         href="https://youtube.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
                         style={{ backgroundColor: '#FF0000' }}
                       >
-                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                         </svg>
                       </a>
@@ -1040,47 +1465,47 @@ export default function EcommerceView() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl shadow-xl p-8" style={{ backgroundColor: COLORS.blanco }}>
-                  <h2 className="text-2xl font-bold mb-6" style={{ color: COLORS.verdePrincipal }}>
+                <div className="rounded-2xl shadow-xl p-4 sm:p-6 md:p-8" style={{ backgroundColor: COLORS.blanco }}>
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: COLORS.verdePrincipal }}>
                     Envíanos un Mensaje
                   </h2>
-                  <form className="space-y-4">
+                  <form className="space-y-3 sm:space-y-4">
                     <div>
-                      <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.grisOscuro }}>
+                      <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2" style={{ color: COLORS.grisOscuro }}>
                         Nombre Completo
                       </label>
                       <input
                         type="text"
-                        className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base"
                         style={{ borderColor: COLORS.verdeMenta }}
                         placeholder="Tu nombre"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.grisOscuro }}>
+                      <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2" style={{ color: COLORS.grisOscuro }}>
                         Correo Electrónico
                       </label>
                       <input
                         type="email"
-                        className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base"
                         style={{ borderColor: COLORS.verdeMenta }}
                         placeholder="tu@email.com"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.grisOscuro }}>
+                      <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2" style={{ color: COLORS.grisOscuro }}>
                         Mensaje
                       </label>
                       <textarea
                         rows="4"
-                        className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base"
                         style={{ borderColor: COLORS.verdeMenta }}
                         placeholder="¿En qué podemos ayudarte?"
                       ></textarea>
                     </div>
                     <button
                       type="button"
-                      className="w-full px-6 py-3 rounded-lg font-semibold text-white shadow-lg hover:shadow-xl transition-all"
+                      className="w-full px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-white shadow-lg hover:shadow-xl transition-all text-sm sm:text-base"
                       style={{ backgroundColor: COLORS.verdePrincipal }}
                     >
                       Enviar Mensaje
@@ -1095,25 +1520,26 @@ export default function EcommerceView() {
 
       {/* Modal del Producto con Ficha Técnica */}
       {showProductModal && selectedProduct && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20">
+        <div className="fixed inset-0 z-50 overflow-y-auto" style={{ paddingTop: '60px' }}>
+          <div className="flex items-start justify-center min-h-screen px-2 sm:px-4 py-4">
             <div
               className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
               onClick={() => setShowProductModal(false)}
+              style={{ paddingTop: '60px' }}
             />
 
-            <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-4 overflow-hidden modal-content-custom" style={{ maxHeight: 'calc(100vh - 100px)' }}>
               {/* Header */}
-              <div className="sticky top-0 bg-white border-b p-6 z-10">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-3xl font-bold" style={{ color: COLORS.verdeOscuro }}>
+              <div className="sticky top-0 bg-white border-b p-3 sm:p-4 md:p-6 z-10">
+                <div className="flex items-center justify-between gap-2 sm:gap-4">
+                  <h2 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold" style={{ color: COLORS.verdeOscuro }}>
                     {selectedProduct.nombre}
                   </h2>
                   <button
                     onClick={() => setShowProductModal(false)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
                   >
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -1121,8 +1547,8 @@ export default function EcommerceView() {
               </div>
 
               {/* Contenido */}
-              <div className="p-6 overflow-y-auto max-h-[70vh]">
-                <div className="grid md:grid-cols-2 gap-8">
+              <div className="p-3 sm:p-4 md:p-6 overflow-y-auto" style={{ maxHeight: 'calc(70vh - 60px)' }}>
+                <div className="grid md:grid-cols-2 gap-3 sm:gap-4 md:gap-8">
                   {/* Imagen */}
                   <div
                     className="rounded-xl overflow-hidden"
@@ -1135,8 +1561,8 @@ export default function EcommerceView() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-80 flex items-center justify-center">
-                        <span className="text-9xl">{getCategoryEmoji(selectedProduct.categoria_nombre)}</span>
+                      <div className="w-full h-48 sm:h-64 md:h-80 flex items-center justify-center">
+                        <span className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl">{getCategoryEmoji(selectedProduct.categoria_nombre)}</span>
                       </div>
                     )}
                   </div>
@@ -1144,55 +1570,55 @@ export default function EcommerceView() {
                   {/* Info */}
                   <div>
                     {selectedProduct.categoria_nombre && (
-                      <span className="inline-block px-3 py-1 text-sm rounded-full mb-4 text-white" style={{ backgroundColor: COLORS.verdePrincipal }}>
+                      <span className="inline-block px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full mb-3 sm:mb-4 text-white" style={{ backgroundColor: COLORS.verdePrincipal }}>
                         {selectedProduct.categoria_nombre}
                       </span>
                     )}
 
-                    <p className="text-lg mb-6 leading-relaxed" style={{ color: COLORS.grisOscuro }}>
+                    <p className="text-sm sm:text-base md:text-lg mb-4 sm:mb-6 leading-relaxed" style={{ color: COLORS.grisOscuro }}>
                       {selectedProduct.descripcion || 'Producto de alta calidad para movilidad eléctrica.'}
                     </p>
 
-                    <p className="text-4xl font-bold mb-6" style={{ color: COLORS.verdePrincipal }}>
+                    <p className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6" style={{ color: COLORS.verdePrincipal }}>
                       ${parseFloat(selectedProduct.precio_venta || 0).toFixed(2)}
                     </p>
 
                     {/* Ficha Técnica */}
-                    <div className="mb-6 p-4 rounded-xl" style={{ backgroundColor: COLORS.beigeCrema }}>
-                      <h3 className="text-xl font-bold mb-3" style={{ color: COLORS.verdeOscuro }}>
+                    <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl" style={{ backgroundColor: COLORS.beigeCrema }}>
+                      <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 sm:mb-3 text-center" style={{ color: COLORS.verdeOscuro }}>
                         📋 Ficha Técnica
                       </h3>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
+                      <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
+                        <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-1">
                           <span style={{ color: COLORS.grisMedio }}>Categoría:</span>
-                          <span className="font-semibold" style={{ color: COLORS.verdeOscuro }}>
+                          <span className="font-semibold text-center" style={{ color: COLORS.verdeOscuro }}>
                             {selectedProduct.categoria_nombre || 'N/A'}
                           </span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-1">
                           <span style={{ color: COLORS.grisMedio }}>Stock:</span>
-                          <span className="font-semibold" style={{ color: COLORS.verdeOscuro }}>
+                          <span className="font-semibold text-center" style={{ color: COLORS.verdeOscuro }}>
                             {selectedProduct.stock || 'Disponible'}
                           </span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-1">
                           <span style={{ color: COLORS.grisMedio }}>SKU:</span>
-                          <span className="font-semibold" style={{ color: COLORS.verdeOscuro }}>
+                          <span className="font-semibold text-center" style={{ color: COLORS.verdeOscuro }}>
                             {selectedProduct.codigo_barras || 'N/A'}
                           </span>
                         </div>
                         {selectedProduct.marca_nombre && (
-                          <div className="flex justify-between">
+                          <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-1">
                             <span style={{ color: COLORS.grisMedio }}>Marca:</span>
-                            <span className="font-semibold" style={{ color: COLORS.verdeOscuro }}>
+                            <span className="font-semibold text-center" style={{ color: COLORS.verdeOscuro }}>
                               {selectedProduct.marca_nombre}
                             </span>
                           </div>
                         )}
                         {selectedProduct.iva_porcentaje && (
-                          <div className="flex justify-between">
+                          <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-1">
                             <span style={{ color: COLORS.grisMedio }}>IVA:</span>
-                            <span className="font-semibold" style={{ color: COLORS.verdeOscuro }}>
+                            <span className="font-semibold text-center" style={{ color: COLORS.verdeOscuro }}>
                               {selectedProduct.iva_porcentaje}%
                             </span>
                           </div>
@@ -1201,13 +1627,13 @@ export default function EcommerceView() {
                     </div>
 
                     {/* Botones */}
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:gap-4">
                       <button
                         onClick={() => {
                           addToCart(selectedProduct);
                           setShowProductModal(false);
                         }}
-                        className="flex-1 px-6 py-4 rounded-xl font-bold text-white text-lg shadow-lg hover:shadow-xl transition-all"
+                        className="flex-1 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 rounded-xl font-bold text-white text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl transition-all"
                         style={{ backgroundColor: COLORS.acentoNaranja }}
                       >
                         🛒 Agregar al Carrito
@@ -1218,7 +1644,7 @@ export default function EcommerceView() {
                           setShowProductModal(false);
                           setShowCart(true);
                         }}
-                        className="flex-1 px-6 py-4 rounded-xl font-bold text-white text-lg shadow-lg hover:shadow-xl transition-all"
+                        className="flex-1 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 rounded-xl font-bold text-white text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl transition-all"
                         style={{ backgroundColor: COLORS.verdePrincipal }}
                       >
                         ⚡ Comprar Ahora
@@ -1228,51 +1654,51 @@ export default function EcommerceView() {
                 </div>
 
                 {/* Sección de Reseñas */}
-                <div className="mt-8 pt-8 border-t">
-                  <h3 className="text-2xl font-bold mb-6" style={{ color: COLORS.verdeOscuro }}>
+                <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t">
+                  <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: COLORS.verdeOscuro }}>
                     ⭐ Reseñas de Clientes
                   </h3>
 
                   {/* Formulario para agregar reseña */}
-                  <div className="mb-8 p-6 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
-                    <h4 className="text-lg font-semibold mb-4" style={{ color: COLORS.verdePrincipal }}>
+                  <div className="mb-6 sm:mb-8 p-4 sm:p-6 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
+                    <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4" style={{ color: COLORS.verdePrincipal }}>
                       Comparte tu experiencia
                     </h4>
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                       <div>
-                        <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.grisOscuro }}>
+                        <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2" style={{ color: COLORS.grisOscuro }}>
                           Tu Nombre
                         </label>
                         <input
                           type="text"
                           value={newReview.customerName}
                           onChange={(e) => setNewReview({ ...newReview, customerName: e.target.value })}
-                          className="w-full px-4 py-2 rounded-lg border-2 focus:outline-none"
+                          className="w-full px-3 sm:px-4 py-2 rounded-lg border-2 focus:outline-none text-sm sm:text-base"
                           style={{ borderColor: COLORS.verdeMenta }}
                           placeholder="Tu nombre"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.grisOscuro }}>
+                        <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2" style={{ color: COLORS.grisOscuro }}>
                           Calificación
                         </label>
                         {renderStars(newReview.rating, true, (rating) => setNewReview({ ...newReview, rating }))}
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.grisOscuro }}>
+                        <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2" style={{ color: COLORS.grisOscuro }}>
                           Tu Reseña
                         </label>
                         <textarea
                           value={newReview.comment}
                           onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                          className="w-full px-4 py-2 rounded-lg border-2 focus:outline-none"
+                          className="w-full px-3 sm:px-4 py-2 rounded-lg border-2 focus:outline-none text-sm sm:text-base"
                           style={{ borderColor: COLORS.verdeMenta }}
                           rows="3"
                           placeholder="Cuéntanos tu experiencia..."
                         ></textarea>
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.grisOscuro }}>
+                        <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2" style={{ color: COLORS.grisOscuro }}>
                           Sube tus fotos (opcional)
                         </label>
                         <input
@@ -1280,20 +1706,20 @@ export default function EcommerceView() {
                           multiple
                           accept="image/*"
                           onChange={handlePhotoUpload}
-                          className="w-full px-4 py-2 rounded-lg border-2"
+                          className="w-full px-3 sm:px-4 py-2 rounded-lg border-2 text-xs sm:text-sm"
                           style={{ borderColor: COLORS.verdeMenta }}
                         />
                         {customerPhotos.length > 0 && (
                           <div className="flex gap-2 mt-2">
                             {customerPhotos.map((photo, index) => (
-                              <img key={index} src={photo} alt={`Preview ${index}`} className="w-20 h-20 object-cover rounded-lg" />
+                              <img key={index} src={photo} alt={`Preview ${index}`} className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg" />
                             ))}
                           </div>
                         )}
                       </div>
                       <button
                         onClick={handleSubmitReview}
-                        className="px-6 py-3 rounded-lg font-semibold text-white shadow-lg hover:shadow-xl transition-all"
+                        className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-white shadow-lg hover:shadow-xl transition-all text-sm sm:text-base"
                         style={{ backgroundColor: COLORS.verdePrincipal }}
                       >
                         Publicar Reseña
@@ -1302,36 +1728,38 @@ export default function EcommerceView() {
                   </div>
 
                   {/* Lista de reseñas */}
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {reviews.length === 0 ? (
-                      <p className="text-center py-8" style={{ color: COLORS.grisMedio }}>
+                      <p className="text-center py-6 sm:py-8 text-sm sm:text-base" style={{ color: COLORS.grisMedio }}>
                         ¡Sé el primero en dejar una reseña!
                       </p>
                     ) : (
                       reviews.map((review) => (
-                        <div key={review.id} className="p-4 rounded-xl" style={{ backgroundColor: COLORS.beigeCrema }}>
+                        <div key={review.id} className="p-3 sm:p-4 rounded-xl" style={{ backgroundColor: COLORS.beigeCrema }}>
                           <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2 sm:space-x-3">
                               <div
-                                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base"
                                 style={{ backgroundColor: COLORS.verdePrincipal }}
                               >
                                 {review.customerName.charAt(0).toUpperCase()}
                               </div>
                               <div>
-                                <p className="font-semibold" style={{ color: COLORS.verdeOscuro }}>
+                                <p className="font-semibold text-sm sm:text-base" style={{ color: COLORS.verdeOscuro }}>
                                   {review.customerName}
                                 </p>
-                                <p className="text-sm" style={{ color: COLORS.grisMedio }}>{review.date}</p>
+                                <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>{review.date}</p>
                               </div>
                             </div>
-                            {renderStars(review.rating)}
+                            <div className="transform scale-75 sm:scale-100">
+                              {renderStars(review.rating)}
+                            </div>
                           </div>
-                          <p className="mb-3" style={{ color: COLORS.grisOscuro }}>{review.comment}</p>
+                          <p className="mb-2 sm:mb-3 text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>{review.comment}</p>
                           {review.photos && review.photos.length > 0 && (
                             <div className="flex gap-2">
                               {review.photos.map((photo, index) => (
-                                <img key={index} src={photo} alt={`Review ${index}`} className="w-24 h-24 object-cover rounded-lg" />
+                                <img key={index} src={photo} alt={`Review ${index}`} className="w-16 h-16 sm:w-24 sm:h-24 object-cover rounded-lg" />
                               ))}
                             </div>
                           )}
@@ -1454,14 +1882,14 @@ export default function EcommerceView() {
       )}
 
       {/* Footer */}
-      <footer className="mt-12">
-        <div className="grid md:grid-cols-3 gap-8 p-8 text-white" style={{ backgroundColor: COLORS.grisOscuro }}>
+      <footer className="mt-8 sm:mt-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 p-6 sm:p-8 text-white" style={{ backgroundColor: COLORS.grisOscuro }}>
           {/* Columna 1: Dirección */}
           <div>
-            <h3 className="text-lg font-bold mb-4 uppercase">📍 {nombreTienda}</h3>
-            <div className="space-y-2 text-sm" style={{ color: COLORS.grisClaro }}>
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 uppercase">📍 {nombreTienda}</h3>
+            <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm" style={{ color: COLORS.grisClaro }}>
               <p>Calle Principal #123</p>
-              <p>Cudad, País</p>
+              <p>Ciudad, País</p>
               <p>Tel: {whatsappNumber}</p>
               <p>Email: info@ecomotion.com</p>
             </div>
@@ -1469,8 +1897,8 @@ export default function EcommerceView() {
 
           {/* Columna 2: Links */}
           <div>
-            <h3 className="text-lg font-bold mb-4 uppercase">🔗 Links Útiles</h3>
-            <div className="space-y-2 text-sm">
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 uppercase">🔗 Links Útiles</h3>
+            <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
               <button
                 onClick={() => setActiveSection('nosotros')}
                 className="block hover:underline"
@@ -1492,16 +1920,16 @@ export default function EcommerceView() {
 
           {/* Columna 3: Redes Sociales */}
           <div>
-            <h3 className="text-lg font-bold mb-4 uppercase">🌐 Síguenos</h3>
-            <div className="flex space-x-3">
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 uppercase">🌐 Síguenos</h3>
+            <div className="flex space-x-2 sm:space-x-3">
               <a
                 href={`https://wa.me/${whatsappNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                 style={{ backgroundColor: '#25D366' }}
               >
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
               </a>
@@ -1509,10 +1937,10 @@ export default function EcommerceView() {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                 style={{ backgroundColor: '#1877F2' }}
               >
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
               </a>
@@ -1520,10 +1948,10 @@ export default function EcommerceView() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                 style={{ backgroundColor: '#E4405F' }}
               >
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                 </svg>
               </a>
@@ -1531,10 +1959,10 @@ export default function EcommerceView() {
                 href="https://youtube.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                 style={{ backgroundColor: '#FF0000' }}
               >
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                 </svg>
               </a>
@@ -1542,8 +1970,9 @@ export default function EcommerceView() {
           </div>
         </div>
 
-        <div className="py-4 text-center text-white text-sm" style={{ backgroundColor: COLORS.negro }}>
-          <p>© 2025 {nombreTienda}. Todos los derechos reservados. | Movilidad Eléctrica Sostenible</p>
+        <div className="py-3 sm:py-4 text-center text-white text-xs sm:text-sm" style={{ backgroundColor: COLORS.negro }}>
+          <p>© 2025 {nombreTienda}. Todos los derechos reservados.</p>
+          <p className="mt-1 sm:mt-0">Movilidad Eléctrica Sostenible</p>
         </div>
       </footer>
     </div>

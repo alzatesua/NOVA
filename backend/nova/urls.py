@@ -1,6 +1,8 @@
 # ROOT urls.py
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from nova.views import TipoDocumentoViewSet, crear_tienda, test_enviar_correo
 from . import views
@@ -36,3 +38,7 @@ urlpatterns = [
     path('api/activar-tienda/', views.activar_tienda, name='activar_tienda'),
     path("api/test-correo/", test_enviar_correo, name="test_correo"),
 ]
+
+# Media files (solo en desarrollo o si DEBUG=True)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

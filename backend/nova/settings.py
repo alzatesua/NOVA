@@ -282,5 +282,6 @@ LOGGING = {
 # Configuración para archivos multimedia
 MEDIA_URL = '/media/'
 # MEDIA_ROOT debe apuntar a /app/media (no /app/nova/media)
-MEDIA_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/media'
+# BASE_DIR es /app/nova, así que usamos pathlib para ir al directorio padre
+MEDIA_ROOT = '/app/media'
 

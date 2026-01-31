@@ -239,11 +239,11 @@ export default function ProductsView({
           atributo: p.atributo,
           valor_atributo: p.valor_atributo,
           imei: p.imei,
-          sucursal: Number(p.iva),
+          sucursal: Number(p.sucursal_id),
           bodega: p.bodega ,
           stock: Number(p.stock),
           precio: Number(p.precio),
-          descuento: Number(p.descuento),    
+          descuento: Number(p.descuento),
           tipo_medida: Number(p.tipo_medida)
         }));
 
@@ -425,6 +425,15 @@ export default function ProductsView({
     },
     [rol, tokenUsuario, subdominio, usuario, logout]
   );
+
+  // Manejar actualización de imagen - solo actualiza el producto específico
+  const handleImageUpdate = useCallback((productId, imageUrl) => {
+    setProducts(prev =>
+      prev.map(p =>
+        p.id === productId ? { ...p, imagen_producto: imageUrl, imagenUrl: imageUrl } : p
+      )
+    );
+  }, []);
 
 
 
@@ -1123,15 +1132,15 @@ export default function ProductsView({
                           const raw = e.target.value.replace(/\./g, "").replace(",", ".");
                           const numericValue = parseFloat(raw) || 0;
 
-                          // Validación: máximo 13 enteros + 2 decimales
+                          // Validación: máximo 8 enteros + 2 decimales (max_digits=10 en Django)
                           const partes = raw.split(".");
                           const enteros = partes[0].replace(/\D/g, "");
                           const decimales = partes[1] || "";
 
-                          if (enteros.length > 13 || decimales.length > 2) {
+                          if (enteros.length > 8 || decimales.length > 2) {
                             showToast(
                               "error",
-                              "El precio no puede tener más de 13 dígitos enteros y 2 decimales."
+                              "El precio no puede tener más de 8 dígitos enteros y 2 decimales."
                             );
                             return;
                           }
@@ -1147,9 +1156,9 @@ export default function ProductsView({
                       />
 
                       {/* Advertencia visual */}
-                      {String(product.precio).length > 13 && (
+                      {String(product.precio).replace('.', '').length > 10 && (
                         <p className="mt-1 text-sm text-red-600">
-                          El precio excede el máximo permitido (13 dígitos enteros, 2 decimales).
+                          El precio excede el máximo permitido (8 dígitos enteros, 2 decimales).
                         </p>
                       )}
                     </div>
@@ -1249,6 +1258,7 @@ export default function ProductsView({
                 onFieldChange={handleFieldChange}
                 onSave={handleSave}
                 onToggleActive={handleToggleActive}
+                onImageUpdate={handleImageUpdate}
                 existencias={p.existencias || []}
                 stockTotal={p.stock_total}
               />

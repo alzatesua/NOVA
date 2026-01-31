@@ -849,28 +849,52 @@ def crear_producto_tienda(request):
 
         # ✅ NUEVO: Crear existencia en inventario_existencia
         from django.db import transaction
-        
+
         with transaction.atomic(using=alias):
             # Si es lista de productos
             if multiple:
                 for producto in productos_creados:
                     if producto.bodega_id and producto.stock > 0:
-                        Existencia.objects.using(alias).create(
-                            producto_id=producto.id,
-                            bodega_id=producto.bodega_id,
-                            cantidad=producto.stock,
-                            reservado=0
-                        )
+                        # Usar raw SQL para evitar problemas con columnas faltantes
+                        conn = connections[alias]
+                        with conn.cursor() as cursor:
+                            # Primero intentar insertar, si falla por duplicado, actualizar
+                            try:
+                                cursor.execute(
+                                    "INSERT INTO inventario_existencia (producto_id, bodega_id, cantidad) VALUES (%s, %s, %s)",
+                                    [producto.id, producto.bodega_id, producto.stock]
+                                )
+                            except Exception as insert_err:
+                                # Si el error es por duplicado, actualizar
+                                if 'duplicate' in str(insert_err).lower() or 'unique' in str(insert_err).lower():
+                                    cursor.execute(
+                                        "UPDATE inventario_existencia SET cantidad = cantidad + %s WHERE producto_id = %s AND bodega_id = %s",
+                                        [producto.stock, producto.id, producto.bodega_id]
+                                    )
+                                else:
+                                    raise insert_err
             # Si es un solo producto
             else:
                 producto = productos_creados
                 if producto.bodega_id and producto.stock > 0:
-                    Existencia.objects.using(alias).create(
-                        producto_id=producto.id,
-                        bodega_id=producto.bodega_id,
-                        cantidad=producto.stock,
-                        reservado=0
-                    )
+                    # Usar raw SQL para evitar problemas con columnas faltantes
+                    conn = connections[alias]
+                    with conn.cursor() as cursor:
+                        # Primero intentar insertar, si falla por duplicado, actualizar
+                        try:
+                            cursor.execute(
+                                "INSERT INTO inventario_existencia (producto_id, bodega_id, cantidad) VALUES (%s, %s, %s)",
+                                [producto.id, producto.bodega_id, producto.stock]
+                            )
+                        except Exception as insert_err:
+                            # Si el error es por duplicado, actualizar
+                            if 'duplicate' in str(insert_err).lower() or 'unique' in str(insert_err).lower():
+                                cursor.execute(
+                                    "UPDATE inventario_existencia SET cantidad = cantidad + %s WHERE producto_id = %s AND bodega_id = %s",
+                                    [producto.stock, producto.id, producto.bodega_id]
+                                )
+                            else:
+                                raise insert_err
 
         return Response(serializer.data, status=201)
 

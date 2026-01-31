@@ -13,6 +13,9 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+# Media files - Sobrescribir para usar /app/media en lugar de /app/nova/media
+MEDIA_ROOT = '/app/media'
+
 ALLOWED_HOSTS = [
     'dagi.co',
     '31.97.14.61',

@@ -23,7 +23,8 @@ function ProductCard({
   onToggleEdit,
   onFieldChange,
   onSave,
-  onToggleActive
+  onToggleActive,
+  onImageUpdate
 }) {
   const {
     id,
@@ -63,7 +64,7 @@ function ProductCard({
       }
     })();
     return () => { mounted = false; };
-  }, [id, usuario, token, subdominio]);
+  }, [id, usuario, token, subdominio, imagenUrl]);
 
   // Subir nueva imagen
   const handleImageChange = async e => {
@@ -80,7 +81,12 @@ function ProductCard({
         categoriaId: product.id_categoria,
         imagen: file
       });
-      setPreviewImage(`${newUrl}?t=${Date.now()}`);
+      const imageUrl = `${newUrl}?t=${Date.now()}`;
+      setPreviewImage(imageUrl);
+      // Notificar al padre para actualizar el producto en la lista
+      if (onImageUpdate) {
+        onImageUpdate(id, imageUrl);
+      }
       showToast('success', 'Imagen subida con éxito');
     } catch (err) {
       showToast('error', err.message);
