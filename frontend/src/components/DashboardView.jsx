@@ -108,11 +108,11 @@ export default function DashboardView() {
       {/* Header con selector de período */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Período:</label>
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Período:</label>
           <select
             value={dias}
             onChange={(e) => setDias(Number(e.target.value))}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 border border-slate-300 dark:!border-slate-700 rounded-lg text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
           >
             <option value={7}>Últimos 7 días</option>
             <option value={15}>Últimos 15 días</option>
@@ -124,7 +124,7 @@ export default function DashboardView() {
       </div>
 
       {/* Tarjeta de acceso a la Tienda E-commerce */}
-      <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+      <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 rounded-xl shadow-lg p-6 text-white">
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
@@ -133,10 +133,10 @@ export default function DashboardView() {
               </svg>
               <h3 className="text-2xl font-bold">Mi Tienda Online</h3>
             </div>
-            <p className="text-green-100 text-sm mb-4">
+            <p className="text-emerald-100 text-sm mb-4">
               Accede a tu tienda e-commerce para ver cómo la ven tus clientes
             </p>
-            <div className="text-sm bg-green-700 bg-opacity-50 rounded-lg p-3 inline-block">
+            <div className="text-sm bg-emerald-900 bg-opacity-30 dark:bg-opacity-50 rounded-lg p-3 inline-block">
               <span className="font-mono">{window.location.origin}/tienda</span>
             </div>
           </div>
@@ -145,7 +145,7 @@ export default function DashboardView() {
               href="/tienda"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 bg-white text-green-600 rounded-lg font-semibold hover:bg-green-50 transition-colors shadow-md text-center"
+              className="px-6 py-3 bg-white dark:!bg-slate-800 text-emerald-600 dark:text-emerald-400 rounded-lg font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors shadow-md text-center"
             >
               Ver Tienda
             </a>
@@ -156,7 +156,7 @@ export default function DashboardView() {
                   alert('URL copiada:\n' + url);
                 });
               }}
-              className="px-6 py-3 bg-green-700 text-white rounded-lg font-semibold hover:bg-green-800 transition-colors text-center"
+              className="px-6 py-3 bg-emerald-700 dark:bg-emerald-800 text-white rounded-lg font-semibold hover:bg-emerald-800 dark:hover:bg-emerald-900 transition-colors text-center"
             >
               Copiar URL
             </button>
@@ -208,12 +208,12 @@ export default function DashboardView() {
 
       {/* Alertas */}
       {kpis?.alertas?.productos_stock_bajo > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
           <div className="flex items-center">
-            <svg className="w-6 h-6 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-amber-600 dark:text-amber-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <p className="text-yellow-800">
+            <p className="text-amber-800 dark:text-amber-200">
               <span className="font-semibold">Alerta:</span> Tienes {kpis.alertas.productos_stock_bajo} productos con stock bajo
             </p>
           </div>

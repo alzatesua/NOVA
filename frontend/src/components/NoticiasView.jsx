@@ -10,7 +10,7 @@ export default function NoticiasView() {
       <DashboardCarousel />
 
       {/* Link del Catálogo */}
-      <div className="max-w-screen-xl mx-auto px-6 py-4 bg-white rounded-lg shadow-md flex items-center justify-between space-x-6">
+      <div className="max-w-screen-xl mx-auto px-6 py-4 bg-white dark:!bg-slate-900 rounded-lg shadow-md border border-slate-200 dark:!border-slate-800 flex items-center justify-between space-x-6 transition-colors duration-200">
         {/* Izquierda: input + botones */}
         <div className="flex items-center space-x-4 flex-shrink-0">
           <input
@@ -19,11 +19,12 @@ export default function NoticiasView() {
             value="https://mi-tienda.com/catalogo"
             className="
               w-64 px-5 py-3
-              border border-gray-300 rounded-lg
-              text-blue-600 text-sm font-medium
+              border border-slate-300 dark:!border-slate-700 rounded-lg
+              text-blue-600 dark:text-blue-400 text-sm font-medium
               cursor-pointer select-all
               focus:outline-none focus:ring-2 focus:ring-blue-400
-              transition
+              transition transition-colors duration-200
+              bg-slate-50 dark:!bg-slate-800
             "
             onClick={e => e.target.select()}
           />
@@ -32,7 +33,7 @@ export default function NoticiasView() {
             target="_blank"
             rel="noopener noreferrer"
             className="
-              bg-blue-600 hover:bg-blue-700
+              bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800
               text-white font-semibold text-sm
               px-6 py-3 rounded-lg shadow-md
               transition
@@ -50,12 +51,13 @@ export default function NoticiasView() {
             className="
               px-6 py-3
               rounded-lg font-semibold text-sm
-              bg-gray-200 text-gray-700
-              hover:bg-gray-300
+              bg-slate-200 dark:!bg-slate-700 text-slate-700 dark:!text-slate-300
+              hover:bg-slate-300 dark:hover:!bg-slate-600
               transition
               duration-300
               ease-in-out
               shadow-sm
+              transition-colors duration-200
             "
           >
             Copiar
@@ -63,7 +65,7 @@ export default function NoticiasView() {
         </div>
 
         {/* Derecha: descripción */}
-        <p className="text-gray-700 max-w-md text-sm leading-relaxed">
+        <p className="text-slate-700 dark:!text-slate-300 max-w-md text-sm leading-relaxed transition-colors duration-200">
           Comparte el link de tu catálogo para que tus clientes puedan ver todos tus productos fácilmente.
         </p>
       </div>

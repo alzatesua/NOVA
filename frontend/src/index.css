@@ -4,25 +4,26 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Modo claro - Paleta base con buen contraste */
+    --background: 0 0% 100%;                    /* Blanco puro */
+    --foreground: 210 40% 10%;                  /* slate-950 ≈ */
+    --card: 0 0% 100%;                          /* Blanco */
+    --card-foreground: 210 40% 10%;             /* slate-950 ≈ */
+    --popover: 0 0% 100%;                       /* Blanco */
+    --popover-foreground: 210 40% 10%;          /* slate-950 ≈ */
+    --primary: 221 83% 53%;                     /* blue-600 */
+    --primary-foreground: 0 0% 100%;            /* Blanco */
+    --secondary: 210 40% 96%;                   /* slate-100 ≈ */
+    --secondary-foreground: 222 47% 11%;        /* slate-900 ≈ */
+    --muted: 210 40% 96%;                       /* slate-100 ≈ */
+    --muted-foreground: 215 16% 47%;            /* slate-500 ≈ */
+    --accent: 210 40% 96%;                      /* slate-100 ≈ */
+    --accent-foreground: 222 47% 11%;           /* slate-900 ≈ */
+    --destructive: 0 84% 60%;                   /* red-500 */
+    --destructive-foreground: 0 0% 98%;         /* Casi blanco */
+    --border: 214 32% 91%;                      /* slate-200 */
+    --input: 214 32% 91%;                       /* slate-200 */
+    --ring: 221 83% 53%;                        /* blue-600 */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -31,25 +32,26 @@
     --radius: 0.5rem
   }
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    /* Modo oscuro - Paleta slate con mejor contraste */
+    --background: 222 47% 11%;                  /* slate-900 */
+    --foreground: 210 40% 98%;                  /* slate-100 ≈ */
+    --card: 222 47% 11%;                        /* slate-900 */
+    --card-foreground: 210 40% 98%;             /* slate-100 ≈ */
+    --popover: 222 47% 11%;                     /* slate-900 */
+    --popover-foreground: 210 40% 98%;          /* slate-100 ≈ */
+    --primary: 217 91% 60%;                     /* blue-500 - más brillante */
+    --primary-foreground: 222 47% 11%;          /* slate-900 */
+    --secondary: 217 33% 17%;                   /* slate-800 */
+    --secondary-foreground: 210 40% 98%;        /* Casi blanco */
+    --muted: 217 33% 17%;                       /* slate-800 */
+    --muted-foreground: 215 20% 65%;            /* slate-400 */
+    --accent: 217 33% 17%;                      /* slate-800 */
+    --accent-foreground: 210 40% 98%;           /* Casi blanco */
+    --destructive: 0 63% 31%;                   /* red-900 */
+    --destructive-foreground: 210 40% 98%;      /* Casi blanco */
+    --border: 217 33% 33%;                      /* slate-700 */
+    --input: 217 33% 33%;                       /* slate-700 */
+    --ring: 217 91% 60%;                        /* blue-500 */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -67,49 +69,88 @@
   }
 }
 
-/* Variables personalizadas para modo oscuro - fáciles de modificar */
+/* ========================================
+   PALETA DE COLORES ELEGANTE
+   Buena legibilidad y contraste para ambos modos
+   ======================================== */
+
+/* Variables personalizadas para modo claro */
 :root {
-  /* Fondos */
-  --bg-primary: 255 255 255;        /* white */
-  --bg-secondary: 249 250 251;      /* gray-50 */
-  --bg-tertiary: 243 244 246;       /* gray-100 */
-  --bg-card: 255 255 255;           /* white */
-  --bg-card-hover: 249 250 251;     /* gray-50 */
+  /* Fondos - Modo Claro */
+  --bg-primary: 255 255 255;              /* Blanco puro */
+  --bg-secondary: 248 250 252;            /* slate-50 - muy suave */
+  --bg-tertiary: 241 245 249;             /* slate-100 */
+  --bg-card: 255 255 255;                 /* Blanco */
+  --bg-card-hover: 248 250 252;           /* slate-50 */
+  --bg-elevated: 255 255 255;             /* Blanco elevado */
 
-  /* Textos */
-  --text-primary: 17 24 39;         /* gray-900 */
-  --text-secondary: 55 65 81;       /* gray-700 */
-  --text-muted: 107 114 128;        /* gray-500 */
-  --text-inverse: 255 255 255;      /* white */
+  /* Textos - Modo Claro (Alto contraste) */
+  --text-primary: 15 23 42;               /* slate-900 - casi negro */
+  --text-secondary: 71 85 105;            /* slate-600 */
+  --text-muted: 148 163 184;              /* slate-400 */
+  --text-inverse: 255 255 255;            /* Blanco */
+  --text-accent: 37 99 235;               /* blue-600 */
 
-  /* Bordes */
-  --border-color: 229 231 235;      /* gray-200 */
-  --border-color-hover: 209 213 219; /* gray-300 */
+  /* Bordes - Modo Claro */
+  --border-color: 226 232 240;            /* slate-200 */
+  --border-color-hover: 203 213 225;      /* slate-300 */
+  --border-color-focus: 99 102 241;       /* indigo-500 */
 
-  /* Interactivos */
-  --hover-bg: 243 244 246;          /* gray-100 */
-  --active-bg: 229 231 235;         /* gray-200 */
+  /* Interactivos - Modo Claro */
+  --hover-bg: 241 245 249;                /* slate-100 */
+  --active-bg: 226 232 240;               /* slate-200 */
+  --focus-ring: 99 102 241 0.5;           /* indigo-500 con opacidad */
+
+  /* Sombras - Modo Claro */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* Variables personalizadas para modo oscuro */
+.dark {
+  /* Fondos - Modo Oscuro (Slate - elegante azulado) */
+  --bg-primary: 15 23 42;                 /* slate-900 - profundo */
+  --bg-secondary: 30 41 59;               /* slate-800 */
+  --bg-tertiary: 51 65 85;                /* slate-700 */
+  --bg-card: 30 41 59;                    /* slate-800 */
+  --bg-card-hover: 51 65 85;              /* slate-700 */
+  --bg-elevated: 30 41 59;                /* slate-800 */
+
+  /* Textos - Modo Oscuro (Alto contraste sobre fondo oscuro) */
+  --text-primary: 241 245 249;            /* slate-100 - casi blanco */
+  --text-secondary: 203 213 225;          /* slate-300 */
+  --text-muted: 148 163 184;              /* slate-400 */
+  --text-inverse: 15 23 42;               /* slate-900 */
+  --text-accent: 96 165 250;              /* blue-400 - más brillante */
+
+  /* Bordes - Modo Oscuro (visibles pero sutiles) */
+  --border-color: 71 85 105;              /* slate-600 */
+  --border-color-hover: 100 116 139;      /* slate-500 */
+  --border-color-focus: 129 140 248;      /* indigo-400 */
+
+  /* Interactivos - Modo Oscuro */
+  --hover-bg: 51 65 85;                   /* slate-700 */
+  --active-bg: 71 85 105;                 /* slate-600 */
+  --focus-ring: 129 140 248 0.5;          /* indigo-400 con opacidad */
+
+  /* Sombras - Modo Oscuro */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+}
+
+/* Colores semánticos adicionales */
+:root {
+  --color-success: 34 197 94;             /* green-500 */
+  --color-warning: 251 146 60;            /* orange-400 */
+  --color-error: 239 68 68;               /* red-500 */
+  --color-info: 59 130 246;               /* blue-500 */
 }
 
 .dark {
-  /* Fondos oscuros */
-  --bg-primary: 17 24 39;           /* gray-900 */
-  --bg-secondary: 31 41 55;         /* gray-800 */
-  --bg-tertiary: 55 65 81;          /* gray-700 */
-  --bg-card: 31 41 55;              /* gray-800 */
-  --bg-card-hover: 55 65 81;        /* gray-700 */
-
-  /* Textos oscuros */
-  --text-primary: 243 244 246;      /* gray-100 */
-  --text-secondary: 209 213 219;    /* gray-300 */
-  --text-muted: 156 163 175;        /* gray-400 */
-  --text-inverse: 17 24 39;         /* gray-900 */
-
-  /* Bordes oscuros */
-  --border-color: 55 65 81;         /* gray-700 */
-  --border-color-hover: 75 85 99;   /* gray-600 */
-
-  /* Interactivos oscuros */
-  --hover-bg: 55 65 81;             /* gray-700 */
-  --active-bg: 75 85 99;            /* gray-600 */
+  --color-success: 74 222 128;            /* green-400 - más brillante */
+  --color-warning: 251 191 36;            /* yellow-400 */
+  --color-error: 248 113 113;             /* red-400 */
+  --color-info: 96 165 250;               /* blue-400 */
 }

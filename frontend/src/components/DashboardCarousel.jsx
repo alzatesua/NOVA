@@ -6,7 +6,7 @@ export default function DashboardCarousel() {
       key: 'welcome',
       title: 'Panel de Administración',
       content: (
-        <p className="text-lg text-gray-700 max-w-xl mx-auto text-center">
+        <p className="text-lg text-slate-700 dark:!text-slate-300 max-w-xl mx-auto text-center transition-colors duration-200">
           Bienvenido al dashboard.
         </p>
       ),
@@ -15,7 +15,7 @@ export default function DashboardCarousel() {
       key: 'stats',
       title: 'Estadísticas',
       content: (
-        <ul className="list-disc pl-5 text-gray-700 max-w-xl mx-auto text-left space-y-2">
+        <ul className="list-disc pl-5 text-slate-700 dark:!text-slate-300 max-w-xl mx-auto text-left space-y-2 transition-colors duration-200">
           <li>Usuarios registrados: <span className="font-semibold">120</span></li>
           <li>Productos disponibles: <span className="font-semibold">85</span></li>
           <li>Sucursales activas: <span className="font-semibold">7</span></li>
@@ -26,7 +26,7 @@ export default function DashboardCarousel() {
       key: 'noticias',
       title: 'Noticias recientes',
       content: (
-        <p className="text-gray-700 max-w-xl mx-auto text-center text-lg">
+        <p className="text-slate-700 dark:!text-slate-300 max-w-xl mx-auto text-center text-lg transition-colors duration-200">
           Próximamente nuevas funcionalidades para mejorar tu experiencia.
         </p>
       ),
@@ -59,10 +59,10 @@ export default function DashboardCarousel() {
   const slide = slides[currentIndex];
 
   return (
-    <div className="relative w-full max-w-screen-xl mx-auto rounded-xl overflow-hidden bg-white shadow-lg select-none mt-6 md:mt-8 lg:mt-12">
+    <div className="relative w-full max-w-screen-xl mx-auto rounded-xl overflow-hidden bg-white dark:!bg-slate-900 shadow-lg select-none mt-6 md:mt-8 lg:mt-12 border border-slate-200 dark:!border-slate-800 transition-colors duration-200">
       {/* Si la slide tiene imagen, mostramos diferente layout */}
       {slide.imgSrc ? (
-        <div className="flex items-center justify-center h-72 md:h-80 lg:h-96 p-6">
+        <div className="flex items-center justify-center h-72 md:h-80 lg:h-96 p-6 bg-white dark:!bg-slate-900 transition-colors duration-200">
           <img
             src={slide.imgSrc}
             alt={slide.imgAlt}
@@ -70,23 +70,23 @@ export default function DashboardCarousel() {
           />
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center h-72 md:h-80 lg:h-96 p-10 text-center">
-          <h3 className="text-3xl font-extrabold text-black mb-6">{slide.title}</h3>
-          <div className="text-gray-700">{slide.content}</div>
+        <div className="flex flex-col items-center justify-center h-72 md:h-80 lg:h-96 p-10 text-center bg-white dark:!bg-slate-900 transition-colors duration-200">
+          <h3 className="text-3xl font-extrabold text-slate-900 dark:!text-slate-100 mb-6">{slide.title}</h3>
+          <div className="text-slate-700 dark:!text-slate-300">{slide.content}</div>
         </div>
       )}
 
       {/* Flechas */}
       <button
         onClick={goPrev}
-        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-30 hover:bg-opacity-50 text-white rounded-full p-3 focus:outline-none shadow-lg transition z-20"
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-slate-900/50 dark:!bg-slate-700/70 hover:bg-slate-900/70 dark:hover:!bg-slate-600/80 text-white rounded-full p-3 focus:outline-none shadow-lg transition z-20 backdrop-blur-sm"
         aria-label="Anterior"
       >
         ‹
       </button>
       <button
         onClick={goNext}
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-30 hover:bg-opacity-50 text-white rounded-full p-3 focus:outline-none shadow-lg transition z-20"
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-900/50 dark:!bg-slate-700/70 hover:bg-slate-900/70 dark:hover:!bg-slate-600/80 text-white rounded-full p-3 focus:outline-none shadow-lg transition z-20 backdrop-blur-sm"
         aria-label="Siguiente"
       >
         ›
@@ -99,13 +99,13 @@ export default function DashboardCarousel() {
             key={idx}
             onClick={() => setCurrentIndex(idx)}
             className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-              idx === currentIndex ? 'bg-blue-400' : 'bg-gray-300 hover:bg-blue-300'
+              idx === currentIndex ? 'bg-blue-400' : 'bg-slate-300 dark:!bg-slate-600 hover:bg-blue-300 dark:hover:!bg-slate-500'
             }`}
             aria-label={`Ir al slide ${idx + 1}`}
           />
         ))}
       </div>
-      
+
     </div>
 
      

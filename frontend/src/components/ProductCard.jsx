@@ -96,13 +96,13 @@ function ProductCard({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col w-full">
+    <div className="bg-white dark:!bg-slate-900 rounded-2xl shadow-md overflow-hidden flex flex-col w-full border border-slate-200 dark:!border-slate-800 transition-colors duration-200">
 
       {/* Hero + imagen + upload */}
-      <div className="relative h-48 w-full bg-gray-100 flex items-center justify-center">
+      <div className="relative h-48 w-full bg-slate-100 dark:!bg-slate-800 flex items-center justify-center transition-colors duration-200">
         {isLoadingImage ? (
   <svg
-    className="animate-spin h-8 w-8 text-gray-400"
+    className="animate-spin h-8 w-8 text-slate-400 dark:text-slate-600"
     xmlns="http://www.w3.org/2000/svg"
     fill="none" viewBox="0 0 24 24"
   >
@@ -118,7 +118,7 @@ function ProductCard({
         ) : imageError ? (
           <label
             htmlFor={`file-${id}`}
-            className="flex flex-col items-center justify-center cursor-pointer text-gray-400 hover:text-gray-600"
+            className="flex flex-col items-center justify-center cursor-pointer text-slate-400 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-400 transition-colors duration-200"
           >
             <CameraIcon className="h-12 w-12 mb-2" />
             <span>Haz clic para subir una imagen</span>
@@ -166,8 +166,8 @@ function ProductCard({
             absolute top-2 right-2 inline-flex items-center text-xs font-semibold
             px-2 py-1 rounded-full
             ${fields.stock <= 0
-              ? 'bg-yellow-100 text-yellow-800'
-              : 'bg-green-100 text-green-800'}
+              ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300'
+              : 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300'}
           `}
         >
           {fields.stock <= 0 ? (
@@ -187,17 +187,17 @@ function ProductCard({
             type="text"
             value={fields.nombre}
             onChange={e => onFieldChange(id, 'nombre', e.target.value)}
-            className="text-2xl font-bold text-gray-900 mb-1 border-b focus:outline-none"
+            className="text-2xl font-bold text-slate-900 dark:!text-slate-100 mb-1 border-b border-slate-300 dark:!border-slate-700 focus:outline-none bg-transparent transition-colors duration-200"
           />
         ) : (
-          <h5 className="text-2xl font-bold text-gray-900 mb-1">
+          <h5 className="text-2xl font-bold text-slate-900 dark:!text-slate-100 mb-1 transition-colors duration-200">
             {fields.nombre}
           </h5>
         )}
 
         {/* Categoría */}
         {categoria_nombre && (
-          <span className="inline-block text-sm bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full mb-4">
+          <span className="inline-block text-sm bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-300 px-2 py-0.5 rounded-full mb-4 transition-colors duration-200">
             {categoria_nombre}
           </span>
         )}
@@ -208,26 +208,26 @@ function ProductCard({
             rows={2}
             value={fields.descripcion}
             onChange={e => onFieldChange(id, 'descripcion', e.target.value)}
-            className="text-gray-600 text-sm mb-4 border rounded p-2 focus:outline-none"
+            className="text-slate-600 dark:!text-slate-400 text-sm mb-4 border border-slate-300 dark:!border-slate-700 rounded p-2 focus:outline-none bg-white dark:!bg-slate-800 transition-colors duration-200"
           />
         ) : fields.descripcion ? (
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+          <p className="text-slate-600 dark:!text-slate-400 text-sm mb-4 line-clamp-2 transition-colors duration-200">
             {fields.descripcion}
           </p>
         ) : null}
 
         {/* Datos */}
-        <dl className="flex-1 space-y-3 text-gray-700 text-sm">
+        <dl className="flex-1 space-y-3 text-slate-700 dark:!text-slate-300 text-sm transition-colors duration-200">
           {/* SKU (solo lectura) */}
           <div className="flex justify-between items-center">
             <dt className="font-medium">SKU</dt>
-            <dd className="text-right text-gray-800">{fields.sku}</dd>
+            <dd className="text-right text-slate-800 dark:!text-slate-200">{fields.sku}</dd>
           </div>
-          
+
           {fields.imei && (
             <div className="flex justify-between items-center">
               <dt className="font-medium">IMEI</dt>
-              <dd className="text-right text-gray-800">{fields.imei}</dd>
+              <dd className="text-right text-slate-800 dark:!text-slate-200">{fields.imei}</dd>
             </div>
           )}
 
@@ -242,7 +242,7 @@ function ProductCard({
                   onClick={() =>
                     onFieldChange(id, 'stock', Math.max(0, fields.stock - 1))
                   }
-                  className="px-2 py-1 bg-gray-200 rounded"
+                  className="px-2 py-1 bg-slate-200 dark:!bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
                 >
                   −
                 </button>
@@ -252,13 +252,13 @@ function ProductCard({
                   onClick={() =>
                     onFieldChange(id, 'stock', fields.stock + 1)
                   }
-                  className="px-2 py-1 bg-gray-200 rounded"
+                  className="px-2 py-1 bg-slate-200 dark:!bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
                 >
                   +
                 </button>
               </div>
             ) : (
-              <dd className="text-right text-gray-800">{fields.stock}</dd>
+              <dd className="text-right text-slate-800 dark:!text-slate-200">{fields.stock}</dd>
             )}
           </div>
 
@@ -273,10 +273,10 @@ function ProductCard({
                 onChange={e =>
                   onFieldChange(id, 'precio', parseFloat(e.target.value))
                 }
-                className="w-24 text-right border-b focus:outline-none"
+                className="w-24 text-right border-b border-slate-300 dark:!border-slate-700 focus:outline-none bg-transparent dark:!bg-slate-900 text-slate-800 dark:!text-slate-200 transition-colors duration-200"
               />
             ) : (
-              <dd className="text-right text-gray-800">
+              <dd className="text-right text-slate-800 dark:!text-slate-200">
                 ${fields.precio.toFixed(2)}
               </dd>
             )}
@@ -287,7 +287,7 @@ function ProductCard({
         <div className="mt-6 flex items-center justify-between">
           <button
             onClick={() => onToggleDetails(id)}
-            className="text-indigo-600 hover:text-indigo-800 flex items-center text-sm font-medium"
+            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center text-sm font-medium transition-colors duration-200"
           >
             {isExpanded ? 'Ocultar' : 'Acciones'}
             {isExpanded ? (
@@ -297,7 +297,7 @@ function ProductCard({
             )}
           </button>
           {!editing && (
-            <span className="text-lg font-semibold text-gray-800">
+            <span className="text-lg font-semibold text-slate-800 dark:!text-slate-200 transition-colors duration-200">
               ${fields.precio.toFixed(2)}
             </span>
           )}
@@ -305,7 +305,7 @@ function ProductCard({
 
         {/* Detalles extra */}
         {isExpanded && (
-          <div className="mt-4 pt-4 border-t space-y-4 text-gray-700 text-sm">
+          <div className="mt-4 pt-4 border-t border-slate-200 dark:!border-slate-800 space-y-4 text-slate-700 dark:!text-slate-300 text-sm transition-colors duration-200">
             
 
             <div className="flex gap-3">
@@ -313,13 +313,13 @@ function ProductCard({
                 <>
                   <button
                     onClick={() => onSave(id)}
-                    className="bg-green-600 text-white text-sm px-3 py-1 rounded hover:bg-green-700"
+                    className="bg-emerald-600 text-white text-sm px-3 py-1 rounded hover:bg-emerald-700 transition-colors duration-200"
                   >
                     Guardar
                   </button>
                   <button
                     onClick={() => onToggleEdit(id)}
-                    className="bg-gray-300 text-gray-800 text-sm px-3 py-1 rounded hover:bg-gray-400"
+                    className="bg-slate-300 dark:!bg-slate-700 text-slate-800 dark:!text-slate-200 text-sm px-3 py-1 rounded hover:bg-slate-400 dark:hover:!bg-slate-600 transition-colors duration-200"
                   >
                     Cancelar
                   </button>
@@ -327,7 +327,7 @@ function ProductCard({
               ) : (
                 <button
                   onClick={() => onToggleEdit(id)}
-                  className="flex items-center text-indigo-600 hover:text-indigo-800 text-sm"
+                  className="flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-sm transition-colors duration-200"
                 >
                   <PencilSquareIcon className="w-5 h-5 mr-1" />
                   Editar
@@ -335,8 +335,8 @@ function ProductCard({
               )}
               <button
                 onClick={() => onToggleActive(product)}
-                className={`px-3 py-1 rounded text-sm font-medium text-white ${
-                  is_active ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+                className={`px-3 py-1 rounded text-sm font-medium text-white transition-colors duration-200 ${
+                  is_active ? 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700' : 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700'
                 }`}
               >
                 {is_active ? 'Inactivar' : 'Activar'}

@@ -3,6 +3,7 @@ Calculadora de KPIs principales del dashboard
 """
 from datetime import datetime, timedelta
 from decimal import Decimal
+from django.utils import timezone
 
 
 class KPICalculator:
@@ -29,7 +30,7 @@ class KPICalculator:
         Returns:
             dict con todos los KPIs calculados
         """
-        fecha_fin = datetime.now()
+        fecha_fin = timezone.now()
         fecha_inicio = fecha_fin - timedelta(days=dias)
 
         # KPIs de Ventas
@@ -77,7 +78,7 @@ class KPICalculator:
         Returns:
             dict con comparativa
         """
-        fecha_fin_actual = datetime.now()
+        fecha_fin_actual = timezone.now()
         fecha_inicio_actual = fecha_fin_actual - timedelta(days=dias_actual)
 
         fecha_fin_anterior = fecha_inicio_actual - timedelta(days=1)
@@ -134,4 +135,4 @@ class KPICalculator:
         if valor_anterior == 0:
             return 100.0 if valor_actual > 0 else 0.0
 
-        return float(((valor_actual - valor_anterior) / valor_anterior) * 100)
+        return round(float(((valor_actual - valor_anterior) / valor_anterior) * 100), 2)

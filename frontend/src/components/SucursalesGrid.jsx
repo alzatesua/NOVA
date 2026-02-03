@@ -429,7 +429,7 @@ export default function SucursalesGrid() {
 
 
   return (
-    <main className="max-w-[1200px] mx-auto p-4 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <main className="max-w-[1200px] mx-auto p-4 bg-slate-50 dark:!bg-slate-950 min-h-screen transition-colors duration-200">
       {/* Cabecera */}
       <div className="flex flex-col lg:flex-row justify-between items-center gap-3 mb-4">
         {/* Buscador */}
@@ -437,12 +437,12 @@ export default function SucursalesGrid() {
           <input
             type="text"
             placeholder="Buscar sucursales..."
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-full pl-9 pr-3 py-1.5 text-xs dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400
+            className="w-full border border-slate-300 dark:!border-slate-700 rounded-full pl-9 pr-3 py-1.5 text-xs dark:!bg-slate-800 dark:!text-slate-100 dark:!placeholder-slate-400
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:shadow-lg transition-shadow duration-300"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
         </div>
 
         {/* Filtros rápidos */}
@@ -454,7 +454,7 @@ export default function SucursalesGrid() {
               className={`px-2.5 py-1 rounded-full text-xs transition duration-300 transform ${
                 quickFilter === label.toLowerCase()
                   ? 'bg-blue-500 text-white shadow-lg'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105'
+                  : 'bg-slate-100 dark:!bg-slate-800 text-slate-700 dark:!text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105'
               }`}
             >
               {label}
@@ -465,7 +465,7 @@ export default function SucursalesGrid() {
         {/* Botón nueva sucursal */}
         <button
           onClick={() => setShowCreateForm((f) => !f)}
-          className="flex items-center bg-gradient-to-r from-blue-600 to-blue-500 text-white px-3 py-1.5 rounded-lg shadow-md hover:opacity-90 transition-opacity text-xs font-medium"
+          className="flex items-center bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-700 dark:to-blue-600 text-white px-3 py-1.5 rounded-lg shadow-md hover:opacity-90 transition-opacity text-xs font-medium"
         >
           <PlusIcon className="h-4 w-4 mr-1.5" />
           {showCreateForm ? 'Cancelar' : 'Nueva Sucursal'}
@@ -474,7 +474,7 @@ export default function SucursalesGrid() {
         {/* Modal crear sucursal */}
         {showCreateForm && (
           <Modal onClose={() => setShowCreateForm(false)}>
-            <h4 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
+            <h4 className="text-2xl font-semibold mb-4 text-slate-800 dark:!text-slate-100">
               Aqui podras crear tu nueva sucursal
             </h4>
             <SucursalesForm
@@ -489,17 +489,17 @@ export default function SucursalesGrid() {
 
       {/* Lista de sucursales */}
       {isLoading ? (
-        <p className="text-center py-4 text-gray-600 dark:text-gray-400">Cargando sucursales…</p>
+        <p className="text-center py-4 text-slate-600 dark:!text-slate-400">Cargando sucursales…</p>
       ) : (
         <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredSucursales.map((suc) => (
             <div
               key={suc.id}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col h-full cursor-pointer hover:shadow-xl transition-shadow duration-300"
+              className="bg-white dark:!bg-slate-900 rounded-xl shadow p-4 flex flex-col h-full cursor-pointer hover:shadow-xl transition-shadow duration-300 border border-slate-200 dark:!border-slate-800"
             >
               {/* Header de la tarjeta */}
-              <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-gray-700">
-                <h5 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{suc.nombre}</h5>
+              <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:!border-slate-800">
+                <h5 className="text-lg font-semibold text-slate-800 dark:!text-slate-100">{suc.nombre}</h5>
 
                 <div className="flex items-center gap-2">
                   {/* Pill de usuarios */}
@@ -539,8 +539,8 @@ export default function SucursalesGrid() {
                   ['País', suc.pais],
                 ].map(([dt, dd]) => (
                   <div key={dt} className="flex justify-between">
-                    <dt className="text-xs text-gray-500 dark:text-gray-400">{dt}</dt>
-                    <dd className="text-xs text-gray-700 dark:text-gray-300">{dd}</dd>
+                    <dt className="text-xs text-slate-500 dark:!text-slate-400">{dt}</dt>
+                    <dd className="text-xs text-slate-700 dark:!text-slate-300">{dd}</dd>
                   </div>
                 ))}
               </dl>

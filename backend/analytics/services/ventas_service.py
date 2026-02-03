@@ -6,6 +6,7 @@ from django.db.models import Sum, Count, Avg, F, DecimalField
 from django.db.models.functions import TruncDate, TruncDay, TruncMonth
 from datetime import datetime, timedelta
 from decimal import Decimal
+from django.utils import timezone
 
 
 class VentasService:
@@ -28,7 +29,7 @@ class VentasService:
 
         queryset = Factura.objects.filter(
             fecha_venta__range=(fecha_inicio, fecha_fin),
-            estado='ACT'  # Solo facturas activas
+            estado='PAG'  # Solo facturas pagadas
         )
 
         if sucursal_id:
@@ -67,12 +68,12 @@ class VentasService:
         """
         from main_dashboard.models import Factura
 
-        fecha_fin = datetime.now()
+        fecha_fin = timezone.now()
         fecha_inicio = fecha_fin - timedelta(days=dias)
 
         queryset = Factura.objects.filter(
             fecha_venta__range=(fecha_inicio, fecha_fin),
-            estado='ACT'
+            estado='PAG'
         ).annotate(
             fecha=TruncDate('fecha_venta')
         ).values('fecha').annotate(
@@ -103,7 +104,7 @@ class VentasService:
 
         queryset = FacturaDetalle.objects.filter(
             factura__fecha_venta__range=(fecha_inicio, fecha_fin),
-            factura__estado='ACT'
+            factura__estado='PAG'
         ).values(
             'producto_id',
             'producto_nombre',
@@ -135,7 +136,7 @@ class VentasService:
 
         queryset = FacturaDetalle.objects.filter(
             factura__fecha_venta__range=(fecha_inicio, fecha_fin),
-            factura__estado='ACT'
+            factura__estado='PAG'
         ).select_related('producto__categoria_id')
 
         if sucursal_id:
@@ -172,7 +173,7 @@ class VentasService:
 
         queryset = Factura.objects.filter(
             fecha_venta__range=(fecha_inicio, fecha_fin),
-            estado='ACT'
+            estado='PAG'
         ).values('sucursal_id', 'sucursal__nombre').annotate(
             total_ventas=Sum('total'),
             cantidad_facturas=Count('id'),

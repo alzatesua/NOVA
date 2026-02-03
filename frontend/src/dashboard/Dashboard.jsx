@@ -62,7 +62,7 @@ export default function Dashboard() {
   
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:!bg-slate-950 transition-colors duration-200 flex flex-col">
       <Navbar
         rol={rol}
         onViewChange={setView}
@@ -80,9 +80,9 @@ export default function Dashboard() {
 
         {view === 'usuarios' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white/20 dark:bg-gray-800/60 backdrop-blur-md ring-1 ring-white/30 dark:ring-gray-700 shadow-lg">
+            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
             <section className="w-full max-w-4xl">
-              <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Gestión de Usuarios</h3>
+              <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-slate-100">Gestión de Usuarios</h3>
               <UsersView users={usersData} onCreated={reloadUsers} />
             </section>
           </div>
@@ -90,7 +90,7 @@ export default function Dashboard() {
 
         {view === 'sucursales' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white/20 dark:bg-gray-800/60 backdrop-blur-md ring-1 ring-white/30 dark:ring-gray-700 shadow-lg">
+            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
             <SucursalesGrid
               sucursales={sucursales}
               isLoading={loadingSuc}
@@ -101,7 +101,7 @@ export default function Dashboard() {
 
         {view === 'productos' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white/20 dark:bg-gray-800/60 backdrop-blur-md ring-1 ring-white/30 dark:ring-gray-700 shadow-lg">
+            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
             <ProductosView
               products={products}
               loading={loadingProducts}
@@ -113,7 +113,7 @@ export default function Dashboard() {
         {/* VISTA DE NOTICIAS - Carrusel + link del catálogo */}
         {view === 'noticias' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white/20 dark:bg-gray-800/60 backdrop-blur-md ring-1 ring-white/30 dark:ring-gray-700 shadow-lg">
+            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
             <NoticiasView />
           </div>
         )}
@@ -121,7 +121,7 @@ export default function Dashboard() {
         {/* VISTA DE FACTURACIÓN - SIN PROPS, USA DATOS INTERNOS */}
         {view === 'facturacion' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white/20 dark:bg-gray-800/60 backdrop-blur-md ring-1 ring-white/30 dark:ring-gray-700 shadow-lg">
+            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
             <FacturacionView />
           </div>
         )}
@@ -129,7 +129,7 @@ export default function Dashboard() {
         {/* VISTA DE CONFIGURACIÓN - SIN PROPS, USA DATOS INTERNOS */}
         {view === 'configuracion' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white/20 dark:bg-gray-800/60 backdrop-blur-md ring-1 ring-white/30 dark:ring-gray-700 shadow-lg">
+            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
             <ConfiguracionView />
           </div>
         )}

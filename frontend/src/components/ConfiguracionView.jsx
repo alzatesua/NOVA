@@ -352,11 +352,11 @@ export default function ConfiguracionView() {
     if (items.length === 0) {
       return (
         <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 mb-3">
-            <i className='bx bx-inbox text-3xl text-gray-400 dark:text-gray-500'></i>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:!bg-slate-800 mb-3 transition-colors duration-200">
+            <i className='bx bx-inbox text-3xl text-slate-400 dark:!text-slate-600'></i>
           </div>
-          <p className="text-base text-gray-500 dark:text-gray-400 font-medium">No hay {tabs.find(t => t.id === activeTab)?.label.toLowerCase()} registrados</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Crea uno nuevo para comenzar</p>
+          <p className="text-base text-slate-500 dark:!text-slate-400 font-medium transition-colors duration-200">No hay {tabs.find(t => t.id === activeTab)?.label.toLowerCase()} registrados</p>
+          <p className="text-xs text-slate-400 dark:!text-slate-500 mt-1 transition-colors duration-200">Crea uno nuevo para comenzar</p>
         </div>
       );
     }
@@ -366,19 +366,19 @@ export default function ConfiguracionView() {
         {items.map((item) => (
           <div
             key={item.id}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 p-4 hover:shadow-md hover:border-[rgb(37,99,235)] hover:border-opacity-30 transition-all duration-200 group"
+            className="bg-white dark:!bg-slate-900 rounded-lg shadow-sm border border-slate-100 dark:!border-slate-800 p-4 hover:shadow-md hover:border-[rgb(37,99,235)] hover:border-opacity-30 transition-all duration-200 group transition-colors duration-200"
           >
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 {activeTab === 'ivas' ? (
-                  <p className="font-semibold text-base text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                  <p className="font-semibold text-base text-slate-800 dark:!text-slate-100 flex items-center gap-2 transition-colors duration-200">
                     <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
                       <i className='bx bx-percent text-sm text-[rgb(37,99,235)]'></i>
                     </span>
                     {item.porcentaje}%
                   </p>
                 ) : activeTab === 'descuentos' ? (
-                  <p className="font-semibold text-base text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                  <p className="font-semibold text-base text-slate-800 dark:!text-slate-100 flex items-center gap-2 transition-colors duration-200">
                     <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
                       <i className='bx bx-discount text-sm text-[rgb(37,99,235)]'></i>
                     </span>
@@ -386,25 +386,25 @@ export default function ConfiguracionView() {
                   </p>
                 ) : activeTab === 'categorias' ? (
                   <>
-                    <p className="font-semibold text-base text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                    <p className="font-semibold text-base text-slate-800 dark:!text-slate-100 flex items-center gap-2 transition-colors duration-200">
                       <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
                         <i className='bx bx-category text-sm text-[rgb(37,99,235)]'></i>
                       </span>
                       {item.nombre}
                     </p>
                     {item.descripcion && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 ml-9">{item.descripcion}</p>
+                      <p className="text-xs text-slate-500 dark:!text-slate-400 mt-1.5 ml-9 transition-colors duration-200">{item.descripcion}</p>
                     )}
                   </>
                 ) : activeTab === 'marcas' ? (
-                  <p className="font-semibold text-base text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                  <p className="font-semibold text-base text-slate-800 dark:!text-slate-100 flex items-center gap-2 transition-colors duration-200">
                     <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
                       <i className='bx bx-tag text-sm text-[rgb(37,99,235)]'></i>
                     </span>
                     {item.nombre}
                   </p>
                 ) : (
-                  <p className="font-semibold text-base text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                  <p className="font-semibold text-base text-slate-800 dark:!text-slate-100 flex items-center gap-2 transition-colors duration-200">
                     <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
                       <i className='bx bx-ruler text-sm text-[rgb(37,99,235)]'></i>
                     </span>
@@ -412,7 +412,7 @@ export default function ConfiguracionView() {
                   </p>
                 )}
                 {item.id && (
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 ml-9">ID: {item.id}</p>
+                  <p className="text-xs text-slate-400 dark:!text-slate-600 mt-1.5 ml-9 transition-colors duration-200">ID: {item.id}</p>
                 )}
               </div>
               <div className="flex gap-1">
@@ -445,13 +445,13 @@ export default function ConfiguracionView() {
           <i className='bx bx-cog text-xl text-[rgb(37,99,235)]'></i>
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Configuración General</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">Administra la configuración de tu sistema</p>
+          <h2 className="text-2xl font-bold text-slate-800 dark:!text-slate-100 transition-colors duration-200">Configuración General</h2>
+          <p className="text-slate-500 dark:!text-slate-400 text-sm transition-colors duration-200">Administra la configuración de tu sistema</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-8 border-b border-gray-200 dark:border-gray-700 pb-1">
+      <div className="flex flex-wrap gap-2 mb-8 border-b border-slate-200 dark:!border-slate-800 pb-1 transition-colors duration-200">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -459,10 +459,10 @@ export default function ConfiguracionView() {
               setActiveTab(tab.id);
               setShowCreateForm(false);
             }}
-            className={`flex items-center gap-2 px-4 py-2.5 font-medium rounded-t-lg transition-all duration-200 text-sm ${
+            className={`flex items-center gap-2 px-4 py-2.5 font-medium rounded-t-lg transition-all duration-200 text-sm transition-colors duration-200 ${
               activeTab === tab.id
                 ? 'text-white bg-[rgb(37,99,235)] shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-[rgb(37,99,235)] hover:bg-gray-50 dark:hover:bg-gray-700'
+                : 'text-slate-600 dark:!text-slate-400 hover:text-[rgb(37,99,235)] hover:bg-slate-50 dark:hover:!bg-slate-700'
             }`}
           >
             <i className={`bx ${tab.icon} text-lg`}></i>
@@ -475,23 +475,23 @@ export default function ConfiguracionView() {
       <div className="space-y-6">
         {/* Configuración de la Tienda */}
         {activeTab === 'tienda' && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
+          <div className="bg-white dark:!bg-slate-900 rounded-xl shadow-md border border-slate-100 dark:!border-slate-800 p-6 transition-colors duration-200">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-xl bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
                 <i className='bx bx-store-alt text-xl text-[rgb(37,99,235)]'></i>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">Configuración de Tienda Online</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">Personaliza tu tienda en línea</p>
+                <h3 className="text-xl font-bold text-slate-800 dark:!text-slate-100 transition-colors duration-200">Configuración de Tienda Online</h3>
+                <p className="text-slate-500 dark:!text-slate-400 text-sm transition-colors duration-200">Personaliza tu tienda en línea</p>
               </div>
             </div>
-            <p className="text-gray-600 dark:text-gray-400 mb-8">
+            <p className="text-slate-600 dark:!text-slate-400 mb-8 transition-colors duration-200">
               Configura los datos de tu tienda para que los clientes puedan contactarte por WhatsApp.
             </p>
 
             <div className="space-y-5 max-w-2xl">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2 flex items-center gap-2 transition-colors duration-200">
                   <i className='bx bx-heading text-sm text-[rgb(37,99,235)]'></i>
                   Nombre de la Tienda
                 </label>
@@ -499,14 +499,14 @@ export default function ConfiguracionView() {
                   type="text"
                   value={tiendaConfig.nombre_tienda}
                   onChange={(e) => setTiendaConfig({ ...tiendaConfig, nombre_tienda: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
                   placeholder="Ej: Mi Tienda Online"
                 />
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Este nombre se mostrará en el header de tu tienda</p>
+                <p className="text-xs text-slate-400 dark:!text-slate-500 mt-1.5 transition-colors duration-200">Este nombre se mostrará en el header de tu tienda</p>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2 flex items-center gap-2 transition-colors duration-200">
                   <i className='bx bxl-whatsapp text-sm text-[rgb(37,99,235)]'></i>
                   Número de WhatsApp
                 </label>
@@ -514,20 +514,20 @@ export default function ConfiguracionView() {
                   type="text"
                   value={tiendaConfig.whatsapp_number}
                   onChange={(e) => setTiendaConfig({ ...tiendaConfig, whatsapp_number: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
                   placeholder="Ej: 573000000000"
                 />
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
+                <p className="text-xs text-slate-400 dark:!text-slate-500 mt-1.5 transition-colors duration-200">
                   Código de país + número (sin el signo +). Ej: 57 para Colombia, 54 para Argentina
                 </p>
               </div>
 
               <div className="bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] bg-opacity-5 border border-[rgb(37,99,235)] border-opacity-20 rounded-xl p-5">
-                <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2 text-sm">
+                <h4 className="font-semibold text-slate-800 dark:!text-slate-100 mb-3 flex items-center gap-2 text-sm transition-colors duration-200">
                   <i className='bx bx-info-circle text-[rgb(37,99,235)] text-lg'></i>
                   ¿Cómo funciona?
                 </h4>
-                <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                <ul className="text-sm text-slate-700 dark:!text-slate-300 space-y-2 transition-colors duration-200">
                   <li className="flex items-start gap-2">
                     <i className='bx bx-check-circle text-[rgb(37,99,235)] mt-0.5'></i>
                     <span>Los clientes agregan productos al carrito</span>
@@ -562,13 +562,13 @@ export default function ConfiguracionView() {
 
         {/* Formulario de creación/edición */}
         {showCreateForm && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
+          <div className="bg-white dark:!bg-slate-900 rounded-xl shadow-md border border-slate-100 dark:!border-slate-800 p-6 transition-colors duration-200">
             <div className="flex justify-between items-center mb-5">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
                   <i className={`bx ${editingItem ? 'bx-edit' : 'bx-plus'} text-base text-[rgb(37,99,235)]`}></i>
                 </div>
-                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                <h3 className="text-lg font-bold text-slate-800 dark:!text-slate-100 transition-colors duration-200">
                   {editingItem ? 'Editar' : 'Crear'} {tabs.find(t => t.id === activeTab)?.label.slice(0, -1)}
                 </h3>
               </div>
@@ -584,7 +584,7 @@ export default function ConfiguracionView() {
               {activeTab === 'categorias' && (
                 <>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                    <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2 flex items-center gap-2 transition-colors duration-200">
                       <i className='bx bx-text text-sm text-[rgb(37,99,235)]'></i>
                       Nombre
                     </label>
@@ -593,12 +593,12 @@ export default function ConfiguracionView() {
                       required
                       value={formData.nombre || ''}
                       onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                      className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm"
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
                       placeholder="Ej: Electrónica, Deportes"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                    <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2 flex items-center gap-2 transition-colors duration-200">
                       <i className='bx bx-align-left text-sm text-[rgb(37,99,235)]'></i>
                       Descripción
                     </label>
@@ -606,7 +606,7 @@ export default function ConfiguracionView() {
                       required
                       value={formData.descripcion || ''}
                       onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                      className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all resize-none text-sm"
+                      className="w-full px-3 py-2.5 border border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all resize-none text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
                       placeholder="Ej: Todos los productos de electrónica"
                       rows={2}
                     />
@@ -616,7 +616,7 @@ export default function ConfiguracionView() {
 
               {(activeTab === 'marcas' || activeTab === 'medidas') && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2 flex items-center gap-2 transition-colors duration-200">
                     <i className='bx bx-text text-sm text-[rgb(37,99,235)]'></i>
                     Nombre
                   </label>
@@ -625,7 +625,7 @@ export default function ConfiguracionView() {
                     required
                     value={formData.nombre || ''}
                     onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm"
+                    className="w-full px-3 py-2.5 border border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
                     placeholder={activeTab === 'marcas' ? "Ej: Apple, Samsung" : "Ej: Kilogramo, Unidad"}
                   />
                 </div>
@@ -633,7 +633,7 @@ export default function ConfiguracionView() {
 
               {activeTab === 'ivas' && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2 flex items-center gap-2 transition-colors duration-200">
                     <i className='bx bx-percent text-sm text-[rgb(37,99,235)]'></i>
                     Porcentaje de IVA
                   </label>
@@ -643,7 +643,7 @@ export default function ConfiguracionView() {
                     required
                     value={formData.porcentaje || ''}
                     onChange={(e) => setFormData({ ...formData, porcentaje: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm"
+                    className="w-full px-3 py-2.5 border border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
                     placeholder="Ej: 19.00"
                   />
                 </div>
@@ -651,7 +651,7 @@ export default function ConfiguracionView() {
 
               {activeTab === 'descuentos' && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2 flex items-center gap-2 transition-colors duration-200">
                     <i className='bx bx-discount text-sm text-[rgb(37,99,235)]'></i>
                     Porcentaje de Descuento
                   </label>
@@ -661,7 +661,7 @@ export default function ConfiguracionView() {
                     required
                     value={formData.Descuento || ''}
                     onChange={(e) => setFormData({ ...formData, Descuento: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm"
+                    className="w-full px-3 py-2.5 border border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
                     placeholder="Ej: 30"
                   />
                 </div>
@@ -671,7 +671,7 @@ export default function ConfiguracionView() {
                 <button
                   type="button"
                   onClick={() => setShowCreateForm(false)}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-sm font-medium"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:!bg-slate-800 text-slate-700 dark:!text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:!bg-slate-700 transition-all text-sm font-medium transition-colors duration-200"
                 >
                   <i className='bx bx-x text-base'></i>
                   Cancelar

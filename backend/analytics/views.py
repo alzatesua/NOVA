@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from datetime import datetime, timedelta
 from django.utils import timezone
+from decimal import Decimal
 
 from .services import VentasService, InventarioService, KPICalculator
 from .serializers import (
