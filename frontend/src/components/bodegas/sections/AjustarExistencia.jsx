@@ -244,33 +244,33 @@ export default function AjustarExistencia({
   }, [productoEncontrado?.imagen_producto, fullUrl]);
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-xl">
+    <div className="bg-white/90 backdrop-blur-sm rounded-xl p-5 border border-white/20 shadow-lg">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl">
-          <SparklesIcon className="w-6 h-6 text-white" />
+      <div className="flex items-center gap-3 mb-5">
+        <div className="p-2 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg">
+          <SparklesIcon className="w-4 h-4 text-white" />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-slate-800">Ajuste de inventario</h3>
-          <p className="text-sm text-slate-600">Modifica inventarios con búsqueda inteligente por código de barras</p>
+          <h3 className="text-base font-bold text-slate-800">Ajuste de inventario</h3>
+          <p className="text-xs text-slate-600">Modifica inventarios con búsqueda inteligente por código de barras</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Columna izquierda - Formulario */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 space-y-4">
             {/* Fila 1: Código de barras y Bodega */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  <MagnifyingGlassIcon className="w-4 h-4 inline mr-1" />
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                  <MagnifyingGlassIcon className="w-3.5 h-3.5 inline mr-1" />
                   Código de Barras
                 </label>
                 <input
                   ref={barcodeRef}
                   type="text"
-                  className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm
+                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs
                             focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
                             transition-all duration-200 shadow-sm hover:shadow-md"
                   value={codigoBarras}
@@ -280,15 +280,15 @@ export default function AjustarExistencia({
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Bodega <span className="text-rose-400">*</span>
                 </label>
                 <select
                   required
                   value={ajusteForm?.bodega || ''}
                   onChange={(e) => onBodegaSelect(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm 
-                            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 
+                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                             transition-all duration-200 shadow-sm hover:shadow-md appearance-none"
                 >
                   <option value="">Seleccionar bodega...</option>
@@ -297,8 +297,8 @@ export default function AjustarExistencia({
                   ) : (
                     bodegasList
                       .filter(b =>
-                        sucursalSel 
-                          ? Number(b.sucursal_id ?? b.id_sucursal ?? b.sucursal) === Number(sucursalSel?.id) 
+                        sucursalSel
+                          ? Number(b.sucursal_id ?? b.id_sucursal ?? b.sucursal) === Number(sucursalSel?.id)
                           : true
                       )
                       .map(bodega => (
@@ -316,12 +316,12 @@ export default function AjustarExistencia({
 
             {/* Producto encontrado */}
             {productoEncontrado && (
-              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-200">
-                <div className="flex items-center gap-2 mb-3">
-                  <CheckCircleIcon className="w-5 h-5 text-emerald-600" />
-                  <span className="text-sm font-semibold text-emerald-800">Producto Encontrado</span>
+              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-3 border border-emerald-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircleIcon className="w-4 h-4 text-emerald-600" />
+                  <span className="text-xs font-semibold text-emerald-800">Producto Encontrado</span>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                   <div>
                     <span className="text-emerald-600 font-medium">Nombre:</span>
                     <p className="font-semibold text-slate-800 truncate">{productoEncontrado?.nombre}</p>
@@ -343,15 +343,15 @@ export default function AjustarExistencia({
             )}
 
             {/* Fila 2: ID Producto, Selector manual, Ajuste */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   ID del Producto <span className="text-rose-400">*</span>
                 </label>
                 <input
                   type="number"
-                  className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm 
-                            focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                             transition-all duration-200"
                   value={ajusteForm?.producto ?? ''}
                   onChange={(e) => setAjusteFormSafe(prev => ({ ...prev, producto: e.target.value }))}
@@ -365,15 +365,15 @@ export default function AjustarExistencia({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">
                   O selecciona manualmente
                 </label>
                 <select
                   disabled={!ajusteForm?.bodega}
                   value={ajusteForm?.producto ?? ''}
                   onChange={(e) => onProductoSelect(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm 
-                            focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                             transition-all duration-200 disabled:opacity-50"
                 >
                   <option value="">
@@ -394,13 +394,13 @@ export default function AjustarExistencia({
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Ajuste <span className="text-rose-400">*</span>
                 </label>
                 <input
                   type="number"
-                  className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm 
-                            focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                             transition-all duration-200"
                   value={ajusteForm?.delta ?? ''}
                   onChange={(e) => setAjusteFormSafe(prev => ({ ...prev, delta: e.target.value }))}
@@ -414,13 +414,13 @@ export default function AjustarExistencia({
           </div>
 
           {/* Columna derecha - Imagen y resumen */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="lg:col-span-4 space-y-4">
             {/* Imagen del producto */}
-            <div className="bg-white rounded-xl border-2 border-slate-200 p-4">
-              <h5 className="text-sm font-semibold text-slate-700 mb-3 text-center">
+            <div className="bg-white rounded-lg border border-slate-200 p-3">
+              <h5 className="text-xs font-semibold text-slate-700 mb-2 text-center">
                 Imagen del Producto
               </h5>
-              <div className="w-full aspect-square bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg 
+              <div className="w-full aspect-square bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg
                             border border-slate-200 flex items-center justify-center overflow-hidden relative">
                 {imgUrl && !imgError && (
                   <img
@@ -434,8 +434,8 @@ export default function AjustarExistencia({
 
                 {(!imgUrl || imgError) && (
                   <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 absolute inset-0">
-                    <CubeIcon className="w-16 h-16 mb-2" />
-                    <span className="text-sm font-medium">
+                    <CubeIcon className="w-12 h-12 mb-2" />
+                    <span className="text-xs font-medium">
                       {productoEncontrado
                         ? (imgError ? 'No se pudo cargar la imagen' : 'Sin imagen')
                         : 'Busca un producto'}
@@ -447,28 +447,28 @@ export default function AjustarExistencia({
 
             {/* Resumen del ajuste */}
             {productoEncontrado && ajusteForm?.delta !== '' && (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-4">
-                <h5 className="text-sm font-semibold text-blue-800 mb-3 text-center">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-3">
+                <h5 className="text-xs font-semibold text-blue-800 mb-2 text-center">
                   📊 Resumen del Ajuste
                 </h5>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center p-2 bg-white rounded-lg">
-                    <span className="text-sm text-slate-600">Stock Actual:</span>
-                    <span className="font-bold text-slate-800">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center p-1.5 bg-white rounded-lg">
+                    <span className="text-xs text-slate-600">Stock Actual:</span>
+                    <span className="font-bold text-slate-800 text-sm">
                       {productoEncontrado?.stock ?? '?'}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center p-2 bg-white rounded-lg">
-                    <span className="text-sm text-slate-600">Ajuste:</span>
-                    <span className={`font-bold ${
+                  <div className="flex justify-between items-center p-1.5 bg-white rounded-lg">
+                    <span className="text-xs text-slate-600">Ajuste:</span>
+                    <span className={`font-bold text-sm ${
                       Number(ajusteForm.delta) > 0 ? 'text-emerald-600' : 'text-rose-600'
                     }`}>
                       {Number(ajusteForm.delta) > 0 ? '+' : ''}{ajusteForm.delta}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center p-2 bg-indigo-100 rounded-lg border border-indigo-200">
-                    <span className="text-sm font-semibold text-indigo-800">Stock Final:</span>
-                    <span className="font-bold text-indigo-600 text-lg">
+                  <div className="flex justify-between items-center p-1.5 bg-indigo-100 rounded-lg border border-indigo-200">
+                    <span className="text-xs font-semibold text-indigo-800">Stock Final:</span>
+                    <span className="font-bold text-indigo-600 text-sm">
                       {stockResultante ?? '?'}
                     </span>
                   </div>
@@ -479,12 +479,12 @@ export default function AjustarExistencia({
         </div>
 
         {/* Botones de acción */}
-        <div className="flex justify-end gap-4 pt-6 border-t border-slate-200">
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
           <button
             type="button"
             onClick={() => handleTabChange('administrar')}
-            className="px-6 py-3 text-slate-700 font-medium rounded-xl border-2 border-slate-200 
-                      hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
+            className="px-4 py-2 text-slate-700 font-medium rounded-lg border border-slate-200
+                      hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 text-xs"
           >
             Cancelar
           </button>
@@ -497,18 +497,18 @@ export default function AjustarExistencia({
               ajusteForm?.delta === '' ||
               Number.isNaN(Number(ajusteForm?.delta))
             }
-            className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold 
-                      rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 
-                      hover:scale-105 disabled:opacity-60 disabled:hover:scale-100 transition-all duration-200"
+            className="px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold
+                      rounded-lg shadow-md shadow-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/40
+                      hover:scale-105 disabled:opacity-60 disabled:hover:scale-100 transition-all duration-200 text-xs"
           >
             {ajusteLoading ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 Aplicando...
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <SparklesIcon className="w-5 h-5" />
+              <div className="flex items-center gap-1.5">
+                <SparklesIcon className="w-4 h-4" />
                 Aplicar Ajuste
               </div>
             )}

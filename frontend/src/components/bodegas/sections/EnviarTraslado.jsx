@@ -127,14 +127,14 @@ export default function EnviarTraslado({
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-6 text-white">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
             <PaperAirplaneIcon className="w-6 h-6" />
           </div>
           <div className="flex-1">
             <h3 className="text-2xl font-bold">Enviar Traslado</h3>
-            <p className="text-indigo-100 mt-1">
+            <p className="text-blue-100 mt-1">
               Selecciona un borrador de traslado y envíalo para procesamiento
             </p>
           </div>
@@ -154,7 +154,7 @@ export default function EnviarTraslado({
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
               placeholder="Buscar por ID, estado, bodega o observaciones..."
-              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
 
@@ -173,7 +173,7 @@ export default function EnviarTraslado({
               type="button"
               disabled={!trasladoMasReciente}
               onClick={() => trasladoMasReciente && manejarEnvio(trasladoMasReciente.id)}
-              className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               <ClockIcon className="w-5 h-5" />
               Enviar más reciente
@@ -194,7 +194,7 @@ export default function EnviarTraslado({
                   type="checkbox"
                   checked={soloBorradores}
                   onChange={(e) => setSoloBorradores(e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  className="rounded border-gray-300 text-indigo-600 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-700 flex items-center gap-1">
                   <DocumentDuplicateIcon className="w-4 h-4" />
@@ -207,7 +207,7 @@ export default function EnviarTraslado({
                   type="checkbox"
                   checked={soloMios}
                   onChange={(e) => setSoloMios(e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  className="rounded border-gray-300 text-indigo-600 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-700 flex items-center gap-1">
                   <UserIcon className="w-4 h-4" />
@@ -338,7 +338,7 @@ export default function EnviarTraslado({
                               type="button"
                               onClick={() => manejarEnvio(traslado.id)}
                               disabled={enviarLoading}
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                             >
                               {estaEnviando ? (
                                 <>

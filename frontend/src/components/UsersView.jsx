@@ -271,7 +271,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
           placeholder="Buscar usuarios..."
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
-          className="w-full md:w-64 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full md:w-64 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
         />
 
         <div className="flex gap-2 whitespace-nowrap">
@@ -282,7 +282,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
               className={`px-3 py-1 rounded-full text-sm ${
                 quickFilter === label.toLowerCase()
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               } transition`}
             >
               {label}
@@ -304,9 +304,9 @@ export default function UsersView({ users: initialUsers, onCreated }) {
       {showCreateForm && (
         <form
           onSubmit={handleSubmitNewUser}
-          className="bg-white p-6 rounded-lg shadow-md border border-gray-200 space-y-4 mb-6"
+          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 space-y-4 mb-6"
         >
-          <h4 className="text-lg font-medium">Crear Nuevo Usuario</h4>
+          <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">Crear Nuevo Usuario</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input
               name="usuario"
@@ -314,7 +314,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
               value={newUser.usuario}
               onChange={handleNewFieldChange}
               required
-              className="border rounded px-2 py-1 text-sm"
+              className="border dark:border-gray-600 rounded px-2 py-1 text-sm dark:bg-gray-700 dark:text-gray-100"
             />
             <input
               name="correo_usuario"
@@ -323,7 +323,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
               value={newUser.correo_usuario}
               onChange={handleNewFieldChange}
               required
-              className="border rounded px-2 py-1 text-sm"
+              className="border dark:border-gray-600 rounded px-2 py-1 text-sm dark:bg-gray-700 dark:text-gray-100"
             />
             <input
               name="password"
@@ -332,13 +332,13 @@ export default function UsersView({ users: initialUsers, onCreated }) {
               value={newUser.password}
               onChange={handleNewFieldChange}
               required
-              className="border rounded px-2 py-1 text-sm"
+              className="border dark:border-gray-600 rounded px-2 py-1 text-sm dark:bg-gray-700 dark:text-gray-100"
             />
             <select
               name="sucursal_id"
               value={newUser.sucursal_id}
               onChange={handleNewFieldChange}
-              className="border rounded px-2 py-1 text-sm"
+              className="border dark:border-gray-600 rounded px-2 py-1 text-sm dark:bg-gray-700 dark:text-gray-100"
               required
             >
               <option value="">Seleccione una sucursal</option>
@@ -351,7 +351,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
               value={newUser.rol}
               onChange={handleNewFieldChange}
               required
-              className="border rounded px-2 py-1 text-sm"
+              className="border dark:border-gray-600 rounded px-2 py-1 text-sm dark:bg-gray-700 dark:text-gray-100"
             >
               <option value="" disabled>-- Selecciona un rol --</option>
               {availableRoles.map(r => (
@@ -375,7 +375,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
       {viewMode === 'card' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredUsers.length === 0 && !loading && (
-            <p className="col-span-full text-center text-gray-500">No se encontraron usuarios.</p>
+            <p className="col-span-full text-center text-gray-500 dark:text-gray-400">No se encontraron usuarios.</p>
           )}
 
           {filteredUsers.map(u => {
@@ -386,11 +386,11 @@ export default function UsersView({ users: initialUsers, onCreated }) {
             return (
               <div
                 key={u.id_login_usuario}
-                className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 flex flex-col break-words"
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700 flex flex-col break-words"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h5
-                    className="text-xl font-semibold text-gray-900 truncate max-w-[70%]"
+                    className="text-xl font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[70%]"
                     title={u.usuario}
                   >
                     {u.usuario}
@@ -441,9 +441,9 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                   </button>
                 </div>
 
-                <dl className="space-y-2 text-sm text-gray-700">
+                <dl className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <div className="flex justify-between">
-                    <dt className="font-medium text-gray-500">Correo</dt>
+                    <dt className="font-medium text-gray-500 dark:text-gray-400">Correo</dt>
                     <dd
                       className="truncate max-w-[60%]"
                       title={u.correo_usuario}
@@ -452,7 +452,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                     </dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="font-medium text-gray-500">Sucursal</dt>
+                    <dt className="font-medium text-gray-500 dark:text-gray-400">Sucursal</dt>
                     <dd
                       className="truncate max-w-[60%]"
                       title={sucursales.find(s => s.id === u.id_sucursal_default)?.nombre || '—'}
@@ -477,12 +477,12 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                 </div>
 
                 {isExpanded && (
-                  <div className="mt-4 pt-4 border-t space-y-2 text-sm text-gray-700">
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2 text-sm text-gray-700 dark:text-gray-300">
                     <div>
-                      <span className="font-medium text-gray-500">Rol:</span>{' '}
+                      <span className="font-medium text-gray-500 dark:text-gray-400">Rol:</span>{' '}
                       {isEditing ? (
                         <select
-                          className="border rounded px-2 py-1 text-sm"
+                          className="border dark:border-gray-600 rounded px-2 py-1 text-sm dark:bg-gray-700 dark:text-gray-100"
                           value={fields.rol}
                           onChange={e => handleFieldChange(u.id_login_usuario, 'rol', e.target.value)}
                         >
@@ -497,10 +497,10 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                     </div>
 
                     <div>
-                      <span className="font-medium text-gray-500">Usuario:</span>{' '}
+                      <span className="font-medium text-gray-500 dark:text-gray-400">Usuario:</span>{' '}
                       {isEditing ? (
                         <input
-                          className="border rounded px-2 py-1 text-sm"
+                          className="border dark:border-gray-600 rounded px-2 py-1 text-sm dark:bg-gray-700 dark:text-gray-100"
                           value={fields.usuario}
                           onChange={e => handleFieldChange(u.id_login_usuario, 'usuario', e.target.value)}
                         />
@@ -510,10 +510,10 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                     </div>
 
                     <div>
-                      <span className="font-medium text-gray-500">Sucursal:</span>{' '}
+                      <span className="font-medium text-gray-500 dark:text-gray-400">Sucursal:</span>{' '}
                       {isEditing ? (
                         <select
-                          className="border rounded px-2 py-1 text-sm"
+                          className="border dark:border-gray-600 rounded px-2 py-1 text-sm dark:bg-gray-700 dark:text-gray-100"
                           value={fields.id_sucursal_default}
                           onChange={e => handleFieldChange(u.id_login_usuario, 'id_sucursal_default', e.target.value)}
                         >
@@ -528,7 +528,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                     </div>
 
                     <div>
-                      <span className="font-medium text-gray-500">Fecha de creación:</span> {fields.creado_en}
+                      <span className="font-medium text-gray-500 dark:text-gray-400">Fecha de creación:</span> {fields.creado_en}
                     </div>
 
                     {u.foto_perfil && (
@@ -552,7 +552,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                           </button>
                           <button
                             onClick={() => toggleEdit(u.id_login_usuario)}
-                            className="bg-gray-300 text-gray-800 text-sm px-3 py-1 rounded hover:bg-gray-400"
+                            className="bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 text-sm px-3 py-1 rounded hover:bg-gray-400 dark:hover:bg-gray-500"
                           >
                             Cancelar
                           </button>

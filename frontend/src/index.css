@@ -66,3 +66,50 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Variables personalizadas para modo oscuro - fáciles de modificar */
+:root {
+  /* Fondos */
+  --bg-primary: 255 255 255;        /* white */
+  --bg-secondary: 249 250 251;      /* gray-50 */
+  --bg-tertiary: 243 244 246;       /* gray-100 */
+  --bg-card: 255 255 255;           /* white */
+  --bg-card-hover: 249 250 251;     /* gray-50 */
+
+  /* Textos */
+  --text-primary: 17 24 39;         /* gray-900 */
+  --text-secondary: 55 65 81;       /* gray-700 */
+  --text-muted: 107 114 128;        /* gray-500 */
+  --text-inverse: 255 255 255;      /* white */
+
+  /* Bordes */
+  --border-color: 229 231 235;      /* gray-200 */
+  --border-color-hover: 209 213 219; /* gray-300 */
+
+  /* Interactivos */
+  --hover-bg: 243 244 246;          /* gray-100 */
+  --active-bg: 229 231 235;         /* gray-200 */
+}
+
+.dark {
+  /* Fondos oscuros */
+  --bg-primary: 17 24 39;           /* gray-900 */
+  --bg-secondary: 31 41 55;         /* gray-800 */
+  --bg-tertiary: 55 65 81;          /* gray-700 */
+  --bg-card: 31 41 55;              /* gray-800 */
+  --bg-card-hover: 55 65 81;        /* gray-700 */
+
+  /* Textos oscuros */
+  --text-primary: 243 244 246;      /* gray-100 */
+  --text-secondary: 209 213 219;    /* gray-300 */
+  --text-muted: 156 163 175;        /* gray-400 */
+  --text-inverse: 17 24 39;         /* gray-900 */
+
+  /* Bordes oscuros */
+  --border-color: 55 65 81;         /* gray-700 */
+  --border-color-hover: 75 85 99;   /* gray-600 */
+
+  /* Interactivos oscuros */
+  --hover-bg: 55 65 81;             /* gray-700 */
+  --active-bg: 75 85 99;            /* gray-600 */
+}

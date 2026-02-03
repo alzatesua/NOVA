@@ -561,53 +561,28 @@ export default function BodegasModal({
         <div className="flex-1 flex flex-col bg-gradient-to-br from-slate-50 to-indigo-50/30">
           {/* Header superior - Más compacto */}
           <div className="relative z-10 flex-shrink-0">
-            <header className="relative mb-4 sticky top-0 z-20 bg-white/70 backdrop-blur-xl rounded-2xl p-4 border border-white/20 shadow-xl mx-6 mt-4">
-              <div className="flex items-start gap-4">
-                <div className={`w-2 h-16 rounded-full bg-gradient-to-b transition-all duration-500 ${currentSection?.color} flex-shrink-0`}>
-                  <div className="w-full h-6 bg-white/30 rounded-full animate-pulse"></div>
+            <header className="relative mb-2 sticky top-0 z-20 bg-white/70 backdrop-blur-xl rounded-xl p-3 border border-white/20 shadow-lg mx-6 mt-2">
+              <div className="flex items-center gap-3">
+                <div className={`w-1.5 h-8 rounded-full bg-gradient-to-b transition-all duration-500 ${currentSection?.color} flex-shrink-0`}>
+                  <div className="w-full h-3 bg-white/30 rounded-full animate-pulse"></div>
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1 text-xs text-slate-600 mb-1">
-                    <span className="px-2 py-0.5 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full font-medium">
+                  <div className="flex items-center gap-1 text-xs text-slate-600 mb-0.5">
+                    <span className="px-1.5 py-0.5 bg-gradient-to-r from-blue-600/10 to-blue-500/10 rounded-full font-medium">
                       Gestión de Inventario
                     </span>
                     <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
-                    <span className="font-medium text-indigo-600 text-sm truncate">
+                    <span className="font-medium text-blue-600 text-sm truncate">
                       {sucursalSel?.nombre || 'Sucursal'}
                     </span>
                   </div>
 
-                  <h6 className="text-lg md:text-xl font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-2 leading-snug">
+                  <h6 className="text-base font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent leading-tight">
                     {currentSection?.label}
                   </h6>
-                  
-                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                    {SECCIONES.map(section => {
-                      const Icon = section.icon;
-                      const isActive = active === section.id;
-
-                      return (
-                        <button
-                          key={section.id}
-                          onClick={() => handleTabChange(section.id)}
-                          className={`group relative overflow-hidden rounded-lg p-2 transition-all duration-300 transform hover:scale-105 ${
-                            isActive
-                              ? `bg-gradient-to-br ${section.color} text-white shadow-lg shadow-indigo-500/25`
-                              : 'bg-white/60 hover:bg-white/80 text-slate-700 border border-slate-200/60'
-                          }`}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                          <div className="relative z-10">
-                            <Icon className={`w-4 h-4 mx-auto mb-0.5 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
-                            <p className="text-xs font-medium text-center leading-tight">{section.label}</p>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
                 </div>
               </div>
             </header>
@@ -615,7 +590,7 @@ export default function BodegasModal({
 
           {/* Contenido principal - Más espacio */}
           <div className="flex-1 relative overflow-y-auto">
-            <div className="min-h-full px-6 pb-4">
+            <div className="min-h-full px-4 pb-3">
               {/* Contenido con transiciones */}
               <div className={`relative transition-all duration-300 ${isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
                 {active === 'crear-bodega' && (

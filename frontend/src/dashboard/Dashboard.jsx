@@ -62,7 +62,7 @@ export default function Dashboard() {
   
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
       <Navbar
         rol={rol}
         onViewChange={setView}
@@ -80,17 +80,17 @@ export default function Dashboard() {
 
         {view === 'usuarios' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white/20 backdrop-blur-md ring-1 ring-white/30 shadow-lg">
+            bg-white/20 dark:bg-gray-800/60 backdrop-blur-md ring-1 ring-white/30 dark:ring-gray-700 shadow-lg">
             <section className="w-full max-w-4xl">
-              <h3 className="text-2xl font-bold mb-4">Gestión de Usuarios</h3>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Gestión de Usuarios</h3>
               <UsersView users={usersData} onCreated={reloadUsers} />
             </section>
           </div>
         )}
 
         {view === 'sucursales' && (
-          <div className="relative w-full mb-8 p-8 rounded-3xl 
-            bg-white/20 backdrop-blur-md ring-1 ring-white/30 shadow-lg">
+          <div className="relative w-full mb-8 p-8 rounded-3xl
+            bg-white/20 dark:bg-gray-800/60 backdrop-blur-md ring-1 ring-white/30 dark:ring-gray-700 shadow-lg">
             <SucursalesGrid
               sucursales={sucursales}
               isLoading={loadingSuc}
@@ -101,7 +101,7 @@ export default function Dashboard() {
 
         {view === 'productos' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white/20 backdrop-blur-md ring-1 ring-white/30 shadow-lg">
+            bg-white/20 dark:bg-gray-800/60 backdrop-blur-md ring-1 ring-white/30 dark:ring-gray-700 shadow-lg">
             <ProductosView
               products={products}
               loading={loadingProducts}
@@ -113,7 +113,7 @@ export default function Dashboard() {
         {/* VISTA DE NOTICIAS - Carrusel + link del catálogo */}
         {view === 'noticias' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white/20 backdrop-blur-md ring-1 ring-white/30 shadow-lg">
+            bg-white/20 dark:bg-gray-800/60 backdrop-blur-md ring-1 ring-white/30 dark:ring-gray-700 shadow-lg">
             <NoticiasView />
           </div>
         )}
@@ -121,7 +121,7 @@ export default function Dashboard() {
         {/* VISTA DE FACTURACIÓN - SIN PROPS, USA DATOS INTERNOS */}
         {view === 'facturacion' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white/20 backdrop-blur-md ring-1 ring-white/30 shadow-lg">
+            bg-white/20 dark:bg-gray-800/60 backdrop-blur-md ring-1 ring-white/30 dark:ring-gray-700 shadow-lg">
             <FacturacionView />
           </div>
         )}
@@ -129,7 +129,7 @@ export default function Dashboard() {
         {/* VISTA DE CONFIGURACIÓN - SIN PROPS, USA DATOS INTERNOS */}
         {view === 'configuracion' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white/20 backdrop-blur-md ring-1 ring-white/30 shadow-lg">
+            bg-white/20 dark:bg-gray-800/60 backdrop-blur-md ring-1 ring-white/30 dark:ring-gray-700 shadow-lg">
             <ConfiguracionView />
           </div>
         )}

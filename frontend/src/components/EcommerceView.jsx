@@ -49,10 +49,68 @@ export default function EcommerceView() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  // Estados para autenticación de clientes
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [customerData, setCustomerData] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [authForm, setAuthForm] = useState({
+    nombre: '',
+    email: '',
+    telefono: '',
+    direccion: '',
+    password: ''
+  });
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const userDropdownRef = useRef(null);
+
+  // Estados para cupones
+  const [coupons, setCoupons] = useState([]);
+  const [showCouponModal, setShowCouponModal] = useState(false);
+  const [earnedCoupon, setEarnedCoupon] = useState(null);
+
   // Configuración de la tienda
   const nombreTienda = localStorage.getItem('nombre_tienda') || 'EcoMotion';
   const whatsappNumber = localStorage.getItem('whatsapp_number') || '573000000000';
   const subdominio = window.location.hostname.split('.')[0];
+
+  // Cargar datos del cliente al iniciar
+  useEffect(() => {
+    const savedCustomer = localStorage.getItem('ecommerce_customer');
+    const savedCoupons = localStorage.getItem('ecommerce_coupons');
+
+    console.log('=== Cargando datos al iniciar ===');
+    console.log('savedCustomer:', savedCustomer);
+
+    if (savedCustomer) {
+      setCustomerData(JSON.parse(savedCustomer));
+      setIsLoggedIn(true);
+      console.log('Usuario detectado, isLoggedIn = true');
+    } else {
+      setIsLoggedIn(false);
+      console.log('No hay usuario, isLoggedIn = false');
+    }
+
+    if (savedCoupons) {
+      setCoupons(JSON.parse(savedCoupons));
+    }
+  }, []);
+
+  // Cerrar dropdown del usuario cuando se hace clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setShowUserDropdown(false);
+      }
+    };
+
+    if (showUserDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showUserDropdown]);
 
   // Cerrar dropdown cuando se cambia de sección o se hace clic fuera
   useEffect(() => {
@@ -239,6 +297,20 @@ export default function EcommerceView() {
 
   // Carrito functions
   const addToCart = (product, quantity = 1) => {
+    // VERIFICACIÓN INMEDIATA - Alerta visual para debug
+    const savedCustomer = localStorage.getItem('ecommerce_customer');
+
+    // Alerta para verificar que la función se ejecuta
+    alert(`🔍 addToCart llamado\nisLoggedIn: ${isLoggedIn}\nlocalStorage: ${savedCustomer ? 'TIENE DATOS' : 'VACÍO'}\n\nSi ves esto y NO apareció el modal, hay un ERROR en el código.`);
+
+    // Si NO está logueado o NO hay cliente en localStorage
+    if (!isLoggedIn || !savedCustomer) {
+      console.log('❌ NO LOGUEADO - Mostrando modal de autenticación');
+      setShowAuthModal(true);
+      return;
+    }
+
+    // Si SÍ está logueado, agregar al carrito
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
 
@@ -252,6 +324,8 @@ export default function EcommerceView() {
 
       return [...prevCart, { ...product, quantity }];
     });
+
+    alert(`✅ ${product.nombre} agregado al carrito`);
   };
 
   const removeFromCart = (productId) => {
@@ -297,6 +371,19 @@ export default function EcommerceView() {
   // WhatsApp
   const generateWhatsAppMessage = () => {
     let message = `🛒 *Pedido - ${nombreTienda}*\n\n`;
+
+    // Información del cliente si está logueado
+    if (isLoggedIn && customerData) {
+      message += `👤 *Datos del Cliente:*\n`;
+      message += `Nombre: ${customerData.nombre}\n`;
+      message += `Email: ${customerData.email}\n`;
+      message += `Teléfono: ${customerData.telefono}\n`;
+      if (customerData.direccion) {
+        message += `Dirección: ${customerData.direccion}\n`;
+      }
+      message += `\n`;
+    }
+
     message += `📋 *Productos:*\n`;
 
     cart.forEach((item, index) => {
@@ -308,13 +395,31 @@ export default function EcommerceView() {
       message += `   Subtotal: $${subtotal.toFixed(2)}\n\n`;
     });
 
-    message += `💰 *Total: $${cartTotal.toFixed(2)}*`;
+    message += `💰 *Total: $${cartTotal.toFixed(2)}*\n\n`;
+
+    // Agregar cupones si tiene
+    if (coupons.length > 0) {
+      message += `🎁 *Cupones Disponibles:*\n`;
+      coupons.forEach((coupon, index) => {
+        if (!coupon.usado) {
+          message += `${index + 1}. ${coupon.codigo} - ${coupon.descuento}% OFF\n`;
+        }
+      });
+      message += `\n`;
+    }
+
     return encodeURIComponent(message);
   };
 
   const sendToWhatsApp = () => {
     if (cart.length === 0) {
       alert('Tu carrito está vacío');
+      return;
+    }
+
+    // Verificar si está logueado
+    if (!isLoggedIn) {
+      setShowAuthModal(true);
       return;
     }
 
@@ -325,14 +430,25 @@ export default function EcommerceView() {
 
   // Reseñas
   const handleSubmitReview = () => {
-    if (!newReview.comment || !newReview.customerName) {
-      alert('Por favor completa todos los campos');
+    if (!isLoggedIn) {
+      alert('Debes iniciar sesión para dejar una reseña y ganar cupones de descuento');
+      setShowAuthModal(true);
+      return;
+    }
+
+    if (!newReview.comment) {
+      alert('Por favor escribe tu reseña');
       return;
     }
 
     const review = {
       id: Date.now(),
-      ...newReview,
+      productId: selectedProduct?.id,
+      productName: selectedProduct?.nombre,
+      rating: newReview.rating,
+      comment: newReview.comment,
+      customerName: customerData.nombre,
+      customerEmail: customerData.email,
       date: new Date().toLocaleDateString('es-ES'),
       photos: [...customerPhotos]
     };
@@ -340,13 +456,142 @@ export default function EcommerceView() {
     setReviews([...reviews, review]);
     setNewReview({ rating: 5, comment: '', customerName: '' });
     setCustomerPhotos([]);
-    alert('¡Gracias por tu reseña!');
+
+    // Generar cupón de descuento
+    const newCoupon = generateCoupon();
+    saveCoupon(newCoupon);
+    setEarnedCoupon(newCoupon);
+    setShowCouponModal(true);
   };
 
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
     const photoUrls = files.map(file => URL.createObjectURL(file));
     setCustomerPhotos([...customerPhotos, ...photoUrls]);
+  };
+
+  // ==================== AUTENTICACIÓN ====================
+
+  const handleRegister = () => {
+    // Validar campos
+    if (!authForm.nombre || !authForm.email || !authForm.telefono || !authForm.password) {
+      alert('Por favor completa todos los campos requeridos');
+      return;
+    }
+
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(authForm.email)) {
+      alert('Por favor ingresa un email válido');
+      return;
+    }
+
+    // Crear objeto de cliente
+    const customer = {
+      id: Date.now(),
+      nombre: authForm.nombre,
+      email: authForm.email,
+      telefono: authForm.telefono,
+      direccion: authForm.direccion || '',
+      fechaRegistro: new Date().toISOString(),
+      totalCompras: 0,
+      reseñas: 0
+    };
+
+    // Guardar en localStorage
+    localStorage.setItem('ecommerce_customer', JSON.stringify(customer));
+
+    // Actualizar estado
+    setCustomerData(customer);
+    setIsLoggedIn(true);
+    setShowAuthModal(false);
+    setAuthForm({ nombre: '', email: '', telefono: '', direccion: '', password: '' });
+
+    alert(`¡Bienvenido/a ${customer.nombre}! 🎉\n\nTu cuenta ha sido creada exitosamente.\nAhora puedes agregar productos al carrito y dejar reseñas para ganar cupones de descuento.`);
+  };
+
+  const handleLogin = () => {
+    // Validar campos
+    if (!authForm.email || !authForm.password) {
+      alert('Por favor ingresa tu email y contraseña');
+      return;
+    }
+
+    // Buscar cliente en localStorage
+    const savedCustomer = localStorage.getItem('ecommerce_customer');
+
+    if (!savedCustomer) {
+      alert('No se encontró una cuenta con ese email. Por favor regístrate.');
+      setIsLoginMode(false);
+      return;
+    }
+
+    const customer = JSON.parse(savedCustomer);
+
+    // Verificar email (en un sistema real también verificarías el password)
+    if (customer.email !== authForm.email) {
+      alert('Email o contraseña incorrectos');
+      return;
+    }
+
+    // Actualizar estado
+    setCustomerData(customer);
+    setIsLoggedIn(true);
+    setShowAuthModal(false);
+    setAuthForm({ nombre: '', email: '', telefono: '', direccion: '', password: '' });
+
+    alert(`¡Hola de nuevo ${customer.nombre}! 👋\n\nBienvenido/a de nuevo.`);
+  };
+
+  const handleLogout = () => {
+    if (confirm('¿Estás seguro/a de que quieres cerrar sesión?')) {
+      setIsLoggedIn(false);
+      setCustomerData(null);
+      // NOTA: No eliminamos los cupones guardados
+      alert('Has cerrado sesión correctamente. Tus cupones se han mantenido guardados.');
+    }
+  };
+
+  // ==================== CUPONES ====================
+
+  const generateCoupon = () => {
+    const discount = Math.floor(Math.random() * 15) + 10; // 10-25% de descuento
+    const code = `DESC${Date.now().toString().slice(-6).toUpperCase()}`;
+
+    const coupon = {
+      codigo: code,
+      descuento: discount,
+      fechaGeneracion: new Date().toISOString(),
+      estado: 'activo',
+      usado: false
+    };
+
+    return coupon;
+  };
+
+  const saveCoupon = (coupon) => {
+    const updatedCoupons = [...coupons, coupon];
+    setCoupons(updatedCoupons);
+    localStorage.setItem('ecommerce_coupons', JSON.stringify(updatedCoupons));
+
+    // Actualizar contador de reseñas del cliente
+    if (customerData) {
+      const updatedCustomer = {
+        ...customerData,
+        reseñas: (customerData.reseñas || 0) + 1
+      };
+      setCustomerData(updatedCustomer);
+      localStorage.setItem('ecommerce_customer', JSON.stringify(updatedCustomer));
+    }
+  };
+
+  const formatCouponDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   };
 
   const renderStars = (rating, interactive = false, onRate = null) => {
@@ -925,6 +1170,13 @@ export default function EcommerceView() {
                   className="position-relative flex-shrink-0"
                   onClick={() => {
                     if (cart.length > 0) {
+                      // Verificar autenticación ANTES de enviar a WhatsApp
+                      if (!isLoggedIn) {
+                        console.log('Botón carrito - Usuario NO logueado, mostrando modal');
+                        setShowAuthModal(true);
+                        return;
+                      }
+                      console.log('Botón carrito - Usuario logueado, enviando a WhatsApp');
                       sendToWhatsApp();
                     } else {
                       alert('Tu carrito está vacío');
@@ -955,6 +1207,140 @@ export default function EcommerceView() {
                   )}
                 </Button>
 
+                {/* Usuario / Cuenta */}
+                {isLoggedIn ? (
+                  <div style={{ position: 'relative', display: 'inline-block' }} ref={userDropdownRef}>
+                    <Button
+                      variant="light"
+                      className="position-relative flex-shrink-0"
+                      onClick={() => setShowUserDropdown(!showUserDropdown)}
+                      style={{
+                        color: COLORS.verdePrincipal,
+                        minWidth: '50px',
+                        height: '45px'
+                      }}
+                      title={`Hola, ${customerData?.nombre}`}
+                    >
+                      <svg
+                        style={{ width: '20px', height: '20px' }}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      {coupons.length > 0 && (
+                        <span
+                          className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                          style={{ backgroundColor: COLORS.acentoNaranja }}
+                        >
+                          {coupons.length}
+                        </span>
+                      )}
+                    </Button>
+                    <small className="d-block text-center text-white" style={{ fontSize: '10px' }}>
+                      {customerData?.nombre?.split(' ')[0]}
+                    </small>
+
+                    {/* Dropdown Menu */}
+                    {showUserDropdown && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        right: 0,
+                        marginTop: '10px',
+                        minWidth: '200px',
+                        backgroundColor: 'white',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+                        zIndex: 1000,
+                        overflow: 'hidden',
+                        animation: 'fadeIn 0.2s ease-out'
+                      }}>
+                        <div style={{ padding: '12px 16px', borderBottom: '1px solid #eee' }}>
+                          <p style={{ margin: 0, fontWeight: 'bold', color: COLORS.verdeOscuro }}>
+                            {customerData?.nombre}
+                          </p>
+                          <p style={{ margin: 0, fontSize: '12px', color: COLORS.grisMedio }}>
+                            {customerData?.email}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            setShowUserDropdown(false);
+                            setShowCouponModal(true);
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '12px 16px',
+                            border: 'none',
+                            backgroundColor: 'transparent',
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            fontSize: '14px',
+                            color: COLORS.grisOscuro,
+                            transition: 'background 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          🎁 Mis Cupones ({coupons.length})
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setShowUserDropdown(false);
+                            handleLogout();
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '12px 16px',
+                            border: 'none',
+                            backgroundColor: 'transparent',
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            fontSize: '14px',
+                            color: '#d32f2f',
+                            transition: 'background 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ffebee'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          🚪 Cerrar Sesión
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Button
+                    variant="light"
+                    className="flex-shrink-0"
+                    onClick={() => setShowAuthModal(true)}
+                    style={{
+                      color: COLORS.verdePrincipal,
+                      minWidth: '50px',
+                      height: '45px'
+                    }}
+                    title="Iniciar sesión / Registrarse"
+                  >
+                    <svg
+                      style={{ width: '20px', height: '20px' }}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                  </Button>
+                )}
+
                 {/* Barra de búsqueda */}
                 <Form className="d-flex">
                   <Form.Control
@@ -977,6 +1363,34 @@ export default function EcommerceView() {
                     🔍
                   </Button>
                 </Form>
+
+                {/* Botón de prueba para limpiar localStorage (DEBUG) */}
+                <Button
+                  variant="outline-danger"
+                  className="ms-2"
+                  onClick={() => {
+                    // Mostrar estado actual
+                    const savedCustomer = localStorage.getItem('ecommerce_customer');
+                    const savedCoupons = localStorage.getItem('ecommerce_coupons');
+
+                    alert(`ESTADO ACTUAL:\n\nisLoggedIn: ${isLoggedIn}\nCustomer en localStorage: ${savedCustomer ? 'SÍ' : 'NO'}\nCoupons: ${coupons.length}\n\n${savedCustomer ? '\nDATOS CLIENTE:\n' + savedCustomer : ''}`);
+
+                    if (confirm('\n¿Limpiar todos los datos de prueba? Esto cerrará tu sesión.')) {
+                      localStorage.removeItem('ecommerce_customer');
+                      localStorage.removeItem('ecommerce_coupons');
+                      setIsLoggedIn(false);
+                      setCustomerData(null);
+                      setCoupons([]);
+                      setCart([]);
+                      alert('Datos limpiados. Ahora puedes probar el flujo de registro.');
+                      window.location.reload();
+                    }
+                  }}
+                  style={{ height: '45px', fontSize: '11px', padding: '0 8px' }}
+                  title="Ver estado y limpiar datos"
+                >
+                  🔄 Debug
+                </Button>
               </div>
             </div>
           </Navbar.Collapse>
@@ -985,6 +1399,72 @@ export default function EcommerceView() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Panel de Estado Visible (DEBUG) */}
+        <div
+          className="mb-4 p-4 rounded-lg"
+          style={{
+            backgroundColor: '#fff3cd',
+            border: '3px solid #ff9800',
+            position: 'relative',
+            zIndex: 1000
+          }}
+        >
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex-1">
+              <div className="mb-2">
+                <strong>ESTADO DE AUTENTICACIÓN:</strong>{' '}
+                <span
+                  className="px-3 py-1 rounded font-bold text-white"
+                  style={{ backgroundColor: isLoggedIn ? '#4caf50' : '#f44336' }}
+                >
+                  {isLoggedIn ? 'LOGUEADO' : 'NO LOGUEADO'}
+                </span>
+              </div>
+              {customerData && (
+                <div className="text-sm">
+                  Cliente: <strong>{customerData.nombre}</strong> ({customerData.email})
+                </div>
+              )}
+              {coupons.length > 0 && (
+                <div className="text-sm">
+                  Cupones acumulados: <strong>{coupons.length}</strong>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => {
+                  console.log('=== Botón Probar Modal presionado ===');
+                  console.log('showAuthModal antes:', showAuthModal);
+                  setShowAuthModal(true);
+                  console.log('showAuthModal después:', showAuthModal);
+                }}
+                className="px-4 py-2 rounded font-bold text-white"
+                style={{ backgroundColor: '#2196F3' }}
+              >
+                🔐 Probar Modal
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm('¿Cerrar sesión y limpiar todos los datos?')) {
+                    localStorage.removeItem('ecommerce_customer');
+                    localStorage.removeItem('ecommerce_coupons');
+                    setIsLoggedIn(false);
+                    setCustomerData(null);
+                    setCoupons([]);
+                    alert('Sesión cerrada. La página se recargará.');
+                    window.location.reload();
+                  }
+                }}
+                className="px-4 py-2 rounded font-bold text-white"
+                style={{ backgroundColor: '#f44336' }}
+              >
+                🚪 Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Sección INICIO */}
         {activeSection === 'inicio' && (
           <div>
@@ -1528,16 +2008,16 @@ export default function EcommerceView() {
               style={{ paddingTop: '60px' }}
             />
 
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-4 overflow-hidden modal-content-custom" style={{ maxHeight: 'calc(100vh - 100px)' }}>
+            <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-4 overflow-hidden modal-content-custom" style={{ maxHeight: 'calc(100vh - 100px)' }}>
               {/* Header */}
-              <div className="sticky top-0 bg-white border-b p-3 sm:p-4 md:p-6 z-10">
+              <div className="sticky top-0 bg-white dark:bg-gray-800 border-b dark:border-gray-700 p-3 sm:p-4 md:p-6 z-10">
                 <div className="flex items-center justify-between gap-2 sm:gap-4">
                   <h2 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold" style={{ color: COLORS.verdeOscuro }}>
                     {selectedProduct.nombre}
                   </h2>
                   <button
                     onClick={() => setShowProductModal(false)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-shrink-0"
                   >
                     <svg className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1783,12 +2263,12 @@ export default function EcommerceView() {
               onClick={() => setShowCart(false)}
             />
 
-            <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
               {/* Header */}
-              <div className="sticky top-0 bg-white border-b p-6 z-10">
+              <div className="sticky top-0 bg-white dark:bg-gray-800 border-b dark:border-gray-700 p-6 z-10">
                 <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-bold" style={{ color: COLORS.verdeOscuro }}>🛒 Tu Carrito</h2>
-                  <button onClick={() => setShowCart(false)} className="text-gray-400 hover:text-gray-600">
+                  <button onClick={() => setShowCart(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -1859,7 +2339,7 @@ export default function EcommerceView() {
 
               {/* Footer */}
               {cart.length > 0 && (
-                <div className="sticky bottom-0 bg-white border-t p-6 space-y-4">
+                <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t dark:border-gray-700 p-6 space-y-4">
                   <div className="flex items-center justify-between text-2xl font-bold">
                     <span style={{ color: COLORS.verdeOscuro }}>Total:</span>
                     <span style={{ color: COLORS.verdePrincipal }}>${cartTotal.toFixed(2)}</span>
@@ -1975,6 +2455,314 @@ export default function EcommerceView() {
           <p className="mt-1 sm:mt-0">Movilidad Eléctrica Sostenible</p>
         </div>
       </footer>
+
+      {/* ==================== MODALES ==================== */}
+      {/* MODAL DE AUTENTICACIÓN */}
+      {showAuthModal && (
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{
+          zIndex: 9999,
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0
+        }}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+            {/* Header */}
+            <div className="p-6 text-center" style={{ backgroundColor: COLORS.verdePrincipal }}>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {isLoginMode ? '🔐 Iniciar Sesión' : '📝 Registrarse'}
+              </h2>
+              <p className="text-white/90 text-sm">
+                {isLoginMode
+                  ? 'Inicia sesión para comprar y dejar reseñas'
+                  : 'Crea tu cuenta y obtén cupones de descuento'}
+              </p>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              {!isLoginMode && (
+                <div>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.verdeOscuro }}>
+                    Nombre Completo *
+                  </label>
+                  <input
+                    type="text"
+                    value={authForm.nombre}
+                    onChange={(e) => setAuthForm({ ...authForm, nombre: e.target.value })}
+                    className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none"
+                    style={{ borderColor: COLORS.verdeMenta }}
+                    placeholder="Tu nombre"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.verdeOscuro }}>
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  value={authForm.email}
+                  onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
+                  className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none"
+                  style={{ borderColor: COLORS.verdeMenta }}
+                  placeholder="tu@email.com"
+                />
+              </div>
+
+              {!isLoginMode && (
+                <>
+                  <div>
+                    <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.verdeOscuro }}>
+                      Teléfono *
+                    </label>
+                    <input
+                      type="tel"
+                      value={authForm.telefono}
+                      onChange={(e) => setAuthForm({ ...authForm, telefono: e.target.value })}
+                      className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none"
+                      style={{ borderColor: COLORS.verdeMenta }}
+                      placeholder="+57 300 000 0000"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.verdeOscuro }}>
+                      Dirección (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={authForm.direccion}
+                      onChange={(e) => setAuthForm({ ...authForm, direccion: e.target.value })}
+                      className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none"
+                      style={{ borderColor: COLORS.verdeMenta }}
+                      placeholder="Tu dirección"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div>
+                <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.verdeOscuro }}>
+                  Contraseña *
+                </label>
+                <input
+                  type="password"
+                  value={authForm.password}
+                  onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })}
+                  className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none"
+                  style={{ borderColor: COLORS.verdeMenta }}
+                  placeholder="••••••••"
+                />
+              </div>
+
+              {/* Info de cupones */}
+              {!isLoginMode && (
+                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.beigeCrema }}>
+                  <p className="text-sm font-semibold mb-1" style={{ color: COLORS.verdeOscuro }}>
+                    🎁 ¡Gana Cupones con tus Reseñas!
+                  </p>
+                  <p className="text-xs" style={{ color: COLORS.grisMedio }}>
+                    Cada vez que dejes una reseña de un producto, recibirás un cupón de descuento entre 10% y 25% para tu próxima compra.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 space-y-3">
+              <button
+                onClick={isLoginMode ? handleLogin : handleRegister}
+                className="w-full py-3 rounded-xl font-bold text-white shadow-lg hover:shadow-xl transition-all"
+                style={{ backgroundColor: COLORS.verdePrincipal }}
+              >
+                {isLoginMode ? '🚀 Iniciar Sesión' : '🎉 Crear Cuenta'}
+              </button>
+
+              <button
+                onClick={() => setIsLoginMode(!isLoginMode)}
+                className="w-full py-2 text-sm font-semibold"
+                style={{ color: COLORS.verdePrincipal }}
+              >
+                {isLoginMode
+                  ? '¿No tienes cuenta? Regístrate aquí'
+                  : '¿Ya tienes cuenta? Inicia sesión'}
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowAuthModal(false);
+                  setAuthForm({ nombre: '', email: '', telefono: '', direccion: '', password: '' });
+                }}
+                className="w-full py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ==================== MODAL DE CUPÓN GANADO ==================== */}
+      {showCouponModal && earnedCoupon && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden text-center">
+            {/* Header con confeti */}
+            <div className="p-8 relative overflow-hidden" style={{ backgroundColor: 'linear-gradient(135deg, #FFA726 0%, #FF6F00 100%)' }}>
+              <div className="text-6xl mb-4 animate-bounce">🎉</div>
+              <h2 className="text-3xl font-bold text-white mb-2">
+                ¡Felicidades!
+              </h2>
+              <p className="text-white/90">
+                Has ganado un cupón por tu reseña
+              </p>
+            </div>
+
+            {/* Cuerpo del cupón */}
+            <div className="p-6">
+              <div className="border-2 border-dashed rounded-xl p-6 mb-6" style={{ borderColor: COLORS.acentoNaranja }}>
+                <p className="text-sm font-semibold mb-2" style={{ color: COLORS.grisMedio }}>
+                  Tu código de descuento:
+                </p>
+                <div className="text-3xl font-bold mb-2" style={{ color: COLORS.verdePrincipal, fontFamily: 'monospace', letterSpacing: '2px' }}>
+                  {earnedCoupon.codigo}
+                </div>
+                <div className="text-4xl font-bold" style={{ color: COLORS.acentoNaranja }}>
+                  {earnedCoupon.descuento}% OFF
+                </div>
+                <p className="text-xs mt-2" style={{ color: COLORS.grisMedio }}>
+                  Válido para tu próxima compra
+                </p>
+              </div>
+
+              <div className="space-y-2 text-sm" style={{ color: COLORS.grisOscuro }}>
+                <p>📅 Generado: {formatCouponDate(earnedCoupon.fechaGeneracion)}</p>
+                <p>✅ Estado: Activo</p>
+                <p>💡 Muestra este código al momento de comprar</p>
+              </div>
+
+              {/* Lista de cupones acumulados */}
+              {coupons.length > 1 && (
+                <div className="mt-6 p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
+                  <p className="font-semibold mb-2" style={{ color: COLORS.verdeOscuro }}>
+                    Tus cupones acumulados: {coupons.length}
+                  </p>
+                  <div className="space-y-2 text-xs">
+                    {coupons.slice().reverse().slice(0, 3).map((coupon, index) => (
+                      <div key={index} className="flex justify-between items-center">
+                        <span style={{ fontFamily: 'monospace' }}>{coupon.codigo}</span>
+                        <span className="font-bold" style={{ color: COLORS.verdePrincipal }}>
+                          {coupon.descuento}% OFF
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 space-y-3">
+              <button
+                onClick={() => {
+                  // Copiar código al portapapeles
+                  navigator.clipboard.writeText(earnedCoupon.codigo);
+                  alert('Código copiado: ' + earnedCoupon.codigo);
+                }}
+                className="w-full py-3 rounded-xl font-bold text-white shadow-lg hover:shadow-xl transition-all"
+                style={{ backgroundColor: COLORS.acentoNaranja }}
+              >
+                📋 Copiar Código
+              </button>
+
+              <button
+                onClick={() => setShowCouponModal(false)}
+                className="w-full py-3 rounded-xl font-semibold border-2 hover:shadow-lg transition-all"
+                style={{ borderColor: COLORS.verdePrincipal, color: COLORS.verdePrincipal }}
+              >
+                Continuar Comprando
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ==================== MODAL DE MIS CUPONES ==================== */}
+      {showCouponModal && !earnedCoupon && coupons.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden">
+            {/* Header */}
+            <div className="p-6 text-center" style={{ backgroundColor: COLORS.verdePrincipal }}>
+              <div className="text-4xl mb-2">🎁</div>
+              <h2 className="text-2xl font-bold text-white mb-2">Mis Cupones</h2>
+              <p className="text-white/90 text-sm">Tienes {coupons.length} cupón(es) disponible(s)</p>
+            </div>
+
+            {/* Lista de cupones */}
+            <div className="p-6 space-y-3 max-h-96 overflow-y-auto">
+              {coupons.slice().reverse().map((coupon, index) => (
+                <div key={index} className="border rounded-xl p-4" style={{ borderColor: COLORS.verdeMenta }}>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="text-2xl font-bold" style={{ color: COLORS.verdePrincipal, fontFamily: 'monospace' }}>
+                        {coupon.codigo}
+                      </div>
+                      <div className="text-sm" style={{ color: COLORS.grisMedio }}>
+                        {formatCouponDate(coupon.fechaGeneracion)}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-3xl font-bold" style={{ color: COLORS.acentoNaranja }}>
+                        {coupon.descuento}%
+                      </div>
+                      <div className="text-xs" style={{ color: COLORS.grisMedio }}>
+                        {coupon.usado ? 'Usado' : 'Activo'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 space-y-3">
+              <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.beigeCrema }}>
+                <p className="text-sm font-semibold mb-1" style={{ color: COLORS.verdeOscuro }}>
+                  👤 {customerData?.nombre}
+                </p>
+                <p className="text-xs" style={{ color: COLORS.grisMedio }}>
+                  {customerData?.email}
+                </p>
+                <p className="text-xs mt-1" style={{ color: COLORS.grisMedio }}>
+                  Reseñas publicadas: {customerData?.reseñas || 0}
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowCouponModal(false)}
+                className="w-full py-3 rounded-xl font-bold text-white shadow-lg"
+                style={{ backgroundColor: COLORS.verdePrincipal }}
+              >
+                Cerrar
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowCouponModal(false);
+                  handleLogout();
+                }}
+                className="w-full py-2 rounded-xl font-semibold border-2 text-sm"
+                style={{ borderColor: '#d32f2f', color: '#d32f2f' }}
+              >
+                🚪 Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

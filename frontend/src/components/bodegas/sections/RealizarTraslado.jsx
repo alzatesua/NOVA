@@ -142,7 +142,7 @@ export default function RealizarTraslado({
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-xl">
       <div className="flex items-center gap-4 mb-6">
-        <div className="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl">
+        <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl">
           <ArrowPathRoundedSquareIcon className="w-6 h-6 text-white" />
         </div>
         <div>
@@ -169,11 +169,11 @@ export default function RealizarTraslado({
                   setModo('crear');
                   setShowTrasladosForm(true);
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-8 border-2 border-orange-100 hover:border-orange-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 text-left"
+                className="group relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-50 rounded-2xl p-8 border-2 border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 text-left"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-full blur-3xl"></div>
                 <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                     <ArrowPathRoundedSquareIcon className="w-8 h-8 text-white" />
                   </div>
                   <h4 className="text-lg font-semibold text-slate-800 mb-2">
@@ -191,11 +191,11 @@ export default function RealizarTraslado({
                   setModo('recibir');
                   setShowTrasladosForm(true);
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-100 hover:border-green-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 text-left"
+                className="group relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-50 rounded-2xl p-8 border-2 border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 text-left"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full blur-3xl"></div>
                 <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                     <ArchiveBoxArrowDownIcon className="w-8 h-8 text-white" />
                   </div>
                   <h4 className="text-lg font-semibold text-slate-800 mb-2">
@@ -205,7 +205,7 @@ export default function RealizarTraslado({
                     Acepta traslados pendientes enviados a esta bodega
                   </p>
                   {trasladosDisponibles.length > 0 && (
-                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
                       <ClockIcon className="w-4 h-4" />
                       {trasladosDisponibles.length} pendiente{trasladosDisponibles.length !== 1 ? 's' : ''}
                     </div>
@@ -216,7 +216,7 @@ export default function RealizarTraslado({
           ) : (
             // Botón simple para crear traslado (sin opción de recibir)
             <div className="text-center py-12">
-              <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-8 border border-orange-100 max-w-md mx-auto">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-50 rounded-2xl p-8 border border-blue-100 max-w-md mx-auto">
                 <ArrowPathRoundedSquareIcon className="w-16 h-16 text-orange-500 mx-auto mb-4" />
                 <h4 className="text-lg font-semibold text-slate-800 mb-2">Configurar Nuevo Traslado</h4>
                 <p className="text-sm text-slate-600 mb-6">Selecciona productos y configura el traslado entre bodegas</p>
@@ -225,7 +225,7 @@ export default function RealizarTraslado({
                     setModo('crear');
                     setShowTrasladosForm(true);
                   }}
-                  className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:scale-105 transition-all duration-200"
+                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:scale-105 transition-all duration-200"
                 >
                   Iniciar traslado
                 </button>
@@ -283,7 +283,7 @@ export default function RealizarTraslado({
                     className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
                       seleccionado
                         ? 'bg-green-50 border-green-500 shadow-lg'
-                        : 'bg-white border-slate-200 hover:border-green-300 hover:shadow-md'
+                        : 'bg-white border-slate-200 hover:border-blue-300 hover:shadow-md'
                     }`}
                   >
                     <div className="flex items-start justify-between">
@@ -355,7 +355,7 @@ export default function RealizarTraslado({
                   }
                 }}
                 disabled={!trasladoSeleccionado || trasladoLoading}
-                className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-all"
+                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-all"
               >
                 {trasladoLoading ? (
                   <div className="flex items-center gap-2">
@@ -396,7 +396,7 @@ export default function RealizarTraslado({
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 rounded-xl flex items-center justify-center shadow-lg">
                           <span className="text-white text-sm font-bold">{index + 1}</span>
                         </div>
                         <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white"></div>
@@ -498,7 +498,7 @@ export default function RealizarTraslado({
                   <div className="space-y-6 border border-slate-300 rounded-xl p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                       <h5 className="text-base font-semibold text-slate-700 flex items-center gap-2">
-                        <div className="w-1 h-6 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full"></div>
+                        <div className="w-1 h-6 bg-gradient-to-b from-blue-600 to-blue-500 rounded-full"></div>
                         Productos del Traslado
                       </h5>
                       <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
@@ -512,7 +512,7 @@ export default function RealizarTraslado({
                         {/* Header de la línea */}
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                               {lIndex + 1}
                             </div>
                             <span className="text-sm font-medium text-slate-600">Producto {lIndex + 1}</span>
@@ -629,7 +629,7 @@ export default function RealizarTraslado({
                         }}
                         className="group w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 border-2 border-dashed border-indigo-300 hover:border-indigo-400 text-indigo-600 hover:text-indigo-700 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-[1.02]"
                       >
-                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 text-white rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-500 text-white rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                           </svg>
@@ -736,7 +736,7 @@ export default function RealizarTraslado({
                 <button
                   type="button"
                   onClick={addEmptyLine}
-                  className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg transform hover:-translate-y-1"
+                  className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg transform hover:-translate-y-1"
                 >
                   <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:rotate-90 transition-transform duration-300">
                     <PlusIcon className="w-5 h-5" />
@@ -753,7 +753,7 @@ export default function RealizarTraslado({
               <button
                 type="submit"
                 disabled={trasladoLoading}
-                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:scale-105 disabled:opacity-60 disabled:hover:scale-100 transition-all duration-200"
+                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:scale-105 disabled:opacity-60 disabled:hover:scale-100 transition-all duration-200"
               >
                 {trasladoLoading ? (
                   <>

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';  // Importa tu hook correctamente
-import { BellIcon } from '@heroicons/react/24/outline';
+import { useTheme } from '../hooks/useTheme';
+import { BellIcon, MoonIcon, SunIcon } from '@heroicons/react/24/outline';
 
 function InfoSucursal() {
   const [nombreSucursal, setNombreSucursal] = useState('');
@@ -39,6 +40,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
   const operarioButtons = ['entrada', 'productos', 'facturacion'];
 
   const { usuario, rol } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const list = rol === 'admin' ? adminButtons : operarioButtons;
 
   const [profileOpen, setProfileOpen] = useState(false);
@@ -74,10 +76,10 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
   }, []);
 
   return (
-  <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md px-8 py-4 flex justify-between items-center">
+  <nav className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 shadow-md px-8 py-4 flex justify-between items-center">
       <span className="text-blue-600 font-bold text-xl cursor-pointer select-none">Logo</span>
       <InfoSucursal />
-      <div className="hidden md:flex space-x-8 text-gray-700 font-semibold tracking-wide">
+      <div className="hidden md:flex space-x-8 text-gray-700 dark:text-gray-200 font-semibold tracking-wide">
         {list.map(view => (
           <button
             key={view}
@@ -96,12 +98,12 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setNotifOpen(prev => !prev)}
-            className="relative p-2 rounded-full bg-white shadow hover:shadow-lg transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="relative p-2 rounded-full bg-white dark:bg-gray-700 shadow hover:shadow-lg transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-haspopup="true"
             aria-expanded={notifOpen}
             aria-label="Notificaciones"
           >
-            <BellIcon className="h-6 w-6 text-gray-600" />
+            <BellIcon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
 
             {notifications.length > 0 && (
               <span
@@ -116,26 +118,26 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
 
           {notifOpen && (
             <div
-              className="absolute right-0 mt-2 w-80 max-h-80 overflow-auto bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-10
+              className="absolute right-0 mt-2 w-80 max-h-80 overflow-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg ring-1 ring-black ring-opacity-10
                 focus:outline-none z-50 origin-top-right animate-fadeIn"
               role="menu"
               aria-orientation="vertical"
               aria-labelledby="notifications-menu"
             >
-              <div className="px-6 py-3 border-b border-gray-200 font-semibold text-gray-700 text-lg">
+              <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700 font-semibold text-gray-700 dark:text-gray-200 text-lg">
                 Mis notificaciones
               </div>
               {notifications.length === 0 ? (
-                <div className="px-6 py-4 text-gray-500 text-center italic">No hay notificaciones.</div>
+                <div className="px-6 py-4 text-gray-500 dark:text-gray-400 text-center italic">No hay notificaciones.</div>
               ) : (
                 notifications.map(({ id, message, time }) => (
                   <div
                     key={id}
-                    className="px-6 py-3 border-b border-gray-100 hover:bg-blue-50 cursor-pointer transition"
+                    className="px-6 py-3 border-b border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer transition"
                     role="menuitem"
                     tabIndex={0}
                   >
-                    <p className="text-gray-800 font-medium">{message}</p>
+                    <p className="text-gray-800 dark:text-gray-200 font-medium">{message}</p>
                     <p className="text-xs text-gray-400 mt-1">{time}</p>
                   </div>
                 ))
@@ -159,9 +161,9 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
             >
               {usuario ? usuario.charAt(0).toUpperCase() : 'U'}
             </div>
-            <span className="hidden md:block text-gray-700 font-semibold select-none tracking-wide">{usuario || 'Usuario'}</span>
+            <span className="hidden md:block text-gray-700 dark:text-gray-300 font-semibold select-none tracking-wide">{usuario || 'Usuario'}</span>
             <svg
-              className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`}
+              className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -174,19 +176,31 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
 
           {profileOpen && (
             <div
-              className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-10
+              className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-lg ring-1 ring-black ring-opacity-10
                 focus:outline-none z-50 origin-top-right animate-fadeIn"
               role="menu"
               aria-orientation="vertical"
               aria-labelledby="user-menu"
             >
-              <div className="px-6 py-4 border-b border-gray-100">
-                <p className="text-gray-900 font-semibold truncate">{usuario}</p>
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                <p className="text-gray-900 dark:text-gray-100 font-semibold truncate">{usuario}</p>
                 <p className="text-gray-400 text-xs mt-1 uppercase tracking-wide">{rol}</p>
               </div>
               <button
+                onClick={toggleTheme}
+                className="w-full text-left px-6 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+                role="menuitem"
+              >
+                <span className="font-semibold">{theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>
+                {theme === 'dark' ? (
+                  <SunIcon className="h-5 w-5 text-yellow-400" />
+                ) : (
+                  <MoonIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                )}
+              </button>
+              <button
                 onClick={onLogout}
-                className="w-full text-left px-6 py-3 hover:bg-blue-600 hover:text-white transition-colors rounded-b-xl font-semibold"
+                className="w-full text-left px-6 py-3 hover:bg-blue-600 hover:text-white transition-colors rounded-b-xl font-semibold text-gray-700 dark:text-gray-300"
                 role="menuitem"
               >
                 Cerrar Sesión

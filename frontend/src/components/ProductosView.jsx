@@ -582,11 +582,11 @@ export default function ProductsView({
             <input
               type="text"
               placeholder="Buscar productos…"
-              className="w-full border border-gray-300 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
           </div>
           <div className="flex items-center gap-2 overflow-x-auto">
             {['Todos', 'Disponible', 'Agotados', 'Destacados'].map(label => (
@@ -596,7 +596,7 @@ export default function ProductsView({
                 className={`whitespace-nowrap px-3 py-1 rounded-full text-sm ${
                   quickFilter === label.toLowerCase()
                     ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
                 {label}
@@ -632,7 +632,7 @@ export default function ProductsView({
 
       {/* ——— Panel Filtros Avanzados ——— */}
       {showAdvancedFilters && (
-        <div className="bg-white p-4 rounded-lg shadow border border-gray-200 mb-6">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <select
               className="border rounded px-3 py-2 text-sm"
@@ -677,14 +677,14 @@ export default function ProductsView({
           <form onSubmit={handleSubmitNew} className="space-y-6">
             <div className="space-y-8">
               {newProducts.map((product, index) => (
-                <div key={index} className="grid grid-cols-1 lg:grid-cols-2 gap-6 border p-4 rounded-lg">
+                <div key={index} className="grid grid-cols-1 lg:grid-cols-2 gap-6 border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
                   {/* Columna Izquierda: Imagen */}
                   <div className="flex flex-col items-center">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Imagen del Producto #{index + 1}
                     </label>
 
-                    <div className="relative w-full h-80 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden">
+                    <div className="relative w-full h-80 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden">
                       {product.previewImage ? (
                         <img
                           src={product.previewImage}
@@ -692,7 +692,7 @@ export default function ProductsView({
                           className="h-full w-full object-contain"
                         />
                       ) : (
-                        <ArrowUpTrayIcon className="h-8 w-8 text-gray-600 mb-2" />
+                        <ArrowUpTrayIcon className="h-8 w-8 text-gray-600 dark:text-gray-400 mb-2" />
                       )}
 
                       <input
@@ -721,11 +721,11 @@ export default function ProductsView({
                           bg-transparent
                           cursor-pointer
                           rounded-lg
-                          hover:bg-gray-200 hover:bg-opacity-30
+                          hover:bg-gray-200 dark:hover:bg-gray-700 hover:bg-opacity-30
                           transition
                         "
                       >
-                        <span className="text-sm font-medium text-gray-600"></span>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400"></span>
                       </label>
                     </div>
                   </div>
@@ -734,7 +734,7 @@ export default function ProductsView({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Nombre */}
                     <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre</label>
                       <input
                         name="nombre"
                         placeholder="Aspiradora Dyson"
@@ -748,14 +748,14 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                                   focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                       />
                     </div>
 
                     {/* Descripción */}
                     <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Descripción
                       </label>
                       <textarea
@@ -772,14 +772,14 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                                   focus:outline-none focus:ring-2 focus:ring-blue-400 transition resize-none"
                       />
                     </div>
 
                     {/* Categoría */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoría</label>
                       <select
                         name="categoria"
                         required
@@ -792,7 +792,7 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                           focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                       >
                         <option value="">Selecciona...</option>
@@ -813,7 +813,7 @@ export default function ProductsView({
 
                     {/* Marca */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Marca</label>
                         <select
                           name="marca"
                           required
@@ -826,7 +826,7 @@ export default function ProductsView({
                               return updated;
                             });
                           }}
-                          className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                          className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                             focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                         >
                           <option value="">Selecciona una marca...</option>
@@ -844,7 +844,7 @@ export default function ProductsView({
 
                     {/* Código de Barras */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Código de Barras
                       </label>
                       <input
@@ -860,14 +860,14 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                                   focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                       />
                     </div>
 
                     {/* IVA */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">IVA</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">IVA</label>
                       <select
                         name="iva"
                         required
@@ -880,7 +880,7 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                           focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                       >
                         <option value="">Selecciona un IVA...</option>
@@ -898,7 +898,7 @@ export default function ProductsView({
 
                     {/* Descuento */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Descuento</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descuento</label>
                       <select
                         name="descuento"
                         required
@@ -911,7 +911,7 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                           focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                       >
                         <option value="">Selecciona un descuento...</option>
@@ -929,7 +929,7 @@ export default function ProductsView({
 
                     {/* Tipo de medida */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Medida</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Medida</label>
                        <select
                         name="tipo_medida"
                         required
@@ -942,7 +942,7 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                           focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                       >
                         <option value="">Selecciona un tipo de medida...</option>
@@ -961,7 +961,7 @@ export default function ProductsView({
 
                     {/* Atributo */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Atributo</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Atributo</label>
                       <input
                         name="atributo"
                         placeholder="Potencia"
@@ -974,14 +974,14 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                                   focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                       />
                     </div>
 
                     {/* Valor Atributo */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Valor Atributo
                       </label>
                       <input
@@ -996,14 +996,14 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                                   focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                       />
                     </div>
 
                     {/* Sucursal */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sucursal</label>
                       <select
                         name="sucursal_id"
                         value={newProducts[index].sucursal_id ?? ''}   // fallback para controlado
@@ -1016,7 +1016,7 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="mt-1 block w-full border rounded px-2 py-1 text-sm"
+                        className="mt-1 block w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm"
                       >
                         <option value="">Seleccione una sucursal</option>
                         {isLoadingSucursales ? (
@@ -1033,7 +1033,7 @@ export default function ProductsView({
 
                     {/* Bodegas */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Bodegas</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bodegas</label>
                       <select
                         name="bodega"
                         value={newProducts[index].bodega ?? ''}        // id de la bodega seleccionada
@@ -1045,7 +1045,7 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="mt-1 block w-full border rounded px-2 py-1 text-sm"
+                        className="mt-1 block w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 text-sm"
                         disabled={!newProducts[index].sucursal_id}     // deshabilitar si no hay sucursal
                       >
                         <option value="">Seleccione una bodega</option>
@@ -1071,7 +1071,7 @@ export default function ProductsView({
 
                     {/* IMEI */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">IMEI (Opcional)</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">IMEI (Opcional)</label>
                       <input
                         name="imei"
                         type="text"
@@ -1085,7 +1085,7 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                                   focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                       />
                     </div>
@@ -1093,7 +1093,7 @@ export default function ProductsView({
 
                     {/* Stock */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock</label>
                       <input
                         name="stock"
                         type="number"
@@ -1108,14 +1108,14 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                                   focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                       />
                     </div>
 
                     {/* Precio */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio</label>
                       <input
                         name="precio"
                         type="text"
@@ -1151,7 +1151,7 @@ export default function ProductsView({
                             return updated;
                           });
                         }}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm dark:text-gray-100
                                   focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                       />
 
@@ -1213,11 +1213,11 @@ export default function ProductsView({
               </div>
 
               {/* Botones cancelar y crear */}
-              <div className="pt-4 flex justify-end space-x-3 border-t border-gray-200">
+              <div className="pt-4 flex justify-end space-x-3 border-t border-gray-200 dark:border-gray-700">
                 <button
                   type="button"
                   onClick={() => setShowCreateForm(false)}
-                  className="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                  className="px-5 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                 >
                   Cancelar
                 </button>
