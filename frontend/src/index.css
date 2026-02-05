@@ -154,3 +154,61 @@
   --color-error: 248 113 113;             /* red-400 */
   --color-info: 96 165 250;               /* blue-400 */
 }
+
+/* ========================================
+   ANIMACIONES
+   Para efectos de fade-in y transiciones
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Animaciones para modales */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes modalBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-backdrop {
+  animation: modalBackdropIn 0.2s ease-out;
+}
+
+.modal-content {
+  animation: modalIn 0.3s ease-out;
+}
+
+/* Transiciones suaves para interactividad */
+@layer utilities {
+  .transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+}
