@@ -7,7 +7,9 @@ import {
   ShoppingCart,
   Phone,
   Grid3x3,
-  ChevronDown
+  ChevronDown,
+  Moon,
+  Sun
 } from 'lucide-react';
 
 // Paleta de colores ecológica para movilidad eléctrica
@@ -24,6 +26,17 @@ const COLORS = {
   negro: '#212121',
   acentoNaranja: '#FFA726',       // Orange para CTAs
   acentoTurquesa: '#26A69A',      // Turquoise para detalles
+};
+
+// Colores para modo oscuro
+const DARK_COLORS = {
+  background: '#1a1a1a',
+  cardBackground: '#2d2d2d',
+  textPrimary: '#ffffff',
+  textSecondary: '#b0b0b0',
+  borderColor: '#404040',
+  navbarBackground: '#212121',
+  inputBackground: '#3d3d3d',
 };
 
 export default function EcommerceView() {
@@ -69,6 +82,12 @@ export default function EcommerceView() {
   const [showCouponModal, setShowCouponModal] = useState(false);
   const [earnedCoupon, setEarnedCoupon] = useState(null);
 
+  // Estado para modo oscuro
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
+
   // Configuración de la tienda
   const nombreTienda = localStorage.getItem('nombre_tienda') || 'EcoMotion';
   const whatsappNumber = localStorage.getItem('whatsapp_number') || '573000000000';
@@ -111,6 +130,25 @@ export default function EcommerceView() {
       };
     }
   }, [showUserDropdown]);
+
+  // Efecto para modo oscuro - guardar preferencia y aplicar clase al body
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+      document.body.style.backgroundColor = DARK_COLORS.background;
+      document.body.style.color = DARK_COLORS.textPrimary;
+    } else {
+      document.body.classList.remove('dark-mode');
+      document.body.style.backgroundColor = COLORS.blanco;
+      document.body.style.color = COLORS.negro;
+    }
+  }, [darkMode]);
+
+  // Función para toggle del modo oscuro
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
 
   // Cerrar dropdown cuando se cambia de sección o se hace clic fuera
   useEffect(() => {
@@ -297,15 +335,11 @@ export default function EcommerceView() {
 
   // Carrito functions
   const addToCart = (product, quantity = 1) => {
-    // VERIFICACIÓN INMEDIATA - Alerta visual para debug
+    // Verificar si hay cliente logueado
     const savedCustomer = localStorage.getItem('ecommerce_customer');
 
-    // Alerta para verificar que la función se ejecuta
-    alert(`🔍 addToCart llamado\nisLoggedIn: ${isLoggedIn}\nlocalStorage: ${savedCustomer ? 'TIENE DATOS' : 'VACÍO'}\n\nSi ves esto y NO apareció el modal, hay un ERROR en el código.`);
-
-    // Si NO está logueado o NO hay cliente en localStorage
+    // Si NO está logueado o NO hay cliente en localStorage, mostrar modal de autenticación
     if (!isLoggedIn || !savedCustomer) {
-      console.log('❌ NO LOGUEADO - Mostrando modal de autenticación');
       setShowAuthModal(true);
       return;
     }
@@ -627,7 +661,11 @@ export default function EcommerceView() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: COLORS.blanco }}>
+    <div className="min-h-screen" style={{
+      backgroundColor: darkMode ? DARK_COLORS.background : COLORS.blanco,
+      color: darkMode ? DARK_COLORS.textPrimary : COLORS.negro,
+      transition: 'background-color 0.3s ease, color 0.3s ease'
+    }}>
       {/* Estilos CSS para el fondo animado */}
       <style>
         {`
@@ -1009,6 +1047,96 @@ export default function EcommerceView() {
               font-size: 1.2rem !important;
             }
           }
+
+          /* ==================== MODO OSCURO ==================== */
+          ${darkMode ? `
+            body {
+              background-color: ${DARK_COLORS.background} !important;
+              color: ${DARK_COLORS.textPrimary} !important;
+            }
+
+            /* Navbar en modo oscuro */
+            .navbar {
+              background: linear-gradient(135deg, #1a1a1a99, #2d2d2dCC) !important;
+            }
+
+            /* Main container */
+            .min-h-screen {
+              background-color: ${DARK_COLORS.background} !important;
+            }
+
+            /* Cards y contenedores */
+            .card,
+            .product-card,
+            .category-card {
+              background-color: ${DARK_COLORS.cardBackground} !important;
+              color: ${DARK_COLORS.textPrimary} !important;
+              border-color: ${DARK_COLORS.borderColor} !important;
+            }
+
+            /* Botones del navbar en modo oscuro */
+            .nav-btn-futuristic {
+              background: rgba(76, 175, 80, 0.2) !important;
+              border-color: rgba(76, 175, 80, 0.5) !important;
+              color: #ffffff !important;
+            }
+
+            .nav-btn-futuristic:hover {
+              background: rgba(76, 175, 80, 0.3) !important;
+              border-color: rgba(76, 175, 80, 0.8) !important;
+            }
+
+            .nav-btn-futuristic.active {
+              background: rgba(76, 175, 80, 0.35) !important;
+              border-color: rgba(76, 175, 80, 0.9) !important;
+            }
+
+            /* Dropdowns en modo oscuro */
+            .nav-dropdown-futuristic,
+            .dropdown-menu {
+              background-color: ${DARK_COLORS.cardBackground} !important;
+              border-color: ${DARK_COLORS.borderColor} !important;
+            }
+
+            /* Inputs y formularios */
+            input,
+            textarea,
+            select,
+            .form-control {
+              background-color: ${DARK_COLORS.inputBackground} !important;
+              color: ${DARK_COLORS.textPrimary} !important;
+              border-color: ${DARK_COLORS.borderColor} !important;
+            }
+
+            input::placeholder,
+            textarea::placeholder {
+              color: ${DARK_COLORS.textSecondary} !important;
+            }
+
+            /* Modal en modo oscuro */
+            .modal-content,
+            .bg-white {
+              background-color: ${DARK_COLORS.cardBackground} !important;
+              color: ${DARK_COLORS.textPrimary} !important;
+            }
+
+            /* Textos secundarios */
+            .text-muted,
+            .text-secondary {
+              color: ${DARK_COLORS.textSecondary} !important;
+            }
+
+            /* Footer en modo oscuro */
+            footer {
+              background-color: ${DARK_COLORS.navbarBackground} !important;
+              color: ${DARK_COLORS.textPrimary} !important;
+            }
+
+            /* Animaciones y efectos */
+            .animated-bg {
+              opacity: 0.9;
+            }
+          ` : ''}
         `}
       </style>
 
@@ -1207,6 +1335,21 @@ export default function EcommerceView() {
                   )}
                 </Button>
 
+                {/* Botón de Modo Oscuro */}
+                <Button
+                  variant="light"
+                  className="flex-shrink-0"
+                  onClick={toggleDarkMode}
+                  style={{
+                    color: darkMode ? COLORS.acentoNaranja : COLORS.verdePrincipal,
+                    minWidth: '50px',
+                    height: '45px'
+                  }}
+                  title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+                >
+                  {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+                </Button>
+
                 {/* Usuario / Cuenta */}
                 {isLoggedIn ? (
                   <div style={{ position: 'relative', display: 'inline-block' }} ref={userDropdownRef}>
@@ -1363,34 +1506,6 @@ export default function EcommerceView() {
                     🔍
                   </Button>
                 </Form>
-
-                {/* Botón de prueba para limpiar localStorage (DEBUG) */}
-                <Button
-                  variant="outline-danger"
-                  className="ms-2"
-                  onClick={() => {
-                    // Mostrar estado actual
-                    const savedCustomer = localStorage.getItem('ecommerce_customer');
-                    const savedCoupons = localStorage.getItem('ecommerce_coupons');
-
-                    alert(`ESTADO ACTUAL:\n\nisLoggedIn: ${isLoggedIn}\nCustomer en localStorage: ${savedCustomer ? 'SÍ' : 'NO'}\nCoupons: ${coupons.length}\n\n${savedCustomer ? '\nDATOS CLIENTE:\n' + savedCustomer : ''}`);
-
-                    if (confirm('\n¿Limpiar todos los datos de prueba? Esto cerrará tu sesión.')) {
-                      localStorage.removeItem('ecommerce_customer');
-                      localStorage.removeItem('ecommerce_coupons');
-                      setIsLoggedIn(false);
-                      setCustomerData(null);
-                      setCoupons([]);
-                      setCart([]);
-                      alert('Datos limpiados. Ahora puedes probar el flujo de registro.');
-                      window.location.reload();
-                    }
-                  }}
-                  style={{ height: '45px', fontSize: '11px', padding: '0 8px' }}
-                  title="Ver estado y limpiar datos"
-                >
-                  🔄 Debug
-                </Button>
               </div>
             </div>
           </Navbar.Collapse>
@@ -1399,72 +1514,6 @@ export default function EcommerceView() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Panel de Estado Visible (DEBUG) */}
-        <div
-          className="mb-4 p-4 rounded-lg"
-          style={{
-            backgroundColor: '#fff3cd',
-            border: '3px solid #ff9800',
-            position: 'relative',
-            zIndex: 1000
-          }}
-        >
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex-1">
-              <div className="mb-2">
-                <strong>ESTADO DE AUTENTICACIÓN:</strong>{' '}
-                <span
-                  className="px-3 py-1 rounded font-bold text-white"
-                  style={{ backgroundColor: isLoggedIn ? '#4caf50' : '#f44336' }}
-                >
-                  {isLoggedIn ? 'LOGUEADO' : 'NO LOGUEADO'}
-                </span>
-              </div>
-              {customerData && (
-                <div className="text-sm">
-                  Cliente: <strong>{customerData.nombre}</strong> ({customerData.email})
-                </div>
-              )}
-              {coupons.length > 0 && (
-                <div className="text-sm">
-                  Cupones acumulados: <strong>{coupons.length}</strong>
-                </div>
-              )}
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => {
-                  console.log('=== Botón Probar Modal presionado ===');
-                  console.log('showAuthModal antes:', showAuthModal);
-                  setShowAuthModal(true);
-                  console.log('showAuthModal después:', showAuthModal);
-                }}
-                className="px-4 py-2 rounded font-bold text-white"
-                style={{ backgroundColor: '#2196F3' }}
-              >
-                🔐 Probar Modal
-              </button>
-              <button
-                onClick={() => {
-                  if (confirm('¿Cerrar sesión y limpiar todos los datos?')) {
-                    localStorage.removeItem('ecommerce_customer');
-                    localStorage.removeItem('ecommerce_coupons');
-                    setIsLoggedIn(false);
-                    setCustomerData(null);
-                    setCoupons([]);
-                    alert('Sesión cerrada. La página se recargará.');
-                    window.location.reload();
-                  }
-                }}
-                className="px-4 py-2 rounded font-bold text-white"
-                style={{ backgroundColor: '#f44336' }}
-              >
-                🚪 Cerrar Sesión
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Sección INICIO */}
         {activeSection === 'inicio' && (
           <div>
@@ -1662,13 +1711,13 @@ export default function EcommerceView() {
                     }}
                     className="product-card rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl transition-all transform hover:scale-105"
                     style={{
-                      backgroundColor: COLORS.blanco,
+                      backgroundColor: darkMode ? DARK_COLORS.cardBackground : COLORS.blanco,
                       animationDelay: `${index * 0.2}s`
                     }}
                   >
                     <div
                       className="w-full h-36 sm:h-40 md:h-48 flex items-center justify-center"
-                      style={{ backgroundColor: COLORS.grisClaro }}
+                      style={{ backgroundColor: darkMode ? DARK_COLORS.inputBackground : COLORS.grisClaro }}
                     >
                       {product.imagen ? (
                         <img src={product.imagen} alt={product.nombre} className="w-full h-full object-cover" />
@@ -1677,10 +1726,10 @@ export default function EcommerceView() {
                       )}
                     </div>
                     <div className="p-3 sm:p-4">
-                      <h3 className="font-bold text-base sm:text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>
+                      <h3 className="font-bold text-base sm:text-lg mb-2" style={{ color: darkMode ? DARK_COLORS.textPrimary : COLORS.verdeOscuro }}>
                         {product.nombre}
                       </h3>
-                      <p className="text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2" style={{ color: COLORS.grisMedio }}>
+                      <p className="text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2" style={{ color: darkMode ? DARK_COLORS.textSecondary : COLORS.grisMedio }}>
                         {product.descripcion}
                       </p>
                       <p className="text-xl sm:text-2xl font-bold" style={{ color: COLORS.verdePrincipal }}>
@@ -2468,7 +2517,11 @@ export default function EcommerceView() {
           right: 0,
           bottom: 0
         }}>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden" style={{
+            backgroundColor: darkMode ? DARK_COLORS.cardBackground : COLORS.blanco,
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
             {/* Header */}
             <div className="p-6 text-center" style={{ backgroundColor: COLORS.verdePrincipal }}>
               <h2 className="text-2xl font-bold text-white mb-2">
@@ -2485,7 +2538,7 @@ export default function EcommerceView() {
             <div className="p-6 space-y-4">
               {!isLoginMode && (
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.verdeOscuro }}>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: darkMode ? DARK_COLORS.textPrimary : COLORS.verdeOscuro }}>
                     Nombre Completo *
                   </label>
                   <input
@@ -2493,14 +2546,18 @@ export default function EcommerceView() {
                     value={authForm.nombre}
                     onChange={(e) => setAuthForm({ ...authForm, nombre: e.target.value })}
                     className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none"
-                    style={{ borderColor: COLORS.verdeMenta }}
+                    style={{
+                      borderColor: COLORS.verdeMenta,
+                      backgroundColor: darkMode ? DARK_COLORS.inputBackground : COLORS.blanco,
+                      color: darkMode ? DARK_COLORS.textPrimary : COLORS.negro
+                    }}
                     placeholder="Tu nombre"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.verdeOscuro }}>
+                <label className="block text-sm font-semibold mb-2" style={{ color: darkMode ? DARK_COLORS.textPrimary : COLORS.verdeOscuro }}>
                   Email *
                 </label>
                 <input
@@ -2765,4 +2822,4 @@ export default function EcommerceView() {
       )}
     </div>
   );
-}
+} 

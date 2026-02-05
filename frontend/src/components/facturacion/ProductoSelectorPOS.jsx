@@ -13,7 +13,7 @@ export default function ProductoSelectorPOS({
 
   const tokenUsuario = localStorage.getItem('token_usuario');
   const usuario = localStorage.getItem('usuario');
-  const subdominio = localStorage.getItem('slug');
+  const subdominio = window.location.hostname.split('.')[0];
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -28,7 +28,7 @@ export default function ProductoSelectorPOS({
             query: searchQuery,
             incluir_sin_stock: false
           });
-          setSearchResults(response.datos || []);
+          setSearchResults(response.productos || []);
         } catch (error) {
           console.error('Error buscando productos:', error);
           setSearchResults([]);

@@ -20,6 +20,7 @@ import {
   createProduct,
   subirImagenProducto,
   obtenerExistenciasPorBodega,
+  obtenerProductosPorBodega,
   fetchAllProductsTraslado,
   enviarTraslado,
   recibirTraslado,
@@ -63,6 +64,8 @@ export default function BodegasModal({
   const [isLoadingBodegas, setIsLoadingBodegas] = useState(false);
   const [productos, setProductos] = useState([]);
   const [productosTraslados, setProductosTraslados] = useState([]);
+  const [productosPorBodega, setProductosPorBodega] = useState({});
+  const [isLoadingProductosPorBodega, setIsLoadingProductosPorBodega] = useState(false);
   const [isLoadingProductos, setIsLoadingProductos] = useState(false);
   const [isLoadingProductosTraslado, setIsLoadingProductosTraslado] = useState(false);
   const [errorBodegas, setErrorBodegas] = useState(null);
@@ -187,6 +190,40 @@ export default function BodegasModal({
       cargarProductosTraslado();
     }
   }, [active, cargarProductosTraslado]);
+
+  // Cargar productos por bodega (para traslados)
+  const cargarProductosPorBodega = useCallback(async (bodegaId) => {
+    if (!tokenUsuario || !usuario || !subdominio || !bodegaId) {
+      console.log('Faltan datos para cargar productos por bodega:', { tokenUsuario: !!tokenUsuario, usuario: !!usuario, subdominio: !!subdominio, bodegaId });
+      return;
+    }
+
+    setIsLoadingProductosPorBodega(true);
+    try {
+      const response = await obtenerProductosPorBodega({
+        tokenUsuario,
+        usuario,
+        subdominio,
+        bodega_id: bodegaId,
+        solo_con_stock: true
+      });
+
+      const datos = response?.datos || [];
+      console.log(`Productos para bodega ${bodegaId}:`, datos);
+      setProductosPorBodega(prev => ({
+        ...prev,
+        [bodegaId]: datos
+      }));
+    } catch (e) {
+      console.error('Error al cargar productos por bodega:', e);
+      setProductosPorBodega(prev => ({
+        ...prev,
+        [bodegaId]: []
+      }));
+    } finally {
+      setIsLoadingProductosPorBodega(false);
+    }
+  }, [tokenUsuario, usuario, subdominio]);
 
   // Cargar traslados disponibles para recibir
   const cargarTrasladosDisponibles = useCallback(async () => {
@@ -627,7 +664,7 @@ export default function BodegasModal({
                   <RealizarTraslado
 
 
-             
+
                     showTrasladosForm={showTrasladosForm}
                     setShowTrasladosForm={setShowTrasladosForm}
                     newProducts={newProducts}
@@ -639,6 +676,9 @@ export default function BodegasModal({
                     bodegas={bodegas}
                     isLoadingBodegas={isLoadingBodegas}
                     productos={productos}
+                    productosPorBodega={productosPorBodega}
+                    isLoadingProductosPorBodega={isLoadingProductosPorBodega}
+                    onCargarProductosPorBodega={cargarProductosPorBodega}
                     isLoadingProductos={isLoadingProductos}
                     errorBodegas={errorBodegas}
                     onRetryBodegas={cargarBodegas}

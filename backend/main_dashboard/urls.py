@@ -21,6 +21,15 @@ from .views import (
     crear_medida,
     buscar_en_tabla,
     ProductoExistenciasView,  # ← Cambiar de ViewSet a View
+    # Facturación (las rutas están en urls_facturacion.py)
+    # buscar_cliente,
+    # crear_cliente,
+    # obtener_formas_pago,
+    # buscar_productos_pos,
+    # crear_factura,
+    # anular_factura,
+    # ventas_hoy,
+    # listar_facturas,
 )
 
 # Router DRF
@@ -44,9 +53,12 @@ urlpatterns = [
 
     path('<int:producto_id>/imagen-producto/', subir_imagen_producto, name='subir_imagen_producto'),
     path('obtener_imagen/', obtener_imagen, name='obtener_imagen'),
-    
+
     # ← AGREGAR ESTA LÍNEA:
     path('productos-existencias/list/', ProductoExistenciasView.as_view(), name='productos_existencias_list'),
+
+    # NOTA: Las rutas de facturación están en urls_facturacion.py
+    # y se incluyen en nova/urls.py con el prefijo 'api/facturacion/'
 ]
 
 # Agregar rutas del ViewSet (si tienes otros ViewSets)

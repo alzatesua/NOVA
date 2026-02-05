@@ -29,6 +29,9 @@ export default function RealizarTraslado({
   onRealizarTraslado, trasladoLoading,
   bodegas, isLoadingBodegas,
   productos, isLoadingProductos,
+  productosPorBodega = {},
+  isLoadingProductosPorBodega = false,
+  onCargarProductosPorBodega = null,
   errorBodegas, onRetryBodegas,
   sucursalSel,
   // PROPS para recibir traslados (OPCIONALES)
@@ -43,6 +46,19 @@ export default function RealizarTraslado({
   // Estado para el modo (crear o recibir)
   const [modo, setModo] = useState('crear');
   const [trasladoSeleccionado, setTrasladoSeleccionado] = useState(null);
+
+  // Cargar productos por bodega cuando cambia la bodega de origen
+  useEffect(() => {
+    newProducts.forEach((product, index) => {
+      const bodegaOrigen = product.bodega_origen;
+      if (bodegaOrigen && onCargarProductosPorBodega) {
+        // Solo cargar si no hay productos cargados para esta bodega
+        if (!productosPorBodega[bodegaOrigen]) {
+          onCargarProductosPorBodega(bodegaOrigen);
+        }
+      }
+    });
+  }, [newProducts, productosPorBodega, onCargarProductosPorBodega]);
 
   // Cargar traslados disponibles cuando se cambia a modo recibir
   useEffect(() => {
@@ -591,16 +607,21 @@ export default function RealizarTraslado({
                             <option value="">
                               {product.bodega_origen ? "Buscar producto..." : "Selecciona primero la bodega de origen"}
                             </option>
-                            {isLoadingProductos ? (
-                              <option disabled>Cargando productos...</option>
+                            {isLoadingProductosPorBodega ? (
+                              <option disabled>Cargando productos de la bodega...</option>
                             ) : (
-                              productos
-                                .filter(p => Number(p.bodega ?? p.bodega_id ?? p.id_bodega) === Number(product.bodega_origen))
-                                .map(p => (
-                                  <option key={p.id} value={p.id}>
-                                    {p.nombre}{typeof p.stock !== "undefined" ? ` • Stock: ${p.stock}` : ""}
-                                  </option>
-                                ))
+                              (() => {
+                                const productosDeBodega = productosPorBodega[product.bodega_origen] || [];
+                                return productosDeBodega.length === 0 ? (
+                                  <option disabled>No hay productos con stock en esta bodega</option>
+                                ) : (
+                                  productosDeBodega.map(p => (
+                                    <option key={p.id} value={p.id}>
+                                      {p.nombre} • Stock: {p.stock_bodega}
+                                    </option>
+                                  ))
+                                );
+                              })()
                             )}
                           </select>
                         </div>

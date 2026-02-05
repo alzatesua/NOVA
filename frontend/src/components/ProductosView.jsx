@@ -18,7 +18,8 @@ import {
   fetchIva,
   fetchTipoMedida,
   fetchSucursales,
-  fetchBodegas
+  fetchBodegas,
+  obtenerProductosPorBodega
 } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { showToast } from '../utils/toast';
@@ -75,6 +76,12 @@ export default function ProductsView({
   const [isLoadingBodegas, setIsLoadingBodegas] = useState(false);
   const [newUser, setNewUser] = useState({ sucursal_id: '' });
 
+  // ——— Estado para filtro por bodega ———
+  const [bodegaSeleccionada, setBodegaSeleccionada] = useState(null); // ID de la bodega seleccionada
+  const [productosPorBodega, setProductosPorBodega] = useState({}); // Cache de productos por bodega
+  const [isLoadingProductosPorBodega, setIsLoadingProductosPorBodega] = useState(false);
+  const [sucursalActual, setSucursalActual] = useState(null); // Sucursal del usuario actual
+
 
 
 
@@ -88,22 +95,29 @@ export default function ProductsView({
   // ——— Filtrado ———
   // Cambiar esta sección
   const filteredProducts = useMemo(() => {
-    return products.filter(p => {
+    // Si hay una bodega seleccionada, usar los productos de esa bodega
+    let productosBase = products;
+    if (bodegaSeleccionada && productosPorBodega[bodegaSeleccionada]) {
+      productosBase = productosPorBodega[bodegaSeleccionada];
+    }
+
+    return productosBase.filter(p => {
       if (
         searchTerm &&
         !p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !p.sku.toLowerCase().includes(searchTerm.toLowerCase())
       ) return false;
-      
-      // Ahora usamos stock_total en lugar de stock
-      if (quickFilter === 'disponible' && p.stock_total <= 0) return false;
-      if (quickFilter === 'agotados' && p.stock_total > 0) return false;
+
+      // Usar stock_bodega si está disponible, sino stock_total, sino stock
+      const stock = bodegaSeleccionada ? (p.stock_bodega ?? p.stock_total ?? p.stock ?? 0) : (p.stock_total ?? p.stock ?? 0);
+      if (quickFilter === 'disponible' && stock <= 0) return false;
+      if (quickFilter === 'agotados' && stock > 0) return false;
       if (quickFilter === 'destacados' && !p.is_featured) return false;
-      
+
       // Categoria ahora es un objeto
       if (categoryFilter && p.categoria?.id !== Number(categoryFilter))
         return false;
-        
+
       if (priceMin !== '' && parseFloat(p.precio) < parseFloat(priceMin)) return false;
       if (priceMax !== '' && parseFloat(p.precio) > parseFloat(priceMax)) return false;
       if (dateFilter && new Date(p.creado_en) < new Date(dateFilter))
@@ -117,7 +131,9 @@ export default function ProductsView({
     categoryFilter,
     priceMin,
     priceMax,
-    dateFilter
+    dateFilter,
+    bodegaSeleccionada,
+    productosPorBodega
   ]);
 
   // ——— Infinite scroll ———
@@ -572,6 +588,108 @@ export default function ProductsView({
     cargarSucursales();
   }, [rol, tokenUsuario, usuario, subdominio]);
 
+  // ——— Obtener sucursal actual del usuario ———
+  useEffect(() => {
+    const sucursalId = localStorage.getItem('sucursal_id');
+    console.log('🔍 Sucursal desde localStorage:', sucursalId);
+    if (sucursalId) {
+      setSucursalActual(Number(sucursalId));
+    }
+  }, []);
+
+  // ——— Debug: Ver bodegas disponibles ———
+  useEffect(() => {
+    if (sucursalActual && bodegas.length > 0) {
+      const bodegasDeSucursal = bodegas.filter(b =>
+        Number(b.sucursal_id ?? b.id_sucursal ?? b.sucursal) === Number(sucursalActual)
+      );
+      console.log('📦 Bodegas cargadas:', bodegas.length);
+      console.log('🏪 Sucursal actual:', sucursalActual);
+      console.log('✅ Bodegas de la sucursal:', bodegasDeSucursal);
+      console.log('📋 Estructura de primera bodega:', bodegas[0]);
+    }
+  }, [sucursalActual, bodegas]);
+
+  // ——— Cargar productos por bodega ———
+  const cargarProductosPorBodega = useCallback(async (bodegaId) => {
+    if (!tokenUsuario || !usuario || !subdominio || !bodegaId) return;
+
+    setIsLoadingProductosPorBodega(true);
+    try {
+      const response = await obtenerProductosPorBodega({
+        tokenUsuario,
+        usuario,
+        subdominio,
+        bodega_id: bodegaId,
+        solo_con_stock: false // Mostrar todos los productos de la bodega
+      });
+      const datos = response?.datos || [];
+      setProductosPorBodega(prev => ({ ...prev, [bodegaId]: datos }));
+    } catch (error) {
+      console.error('Error cargando productos por bodega:', error);
+      setProductosPorBodega(prev => ({ ...prev, [bodegaId]: [] }));
+    } finally {
+      setIsLoadingProductosPorBodega(false);
+    }
+  }, [tokenUsuario, usuario, subdominio]);
+
+  // ——— Cambiar a la siguiente bodega de la sucursal actual ———
+  const cambiarBodega = useCallback(() => {
+    // Filtrar bodegas: por sucursal si existe, sino todas las bodegas
+    let bodegasDisponibles = bodegas;
+
+    if (sucursalActual) {
+      bodegasDisponibles = bodegas.filter(b =>
+        Number(b.sucursal_id ?? b.id_sucursal ?? b.sucursal) === Number(sucursalActual)
+      );
+      console.log('🏪 Filtrando por sucursal', sucursalActual, ':', bodegasDisponibles.length, 'bodegas');
+    } else {
+      console.log('⚠️ No hay sucursal detectada, usando todas las bodegas:', bodegas.length);
+    }
+
+    if (bodegasDisponibles.length === 0) {
+      console.warn('❌ No hay bodegas disponibles');
+      return;
+    }
+
+    // Si no hay bodega seleccionada, seleccionar la primera
+    if (!bodegaSeleccionada) {
+      const primeraBodega = bodegasDisponibles[0];
+      console.log('✅ Seleccionando primera bodega:', primeraBodega.nombre, '(ID:', primeraBodega.id + ')');
+      setBodegaSeleccionada(primeraBodega.id);
+      cargarProductosPorBodega(primeraBodega.id);
+      return;
+    }
+
+    // Encontrar índice de la bodega actual y pasar a la siguiente
+    const indiceActual = bodegasDisponibles.findIndex(b => b.id === bodegaSeleccionada);
+    if (indiceActual === -1) {
+      // La bodega seleccionada ya no está en la lista, seleccionar la primera
+      const primeraBodega = bodegasDisponibles[0];
+      console.log('🔄 Bodega ya no disponible, seleccionando primera:', primeraBodega.nombre);
+      setBodegaSeleccionada(primeraBodega.id);
+      cargarProductosPorBodega(primeraBodega.id);
+      return;
+    }
+
+    const siguienteIndice = (indiceActual + 1) % bodegasDisponibles.length;
+    const siguienteBodega = bodegasDisponibles[siguienteIndice];
+
+    console.log('➡️ Cambiando de bodega:', bodegasDisponibles[indiceActual].nombre, '→', siguienteBodega.nombre);
+    setBodegaSeleccionada(siguienteBodega.id);
+
+    // Cargar productos si no están en caché
+    if (!productosPorBodega[siguienteBodega.id]) {
+      cargarProductosPorBodega(siguienteBodega.id);
+    }
+  }, [bodegaSeleccionada, bodegas, sucursalActual, productosPorBodega, cargarProductosPorBodega]);
+
+  // ——— Resetear bodega seleccionada al cambiar de sucursal ———
+  useEffect(() => {
+    setBodegaSeleccionada(null);
+    setProductosPorBodega({});
+  }, [sucursalActual]);
+
   return (
     <section className="space-y-1">
       {/* ——— Cabecera: search + filtros rápidos + “Nuevo” ——— */}
@@ -607,6 +725,35 @@ export default function ProductsView({
 
         {/* Filtros avanzados + nuevo */}
         <div className="flex items-center gap-4 w-full lg:w-auto">
+          {/* Switch de bodega - mostrar si hay bodegas cargadas */}
+          {bodegas.length > 0 && (
+            <button
+              onClick={cambiarBodega}
+              disabled={isLoadingProductosPorBodega}
+              className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white rounded-lg shadow-md transition-all text-sm font-medium"
+              title="Cambiar bodega de la sucursal actual"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+              </svg>
+              <span>
+                {bodegaSeleccionada
+                  ? bodegas.find(b => b.id === bodegaSeleccionada)?.nombre || 'Bodega'
+                  : 'Seleccionar Bodega'
+                }
+                {sucursalActual && ` (${bodegas.filter(b => Number(b.sucursal_id ?? b.id_sucursal ?? b.sucursal) === Number(sucursalActual)).length} bodegas)`}
+              </span>
+              {isLoadingProductosPorBodega && (
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+            </button>
+          )}
+          {bodegas.length === 0 && !isLoadingBodegas && (
+            <span className="text-xs text-slate-500">No hay bodegas cargadas</span>
+          )}
           <button
             onClick={() => setShowAdvancedFilters(f => !f)}
             className="flex items-center text-sm font-medium text-blue-600 hover:underline"
@@ -1246,6 +1393,20 @@ export default function ProductsView({
       {/* ——— Listado de Productos ——— */}
       {viewMode === 'card' ? (
         <>
+          {bodegaSeleccionada && (
+            <div className="mb-4 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-lg text-sm font-medium flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              Filtrando por bodega: {bodegas.find(b => b.id === bodegaSeleccionada)?.nombre || 'Bodega seleccionada'}
+              <button
+                onClick={() => setBodegaSeleccionada(null)}
+                className="ml-auto text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200 font-semibold"
+              >
+                Limpiar filtro
+              </button>
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
             {visibleProducts.map(p => (
               <ProductCard
@@ -1260,7 +1421,8 @@ export default function ProductsView({
                 onToggleActive={handleToggleActive}
                 onImageUpdate={handleImageUpdate}
                 existencias={p.existencias || []}
-                stockTotal={p.stock_total}
+                stockTotal={bodegaSeleccionada ? (p.stock_bodega ?? p.stock_total) : p.stock_total}
+                nombreBodega={bodegaSeleccionada ? bodegas.find(b => b.id === bodegaSeleccionada)?.nombre : undefined}
               />
             ))}
           </div>
@@ -1271,7 +1433,23 @@ export default function ProductsView({
           )}
         </>
       ) : (
-        <ProductsTable products={filteredProducts} loading={loading} />
+        <>
+          {bodegaSeleccionada && (
+            <div className="mb-4 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-lg text-sm font-medium flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              Filtrando por bodega: {bodegas.find(b => b.id === bodegaSeleccionada)?.nombre || 'Bodega seleccionada'}
+              <button
+                onClick={() => setBodegaSeleccionada(null)}
+                className="ml-auto text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200 font-semibold"
+              >
+                Limpiar filtro
+              </button>
+            </div>
+          )}
+          <ProductsTable products={filteredProducts} loading={loading} bodegaSeleccionada={bodegaSeleccionada} bodegas={bodegas} />
+        </>
       )}
     </section>
   );

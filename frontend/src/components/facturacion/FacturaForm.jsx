@@ -15,7 +15,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
 
   const tokenUsuario = localStorage.getItem('token_usuario');
   const usuario = localStorage.getItem('usuario');
-  const subdominio = localStorage.getItem('slug');
+  const subdominio = window.location.hostname.split('.')[0];
 
   useEffect(() => {
     cargarFormasPago();
@@ -28,10 +28,10 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
         usuario,
         subdominio
       });
-      setFormasPago(response.datos || []);
+      setFormasPago(response.formas_pago || []);
 
       // Seleccionar efectivo por defecto
-      const efectivo = response.datos?.find(f => f.codigo === 'EFE');
+      const efectivo = response.formas_pago?.find(f => f.codigo === 'EFE');
       if (efectivo) {
         setPagos([{ forma_pago: efectivo.id, monto: '' }]);
       }
