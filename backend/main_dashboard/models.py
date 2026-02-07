@@ -709,7 +709,8 @@ class Factura(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='facturas_anuladas'
+        related_name='facturas_anuladas',
+        db_column='anulada_por'
     )
 
     class Meta:

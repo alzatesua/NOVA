@@ -560,6 +560,10 @@ class FacturaSerializer(DbAliasModelSerializer):
 
 class FacturaDetalleInlineSerializer(DbAliasModelSerializer):
     """Serializer para crear detalles desde FacturaCreateSerializer"""
+    # Hacer los campos derivados opcionales
+    producto_nombre = serializers.CharField(required=False, allow_blank=True)
+    producto_sku = serializers.CharField(required=False, allow_blank=True)
+
     class Meta:
         model = FacturaDetalle
         fields = [
@@ -568,6 +572,50 @@ class FacturaDetalleInlineSerializer(DbAliasModelSerializer):
             'descuento_porcentaje', 'descuento_valor',
             'iva_porcentaje', 'iva_valor', 'subtotal', 'total'
         ]
+        extra_kwargs = {
+            'producto': {'required': True},
+            'cantidad': {'required': True, 'min_value': 1},
+            'precio_unitario': {'required': True, 'min_value': 0},
+            'iva_porcentaje': {'required': True, 'min_value': 0},
+            'iva_valor': {'required': True, 'min_value': 0},
+            'subtotal': {'required': True, 'min_value': 0},
+            'total': {'required': True, 'min_value': 0},
+            'descuento_porcentaje': {'default': 0, 'min_value': 0},
+            'descuento_valor': {'default': 0, 'min_value': 0},
+        }
+
+    def validate(self, attrs):
+        """Obtener producto_nombre y producto_sku del objeto Producto si no se proporcionan"""
+        producto = attrs.get('producto')
+        if producto:
+            # Si producto es un ID (número), obtener la instancia
+            from .models import Producto
+            alias = self.context.get('db_alias', 'default')
+
+            # Si es un ID, obtener la instancia del modelo
+            if isinstance(producto, int):
+                producto = Producto.objects.using(alias).get(pk=producto)
+                attrs['producto'] = producto
+
+            if not attrs.get('producto_nombre'):
+                attrs['producto_nombre'] = producto.nombre
+            if not attrs.get('producto_sku'):
+                attrs['producto_sku'] = producto.sku
+
+        # Asegurar que los valores numéricos sean decimales
+        from decimal import Decimal, InvalidOperation
+        for campo in ['precio_unitario', 'descuento_porcentaje', 'descuento_valor',
+                      'iva_porcentaje', 'iva_valor', 'subtotal', 'total']:
+            if campo in attrs and attrs[campo] is not None:
+                try:
+                    if not isinstance(attrs[campo], Decimal):
+                        attrs[campo] = Decimal(str(attrs[campo]))
+                except (ValueError, TypeError, InvalidOperation):
+                    raise serializers.ValidationError({
+                        campo: f'El valor {attrs[campo]} no es un número válido'
+                    })
+
+        return attrs
 
 
 class PagoInlineSerializer(DbAliasModelSerializer):
@@ -575,6 +623,34 @@ class PagoInlineSerializer(DbAliasModelSerializer):
     class Meta:
         model = Pago
         fields = ['forma_pago', 'monto', 'referencia', 'autorizacion']
+        extra_kwargs = {
+            'forma_pago': {'required': True},
+            'monto': {'required': True, 'min_value': 0},
+            'referencia': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'autorizacion': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
+
+    def validate(self, attrs):
+        """Validar y convertir forma_pago si es un ID"""
+        from .models import FormaPago
+        alias = self.context.get('db_alias', 'default')
+
+        forma_pago = attrs.get('forma_pago')
+        if forma_pago and isinstance(forma_pago, int):
+            attrs['forma_pago'] = FormaPago.objects.using(alias).get(pk=forma_pago)
+
+        # Asegurar que monto sea Decimal
+        from decimal import Decimal, InvalidOperation
+        if 'monto' in attrs and attrs['monto'] is not None:
+            if not isinstance(attrs['monto'], Decimal):
+                try:
+                    attrs['monto'] = Decimal(str(attrs['monto']))
+                except (ValueError, TypeError, InvalidOperation):
+                    raise serializers.ValidationError({
+                        'monto': f'El valor {attrs["monto"]} no es un número válido'
+                    })
+
+        return attrs
 
 
 class FacturaCreateSerializer(DbAliasModelSerializer):
@@ -597,6 +673,61 @@ class FacturaCreateSerializer(DbAliasModelSerializer):
             'total_pagado', 'cambio', 'observaciones',
             'detalles', 'pagos'
         ]
+        extra_kwargs = {
+            'cliente': {'required': False, 'allow_null': True},
+            'vendedor': {'required': False, 'allow_null': True},
+            'sucursal': {'required': True},
+            'bodega': {'required': True},
+        }
+
+    def validate(self, attrs):
+        """Validar y convertir IDs a instancias de modelos si es necesario"""
+        from .models import Sucursales, Bodega, Cliente
+        from django.contrib.auth import get_user_model
+        alias = self.context.get('db_alias', 'default')
+
+        # Validar y convertir bodega
+        bodega = attrs.get('bodega')
+        if bodega and isinstance(bodega, int):
+            attrs['bodega'] = Bodega.objects.using(alias).get(pk=bodega)
+
+        # Validar y convertir sucursal
+        sucursal = attrs.get('sucursal')
+        if sucursal and isinstance(sucursal, int):
+            attrs['sucursal'] = Sucursales.objects.using(alias).get(pk=sucursal)
+
+        # Validar y convertir cliente (opcional)
+        cliente = attrs.get('cliente')
+        if cliente and isinstance(cliente, int):
+            try:
+                attrs['cliente'] = Cliente.objects.using(alias).get(pk=cliente)
+            except Cliente.DoesNotExist:
+                attrs['cliente'] = None
+
+        # Validar y convertir vendedor (opcional)
+        vendedor = attrs.get('vendedor')
+        if vendedor and isinstance(vendedor, int):
+            User = get_user_model()
+            try:
+                attrs['vendedor'] = User.objects.using(alias).get(pk=vendedor)
+            except User.DoesNotExist:
+                attrs['vendedor'] = None
+
+        # Validar totales
+        from decimal import Decimal
+        subtotal = attrs.get('subtotal', Decimal('0'))
+        total_iva = attrs.get('total_iva', Decimal('0'))
+        total = attrs.get('total', Decimal('0'))
+
+        # Verificar que total = subtotal + total_iva
+        esperado = subtotal + total_iva
+        if abs(total - esperado) > Decimal('0.01'):
+            raise serializers.ValidationError(
+                f'El total ({total}) no coincide con la suma de subtotal ({subtotal}) + IVA ({total_iva}). '
+                f'Valor esperado: {esperado}'
+            )
+
+        return attrs
 
     def create(self, validated_data):
         from django.utils import timezone
@@ -606,77 +737,130 @@ class FacturaCreateSerializer(DbAliasModelSerializer):
         detalles_data = validated_data.pop('detalles', [])
         pagos_data = validated_data.pop('pagos', [])
 
-        with transaction.atomic(using=alias):
-            # 1. Generar número de factura
-            sucursal = validated_data.get('sucursal')
-            config = ConfiguracionFactura.objects.using(alias).filter(
-                sucursal=sucursal
-            ).first()
+        logger.info(f"FacturaCreateSerializer.create() - alias: {alias}")
+        logger.info(f"validated_data: {validated_data}")
+        logger.info(f"detalles_count: {len(detalles_data)}, pagos_count: {len(pagos_data)}")
 
-            if config:
-                numero = f"{config.prefijo_factura}-{config.consecutivo_actual:0{config.longitud_consecutivo}d}"
-                config.consecutivo_actual += 1
-                config.save(using=alias)
-            else:
-                # Fallback si no hay config: usar timestamp
-                numero = f"FACT-{timezone.now().strftime('%Y%m%d%H%M%S')}"
+        try:
+            with transaction.atomic(using=alias):
+                # 1. Generar número de factura
+                sucursal = validated_data.get('sucursal')
+                config = ConfiguracionFactura.objects.using(alias).filter(
+                    sucursal=sucursal
+                ).first()
 
-            validated_data['numero_factura'] = numero
-            validated_data['estado'] = 'PAG'
+                if config:
+                    numero = f"{config.prefijo_factura}-{config.consecutivo_actual:0{config.longitud_consecutivo}d}"
+                    config.consecutivo_actual += 1
+                    config.save(using=alias)
+                else:
+                    # Fallback si no hay config: usar timestamp
+                    numero = f"FACT-{timezone.now().strftime('%Y%m%d%H%M%S')}"
 
-            # 2. Crear factura
-            factura = Factura.objects.using(alias).create(**validated_data)
+                validated_data['numero_factura'] = numero
+                validated_data['estado'] = 'PAG'
 
-            # 3. Crear detalles y reservar stock
-            for detalle_data in detalles_data:
-                producto = detalle_data['producto']
+                logger.info(f"Número de factura generado: {numero}")
 
-                # Validar y reservar stock
-                existencia = Existencia.objects.using(alias).filter(
-                    producto=producto,
-                    bodega=validated_data['bodega']
-                ).select_for_update().first()
+                # 2. Crear factura - campos explícitos
+                factura_data = {
+                    'numero_factura': validated_data['numero_factura'],
+                    'estado': validated_data['estado'],
+                    'cliente': validated_data.get('cliente'),
+                    'vendedor': validated_data.get('vendedor'),
+                    'sucursal': validated_data['sucursal'],
+                    'bodega': validated_data['bodega'],
+                    'subtotal': validated_data.get('subtotal', 0),
+                    'total_descuento': validated_data.get('total_descuento', 0),
+                    'total_iva': validated_data.get('total_iva', 0),
+                    'total': validated_data['total'],
+                    'total_pagado': validated_data.get('total_pagado', 0),
+                    'cambio': validated_data.get('cambio', 0),
+                    'observaciones': validated_data.get('observaciones'),
+                }
+                logger.info(f"Datos de factura a crear: {factura_data}")
 
-                if not existencia:
-                    raise serializers.ValidationError(
-                        f'El producto {producto.nombre} no tiene existencia en esta bodega'
+                factura = Factura.objects.using(alias).create(**factura_data)
+                logger.info(f"Factura creada con ID: {factura.id}, PK: {factura.pk}")
+
+                # 3. Crear detalles y reservar stock
+                for idx, detalle_data in enumerate(detalles_data):
+                    producto = detalle_data['producto']
+
+                    logger.info(f"Procesando detalle {idx + 1}: producto={producto.id}, cantidad={detalle_data['cantidad']}")
+
+                    # Validar y reservar stock
+                    existencia = Existencia.objects.using(alias).filter(
+                        producto=producto,
+                        bodega=validated_data['bodega']
+                    ).select_for_update().first()
+
+                    if not existencia:
+                        raise serializers.ValidationError(
+                            f'El producto {producto.nombre} no tiene existencia en esta bodega'
+                        )
+
+                    if existencia.disponible < detalle_data['cantidad']:
+                        raise serializers.ValidationError(
+                            f'Stock insuficiente para {producto.nombre}. '
+                            f'Disponible: {existencia.disponible}, Solicitado: {detalle_data["cantidad"]}'
+                        )
+
+                    # Reservar stock
+                    existencia.reservado += detalle_data['cantidad']
+                    existencia.save(using=alias)
+
+                    # Crear detalle - solo campos del modelo
+                    detalle_data_to_create = {
+                        'factura': factura,
+                        'producto': detalle_data['producto'],
+                        'producto_nombre': detalle_data.get('producto_nombre', ''),
+                        'producto_sku': detalle_data.get('producto_sku', ''),
+                        'producto_imei': detalle_data.get('producto_imei', ''),
+                        'cantidad': detalle_data['cantidad'],
+                        'precio_unitario': detalle_data['precio_unitario'],
+                        'descuento_porcentaje': detalle_data.get('descuento_porcentaje', 0),
+                        'descuento_valor': detalle_data.get('descuento_valor', 0),
+                        'iva_porcentaje': detalle_data['iva_porcentaje'],
+                        'iva_valor': detalle_data['iva_valor'],
+                        'subtotal': detalle_data['subtotal'],
+                        'total': detalle_data['total'],
+                    }
+                    logger.info(f"Guardando detalle: {detalle_data_to_create}")
+                    FacturaDetalle.objects.using(alias).create(**detalle_data_to_create)
+                    logger.info(f"Detalle {idx + 1} creado")
+
+                # 4. Crear pagos
+                for idx, pago_data in enumerate(pagos_data):
+                    pago_data_to_create = {
+                        'factura': factura,
+                        'forma_pago': pago_data['forma_pago'],
+                        'monto': pago_data['monto'],
+                        'referencia': pago_data.get('referencia'),
+                        'autorizacion': pago_data.get('autorizacion'),
+                    }
+                    logger.info(f"Guardando pago {idx + 1}: {pago_data_to_create}")
+                    Pago.objects.using(alias).create(**pago_data_to_create)
+                    logger.info(f"Pago {idx + 1} creado")
+
+                # 5. Confirmar reserva (mover de reservado a cantidad real)
+                for detalle in factura.detalles.all().using(alias):
+                    existencia = Existencia.objects.using(alias).get(
+                        producto=detalle.producto,
+                        bodega=factura.bodega
                     )
+                    existencia.cantidad -= detalle.cantidad
+                    existencia.reservado -= detalle.cantidad
+                    existencia.save(using=alias)
 
-                if existencia.disponible < detalle_data['cantidad']:
-                    raise serializers.ValidationError(
-                        f'Stock insuficiente para {producto.nombre}. '
-                        f'Disponible: {existencia.disponible}, Solicitado: {detalle_data["cantidad"]}'
-                    )
+                    # Actualizar cache de stock del producto
+                    self._actualizar_cache_stock_producto(alias, detalle.producto_id)
 
-                # Reservar stock
-                existencia.reservado += detalle_data['cantidad']
-                existencia.save(using=alias)
+                logger.info(f"Factura {factura.id} creada exitosamente")
 
-                # Crear detalle
-                FacturaDetalle.objects.using(alias).create(
-                    factura=factura,
-                    **detalle_data
-                )
-
-            # 4. Crear pagos
-            for pago_data in pagos_data:
-                Pago.objects.using(alias).create(
-                    factura=factura,
-                    **pago_data
-                )
-
-            # 5. Confirmar reserva (mover de reservado a cantidad real)
-            for detalle in factura.detalles.all().using(alias):
-                existencia = Existencia.objects.using(alias).get(
-                    producto=detalle.producto,
-                    bodega=factura.bodega
-                )
-                existencia.cantidad -= detalle.cantidad
-                existencia.reservado -= detalle.cantidad
-                existencia.save(using=alias)
-
-                # Actualizar cache de stock del producto
-                self._actualizar_cache_stock_producto(alias, detalle.producto_id)
+        except Exception as e:
+            logger.error(f"Error creando factura: {str(e)}", exc_info=True)
+            raise
 
         return factura
 
