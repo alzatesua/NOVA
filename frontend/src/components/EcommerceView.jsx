@@ -333,6 +333,13 @@ export default function EcommerceView() {
     setFilteredProducts(filtered);
   }, [activeCategory, searchQuery, products]);
 
+  // Cambiar a sección de productos cuando hay una búsqueda activa
+  useEffect(() => {
+    if (searchQuery && searchQuery.trim() !== '' && activeSection === 'inicio') {
+      setActiveSection('productos');
+    }
+  }, [searchQuery, activeSection]);
+
   // Carrito functions
   const addToCart = (product, quantity = 1) => {
     // Verificar si hay cliente logueado
@@ -805,6 +812,12 @@ export default function EcommerceView() {
             text-decoration: none !important;
             user-select: none !important;
             white-space: nowrap !important;
+          }
+
+          /* Asegurar que los iconos SVG sean de color blanco */
+          .nav-btn-futuristic svg {
+            color: #E8F5E9 !important;
+            stroke: #E8F5E9 !important;
           }
 
           .nav-btn-futuristic::before {
@@ -1293,9 +1306,8 @@ export default function EcommerceView() {
               {/* Carrito y Búsqueda - Alineados */}
               <div className="d-flex align-items-center gap-2 gap-lg-3">
                 {/* Carrito - Enviar directamente a WhatsApp */}
-                <Button
-                  variant="light"
-                  className="position-relative flex-shrink-0"
+                <button
+                  className="nav-btn-futuristic position-relative flex-shrink-0"
                   onClick={() => {
                     if (cart.length > 0) {
                       // Verificar autenticación ANTES de enviar a WhatsApp
@@ -1310,15 +1322,10 @@ export default function EcommerceView() {
                       alert('Tu carrito está vacío');
                     }
                   }}
-                  style={{
-                    color: COLORS.verdePrincipal,
-                    minWidth: '50px',
-                    height: '45px'
-                  }}
                   title="Completar pedido por WhatsApp"
                 >
                   <svg
-                    style={{ width: '20px', height: '20px' }}
+                    style={{ width: '18px', height: '18px' }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1333,39 +1340,27 @@ export default function EcommerceView() {
                       {cartItemCount}
                     </span>
                   )}
-                </Button>
+                </button>
 
                 {/* Botón de Modo Oscuro */}
-                <Button
-                  variant="light"
-                  className="flex-shrink-0"
+                <button
+                  className="nav-btn-futuristic flex-shrink-0"
                   onClick={toggleDarkMode}
-                  style={{
-                    color: darkMode ? COLORS.acentoNaranja : COLORS.verdePrincipal,
-                    minWidth: '50px',
-                    height: '45px'
-                  }}
                   title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
                 >
-                  {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-                </Button>
+                  {darkMode ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
+                </button>
 
                 {/* Usuario / Cuenta */}
                 {isLoggedIn ? (
                   <div style={{ position: 'relative', display: 'inline-block' }} ref={userDropdownRef}>
-                    <Button
-                      variant="light"
-                      className="position-relative flex-shrink-0"
+                    <button
+                      className="nav-btn-futuristic position-relative flex-shrink-0"
                       onClick={() => setShowUserDropdown(!showUserDropdown)}
-                      style={{
-                        color: COLORS.verdePrincipal,
-                        minWidth: '50px',
-                        height: '45px'
-                      }}
                       title={`Hola, ${customerData?.nombre}`}
                     >
                       <svg
-                        style={{ width: '20px', height: '20px' }}
+                        style={{ width: '18px', height: '18px' }}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -1380,7 +1375,7 @@ export default function EcommerceView() {
                           {coupons.length}
                         </span>
                       )}
-                    </Button>
+                    </button>
                     <small className="d-block text-center text-white" style={{ fontSize: '10px' }}>
                       {customerData?.nombre?.split(' ')[0]}
                     </small>
@@ -1462,26 +1457,20 @@ export default function EcommerceView() {
                     )}
                   </div>
                 ) : (
-                  <Button
-                    variant="light"
-                    className="flex-shrink-0"
+                  <button
+                    className="nav-btn-futuristic flex-shrink-0"
                     onClick={() => setShowAuthModal(true)}
-                    style={{
-                      color: COLORS.verdePrincipal,
-                      minWidth: '50px',
-                      height: '45px'
-                    }}
                     title="Iniciar sesión / Registrarse"
                   >
                     <svg
-                      style={{ width: '20px', height: '20px' }}
+                      style={{ width: '18px', height: '18px' }}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
-                  </Button>
+                  </button>
                 )}
 
                 {/* Barra de búsqueda */}
