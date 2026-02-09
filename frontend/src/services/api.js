@@ -733,7 +733,7 @@ export function crearFactura({
   datos_factura
 }) {
   token = token || localStorage.getItem('token_usuario');
-  return post('api/facturacion/facturas/', {
+  return post('api/facturacion/facturas/', { 
     usuario,
     token,
     subdominio,

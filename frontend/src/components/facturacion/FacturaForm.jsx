@@ -90,13 +90,20 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
 
   // Cálculos
   const calcularSubtotal = () => {
-    return productos.reduce((sum, p) => sum + (parseFloat(p.precio) * p.cantidad), 0);
+    return productos.reduce((sum, p) => {
+      const precio = parseFloat(p.precio) || 0;
+      const cantidad = parseInt(p.cantidad) || 0;
+      return sum + (precio * cantidad);
+    }, 0);
   };
 
   const calcularIVA = () => {
     return productos.reduce((sum, p) => {
-      const subtotal = parseFloat(p.precio) * p.cantidad;
-      return sum + (subtotal * (parseFloat(p.iva_porcentaje) / 100));
+      const precio = parseFloat(p.precio) || 0;
+      const cantidad = parseInt(p.cantidad) || 0;
+      const ivaPorcentaje = parseFloat(p.iva_porcentaje) || 0;
+      const subtotal = precio * cantidad;
+      return sum + (subtotal * (ivaPorcentaje / 100));
     }, 0);
   };
 
@@ -143,20 +150,29 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
         total_pagado: calcularTotalPagado(),
         cambio: calcularCambio(),
         observaciones: observaciones || null,
-        detalles: productos.map(p => ({
-          producto: p.id,
-          producto_nombre: p.nombre,
-          producto_sku: p.sku,
-          producto_imei: p.imei || '',
-          cantidad: p.cantidad,
-          precio_unitario: parseFloat(p.precio),
-          descuento_porcentaje: 0,
-          descuento_valor: 0,
-          iva_porcentaje: parseFloat(p.iva_porcentaje),
-          iva_valor: (p.precio * p.cantidad) * (p.iva_porcentaje / 100),
-          subtotal: p.precio * p.cantidad,
-          total: (p.precio * p.cantidad) * (1 + p.iva_porcentaje / 100)
-        })),
+        detalles: productos.map(p => {
+          const precio = parseFloat(p.precio);
+          const ivaPorcentaje = parseFloat(p.iva_porcentaje || 0);
+          const cantidad = parseInt(p.cantidad);
+          const subtotal = precio * cantidad;
+          const ivaValor = subtotal * (ivaPorcentaje / 100);
+          const total = subtotal + ivaValor;
+
+          return {
+            producto: p.id,
+            producto_nombre: p.nombre,
+            producto_sku: p.sku,
+            producto_imei: p.imei || '',
+            cantidad: cantidad,
+            precio_unitario: precio,
+            descuento_porcentaje: 0,
+            descuento_valor: 0,
+            iva_porcentaje: ivaPorcentaje,
+            iva_valor: ivaValor,
+            subtotal: subtotal,
+            total: total
+          };
+        }),
         pagos: pagos.map(p => ({
           forma_pago: p.forma_pago,
           monto: parseFloat(p.monto),

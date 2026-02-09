@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { MagnifyingGlassIcon, UserPlusIcon, XMarkIcon, BuildingOfficeIcon, UserIcon } from '@heroicons/react/24/outline';
 import { buscarCliente, crearCliente } from '../../services/api';
@@ -248,6 +248,8 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
   const [searchResults, setSearchResults] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState(null);
+  const inputRef = useRef(null);
 
   const tokenUsuario = localStorage.getItem('token_usuario');
   const usuario = localStorage.getItem('usuario');
@@ -258,6 +260,17 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
     const timer = setTimeout(async () => {
       if (searchQuery.length >= 2) {
         setLoading(true);
+
+        // Calcular posición del dropdown
+        if (inputRef.current) {
+          const rect = inputRef.current.getBoundingClientRect();
+          setDropdownPosition({
+            top: rect.bottom + window.scrollY + 4,
+            left: rect.left + window.scrollX,
+            width: rect.width,
+          });
+        }
+
         try {
           const response = await buscarCliente({
             query: searchQuery,
@@ -274,20 +287,30 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
         }
       } else {
         setSearchResults([]);
+        setDropdownPosition(null);
       }
     }, 300);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Limpiar posición al limpiar búsqueda
+  useEffect(() => {
+    if (!searchQuery && !loading) {
+      setDropdownPosition(null);
+    }
+  }, [searchQuery, loading]);
+
   const handleSelectCliente = (clienteSeleccionado) => {
     onClienteChange(clienteSeleccionado);
     setSearchQuery('');
     setSearchResults([]);
+    setDropdownPosition(null);
   };
 
   const handleClearCliente = () => {
     onClienteChange(null);
+    setDropdownPosition(null);
   };
 
   const handleCrearCliente = async (datos) => {
@@ -307,72 +330,118 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
   };
 
   return (
-    <div className="space-y-3">
-      <label className="block text-sm font-semibold text-gray-700">Cliente</label>
+    <>
+      <div className="space-y-3">
+        <label className="block text-sm font-semibold text-gray-700">Cliente</label>
 
-      {/* Buscador */}
-      <div className="relative group">
-        <input
-          type="text"
-          value={searchQuery || (cliente && cliente.nombre_completo) || ''}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => {
-            if (cliente) {
-              setSearchQuery('');
-              onClienteChange(null);
-            }
-          }}
-          placeholder="Buscar por documento o nombre..."
-          className="w-full pl-12 pr-24 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
-        />
-        <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+        {/* Buscador */}
+        <div className="relative group">
+          <input
+            ref={inputRef}
+            type="text"
+            value={cliente && !searchQuery ? cliente.nombre_completo : searchQuery || ''}
+            onChange={(e) => {
+              const valor = e.target.value;
+              if (cliente && valor !== cliente.nombre_completo) {
+                onClienteChange(null);
+              }
+              setSearchQuery(valor);
+            }}
+            placeholder="Buscar por documento o nombre..."
+            className="w-full pl-12 pr-24 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
+          />
+          <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
 
-        {cliente && (
+          {cliente && (
+            <button
+              type="button"
+              onClick={handleClearCliente}
+              className="absolute right-12 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
+              title="Limpiar cliente"
+            >
+              <XMarkIcon className="h-5 w-5" />
+            </button>
+          )}
+
           <button
             type="button"
-            onClick={handleClearCliente}
-            className="absolute right-12 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
-            title="Limpiar cliente"
+            onClick={() => setShowCreateForm(true)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+            title="Crear nuevo cliente"
           >
-            <XMarkIcon className="h-5 w-5" />
+            <UserPlusIcon className="h-5 w-5" />
           </button>
+        </div>
+
+        {/* Dropdown renderizado con Portal */}
+        {dropdownPosition && createPortal(
+          <div
+            className="fixed bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto z-[9999]"
+            style={{
+              top: `${dropdownPosition.top}px`,
+              left: `${dropdownPosition.left}px`,
+              width: `${dropdownPosition.width}px`,
+            }}
+          >
+            {searchResults.length > 0 && (
+              <>
+                {searchResults.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => handleSelectCliente(c)}
+                    className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0"
+                  >
+                    <p className="font-semibold text-gray-900">{c.nombre_completo}</p>
+                    <p className="text-sm text-gray-500">
+                      {c.tipo_documento}: {c.numero_documento}
+                    </p>
+                  </button>
+                ))}
+              </>
+            )}
+
+            {loading && searchResults.length === 0 && (
+              <div className="p-4 text-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-sm text-gray-500 mt-2">Buscando...</p>
+              </div>
+            )}
+          </div>,
+          document.body
         )}
 
-        <button
-          type="button"
-          onClick={() => setShowCreateForm(true)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
-          title="Crear nuevo cliente"
-        >
-          <UserPlusIcon className="h-5 w-5" />
-        </button>
+        {/* Cliente seleccionado */}
+        {cliente && !searchQuery && (
+          <div className="mt-2 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border-2 border-blue-200">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <p className="font-bold text-gray-900 text-lg">{cliente.nombre_completo}</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  <span className="inline-flex items-center gap-1">
+                    <span className="font-semibold">{cliente.tipo_documento}:</span>
+                    <span>{cliente.numero_documento}</span>
+                  </span>
+                </p>
+                {cliente.correo && (
+                  <p className="text-sm text-gray-600">{cliente.correo}</p>
+                )}
+                {cliente.telefono && (
+                  <p className="text-sm text-gray-600">{cliente.telefono}</p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleClearCliente}
+                className="p-2 text-blue-600 hover:bg-blue-200 rounded-lg transition-colors"
+                title="Cambiar cliente"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Resultados de búsqueda */}
-      {searchResults.length > 0 && (
-        <div className="absolute z-30 w-full bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
-          {searchResults.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => handleSelectCliente(c)}
-              className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0"
-            >
-              <p className="font-semibold text-gray-900">{c.nombre_completo}</p>
-              <p className="text-sm text-gray-500">
-                {c.tipo_documento}: {c.numero_documento}
-              </p>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {loading && (
-        <div className="absolute z-30 w-full bg-white border border-gray-200 rounded-xl shadow-xl p-4 text-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-sm text-gray-500 mt-2">Buscando...</p>
-        </div>
-      )}
 
       {/* Modal de creación */}
       <CrearClienteModal
@@ -380,37 +449,6 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
         onClose={() => setShowCreateForm(false)}
         onCrear={handleCrearCliente}
       />
-
-      {/* Cliente seleccionado */}
-      {cliente && !searchQuery && (
-        <div className="mt-2 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border-2 border-blue-200">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <p className="font-bold text-gray-900 text-lg">{cliente.nombre_completo}</p>
-              <p className="text-sm text-gray-600 mt-1">
-                <span className="inline-flex items-center gap-1">
-                  <span className="font-semibold">{cliente.tipo_documento}:</span>
-                  <span>{cliente.numero_documento}</span>
-                </span>
-              </p>
-              {cliente.correo && (
-                <p className="text-sm text-gray-600">{cliente.correo}</p>
-              )}
-              {cliente.telefono && (
-                <p className="text-sm text-gray-600">{cliente.telefono}</p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={handleClearCliente}
-              className="p-2 text-blue-600 hover:bg-blue-200 rounded-lg transition-colors"
-              title="Cambiar cliente"
-            >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
