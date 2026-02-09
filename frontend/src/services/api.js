@@ -594,19 +594,27 @@ export function recibirTraslado({ token, usuario, subdominio, traslado_id, canti
 // Obtener productos por bodega
 export function obtenerProductosPorBodega({
   usuario,
-  token,
+  tokenUsuario,
   subdominio,
   bodega_id,
-  incluir_sin_stock = false,
+  solo_con_stock = true,
 }) {
+  console.log('[API] obtenerProductosPorBodega llamado con:', {
+    usuario,
+    subdominio,
+    bodega_id,
+    solo_con_stock
+  });
+
+  const token = tokenUsuario;
   return post(
-    'api/productos/por-bodega/',
+    'api/existencias/productos-por-bodega/',
     {
       usuario,
       token,
       subdominio,
       bodega_id,
-      incluir_sin_stock,
+      solo_con_stock,
     },
     token
   );

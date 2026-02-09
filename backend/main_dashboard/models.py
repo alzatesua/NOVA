@@ -3,7 +3,9 @@ from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.conf import settings
-
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from django.db.models import Sum
 
 class Sucursales(models.Model):
     nombre = models.CharField(max_length=100)
@@ -854,3 +856,93 @@ class ConfiguracionFactura(models.Model):
 
     def __str__(self):
         return f'Config {self.sucursal.nombre}'
+
+
+# =========================
+# SIGNALS - Sincronización Automática de Stock
+# =========================
+
+
+@receiver(post_save, sender=Producto)
+def crear_existencias_para_producto(sender, instance, created, **kwargs):
+    """
+    Cuando se crea un producto, crear automáticamente existencias
+    con stock 0 en todas las bodegas activas.
+    """
+    if created and instance.pk:
+        from django.db import connection
+        # Usar la misma base de datos que el producto
+        db_alias = connection.schema_name if hasattr(connection, 'schema_name') else 'default'
+
+        try:
+            bodegas = Bodega.objects.using(db_alias).filter(estatus=True)
+            for bodega in bodegas:
+                Existencia.objects.using(db_alias).get_or_create(
+                    producto=instance,
+                    bodega=bodega,
+                    defaults={
+                        'cantidad': 0,
+                        'reservado': 0,
+                        'minimo': 0
+                    }
+                )
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f'Error creando existencias para producto {instance.pk}: {e}')
+
+
+@receiver(post_save, sender=Existencia)
+def actualizar_cache_stock_post_save(sender, instance, **kwargs):
+    """
+    Cuando se guarda una existencia, actualizar el cache de stock del producto.
+    """
+    if instance.producto_id and instance.producto:
+        from django.db import connection
+        db_alias = connection.schema_name if hasattr(connection, 'schema_name') else 'default'
+
+        try:
+            # Recalcular stock total del producto (suma de todas las bodegas)
+            total_stock = Existencia.objects.using(db_alias).filter(
+                producto_id=instance.producto_id
+            ).aggregate(
+                total=Sum('cantidad')
+            )['total'] or 0
+
+            # Actualizar el cache
+            Producto.objects.using(db_alias).filter(
+                pk=instance.producto_id
+            ).update(stock=total_stock)
+
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f'Error actualizando stock cache para producto {instance.producto_id}: {e}')
+
+
+@receiver(post_delete, sender=Existencia)
+def actualizar_cache_stock_post_delete(sender, instance, **kwargs):
+    """
+    Cuando se elimina una existencia, actualizar el cache de stock del producto.
+    """
+    if instance.producto_id and instance.producto:
+        from django.db import connection
+        db_alias = connection.schema_name if hasattr(connection, 'schema_name') else 'default'
+
+        try:
+            # Recalcular stock total del producto (suma de todas las bodegas)
+            total_stock = Existencia.objects.using(db_alias).filter(
+                producto_id=instance.producto_id
+            ).aggregate(
+                total=Sum('cantidad')
+            )['total'] or 0
+
+            # Actualizar el cache
+            Producto.objects.using(db_alias).filter(
+                pk=instance.producto_id
+            ).update(stock=total_stock)
+
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f'Error actualizando stock cache para producto {instance.producto_id}: {e}')

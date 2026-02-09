@@ -9,6 +9,7 @@ bodega_detail   = BodegaViewSet.as_view({'get': 'retrieve', 'put': 'update', 'pa
 existencia_list     = ExistenciaViewSet.as_view({'get': 'list', 'post': 'create'})
 existencia_detail   = ExistenciaViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'})
 existencia_ajustar  = ExistenciaViewSet.as_view({'post': 'ajustar'})
+existencia_productos_por_bodega = ExistenciaViewSet.as_view({'post': 'productos_por_bodega'})
 
 traslado_list     = TrasladoViewSet.as_view({'get': 'list', 'post': 'create'})
 traslado_detail   = TrasladoViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'})
@@ -25,6 +26,7 @@ urlpatterns = [
     path('existencias/', existencia_list, name='existencia_list'),
     path('existencias/<int:pk>/', existencia_detail, name='existencia_detail'),
     path('existencias/ajustar/', existencia_ajustar, name='existencia_ajustar'),
+    path('existencias/productos-por-bodega/', existencia_productos_por_bodega, name='existencia_productos_por_bodega'),
 
     path('traslados/', traslado_list, name='traslado_list'),
     path('traslados/<int:pk>/', traslado_detail, name='traslado_detail'),

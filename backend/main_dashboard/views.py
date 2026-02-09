@@ -1968,6 +1968,97 @@ class ExistenciaViewSet(TenantMixin, viewsets.ModelViewSet):
         data = self.get_serializer(exi).data
         return Response(data, status=200)
 
+    @action(detail=False, methods=['post'])
+    def productos_por_bodega(self, request):
+        """
+        Obtiene productos con su stock en una bodega específica.
+        Útil para el componente de traslados.
+
+        Body de ejemplo:
+        {
+          "usuario": "juanprueba",
+          "token": "JWT...",
+          "subdominio": "cruz-verde-b678df",
+          "bodega_id": 1,
+          "solo_con_stock": true  // opcional, solo productos con cantidad > 0
+        }
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        logger.info(f'[productos_por_bodega] Request recibido. Data: {request.data}')
+
+        # 1) resolver alias del tenant
+        try:
+            alias = self._resolve_alias(request)
+            logger.info(f'[productos_por_bodega] Alias resuelto: {alias}')
+        except Exception as e:
+            logger.error(f'[productos_por_bodega] Error resolviendo alias: {e}')
+            return Response({'detail': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # 2) obtener parámetros
+        bodega_id = request.data.get('bodega_id') or request.query_params.get('bodega_id')
+        solo_con_stock = request.data.get('solo_con_stock', True)
+
+        logger.info(f'[productos_por_bodega] Parámetros - bodega_id: {bodega_id}, solo_con_stock: {solo_con_stock}')
+
+        if not bodega_id:
+            logger.warning('[productos_por_bodega] bodega_id no proporcionado')
+            return Response({'detail': 'bodega_id es requerido.'},
+                          status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            bodega_id = int(bodega_id)
+        except (ValueError, TypeError):
+            logger.error(f'[productos_por_bodega] bodega_id inválido: {bodega_id}')
+            return Response({'detail': 'bodega_id debe ser un número entero.'},
+                          status=status.HTTP_400_BAD_REQUEST)
+
+        # 3) buscar existencias en la bodega
+        try:
+            queryset = (Existencia.objects.using(alias)
+                       .filter(bodega_id=bodega_id)
+                       .select_related('producto'))
+
+            logger.info(f'[productos_por_bodega] Queryset creado. Count antes de filtro: {queryset.count()}')
+
+            # filtrar solo con stock si se solicita
+            if solo_con_stock:
+                queryset = queryset.filter(cantidad__gt=0)
+                logger.info(f'[productos_por_bodega] Aplicado filtro solo_con_stock. Count después: {queryset.count()}')
+
+            # 4) construir respuesta con datos del producto + existencia
+            resultados = []
+            for existencia in queryset:
+                producto = existencia.producto
+                resultados.append({
+                    'id': producto.id,
+                    'nombre': producto.nombre,
+                    'sku': producto.sku,
+                    'precio': float(producto.precio) if producto.precio else 0,
+                    'imagen_producto': producto.imagen_producto,
+                    'stock_bodega': existencia.cantidad,
+                    'reservado_bodega': existencia.reservado,
+                    'disponible_bodega': existencia.disponible,
+                    'stock_total': producto.stock,  # cache del stock total
+                    'id_categoria': producto.categoria_id.pk if producto.categoria_id else None,
+                    'id_marca': producto.marca_id.pk if producto.marca_id else None,
+                    'id_iva': producto.iva_id.pk if producto.iva_id else None,
+                    'sucursal_id': producto.sucursal_id,
+                    'activo': getattr(producto, 'activo', True),
+                    'bodega_id': bodega_id,
+                    'existencia_id': existencia.id,
+                })
+
+            logger.info(f'[productos_por_bodega] Resultados generados: {len(resultados)} productos')
+
+            response = Response({'datos': resultados}, status=200)
+            logger.info(f'[productos_por_bodega] Respuesta enviada exitosamente')
+            return response
+
+        except Exception as e:
+            logger.error(f'[productos_por_bodega] Exception: {e}', exc_info=True)
+            return Response({'detail': f'Error interno: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class TrasladoViewSet(TenantMixin, viewsets.ModelViewSet):

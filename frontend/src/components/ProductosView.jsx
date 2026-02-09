@@ -18,7 +18,8 @@ import {
   fetchIva,
   fetchTipoMedida,
   fetchSucursales,
-  fetchBodegas
+  fetchBodegas,
+  obtenerProductosPorBodega
 } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { showToast } from '../utils/toast';
@@ -73,6 +74,13 @@ export default function ProductsView({
   const [isLoadingSucursales, setIsLoadingSucursales] = useState(false);
   const [bodegas, setBodegas] = useState([]);
   const [isLoadingBodegas, setIsLoadingBodegas] = useState(false);
+
+  // Estados para filtro por bodega
+  const [bodegaSeleccionada, setBodegaSeleccionada] = useState(null);
+  const [productosPorBodega, setProductosPorBodega] = useState({});
+  const [isLoadingProductosPorBodega, setIsLoadingProductosPorBodega] = useState(false);
+  const [sucursalActual, setSucursalActual] = useState(null);
+
   const [newUser, setNewUser] = useState({ sucursal_id: '' });
 
 
@@ -85,9 +93,164 @@ export default function ProductsView({
     setVisibleCount(10);
   }, [initialProducts]);
 
+  // ——— Funciones para filtro por bodega ———
+  const cargarProductosPorBodega = useCallback(async (bodegaId) => {
+    console.log('[ProductosView] cargarProductosPorBodega llamado', {
+      bodegaId,
+      subdominio,
+      usuario,
+      hasToken: !!tokenUsuario
+    });
+
+    if (!bodegaId || !subdominio || !usuario) {
+      console.error('[ProductosView] Faltan parámetros requeridos', {
+        hasBodegaId: !!bodegaId,
+        hasSubdominio: !!subdominio,
+        hasUsuario: !!usuario
+      });
+      return;
+    }
+
+    setIsLoadingProductosPorBodega(true);
+    try {
+      console.log('[ProductosView] Llamando a obtenerProductosPorBodega...');
+      const response = await obtenerProductosPorBodega({
+        usuario,
+        tokenUsuario,
+        subdominio,
+        bodega_id: bodegaId,
+        solo_con_stock: true
+      });
+
+      console.log('[ProductosView] Respuesta recibida:', response);
+
+      if (response && response.datos) {
+        console.log('[ProductosView] Productos recibidos:', response.datos.length);
+
+        // Mapear los productos al formato esperado
+        const productosMapeados = response.datos.map(p => ({
+          ...p,
+          id: p.id,
+          nombre: p.nombre,
+          sku: p.sku,
+          precio: p.precio,
+          imagen_producto: p.imagen_producto,
+          stock: p.stock_bodega, // Usar stock de la bodega
+          stock_total: p.stock_total, // Stock total across warehouses
+          reservado: p.reservado_bodega,
+          disponible: p.disponible_bodega,
+          categoria: { id: p.id_categoria },
+          marca: { id: p.id_marca },
+          iva: { id: p.id_iva }
+        }));
+
+        console.log('[ProductosView] Productos mapeados:', productosMapeados.length);
+
+        setProductosPorBodega(prev => {
+          const newState = {
+            ...prev,
+            [bodegaId]: productosMapeados
+          };
+          console.log('[ProductosView] Estado productosPorBodega actualizado:', newState);
+          return newState;
+        });
+      } else {
+        console.warn('[ProductosView] Respuesta sin datos:', response);
+      }
+    } catch (error) {
+      console.error('[ProductosView] Error cargando productos por bodega:', error);
+      showToast('Error al cargar productos de la bodega', 'error');
+    } finally {
+      setIsLoadingProductosPorBodega(false);
+    }
+  }, [subdominio, usuario, tokenUsuario]);
+
+  const cambiarBodega = useCallback(() => {
+    console.log('[ProductosView] cambiarBodega llamado', {
+      totalBodegas: bodegas.length,
+      bodegaSeleccionada
+    });
+
+    if (bodegas.length === 0) {
+      console.warn('[ProductosView] No hay bodegas disponibles');
+      showToast('No hay bodegas disponibles', 'warning');
+      return;
+    }
+
+    // Usar todas las bodegas disponibles (no filtrar por sucursal)
+    const listaBodegas = bodegas;
+    console.log('[ProductosView] Lista de bodegas:', listaBodegas);
+
+    // Si no hay bodega seleccionada, seleccionar la primera
+    if (!bodegaSeleccionada) {
+      const primeraBodega = listaBodegas[0];
+      console.log('[ProductosView] Seleccionando primera bodega:', primeraBodega);
+      setBodegaSeleccionada(primeraBodega.id);
+      cargarProductosPorBodega(primeraBodega.id);
+      showToast(`Bodega: ${primeraBodega.nombre}`, 'info');
+      return;
+    }
+
+    // Encontrar índice de la bodega actual
+    const indiceActual = listaBodegas.findIndex(b => b.id === bodegaSeleccionada);
+    if (indiceActual === -1) {
+      console.warn('[ProductosView] Bodega seleccionada no encontrada en la lista');
+      // Seleccionar la primera
+      const primeraBodega = listaBodegas[0];
+      setBodegaSeleccionada(primeraBodega.id);
+      cargarProductosPorBodega(primeraBodega.id);
+      showToast(`Bodega: ${primeraBodega.nombre}`, 'info');
+      return;
+    }
+
+    const siguienteIndice = (indiceActual + 1) % listaBodegas.length;
+    const siguienteBodega = listaBodegas[siguienteIndice];
+
+    console.log('[ProductosView] Cambiando a siguiente bodega:', {
+      actual: listaBodegas[indiceActual]?.nombre,
+      siguiente: siguienteBodega?.nombre
+    });
+
+    setBodegaSeleccionada(siguienteBodega.id);
+    cargarProductosPorBodega(siguienteBodega.id);
+    showToast(`Bodega: ${siguienteBodega.nombre}`, 'info');
+  }, [bodegas, bodegaSeleccionada, cargarProductosPorBodega]);
+
+  const limpiarFiltroBodega = useCallback(() => {
+    console.log('[ProductosView] Limpiando filtro de bodega');
+    setBodegaSeleccionada(null);
+    setProductosPorBodega({});
+    showToast('Filtro de bodega limpiado', 'info');
+  }, []);
+
   // ——— Filtrado ———
-  // Cambiar esta sección
   const filteredProducts = useMemo(() => {
+    // Si hay una bodega seleccionada, usar sus productos
+    if (bodegaSeleccionada && productosPorBodega[bodegaSeleccionada]) {
+      const productosDeBodega = productosPorBodega[bodegaSeleccionada];
+
+      return productosDeBodega.filter(p => {
+        if (
+          searchTerm &&
+          !p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) &&
+          !p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+        ) return false;
+
+        if (quickFilter === 'disponible' && p.disponible_bodega <= 0) return false;
+        if (quickFilter === 'agotados' && p.disponible_bodega > 0) return false;
+        if (quickFilter === 'destacados' && !p.is_featured) return false;
+
+        if (categoryFilter && p.id_categoria !== Number(categoryFilter))
+          return false;
+
+        if (priceMin !== '' && parseFloat(p.precio) < parseFloat(priceMin)) return false;
+        if (priceMax !== '' && parseFloat(p.precio) > parseFloat(priceMax)) return false;
+
+        return true;
+      });
+    }
+
+    // Si no hay bodega seleccionada, usar todos los productos
     return products.filter(p => {
       if (
         searchTerm &&
@@ -117,7 +280,9 @@ export default function ProductsView({
     categoryFilter,
     priceMin,
     priceMax,
-    dateFilter
+    dateFilter,
+    bodegaSeleccionada,
+    productosPorBodega
   ]);
 
   // ——— Infinite scroll ———
@@ -554,22 +719,24 @@ export default function ProductsView({
 
   //------ CARGAR TODAS LAS BODEGAS ------
     useEffect(() => {
-    const cargarSucursales = async () => {
-      if (rol !== 'admin') return; // según tu lógica original
+    const cargarBodegas = async () => {
+      console.log('[ProductosView] Cargando bodegas...', { rol, subdominio, usuario });
 
       setIsLoadingBodegas(true);
       try {
         const response = await fetchBodegas({ rol, tokenUsuario, usuario, subdominio });
+        console.log('[ProductosView] Respuesta fetchBodegas:', response);
         const datosBodegas = response?.datos || [];
+        console.log('[ProductosView] Bodegas cargadas:', datosBodegas.length, datosBodegas);
         setBodegas(datosBodegas);
       } catch (error) {
-        console.error('Error cargando bodegas:', error);
+        console.error('[ProductosView] Error cargando bodegas:', error);
       } finally {
         setIsLoadingBodegas(false);
       }
     };
 
-    cargarSucursales();
+    cargarBodegas();
   }, [rol, tokenUsuario, usuario, subdominio]);
 
   return (
@@ -625,10 +792,46 @@ export default function ProductsView({
             <PlusIcon className="h-5 w-5 mr-2" />
             {showCreateForm ? 'Cancelar' : 'Nuevo Producto'}
           </button>
-          
+
+          {/* Botón para cambiar de bodega */}
+          <button
+            onClick={cambiarBodega}
+            disabled={isLoadingBodegas || bodegas.length === 0}
+            className="flex items-center bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg shadow-md hover:opacity-90 transition-opacity text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Cambiar bodega"
+          >
+            <TruckIcon className="h-5 w-5 mr-2" />
+            {bodegaSeleccionada
+              ? `Bodega: ${bodegas.find(b => b.id === bodegaSeleccionada)?.nombre || 'Seleccionada'}`
+              : 'Seleccionar Bodega'
+            }
+          </button>
 
         </div>
       </div>
+
+      {/* ——— Banner indicador de filtro por bodega ——— */}
+      {bodegaSeleccionada && (
+        <div className="bg-amber-50 dark:!bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-r-lg mb-6 flex items-center justify-between">
+          <div className="flex items-center">
+            <TruckIcon className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-3" />
+            <div>
+              <p className="font-medium text-amber-900 dark:text-amber-100">
+                Filtrando por bodega: {bodegas.find(b => b.id === bodegaSeleccionada)?.nombre || 'Seleccionada'}
+              </p>
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                Mostrando {productosPorBodega[bodegaSeleccionada]?.length || 0} productos de esta bodega
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={limpiarFiltroBodega}
+            className="text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 font-medium text-sm"
+          >
+            Limpiar filtro
+          </button>
+        </div>
+      )}
 
       {/* ——— Panel Filtros Avanzados ——— */}
       {showAdvancedFilters && (

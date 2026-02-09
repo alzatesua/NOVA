@@ -11,6 +11,8 @@ import {
 } from '@heroicons/react/24/solid';
 
 import React, { useState, useEffect, useRef } from "react";
+import { obtenerProductosPorBodega } from "../../../services/api";
+import { useAuth } from "../../../hooks/useAuth";
 
 // Hook simple para "debouncear"
 function useDebounce(value, delay = 500) {
@@ -36,13 +38,60 @@ export default function RealizarTraslado({
   isLoadingTraslados = false,
   onCargarTraslados = null,
   onRecibirTraslado = null,
+  // NUEVA PROP: productos filtrados por bodega
+  productosPorBodega = {},
 }) {
+  const { tokenUsuario, subdominio } = useAuth();
+  const usuario = typeof localStorage !== 'undefined' ? localStorage.getItem('usuario') : null;
+
   const barcodeTimers = useRef({});
   const barcodeRefs = useRef([]);
 
   // Estado para el modo (crear o recibir)
   const [modo, setModo] = useState('crear');
   const [trasladoSeleccionado, setTrasladoSeleccionado] = useState(null);
+
+  // Estado para productos filtrados por bodega de origen
+  const [productosPorBodegaOrigen, setProductosPorBodegaOrigen] = useState({});
+  const [isLoadingProductosBodega, setIsLoadingProductosBodega] = useState(false);
+
+  // Cargar productos por bodega de origen cuando se selecciona
+  useEffect(() => {
+    newProducts.forEach((product) => {
+      if (product.bodega_origen && !productosPorBodegaOrigen[product.bodega_origen]) {
+        cargarProductosParaBodega(product.bodega_origen);
+      }
+    });
+  }, [newProducts.map(p => p.bodega_origen).join(','), subdominio, usuario, tokenUsuario]);
+
+  const cargarProductosParaBodega = async (bodegaId) => {
+    if (!bodegaId || !subdominio || !usuario) return;
+
+    console.log('[RealizarTraslado] Cargando productos para bodega:', bodegaId);
+
+    setIsLoadingProductosBodega(true);
+    try {
+      const response = await obtenerProductosPorBodega({
+        usuario,
+        tokenUsuario,
+        subdominio,
+        bodega_id: bodegaId,
+        solo_con_stock: false  // Traer todos, incluidos los que no tienen stock
+      });
+
+      if (response && response.datos) {
+        console.log('[RealizarTraslado] Productos recibidos para bodega:', bodegaId, response.datos.length);
+        setProductosPorBodegaOrigen(prev => ({
+          ...prev,
+          [bodegaId]: response.datos
+        }));
+      }
+    } catch (error) {
+      console.error('[RealizarTraslado] Error cargando productos para bodega:', error);
+    } finally {
+      setIsLoadingProductosBodega(false);
+    }
+  };
 
   // Cargar traslados disponibles cuando se cambia a modo recibir
   useEffect(() => {
@@ -73,8 +122,14 @@ export default function RealizarTraslado({
   const addEmptyLineProduct = () =>
     setNewProducts(prev => [...prev, { producto_id: "", cantidad: ""}]);
 
-  const sameBodega = (p, bodegaOrigen) =>
-    Number(p.bodega ?? p.bodega_id ?? p.id_bodega) === Number(bodegaOrigen);
+  const sameBodega = (p, bodegaOrigen) => {
+    // Si el producto viene de productosPorBodega, tiene bodega_id
+    if (p.bodega_id !== undefined && p.bodega_id !== null) {
+      return Number(p.bodega_id) === Number(bodegaOrigen);
+    }
+    // Si no, usar las propiedades normales
+    return Number(p.bodega ?? p.bodega_id ?? p.id_bodega) === Number(bodegaOrigen);
+  };
 
   const getBarcode = (p) =>
     String(p.codigo_barras ?? p.codigo_barra ?? p.barcode ?? p.codigo ?? p.sku ?? "").trim();
@@ -85,7 +140,7 @@ export default function RealizarTraslado({
       const copy = [...prev];
       const prod = copy[prodIndex];
       const lineas = prod.lineas || [];
-      
+
       copy[prodIndex] = {
         ...prod,
         lineas: lineas.map((ln, i) => (i === lIndex ? { ...ln, codigo: raw } : ln))
@@ -104,6 +159,11 @@ export default function RealizarTraslado({
       const found = candidates.find(p => getBarcode(p) === code);
 
       if (!found) {
+        console.warn('[RealizarTraslado] Producto no encontrado:', {
+          code,
+          bodegaOrigen: prod.bodega_origen,
+          candidatesCount: candidates.length
+        });
         copy[prodIndex].lineas[lIndex] = {
           ...copy[prodIndex].lineas[lIndex],
           producto_id: "",
@@ -419,9 +479,35 @@ export default function RealizarTraslado({
                     <div className="flex items-center gap-2 mb-4">
                       <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full"></div>
                       <h5 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">Identificación y Ubicaciones</h5>
-                    </div>
 
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Bodega Origen */}
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">📤 Bodega Origen <span className="text-rose-400">*</span></label>
+                        <div className="relative">
+                          <select
+                            required
+                            value={product.bodega_origen ?? ""}
+                            onChange={(e) => {
+                              const val = e.target.value ? Number(e.target.value) : "";
+                              updateLine(index, "bodega_origen", val);
+                              updateLine(index, "producto_id", "");
+                            }}
+                            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 shadow-sm hover:shadow-md appearance-none"
+                          >
+                            <option value="">Seleccionar origen...</option>
+                            {isLoadingBodegas ? (
+                              <option disabled>⏳ Cargando bodegas...</option>
+                            ) : (
+                              bodegas.map(b => (
+                                <option key={b.id} value={b.id}>🏪 {b.nombre}</option>
+                              ))
+                            )}
+                          </select>
+                        </div>
+                      </div>
+
                       {/* Bodega Destino */}
                       <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">📥 Bodega Destino <span className="text-rose-400">*</span></label>
@@ -451,31 +537,7 @@ export default function RealizarTraslado({
                         </div>
                       </div>
 
-                      {/* Bodega Origen */}
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">📤 Bodega Origen <span className="text-rose-400">*</span></label>
-                        <div className="relative">
-                          <select
-                            required
-                            value={product.bodega_origen ?? ""}
-                            onChange={(e) => {
-                              const val = e.target.value ? Number(e.target.value) : "";
-                              updateLine(index, "bodega_origen", val);
-                              updateLine(index, "producto_id", "");
-                            }}
-                            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 shadow-sm hover:shadow-md appearance-none"
-                          >
-                            <option value="">Seleccionar origen...</option>
-                            {isLoadingBodegas ? (
-                              <option disabled>⏳ Cargando bodegas...</option>
-                            ) : (
-                              bodegas.map(b => (
-                                <option key={b.id} value={b.id}>🏪 {b.nombre}</option>
-                              ))
-                            )}
-                          </select>
-                        </div>
-                      </div>
+
                     </div>
 
                     {errorBodegas && (
@@ -591,16 +653,41 @@ export default function RealizarTraslado({
                             <option value="">
                               {product.bodega_origen ? "Buscar producto..." : "Selecciona primero la bodega de origen"}
                             </option>
-                            {isLoadingProductos ? (
-                              <option disabled>Cargando productos...</option>
+                            {isLoadingProductosBodega && productosPorBodegaOrigen[product.bodega_origen] === undefined ? (
+                              <option disabled>Cargando productos de bodega...</option>
                             ) : (
-                              productos
-                                .filter(p => Number(p.bodega ?? p.bodega_id ?? p.id_bodega) === Number(product.bodega_origen))
-                                .map(p => (
-                                  <option key={p.id} value={p.id}>
-                                    {p.nombre}{typeof p.stock !== "undefined" ? ` • Stock: ${p.stock}` : ""}
-                                  </option>
-                                ))
+                              <>
+                                {/* Primero: Productos específicos de la bodega de origen */}
+                                {productosPorBodegaOrigen[product.bodega_origen] && (
+                                  <>
+                                    {productosPorBodegaOrigen[product.bodega_origen].length === 0 ? (
+                                      <option disabled>No hay productos en esta bodega</option>
+                                    ) : (
+                                      productosPorBodegaOrigen[product.bodega_origen].map(p => (
+                                        <option key={p.id} value={p.id}>
+                                          {p.nombre} • Disp: {p.disponible_bodega || 0}
+                                        </option>
+                                      ))
+                                    )}
+                                  </>
+                                )}
+                                {/* Segundo: Productos del listado general (fallback) */}
+                                {(!productosPorBodegaOrigen[product.bodega_origen] || productosPorBodegaOrigen[product.bodega_origen]?.length === 0) && (
+                                  <>
+                                    {isLoadingProductos ? (
+                                      <option disabled>Cargando productos...</option>
+                                    ) : (
+                                      productos
+                                        .filter(p => sameBodega(p, product.bodega_origen))
+                                        .map(p => (
+                                          <option key={p.id} value={p.id}>
+                                            {p.nombre} {p.disponible_bodega !== undefined ? `• Disp: ${p.disponible_bodega}` : typeof p.stock !== "undefined" ? ` • Stock: ${p.stock}` : ""}
+                                          </option>
+                                        ))
+                                    )}
+                                  </>
+                                )}
+                              </>
                             )}
                           </select>
                         </div>
