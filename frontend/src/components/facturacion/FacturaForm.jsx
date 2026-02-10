@@ -6,6 +6,7 @@ import { fetchFormasPago, crearFactura } from '../../services/api';
 import { showToast } from '../../utils/toast';
 
 export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
+  console.log('[FacturaForm] Componente montado');
   const [cliente, setCliente] = useState(null);
   const [productos, setProductos] = useState([]);
   const [formasPago, setFormasPago] = useState([]);
@@ -17,26 +18,92 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
   const usuario = localStorage.getItem('usuario');
   const subdominio = window.location.hostname.split('.')[0];
 
+  console.log('[FacturaForm] tokenUsuario:', tokenUsuario);
+  console.log('[FacturaForm] usuario:', usuario);
+  console.log('[FacturaForm] subdominio:', subdominio);
+
   useEffect(() => {
-    cargarFormasPago();
-  }, []);
+    console.log('[FacturaForm] useEffect ejecutándose...');
+    console.log('[FacturaForm] tokenUsuario en useEffect:', tokenUsuario);
+    console.log('[FacturaForm] usuario en useEffect:', usuario);
+    console.log('[FacturaForm] subdominio en useEffect:', subdominio);
+    
+    if (tokenUsuario && usuario && subdominio) {
+      console.log('[FacturaForm] Todas las variables están presentes, llamando cargarFormasPago...');
+      cargarFormasPago();
+    } else {
+      console.error('[FacturaForm] Faltan datos requeridos:', { 
+        tokenUsuario: !!tokenUsuario, 
+        usuario: !!usuario, 
+        subdominio: !!subdominio 
+      });
+    }
+  }, [tokenUsuario, usuario, subdominio]);
 
   const cargarFormasPago = async () => {
+    console.log('[FacturaForm] ===== Iniciando carga de formas de pago =====');
+    console.log('[DEBUG] TokenUsuario:', tokenUsuario);
+    console.log('[DEBUG] Usuario:', usuario);
+    console.log('[DEBUG] Subdominio:', subdominio);
+    
     try {
+      console.log('[DEBUG] Llamando a fetchFormasPago...');
       const response = await fetchFormasPago({
         token: tokenUsuario,
         usuario,
         subdominio
       });
+      
+      console.log('[DEBUG] Response completa:', response);
+      console.log('[DEBUG] response.formas_pago:', response?.formas_pago);
+      console.log('[DEBUG] Tipo de response:', typeof response);
+      console.log('[DEBUG] Keys de response:', response ? Object.keys(response) : 'No hay response');
+      
+      if (!response) {
+        console.warn('[FacturaForm] Response es null o undefined');
+        setFormasPago([]);
+        showToast('warning', 'No se pudieron cargar las formas de pago');
+        return;
+      }
+      
+      if (!response.formas_pago) {
+        console.warn('[FacturaForm] La respuesta no contiene formas_pago');
+        console.log('[DEBUG] Estructura completa de response:', JSON.stringify(response, null, 2));
+        setFormasPago([]);
+        return;
+      }
+
+      console.log('[DEBUG] Formas de pago recibidas:', response.formas_pago.length, 'items');
       setFormasPago(response.formas_pago || []);
 
       // Seleccionar efectivo por defecto
       const efectivo = response.formas_pago?.find(f => f.codigo === 'EFE');
+      console.log('[DEBUG] Efectivo encontrado:', efectivo);
+      
       if (efectivo) {
+        console.log('[DEBUG] Configurando efectivo por defecto, ID:', efectivo.id);
         setPagos([{ forma_pago: efectivo.id, monto: '', referencia: '' }]);
+      } else {
+        console.log('[DEBUG] No se encontró efectivo, formas disponibles:', 
+          response.formas_pago.map(f => ({ id: f.id, codigo: f.codigo, nombre: f.nombre }))
+        );
       }
+      
+      console.log('[FacturaForm] ===== Carga de formas de pago completada =====');
     } catch (error) {
-      console.error('Error cargando formas de pago:', error);
+      console.error('[ERROR] ===== Error cargando formas de pago =====');
+      console.error('[ERROR] Mensaje:', error.message);
+      console.error('[ERROR] Stack:', error.stack);
+      console.error('[ERROR] Error completo:', error);
+      
+      if (error.response) {
+        console.error('[ERROR] Response data:', error.response.data);
+        console.error('[ERROR] Response status:', error.response.status);
+        console.error('[ERROR] Response headers:', error.response.headers);
+      }
+      
+      showToast('error', 'Error al cargar formas de pago: ' + error.message);
+      setFormasPago([]);
     }
   };
 
@@ -302,6 +369,14 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
             </div>
             <h3 className="text-lg font-bold text-gray-900">Formas de Pago</h3>
           </div>
+
+          {formasPago.length === 0 && (
+            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+              <p className="text-yellow-700 text-sm font-medium">
+                ⚠️ No se han cargado las formas de pago. Revisa la consola para más detalles.
+              </p>
+            </div>
+          )}
 
           <div className="space-y-3">
             {pagos.map((pago, index) => (

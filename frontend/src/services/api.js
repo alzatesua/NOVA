@@ -293,6 +293,25 @@ export function obtenerExistenciasPorBodega({
   );
 }
 
+/**
+ * Obtiene productos con existencias en una bodega específica.
+ * Útil para el componente de traslados.
+ */
+/*export function obtenerProductosPorBodega({
+  usuario,
+  tokenUsuario,
+  subdominio,
+  bodega_id,
+  solo_con_stock = true
+}) {
+  const token = tokenUsuario;
+  return post(
+    'api/existencias/productos-por-bodega/',
+    { usuario, token, subdominio, bodega_id, solo_con_stock },
+    token
+  );
+}*/
+
 
 export function fetchAllProductsTraslado({
   usuario,

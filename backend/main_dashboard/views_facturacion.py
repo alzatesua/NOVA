@@ -169,6 +169,19 @@ class FormaPagoViewSet(FacturacionTenantMixin, viewsets.ReadOnlyModelViewSet):
         alias = self._resolve_alias(self.request)
         return FormaPago.objects.using(alias).filter(activo=True)
 
+    def list(self, request, *args, **kwargs):
+        """Sobrescribimos list para aceptar POST también"""
+        try:
+            alias = self._resolve_alias(request)
+            queryset = FormaPago.objects.using(alias).filter(activo=True)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response({'formas_pago': serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
 
 # ============================================================
 #                    FacturaViewSet

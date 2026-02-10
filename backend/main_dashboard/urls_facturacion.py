@@ -17,8 +17,8 @@ cliente_detail = ClienteViewSet.as_view({
 cliente_buscar = ClienteViewSet.as_view({'post': 'buscar'})
 
 # Forma Pago
-forma_pago_list = FormaPagoViewSet.as_view({'get': 'list'})
-forma_pago_detail = FormaPagoViewSet.as_view({'get': 'retrieve'})
+forma_pago_list = FormaPagoViewSet.as_view({'post': 'list'})
+forma_pago_detail = FormaPagoViewSet.as_view({'post': 'retrieve'})
 
 # Factura
 factura_list = FacturaViewSet.as_view({'get': 'list', 'post': 'create'})

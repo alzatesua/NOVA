@@ -248,28 +248,37 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
   const [searchResults, setSearchResults] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
   const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const tokenUsuario = localStorage.getItem('token_usuario');
   const usuario = localStorage.getItem('usuario');
   const subdominio = window.location.hostname.split('.')[0];
+
+  // Cerrar dropdown al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        inputRef.current && 
+        !inputRef.current.contains(event.target) &&
+        dropdownRef.current && 
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Buscar cliente con debounce
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (searchQuery.length >= 2) {
         setLoading(true);
-
-        // Calcular posición del dropdown
-        if (inputRef.current) {
-          const rect = inputRef.current.getBoundingClientRect();
-          setDropdownPosition({
-            top: rect.bottom + window.scrollY + 4,
-            left: rect.left + window.scrollX,
-            width: rect.width,
-          });
-        }
+        setShowDropdown(true);
 
         try {
           const response = await buscarCliente({
@@ -278,7 +287,15 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
             usuario,
             subdominio
           });
-          setSearchResults(response.clientes || []);
+          
+          console.log('Response completa:', response);
+          console.log('Clientes encontrados:', response.clientes || response);
+          
+          // Intentar ambas estructuras de respuesta
+          const clientesEncontrados = response.clientes || response || [];
+          
+          console.log('Setting searchResults con:', clientesEncontrados);
+          setSearchResults(clientesEncontrados);
         } catch (error) {
           console.error('Error buscando cliente:', error);
           setSearchResults([]);
@@ -287,30 +304,23 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
         }
       } else {
         setSearchResults([]);
-        setDropdownPosition(null);
+        setShowDropdown(false);
       }
     }, 300);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Limpiar posición al limpiar búsqueda
-  useEffect(() => {
-    if (!searchQuery && !loading) {
-      setDropdownPosition(null);
-    }
-  }, [searchQuery, loading]);
-
   const handleSelectCliente = (clienteSeleccionado) => {
     onClienteChange(clienteSeleccionado);
     setSearchQuery('');
     setSearchResults([]);
-    setDropdownPosition(null);
+    setShowDropdown(false);
   };
 
   const handleClearCliente = () => {
     onClienteChange(null);
-    setDropdownPosition(null);
+    setShowDropdown(false);
   };
 
   const handleCrearCliente = async (datos) => {
@@ -327,6 +337,20 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
     } catch (error) {
       showToast('error', error.message || 'Error al crear cliente');
     }
+  };
+
+  // Calcular posición del dropdown
+  const getDropdownPosition = () => {
+    if (!inputRef.current) return {};
+    
+    const rect = inputRef.current.getBoundingClientRect();
+    return {
+      position: 'fixed',
+      top: `${rect.bottom + 4}px`,
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+      maxHeight: '240px',
+    };
   };
 
   return (
@@ -374,39 +398,55 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
         </div>
 
         {/* Dropdown renderizado con Portal */}
-        {dropdownPosition && createPortal(
+        {showDropdown && createPortal(
           <div
-            className="fixed bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto z-[9999]"
-            style={{
-              top: `${dropdownPosition.top}px`,
-              left: `${dropdownPosition.left}px`,
-              width: `${dropdownPosition.width}px`,
-            }}
+            ref={dropdownRef}
+            className="bg-white border-2 border-gray-200 rounded-xl shadow-2xl overflow-y-auto z-[9999]"
+            style={getDropdownPosition()}
           >
-            {searchResults.length > 0 && (
-              <>
-                {searchResults.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => handleSelectCliente(c)}
-                    className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0"
-                  >
-                    <p className="font-semibold text-gray-900">{c.nombre_completo}</p>
-                    <p className="text-sm text-gray-500">
-                      {c.tipo_documento}: {c.numero_documento}
-                    </p>
-                  </button>
-                ))}
-              </>
-            )}
-
-            {loading && searchResults.length === 0 && (
-              <div className="p-4 text-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-sm text-gray-500 mt-2">Buscando...</p>
-              </div>
-            )}
+            {(() => {
+              console.log('Renderizando dropdown - loading:', loading, 'searchResults.length:', searchResults.length, 'searchResults:', searchResults);
+              
+              if (loading && searchResults.length === 0) {
+                return (
+                  <div className="p-4 text-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-sm text-gray-500 mt-2">Buscando...</p>
+                  </div>
+                );
+              }
+              
+              if (searchResults.length > 0) {
+                return (
+                  <div className="divide-y divide-gray-100">
+                    {searchResults.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => handleSelectCliente(c)}
+                        className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors first:rounded-t-xl last:rounded-b-xl"
+                      >
+                        <p className="font-semibold text-gray-900">{c.nombre_completo}</p>
+                        <p className="text-sm text-gray-500">
+                          {c.tipo_documento}: {c.numero_documento}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                );
+              }
+              
+              if (searchQuery.length >= 2) {
+                return (
+                  <div className="p-4 text-center text-gray-500">
+                    <p className="text-sm">No se encontraron clientes</p>
+                    <p className="text-xs mt-1">Intenta con otro término de búsqueda</p>
+                  </div>
+                );
+              }
+              
+              return null;
+            })()}
           </div>,
           document.body
         )}
