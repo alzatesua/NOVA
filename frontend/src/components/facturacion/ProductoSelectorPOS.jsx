@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, CubeIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
 import { buscarProductosPOS } from '../../services/api';
 
 export default function ProductoSelectorPOS({
@@ -44,10 +44,8 @@ export default function ProductoSelectorPOS({
   }, [searchQuery, bodegaId]);
 
   const handleSelectProducto = (producto) => {
-    // Validar si ya está agregado
     const yaAgregado = productosAgregados.find(p => p.id === producto.id);
     if (yaAgregado) {
-      // Incrementar cantidad
       onProductoSelect({ ...producto, cantidad: yaAgregado.cantidad + 1 });
     } else {
       onProductoSelect({ ...producto, cantidad: 1 });
@@ -63,48 +61,86 @@ export default function ProductoSelectorPOS({
     }
   };
 
-  return (
-    <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">Agregar Producto</label>
+  const getStockColor = (stock) => {
+    if (stock <= 0) return 'text-red-600 bg-red-50';
+    if (stock <= 5) return 'text-orange-600 bg-orange-50';
+    return 'text-green-600 bg-green-50';
+  };
 
-      <div className="relative">
+  return (
+    <div className="space-y-3">
+      <label className="block text-sm font-semibold text-gray-700">Agregar Producto</label>
+
+      {/* Buscador */}
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <MagnifyingGlassIcon className="h-6 w-6 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+        </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Buscar por SKU, nombre o código de barras..."
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+          className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-lg text-gray-900 placeholder-gray-400 shadow-sm"
           autoFocus
         />
-        <MagnifyingGlassIcon className="absolute left-3 top-4 h-6 w-6 text-gray-400" />
+        {searchQuery && (
+          <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-md">
+              Enter para seleccionar
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Resultados */}
       {searchResults.length > 0 && (
-        <div className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
-          {searchResults.map((p) => (
+        <div className="absolute z-30 w-full max-w-2xl bg-white border border-gray-200 rounded-xl shadow-2xl max-h-96 overflow-y-auto">
+          {searchResults.map((p, index) => (
             <button
               key={p.id}
               type="button"
               onClick={() => handleSelectProducto(p)}
               onKeyDown={(e) => handleKeyDown(e, p)}
-              className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-gray-100 last:border-b-0 focus:outline-none focus:bg-blue-50"
+              className="w-full text-left px-5 py-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent transition-all border-b border-gray-100 last:border-b-0 focus:outline-none focus:from-blue-50 focus:to-transparent"
             >
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900">{p.nombre}</p>
-                  <p className="text-sm text-gray-500">SKU: {p.sku}</p>
-                  {p.requiere_imei && (
-                    <p className="text-xs text-orange-600 mt-1">⚠️ Requiere IMEI</p>
-                  )}
+              <div className="flex items-start justify-between gap-4">
+                {/* Left: Info del producto */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-bold text-gray-900 text-lg truncate">{p.nombre}</p>
+                    {p.requiere_imei && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-orange-100 text-orange-800 flex-shrink-0">
+                        ⚠️ IMEI
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-700 rounded-md font-mono text-xs">
+                      <CubeIcon className="h-3 w-3" />
+                      {p.sku}
+                    </span>
+                    {p.marca && (
+                      <span className="text-gray-500">{p.marca}</span>
+                    )}
+                    {p.categoria && (
+                      <span className="text-gray-400">•</span>
+                    )}
+                    {p.categoria && (
+                      <span className="text-gray-500">{p.categoria}</span>
+                    )}
+                  </div>
                 </div>
-                <div className="text-right ml-4">
-                  <p className="font-bold text-lg text-gray-900">
+
+                {/* Right: Precio y Stock */}
+                <div className="text-right flex-shrink-0">
+                  <p className="font-bold text-2xl text-blue-600">
                     ${parseFloat(p.precio).toFixed(2)}
                   </p>
-                  <p className={`text-sm ${p.disponible > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold mt-1 ${getStockColor(p.disponible)}`}>
+                    <ShoppingBagIcon className="h-4 w-4" />
                     Stock: {p.disponible}
-                  </p>
+                  </div>
                 </div>
               </div>
             </button>
@@ -113,15 +149,42 @@ export default function ProductoSelectorPOS({
       )}
 
       {loading && (
-        <div className="text-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-sm text-gray-500 mt-2">Buscando productos...</p>
+        <div className="text-center py-8 bg-gray-50 rounded-xl">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-sm text-gray-500 mt-3 font-medium">Buscando productos...</p>
         </div>
       )}
 
       {!loading && searchQuery.length >= 2 && searchResults.length === 0 && (
-        <div className="text-center py-4 text-gray-500">
-          <p>No se encontraron productos</p>
+        <div className="text-center py-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+          <ShoppingBagIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500 font-medium">No se encontraron productos</p>
+          <p className="text-sm text-gray-400 mt-1">Intenta con otro término de búsqueda</p>
+        </div>
+      )}
+
+      {/* Productos agregados */}
+      {productosAgregados.length > 0 && !searchQuery && (
+        <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
+          <div className="flex items-center gap-2 mb-3">
+            <ShoppingBagIcon className="h-5 w-5 text-green-600" />
+            <p className="font-semibold text-green-800">
+              {productosAgregados.length} producto{productosAgregados.length !== 1 ? 's' : ''} en el carrito
+            </p>
+          </div>
+          <div className="space-y-2">
+            {productosAgregados.slice(0, 3).map((p) => (
+              <div key={p.id} className="flex items-center justify-between text-sm bg-white p-2 rounded-lg">
+                <span className="font-medium text-gray-700 truncate">{p.nombre}</span>
+                <span className="font-bold text-green-600">x{p.cantidad}</span>
+              </div>
+            ))}
+            {productosAgregados.length > 3 && (
+              <p className="text-xs text-green-600 text-center">
+                +{productosAgregados.length - 3} más
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>

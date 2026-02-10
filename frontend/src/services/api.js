@@ -293,25 +293,6 @@ export function obtenerExistenciasPorBodega({
   );
 }
 
-/**
- * Obtiene productos con existencias en una bodega específica.
- * Útil para el componente de traslados.
- */
-export function obtenerProductosPorBodega({
-  usuario,
-  tokenUsuario,
-  subdominio,
-  bodega_id,
-  solo_con_stock = true
-}) {
-  const token = tokenUsuario;
-  return post(
-    'api/existencias/productos-por-bodega/',
-    { usuario, token, subdominio, bodega_id, solo_con_stock },
-    token
-  );
-}
-
 
 export function fetchAllProductsTraslado({
   usuario,
@@ -610,6 +591,34 @@ export function recibirTraslado({ token, usuario, subdominio, traslado_id, canti
 
 
 //------------ APIS PARA FILTRAR LOS PRODUCTOS -------------
+// Obtener productos por bodega
+export function obtenerProductosPorBodega({
+  usuario,
+  tokenUsuario,
+  subdominio,
+  bodega_id,
+  solo_con_stock = true,
+}) {
+  console.log('[API] obtenerProductosPorBodega llamado con:', {
+    usuario,
+    subdominio,
+    bodega_id,
+    solo_con_stock
+  });
+
+  const token = tokenUsuario;
+  return post(
+    'api/existencias/productos-por-bodega/',
+    {
+      usuario,
+      token,
+      subdominio,
+      bodega_id,
+      solo_con_stock,
+    },
+    token
+  );
+}
 
 // Obtener bodegas por sucursal
 export function obtenerBodegasPorSucursal({
@@ -732,7 +741,7 @@ export function crearFactura({
   datos_factura
 }) {
   token = token || localStorage.getItem('token_usuario');
-  return post('api/facturacion/facturas/crear/', {
+  return post('api/facturacion/facturas/', { 
     usuario,
     token,
     subdominio,

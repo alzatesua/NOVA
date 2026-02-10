@@ -1971,7 +1971,7 @@ class ExistenciaViewSet(TenantMixin, viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def productos_por_bodega(self, request):
         """
-        Lista productos con existencias en una bodega específica.
+        Obtiene productos con su stock en una bodega específica.
         Útil para el componente de traslados.
 
         Body de ejemplo:
@@ -1983,59 +1983,82 @@ class ExistenciaViewSet(TenantMixin, viewsets.ModelViewSet):
           "solo_con_stock": true  // opcional, solo productos con cantidad > 0
         }
         """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        logger.info(f'[productos_por_bodega] Request recibido. Data: {request.data}')
+
         # 1) resolver alias del tenant
         try:
             alias = self._resolve_alias(request)
+            logger.info(f'[productos_por_bodega] Alias resuelto: {alias}')
         except Exception as e:
+            logger.error(f'[productos_por_bodega] Error resolviendo alias: {e}')
             return Response({'detail': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
         # 2) obtener parámetros
         bodega_id = request.data.get('bodega_id') or request.query_params.get('bodega_id')
         solo_con_stock = request.data.get('solo_con_stock', True)
 
+        logger.info(f'[productos_por_bodega] Parámetros - bodega_id: {bodega_id}, solo_con_stock: {solo_con_stock}')
+
         if not bodega_id:
+            logger.warning('[productos_por_bodega] bodega_id no proporcionado')
             return Response({'detail': 'bodega_id es requerido.'},
                           status=status.HTTP_400_BAD_REQUEST)
 
         try:
             bodega_id = int(bodega_id)
         except (ValueError, TypeError):
+            logger.error(f'[productos_por_bodega] bodega_id inválido: {bodega_id}')
             return Response({'detail': 'bodega_id debe ser un número entero.'},
                           status=status.HTTP_400_BAD_REQUEST)
 
         # 3) buscar existencias en la bodega
-        queryset = (Existencia.objects.using(alias)
-                   .filter(bodega_id=bodega_id)
-                   .select_related('producto'))
+        try:
+            queryset = (Existencia.objects.using(alias)
+                       .filter(bodega_id=bodega_id)
+                       .select_related('producto'))
 
-        # filtrar solo con stock si se solicita
-        if solo_con_stock:
-            queryset = queryset.filter(cantidad__gt=0)
+            logger.info(f'[productos_por_bodega] Queryset creado. Count antes de filtro: {queryset.count()}')
 
-        # 4) construir respuesta con datos del producto + existencia
-        resultados = []
-        for existencia in queryset:
-            producto = existencia.producto
-            resultados.append({
-                'id': producto.id,
-                'nombre': producto.nombre,
-                'sku': producto.sku,
-                'precio': float(producto.precio) if producto.precio else 0,
-                'imagen_producto': producto.imagen_producto,
-                'stock_bodega': existencia.cantidad,
-                'reservado_bodega': existencia.reservado,
-                'disponible_bodega': existencia.disponible,
-                'stock_total': producto.stock,  # cache del stock total
-                'id_categoria': producto.categoria_id.pk if producto.categoria_id else None,
-                'id_marca': producto.marca_id.pk if producto.marca_id else None,
-                'id_iva': producto.iva_id.pk if producto.iva_id else None,
-                'sucursal_id': producto.sucursal_id,
-                'activo': getattr(producto, 'activo', True),
-                'bodega_id': bodega_id,
-                'existencia_id': existencia.id,
-            })
+            # filtrar solo con stock si se solicita
+            if solo_con_stock:
+                queryset = queryset.filter(cantidad__gt=0)
+                logger.info(f'[productos_por_bodega] Aplicado filtro solo_con_stock. Count después: {queryset.count()}')
 
-        return Response({'datos': resultados}, status=200)
+            # 4) construir respuesta con datos del producto + existencia
+            resultados = []
+            for existencia in queryset:
+                producto = existencia.producto
+                resultados.append({
+                    'id': producto.id,
+                    'nombre': producto.nombre,
+                    'sku': producto.sku,
+                    'precio': float(producto.precio) if producto.precio else 0,
+                    'imagen_producto': producto.imagen_producto,
+                    'stock_bodega': existencia.cantidad,
+                    'reservado_bodega': existencia.reservado,
+                    'disponible_bodega': existencia.disponible,
+                    'stock_total': producto.stock,  # cache del stock total
+                    'id_categoria': producto.categoria_id.pk if producto.categoria_id else None,
+                    'id_marca': producto.marca_id.pk if producto.marca_id else None,
+                    'id_iva': producto.iva_id.pk if producto.iva_id else None,
+                    'sucursal_id': producto.sucursal_id,
+                    'activo': getattr(producto, 'activo', True),
+                    'bodega_id': bodega_id,
+                    'existencia_id': existencia.id,
+                })
+
+            logger.info(f'[productos_por_bodega] Resultados generados: {len(resultados)} productos')
+
+            response = Response({'datos': resultados}, status=200)
+            logger.info(f'[productos_por_bodega] Respuesta enviada exitosamente')
+            return response
+
+        except Exception as e:
+            logger.error(f'[productos_por_bodega] Exception: {e}', exc_info=True)
+            return Response({'detail': f'Error interno: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class TrasladoViewSet(TenantMixin, viewsets.ModelViewSet):
@@ -2509,818 +2532,3 @@ class ProductoExistenciasView(TenantMixin, APIView):
             "sucursal": user.id_sucursal_default.nombre if user.id_sucursal_default and user.rol != 'admin' else None,
             "data": data
         }, status=status.HTTP_200_OK)
-
-
-# =========================
-# FACTURACIÓN POS VIEWS
-# =========================
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def buscar_cliente(request):
-    """
-    Busca clientes por:
-    - Número de documento (exacto o parcial)
-    - Nombre o razón social (LIKE)
-    - Teléfono o correo
-
-    POST /api/facturacion/clientes/buscar/
-    Body:
-    {
-        "usuario": "...",
-        "token": "...",
-        "subdominio": "...",
-        "query": "texto de búsqueda"
-    }
-    """
-    try:
-        # 1) Autenticación tenant
-        usuario = request.data.get('usuario')
-        token = request.data.get('token')
-        subdom = request.data.get('subdominio')
-        query = request.data.get('query', '').strip()
-
-        if not all([usuario, token]):
-            return Response({'error': 'Usuario y token son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not query:
-            return Response({'error': 'Query de búsqueda es requerido'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not subdom:
-            host = request.get_host().split(':')[0]
-            subdom = host.split('.')[0].lower()
-
-        # 2) Resolver tenant
-        dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).first()
-        if not dominio_obj:
-            return Response({'error': 'Dominio no válido'}, status=status.HTTP_400_BAD_REQUEST)
-
-        tienda = dominio_obj.tienda
-        alias = str(tienda.id)
-        conectar_db_tienda(alias, tienda)
-
-        # 3) Validar usuario
-        LoginUsuario = apps.get_model('nova', 'LoginUsuario')
-        try:
-            user = LoginUsuario.objects.using(alias).get(usuario=usuario)
-        except LoginUsuario.DoesNotExist:
-            return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 4) Validar/refresh token
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except ExpiredSignatureError:
-            nuevo = generar_token_jwt(usuario)
-            user.token = nuevo
-            user.save(using=alias)
-            token = nuevo
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except InvalidTokenError:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if payload.get("usuario") != usuario or user.token != token:
-            return Response({'error': 'Token no coincide'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 5) Buscar clientes
-        from .models import Cliente
-        from .serializers import ClienteSerializer
-
-        clientes = Cliente.objects.using(alias).filter(
-            estatus=True
-        ).filter(
-            models.Q(numero_documento__icontains=query) |
-            models.Q(primer_nombre__icontains=query) |
-            models.Q(segundo_nombre__icontains=query) |
-            models.Q(apellidos__icontains=query) |
-            models.Q(razon_social__icontains=query) |
-            models.Q(telefono__icontains=query) |
-            models.Q(correo__icontains=query)
-        )[:20]  # Limitar a 20 resultados
-
-        serializer = ClienteSerializer(clientes, many=True, context={'db_alias': alias})
-
-        return Response({
-            'ok': True,
-            'cantidad': len(serializer.data),
-            'clientes': serializer.data
-        }, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return Response({'error': 'Error del servidor', 'detalle': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def crear_cliente(request):
-    """
-    Crea un nuevo cliente
-
-    POST /api/facturacion/clientes/
-    Body:
-    {
-        "usuario": "...",
-        "token": "...",
-        "subdominio": "...",
-        "tipo_persona": "NAT|JUR",
-        "primer_nombre": "...",
-        "apellidos": "...",
-        "razon_social": "...",
-        "tipo_documento": "CC|NIT|...",
-        "numero_documento": "...",
-        "correo": "...",
-        "telefono": "...",
-        "direccion": "...",
-        "ciudad": "..."
-    }
-    """
-    try:
-        # 1) Autenticación tenant
-        usuario = request.data.get('usuario')
-        token = request.data.get('token')
-        subdom = request.data.get('subdominio')
-
-        if not all([usuario, token]):
-            return Response({'error': 'Usuario y token son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not subdom:
-            host = request.get_host().split(':')[0]
-            subdom = host.split('.')[0].lower()
-
-        # 2) Resolver tenant
-        dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).first()
-        if not dominio_obj:
-            return Response({'error': 'Dominio no válido'}, status=status.HTTP_400_BAD_REQUEST)
-
-        tienda = dominio_obj.tienda
-        alias = str(tienda.id)
-        conectar_db_tienda(alias, tienda)
-
-        # 3) Validar usuario
-        LoginUsuario = apps.get_model('nova', 'LoginUsuario')
-        try:
-            user = LoginUsuario.objects.using(alias).get(usuario=usuario)
-        except LoginUsuario.DoesNotExist:
-            return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 4) Validar/refresh token
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except ExpiredSignatureError:
-            nuevo = generar_token_jwt(usuario)
-            user.token = nuevo
-            user.save(using=alias)
-            token = nuevo
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except InvalidTokenError:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if payload.get("usuario") != usuario or user.token != token:
-            return Response({'error': 'Token no coincide'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 5) Crear cliente
-        from .models import Cliente
-        from .serializers import ClienteSerializer
-
-        serializer = ClienteSerializer(data=request.data, context={'db_alias': alias})
-        if not serializer.is_valid():
-            return Response({
-                'error': 'Datos inválidos',
-                'detalle': serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        cliente = serializer.save()
-
-        return Response({
-            'ok': True,
-            'mensaje': 'Cliente creado exitosamente',
-            'cliente': ClienteSerializer(cliente, context={'db_alias': alias}).data
-        }, status=status.HTTP_201_CREATED)
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return Response({'error': 'Error del servidor', 'detalle': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def obtener_formas_pago(request):
-    """
-    Retorna todas las formas de pago activas
-
-    POST /api/facturacion/formas-pago/
-    Body:
-    {
-        "usuario": "...",
-        "token": "...",
-        "subdominio": "..."
-    }
-    """
-    try:
-        # 1) Autenticación tenant
-        usuario = request.data.get('usuario')
-        token = request.data.get('token')
-        subdom = request.data.get('subdominio')
-
-        if not all([usuario, token]):
-            return Response({'error': 'Usuario y token son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not subdom:
-            host = request.get_host().split(':')[0]
-            subdom = host.split('.')[0].lower()
-
-        # 2) Resolver tenant
-        dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).first()
-        if not dominio_obj:
-            return Response({'error': 'Dominio no válido'}, status=status.HTTP_400_BAD_REQUEST)
-
-        tienda = dominio_obj.tienda
-        alias = str(tienda.id)
-        conectar_db_tienda(alias, tienda)
-
-        # 3) Validar usuario
-        LoginUsuario = apps.get_model('nova', 'LoginUsuario')
-        try:
-            user = LoginUsuario.objects.using(alias).get(usuario=usuario)
-        except LoginUsuario.DoesNotExist:
-            return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 4) Validar/refresh token
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except ExpiredSignatureError:
-            nuevo = generar_token_jwt(usuario)
-            user.token = nuevo
-            user.save(using=alias)
-            token = nuevo
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except InvalidTokenError:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if payload.get("usuario") != usuario or user.token != token:
-            return Response({'error': 'Token no coincide'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 5) Obtener formas de pago
-        from .models import FormaPago
-        from .serializers import FormaPagoSerializer
-
-        formas = FormaPago.objects.using(alias).filter(activo=True)
-        serializer = FormaPagoSerializer(formas, many=True, context={'db_alias': alias})
-
-        return Response({
-            'ok': True,
-            'formas_pago': serializer.data
-        }, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return Response({'error': 'Error del servidor', 'detalle': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def buscar_productos_pos(request):
-    """
-    Busca productos para el POS filtrando por bodega.
-
-    POST /api/facturacion/facturas/productos-pos/
-    Body:
-    {
-        "usuario": "...",
-        "token": "...",
-        "subdominio": "...",
-        "bodega_id": 123,
-        "query": "texto de búsqueda (opcional)",
-        "incluir_sin_stock": false
-    }
-    """
-    try:
-        # 1) Autenticación tenant
-        usuario = request.data.get('usuario')
-        token = request.data.get('token')
-        subdom = request.data.get('subdominio')
-        bodega_id = request.data.get('bodega_id')
-        query = request.data.get('query', '').strip()
-        incluir_sin_stock = request.data.get('incluir_sin_stock', False)
-
-        if not all([usuario, token, bodega_id]):
-            return Response({'error': 'Usuario, token y bodega_id son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not subdom:
-            host = request.get_host().split(':')[0]
-            subdom = host.split('.')[0].lower()
-
-        # 2) Resolver tenant
-        dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).first()
-        if not dominio_obj:
-            return Response({'error': 'Dominio no válido'}, status=status.HTTP_400_BAD_REQUEST)
-
-        tienda = dominio_obj.tienda
-        alias = str(tienda.id)
-        conectar_db_tienda(alias, tienda)
-
-        # 3) Validar usuario
-        LoginUsuario = apps.get_model('nova', 'LoginUsuario')
-        try:
-            user = LoginUsuario.objects.using(alias).get(usuario=usuario)
-        except LoginUsuario.DoesNotExist:
-            return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 4) Validar/refresh token
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except ExpiredSignatureError:
-            nuevo = generar_token_jwt(usuario)
-            user.token = nuevo
-            user.save(using=alias)
-            token = nuevo
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except InvalidTokenError:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if payload.get("usuario") != usuario or user.token != token:
-            return Response({'error': 'Token no coincide'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 5) Buscar productos con existencias en la bodega
-        from .models import Producto, Existencia
-
-        queryset = Producto.objects.using(alias).filter(
-            existencias__bodega_id=bodega_id
-        ).select_related(
-            'categoria_id', 'marca_id', 'iva_id', 'descuento'
-        ).prefetch_related(
-            models.Prefetch(
-                'existencias',
-                queryset=Existencia.objects.using(alias).filter(bodega_id=bodega_id),
-                to_attr='existencia_bodega'
-            )
-        ).distinct()
-
-        # Filtros adicionales
-        if not incluir_sin_stock:
-            queryset = queryset.filter(existencias__cantidad__gt=0)
-
-        if query:
-            queryset = queryset.filter(
-                models.Q(nombre__icontains=query) |
-                models.Q(sku__icontains=query) |
-                models.Q(codigo_barras__icontains=query)
-            )
-
-        productos = queryset[:50]  # Limitar a 50 resultados
-
-        # Serializar
-        from .serializers import ProductoSerializer
-        serializer = ProductoSerializer(productos, many=True, context={'db_alias': alias})
-
-        # Enriquecer con stock disponible de la bodega
-        resultados = []
-        for idx, prod in enumerate(productos):
-            data = serializer.data[idx]
-            if hasattr(prod, 'existencia_bodega') and prod.existencia_bodega:
-                existencia = prod.existencia_bodega[0]
-                data['stock_disponible'] = existencia.disponible
-                data['existencia_id'] = existencia.id
-            else:
-                data['stock_disponible'] = 0
-                data['existencia_id'] = None
-            resultados.append(data)
-
-        return Response({
-            'ok': True,
-            'cantidad': len(resultados),
-            'productos': resultados
-        }, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return Response({'error': 'Error del servidor', 'detalle': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def crear_factura(request):
-    """
-    Crea una nueva factura con sus detalles y pagos.
-
-    POST /api/facturacion/facturas/
-    Body:
-    {
-        "usuario": "...",
-        "token": "...",
-        "subdominio": "...",
-        "cliente": id (opcional),
-        "vendedor": id,
-        "sucursal": id,
-        "bodega": id,
-        "subtotal": 100.00,
-        "total_descuento": 0.00,
-        "total_iva": 16.00,
-        "total": 116.00,
-        "total_pagado": 120.00,
-        "cambio": 4.00,
-        "observaciones": "...",
-        "detalles": [
-            {
-                "producto": id,
-                "producto_nombre": "...",
-                "producto_sku": "...",
-                "producto_imei": "...",
-                "cantidad": 2,
-                "precio_unitario": 50.00,
-                "descuento_porcentaje": 0,
-                "descuento_valor": 0,
-                "iva_porcentaje": 16,
-                "iva_valor": 16.00,
-                "subtotal": 100.00,
-                "total": 116.00
-            }
-        ],
-        "pagos": [
-            {
-                "forma_pago": id,
-                "monto": 120.00,
-                "referencia": "1234",
-                "autorizacion": "ABCD"
-            }
-        ]
-    }
-    """
-    try:
-        # 1) Autenticación tenant
-        usuario = request.data.get('usuario')
-        token = request.data.get('token')
-        subdom = request.data.get('subdominio')
-
-        if not all([usuario, token]):
-            return Response({'error': 'Usuario y token son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not subdom:
-            host = request.get_host().split(':')[0]
-            subdom = host.split('.')[0].lower()
-
-        # 2) Resolver tenant
-        dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).first()
-        if not dominio_obj:
-            return Response({'error': 'Dominio no válido'}, status=status.HTTP_400_BAD_REQUEST)
-
-        tienda = dominio_obj.tienda
-        alias = str(tienda.id)
-        conectar_db_tienda(alias, tienda)
-
-        # 3) Validar usuario
-        LoginUsuario = apps.get_model('nova', 'LoginUsuario')
-        try:
-            user = LoginUsuario.objects.using(alias).get(usuario=usuario)
-        except LoginUsuario.DoesNotExist:
-            return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 4) Validar/refresh token
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except ExpiredSignatureError:
-            nuevo = generar_token_jwt(usuario)
-            user.token = nuevo
-            user.save(using=alias)
-            token = nuevo
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except InvalidTokenError:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if payload.get("usuario") != usuario or user.token != token:
-            return Response({'error': 'Token no coincide'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 5) Crear factura
-        from .serializers import FacturaCreateSerializer, FacturaSerializer
-
-        # Inyectar usuario vendedor si no viene
-        if 'vendedor' not in request.data:
-            request.data['vendedor'] = user.id
-
-        serializer = FacturaCreateSerializer(data=request.data, context={'db_alias': alias})
-        if not serializer.is_valid():
-            return Response({
-                'error': 'Datos inválidos',
-                'detalle': serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        factura = serializer.save()
-
-        return Response({
-            'ok': True,
-            'mensaje': 'Factura creada exitosamente',
-            'factura': FacturaSerializer(factura, context={'db_alias': alias}).data
-        }, status=status.HTTP_201_CREATED)
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return Response({'error': 'Error del servidor', 'detalle': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def anular_factura(request, factura_id):
-    """
-    Anula una factura y revierte el stock.
-
-    POST /api/facturacion/facturas/{id}/anular/
-    Body:
-    {
-        "usuario": "...",
-        "token": "...",
-        "subdominio": "...",
-        "motivo": "Motivo de anulación"
-    }
-    """
-    try:
-        # 1) Autenticación tenant
-        usuario = request.data.get('usuario')
-        token = request.data.get('token')
-        subdom = request.data.get('subdominio')
-        motivo = request.data.get('motivo', '').strip()
-
-        if not all([usuario, token]):
-            return Response({'error': 'Usuario y token son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not motivo:
-            return Response({'error': 'El motivo de anulación es requerido'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not subdom:
-            host = request.get_host().split(':')[0]
-            subdom = host.split('.')[0].lower()
-
-        # 2) Resolver tenant
-        dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).first()
-        if not dominio_obj:
-            return Response({'error': 'Dominio no válido'}, status=status.HTTP_400_BAD_REQUEST)
-
-        tienda = dominio_obj.tienda
-        alias = str(tienda.id)
-        conectar_db_tienda(alias, tienda)
-
-        # 3) Validar usuario
-        LoginUsuario = apps.get_model('nova', 'LoginUsuario')
-        try:
-            user = LoginUsuario.objects.using(alias).get(usuario=usuario)
-        except LoginUsuario.DoesNotExist:
-            return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 4) Validar/refresh token
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except ExpiredSignatureError:
-            nuevo = generar_token_jwt(usuario)
-            user.token = nuevo
-            user.save(using=alias)
-            token = nuevo
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except InvalidTokenError:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if payload.get("usuario") != usuario or user.token != token:
-            return Response({'error': 'Token no coincide'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 5) Anular factura
-        from .models import Factura, Existencia
-        from .serializers import FacturaSerializer
-        from django.utils import timezone
-
-        with transaction.atomic(using=alias):
-            factura = Factura.objects.using(alias).select_for_update().get(pk=factura_id)
-
-            if factura.estado == 'ANU':
-                return Response({'error': 'La factura ya está anulada'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Revertir stock
-            for detalle in factura.detalles.using(alias).all():
-                existencia = Existencia.objects.using(alias).filter(
-                    producto=detalle.producto,
-                    bodega=factura.bodega
-                ).select_for_update().first()
-
-                if existencia:
-                    existencia.cantidad += detalle.cantidad
-                    existencia.save(using=alias)
-
-                    # Actualizar cache del producto
-                    from .models import Producto
-                    from django.db.models import Sum
-                    total = (Existencia.objects.using(alias).filter(producto_id=detalle.producto_id)
-                             .aggregate(total=Sum('cantidad') - Sum('reservado'))['total'] or 0)
-                    Producto.objects.using(alias).filter(pk=detalle.producto_id).update(stock=total)
-
-            # Actualizar estado
-            factura.estado = 'ANU'
-            factura.fecha_anulacion = timezone.now()
-            factura.motivo_anulacion = motivo
-            factura.anulada_por = user
-            factura.save(using=alias)
-
-        return Response({
-            'ok': True,
-            'mensaje': 'Factura anulada exitosamente',
-            'factura': FacturaSerializer(factura, context={'db_alias': alias}).data
-        }, status=status.HTTP_200_OK)
-
-    except Factura.DoesNotExist:
-        return Response({'error': 'Factura no encontrada'}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return Response({'error': 'Error del servidor', 'detalle': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def ventas_hoy(request):
-    """
-    Retorna estadísticas de ventas del día actual.
-
-    POST /api/facturacion/facturas/ventas-hoy/
-    Body:
-    {
-        "usuario": "...",
-        "token": "...",
-        "subdominio": "..."
-    }
-    """
-    try:
-        # 1) Autenticación tenant
-        usuario = request.data.get('usuario')
-        token = request.data.get('token')
-        subdom = request.data.get('subdominio')
-
-        if not all([usuario, token]):
-            return Response({'error': 'Usuario y token son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not subdom:
-            host = request.get_host().split(':')[0]
-            subdom = host.split('.')[0].lower()
-
-        # 2) Resolver tenant
-        dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).first()
-        if not dominio_obj:
-            return Response({'error': 'Dominio no válido'}, status=status.HTTP_400_BAD_REQUEST)
-
-        tienda = dominio_obj.tienda
-        alias = str(tienda.id)
-        conectar_db_tienda(alias, tienda)
-
-        # 3) Validar usuario
-        LoginUsuario = apps.get_model('nova', 'LoginUsuario')
-        try:
-            user = LoginUsuario.objects.using(alias).get(usuario=usuario)
-        except LoginUsuario.DoesNotExist:
-            return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 4) Validar/refresh token
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except ExpiredSignatureError:
-            nuevo = generar_token_jwt(usuario)
-            user.token = nuevo
-            user.save(using=alias)
-            token = nuevo
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except InvalidTokenError:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if payload.get("usuario") != usuario or user.token != token:
-            return Response({'error': 'Token no coincide'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 5) Calcular estadísticas
-        from .models import Factura
-        from django.db.models import Sum, Count
-        from django.utils import timezone
-        from datetime import datetime
-
-        hoy = timezone.now().date()
-        inicio_dia = timezone.make_aware(datetime.combine(hoy, datetime.min.time()))
-        fin_dia = timezone.make_aware(datetime.combine(hoy, datetime.max.time()))
-
-        stats = Factura.objects.using(alias).filter(
-            estado='PAG',
-            fecha_venta__range=[inicio_dia, fin_dia]
-        ).aggregate(
-            total_facturado=Sum('total'),
-            cantidad=Count('id')
-        )
-
-        total_facturado = stats['total_facturado'] or 0
-        cantidad = stats['cantidad'] or 0
-        promedio = total_facturado / cantidad if cantidad > 0 else 0
-
-        return Response({
-            'ok': True,
-            'fecha': hoy,
-            'total_facturado': float(total_facturado),
-            'cantidad': cantidad,
-            'promedio': float(promedio)
-        }, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return Response({'error': 'Error del servidor', 'detalle': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def listar_facturas(request):
-    """
-    Lista facturas con filtros opcionales.
-
-    POST /api/facturacion/facturas/
-    Body (para listar):
-    {
-        "usuario": "...",
-        "token": "...",
-        "subdominio": "...",
-        "fecha_inicio": "2024-01-01",
-        "fecha_fin": "2024-12-31",
-        "estado": "PAG"  (opcional: BOR, PAG, ANU)
-    }
-    """
-    try:
-        # 1) Autenticación tenant
-        usuario = request.data.get('usuario')
-        token = request.data.get('token')
-        subdom = request.data.get('subdominio')
-        fecha_inicio = request.data.get('fecha_inicio')
-        fecha_fin = request.data.get('fecha_fin')
-        estado = request.data.get('estado')
-
-        if not all([usuario, token]):
-            return Response({'error': 'Usuario y token son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not subdom:
-            host = request.get_host().split(':')[0]
-            subdom = host.split('.')[0].lower()
-
-        # 2) Resolver tenant
-        dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).first()
-        if not dominio_obj:
-            return Response({'error': 'Dominio no válido'}, status=status.HTTP_400_BAD_REQUEST)
-
-        tienda = dominio_obj.tienda
-        alias = str(tienda.id)
-        conectar_db_tienda(alias, tienda)
-
-        # 3) Validar usuario
-        LoginUsuario = apps.get_model('nova', 'LoginUsuario')
-        try:
-            user = LoginUsuario.objects.using(alias).get(usuario=usuario)
-        except LoginUsuario.DoesNotExist:
-            return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 4) Validar/refresh token
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except ExpiredSignatureError:
-            nuevo = generar_token_jwt(usuario)
-            user.token = nuevo
-            user.save(using=alias)
-            token = nuevo
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except InvalidTokenError:
-            return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if payload.get("usuario") != usuario or user.token != token:
-            return Response({'error': 'Token no coincide'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # 5) Listar facturas
-        from .models import Factura
-        from .serializers import FacturaSerializer
-
-        queryset = Factura.objects.using(alias).select_related(
-            'cliente', 'vendedor', 'sucursal', 'bodega'
-        ).prefetch_related(
-            'detalles', 'pagos'
-        )
-
-        # Aplicar filtros
-        if fecha_inicio:
-            queryset = queryset.filter(fecha_venta__gte=fecha_inicio)
-        if fecha_fin:
-            queryset = queryset.filter(fecha_venta__lte=fecha_fin)
-        if estado:
-            queryset = queryset.filter(estado=estado)
-
-        facturas = queryset.order_by('-fecha_venta')[:100]  # Limitar a 100
-        serializer = FacturaSerializer(facturas, many=True, context={'db_alias': alias})
-
-        return Response({
-            'ok': True,
-            'cantidad': len(serializer.data),
-            'facturas': serializer.data
-        }, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return Response({'error': 'Error del servidor', 'detalle': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

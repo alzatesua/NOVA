@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SparklesIcon, MagnifyingGlassIcon, CheckCircleIcon, CubeIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '../../../hooks/useAuth';
+import { obtenerProductosPorBodega } from '../../../services/api';
 
 // Debounce simple
 function useDebounce(value, delay = 500) {
@@ -29,6 +30,28 @@ const getBodegaIdFromProduct = (p) =>
 const findBodegaObj = (bodegasList, id) =>
   bodegasList.find(b => Number(b.id) === Number(id)) || null;
 
+// Función para cargar productos por bodega
+const cargarProductosParaBodega = async (bodegaId, tokenUsuario, subdominio) => {
+  if (!bodegaId || !subdominio) return null;
+
+  try {
+    const response = await obtenerProductosPorBodega({
+      usuario: localStorage.getItem('usuario'),
+      tokenUsuario,
+      subdominio,
+      bodega_id: bodegaId,
+      solo_con_stock: false
+    });
+
+    if (response && response.datos) {
+      return response.datos;
+    }
+  } catch (error) {
+    console.error('[AjustarExistencia] Error cargando productos para bodega:', error);
+  }
+  return null;
+};
+
 export default function AjustarExistencia({
   // Estado/control del padre
   ajusteForm = { producto: '', bodega: '', delta: '' },
@@ -52,6 +75,26 @@ export default function AjustarExistencia({
   const dominio = import.meta.env.VITE_DOMINIO;
   const fullUrl = subdominio && dominio ? `https://${subdominio}.${dominio}` : '';
 
+  // Cargar productos cuando se selecciona bodega
+  useEffect(() => {
+    const bodegaId = ajusteForm?.bodega;
+    if (bodegaId && !productosPorBodega[bodegaId]) {
+      setIsLoadingProductosBodega(true);
+      cargarProductosParaBodega(bodegaId, tokenUsuario, subdominio)
+        .then(productos => {
+          if (productos) {
+            setProductosPorBodega(prev => ({
+              ...prev,
+              [bodegaId]: productos
+            }));
+          }
+        })
+        .finally(() => {
+          setIsLoadingProductosBodega(false);
+        });
+    }
+  }, [ajusteForm?.bodega, tokenUsuario, subdominio]);
+
   // Setter defensivo
   const setAjusteFormSafe =
     typeof setAjusteForm === 'function'
@@ -67,6 +110,10 @@ export default function AjustarExistencia({
   const [imgError, setImgError] = useState(null);
   const barcodeRef = useRef(null);
 
+  // Estado para productos por bodega
+  const [productosPorBodega, setProductosPorBodega] = useState({});
+  const [isLoadingProductosBodega, setIsLoadingProductosBodega] = useState(false);
+
   useEffect(() => { barcodeRef.current?.focus(); }, []);
 
   const bodegasList = Array.isArray(bodegas) ? bodegas : [];
@@ -74,8 +121,14 @@ export default function AjustarExistencia({
   const loadingBodegas = !!isLoadingBodegas;
   const loadingProductos = !!isLoadingProductos;
 
-  const sameBodega = (p, bodegaId) =>
-    Number(p.bodega ?? p.bodega_id ?? p.id_bodega) === Number(bodegaId);
+  const sameBodega = (p, bodegaId) => {
+    // Si el producto viene de productosPorBodega, tiene bodega_id
+    if (p.bodega_id !== undefined && p.bodega_id !== null) {
+      return Number(p.bodega_id) === Number(bodegaId);
+    }
+    // Si no, usar las propiedades normales
+    return Number(p.bodega ?? p.bodega_id ?? p.id_bodega) === Number(bodegaId);
+  };
 
   const getBarcode = (p) =>
     String(p.codigo_barras ?? p.codigo_barra ?? p.barcode ?? p.codigo ?? p.sku ?? '').trim();
@@ -379,16 +432,41 @@ export default function AjustarExistencia({
                   <option value="">
                     {ajusteForm?.bodega ? 'Buscar producto...' : 'Selecciona primero la bodega'}
                   </option>
-                  {loadingProductos ? (
-                    <option disabled>Cargando productos...</option>
+                  {isLoadingProductosBodega && productosPorBodega[ajusteForm?.bodega] === undefined ? (
+                    <option disabled>Cargando productos de bodega...</option>
                   ) : (
-                    productosList
-                      .filter(p => sameBodega(p, ajusteForm?.bodega))
-                      .map(p => (
-                        <option key={p.id} value={p.id}>
-                          {p.nombre}{typeof p.stock !== 'undefined' ? ` • Stock: ${p.stock}` : ''}
-                        </option>
-                      ))
+                    <>
+                      {/* Primero: Productos específicos de la bodega */}
+                      {productosPorBodega[ajusteForm?.bodega] && (
+                        <>
+                          {productosPorBodega[ajusteForm?.bodega].length === 0 ? (
+                            <option disabled>No hay productos en esta bodega</option>
+                          ) : (
+                            productosPorBodega[ajusteForm?.bodega].map(p => (
+                              <option key={p.id} value={p.id}>
+                                {p.nombre} • Disp: {p.disponible_bodega || 0}
+                              </option>
+                            ))
+                          )}
+                        </>
+                      )}
+                      {/* Segundo: Productos del listado general (fallback) */}
+                      {(!productosPorBodega[ajusteForm?.bodega] || productosPorBodega[ajusteForm?.bodega]?.length === 0) && (
+                        <>
+                          {loadingProductos ? (
+                            <option disabled>Cargando productos...</option>
+                          ) : (
+                            productosList
+                              .filter(p => sameBodega(p, ajusteForm?.bodega))
+                              .map(p => (
+                                <option key={p.id} value={p.id}>
+                                  {p.nombre}{typeof p.stock !== 'undefined' ? ` • Stock: ${p.stock}` : ''}
+                                </option>
+                              ))
+                          )}
+                        </>
+                      )}
+                    </>
                   )}
                 </select>
               </div>
