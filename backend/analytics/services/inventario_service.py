@@ -11,12 +11,13 @@ class InventarioService:
     """Servicio para métricas relacionadas con inventario"""
 
     @staticmethod
-    def obtener_resumen_inventario(sucursal_id=None):
+    def obtener_resumen_inventario(sucursal_id=None, db_alias='default'):
         """
         Obtiene resumen general del inventario
 
         Args:
             sucursal_id: int (opcional) - Filtrar por sucursal
+            db_alias: str - Alias de la base de datos a utilizar
 
         Returns:
             dict con resumen de inventario
@@ -24,7 +25,7 @@ class InventarioService:
         from main_dashboard.models import Producto, Existencia
 
         # Filtrar productos por sucursal si se especifica
-        productos_qs = Producto.objects.all()
+        productos_qs = Producto.objects.using(db_alias).all()
         if sucursal_id:
             productos_qs = productos_qs.filter(sucursal_id=sucursal_id)
 
@@ -43,7 +44,7 @@ class InventarioService:
         valor_inventario = valor_data['valor_total'] or Decimal('0.00')
 
         # Usar existencias para más precisión
-        existencias_qs = Existencia.objects.select_related('bodega__sucursal')
+        existencias_qs = Existencia.objects.using(db_alias).select_related('bodega__sucursal')
         if sucursal_id:
             existencias_qs = existencias_qs.filter(bodega__sucursal_id=sucursal_id)
 
@@ -64,20 +65,21 @@ class InventarioService:
         }
 
     @staticmethod
-    def obtener_productos_stock_bajo(sucursal_id=None, limite=50):
+    def obtener_productos_stock_bajo(sucursal_id=None, limite=50, db_alias='default'):
         """
         Obtiene productos con stock bajo
 
         Args:
             sucursal_id: int (opcional)
             limite: int - Stock mínimo para considerar como bajo
+            db_alias: str - Alias de la base de datos a utilizar
 
         Returns:
             list de dict con productos stock bajo
         """
         from main_dashboard.models import Producto
 
-        queryset = Producto.objects.filter(
+        queryset = Producto.objects.using(db_alias).filter(
             stock__lt=limite
         ).select_related('categoria_id', 'marca_id').order_by('stock')
 
@@ -110,13 +112,14 @@ class InventarioService:
         return productos
 
     @staticmethod
-    def obtener_productos_sin_rotacion(dias_sin_venta=30, sucursal_id=None):
+    def obtener_productos_sin_rotacion(dias_sin_venta=30, sucursal_id=None, db_alias='default'):
         """
         Obtiene productos que no se han vendido en X días
 
         Args:
             dias_sin_venta: int - Días sin venta
             sucursal_id: int (opcional)
+            db_alias: str - Alias de la base de datos a utilizar
 
         Returns:
             list de dict con productos sin rotación
@@ -126,13 +129,13 @@ class InventarioService:
         fecha_limite = datetime.now() - timedelta(days=dias_sin_venta)
 
         # Encontrar productos que SÍ se vendieron
-        productos_vendidos = FacturaDetalle.objects.filter(
+        productos_vendidos = FacturaDetalle.objects.using(db_alias).filter(
             factura__fecha_venta__gte=fecha_limite,
             factura__estado='ACT'
         ).values_list('producto_id', flat=True).distinct()
 
         # Productos que NO se vendieron - usar values()
-        queryset = Producto.objects.exclude(
+        queryset = Producto.objects.using(db_alias).exclude(
             id__in=productos_vendidos
         ).select_related('categoria_id')
 
@@ -163,19 +166,20 @@ class InventarioService:
         return productos
 
     @staticmethod
-    def obtener_existencias_por_bodega(sucursal_id=None):
+    def obtener_existencias_por_bodega(sucursal_id=None, db_alias='default'):
         """
         Obtiene existencias agrupadas por bodega
 
         Args:
             sucursal_id: int (opcional)
+            db_alias: str - Alias de la base de datos a utilizar
 
         Returns:
             list de dict con existencias por bodega
         """
         from main_dashboard.models import Existencia
 
-        queryset = Existencia.objects.select_related(
+        queryset = Existencia.objects.using(db_alias).select_related(
             'bodega',
             'bodega__sucursal',
             'producto'
@@ -205,7 +209,7 @@ class InventarioService:
         return sorted(resultados.values(), key=lambda x: x['total_unidades'], reverse=True)
 
     @staticmethod
-    def obtener_traslados_periodo(fecha_inicio, fecha_fin, sucursal_id=None):
+    def obtener_traslados_periodo(fecha_inicio, fecha_fin, sucursal_id=None, db_alias='default'):
         """
         Obtiene traslados realizados en un período
 
@@ -213,13 +217,14 @@ class InventarioService:
             fecha_inicio: datetime
             fecha_fin: datetime
             sucursal_id: int (opcional)
+            db_alias: str - Alias de la base de datos a utilizar
 
         Returns:
             dict con estadísticas de traslados
         """
         from main_dashboard.models import Traslado
 
-        queryset = Traslado.objects.filter(
+        queryset = Traslado.objects.using(db_alias).filter(
             fecha_creacion__range=(fecha_inicio, fecha_fin)
         )
 

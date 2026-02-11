@@ -27,22 +27,6 @@ CREATE TABLE IF NOT EXISTS login_usuario (
         ON DELETE SET NULL
 );
 
--- Tabla de relación many-to-many entre usuarios y bodegas
-CREATE TABLE IF NOT EXISTS login_usuario_bodega (
-    id SERIAL PRIMARY KEY,
-    usuario_id INTEGER NOT NULL
-        REFERENCES login_usuario(id_login_usuario) ON DELETE CASCADE,
-    bodega_id INTEGER NOT NULL
-        REFERENCES inventario_bodega(id) ON DELETE CASCADE,
-    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uniq_usuario_bodega UNIQUE (usuario_id, bodega_id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_usuario_bodega_usuario ON login_usuario_bodega(usuario_id);
-CREATE INDEX IF NOT EXISTS idx_usuario_bodega_bodega ON login_usuario_bodega(bodega_id);
-
-COMMENT ON TABLE login_usuario_bodega IS 'Relación many-to-many entre usuarios y bodegas para filtrado de productos';
-
 CREATE TABLE IF NOT EXISTS tipo_documento (
     id        SERIAL PRIMARY KEY,
     nombre    VARCHAR(50) NOT NULL UNIQUE
@@ -252,8 +236,7 @@ CREATE TABLE facturacion_cliente (
     estatus BOOLEAN DEFAULT TRUE NOT NULL,
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     actualizado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT check_tipo_persona CHECK (tipo_persona IN ('NAT', 'JUR')),
-    CONSTRAINT chk_correo_formato CHECK (correo IS NULL OR correo ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+    CONSTRAINT check_tipo_persona CHECK (tipo_persona IN ('NAT', 'JUR'))
 );
 
 COMMENT ON TABLE facturacion_cliente IS 'Clientes (Naturales y Jurídicos)';
@@ -360,6 +343,48 @@ CREATE TABLE facturacion_pago (
 );
 
 COMMENT ON TABLE facturacion_pago IS 'Pagos asociados a cada factura';
+
+CREATE TABLE IF NOT EXISTS inventario_traslado (
+    id BIGSERIAL PRIMARY KEY,
+    estado VARCHAR(3) DEFAULT 'BOR' NOT NULL,
+    usar_bodega_transito BOOLEAN DEFAULT TRUE NOT NULL,
+    observaciones TEXT,
+    enviado_en TIMESTAMP,
+    recibido_en TIMESTAMP,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    actualizado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    bodega_destino_id BIGINT NOT NULL,
+    bodega_origen_id BIGINT NOT NULL,
+    creado_por_id INTEGER,
+    CONSTRAINT check_estado_traslado CHECK (estado IN ('BOR', 'ENV', 'REC', 'CAN')),
+    CONSTRAINT fk_traslado_bodega_destino FOREIGN KEY (bodega_destino_id)
+        REFERENCES inventario_bodega(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_traslado_bodega_origen FOREIGN KEY (bodega_origen_id)
+        REFERENCES inventario_bodega(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_traslado_creado_por FOREIGN KEY (creado_por_id)
+        REFERENCES login_usuario(id_login_usuario) ON DELETE SET NULL
+);
+
+COMMENT ON TABLE inventario_traslado IS 'Traslados de stock entre bodegas';
+
+CREATE TABLE IF NOT EXISTS inventario_traslado_linea (
+    id BIGSERIAL PRIMARY KEY,
+    cantidad INTEGER NOT NULL,
+    cantidad_recibida INTEGER DEFAULT 0 NOT NULL,
+    producto_id BIGINT NOT NULL,
+    traslado_id BIGINT NOT NULL,
+    CONSTRAINT fk_traslado_linea_producto FOREIGN KEY (producto_id)
+        REFERENCES productos(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_traslado_linea_traslado FOREIGN KEY (traslado_id)
+        REFERENCES inventario_traslado(id) ON DELETE CASCADE,
+    CONSTRAINT uniq_linea_por_producto_en_traslado UNIQUE (traslado_id, producto_id)
+);
+
+COMMENT ON TABLE inventario_traslado_linea IS 'Líneas de productos en traslados';
+
+CREATE INDEX IF NOT EXISTS inventorio_traslado_linea_traslado_idx ON inventario_traslado_linea(traslado_id);
+CREATE INDEX IF NOT EXISTS inventorio_traslado_linea_producto_idx ON inventario_traslado_linea(producto_id);
+
 
 INSERT INTO facturacion_forma_pago (codigo, nombre, activo, requiere_referencia, permite_cambio) VALUES
 ('EFE', 'Efectivo', TRUE, FALSE, TRUE),

@@ -216,6 +216,12 @@ class FacturaViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             logger.info(f"FacturaViewSet.create() - alias: {alias}")
             logger.info(f"request.data keys: {request.data.keys()}")
 
+            # Log valores específicos para debug
+            logger.info(f"total_iva valor: {request.data.get('total_iva')} (tipo: {type(request.data.get('total_iva')).__name__})")
+            detalles = request.data.get('detalles', [])
+            for i, det in enumerate(detalles):
+                logger.info(f"detalle[{i}].iva_valor: {det.get('iva_valor')} (tipo: {type(det.get('iva_valor')).__name__})")
+
             serializer = self.get_serializer(data=request.data)
             logger.info(f"Serializer creado: {serializer.__class__.__name__}")
 

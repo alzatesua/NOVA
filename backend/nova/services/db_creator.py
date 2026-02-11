@@ -106,8 +106,30 @@ def crear_db(db_nombre, db_password, db_usuario, usuario_data):
             raise Exception(f"Se produjeron {len(errors)} errores al crear las tablas. Primer error: {errors[0]}")
 
         # 4) Verificar que las tablas críticas existan
-        tablas_criticas = ['login_usuario', 'productos', 'inventario_bodega',
-                           'main_dashboard_sucursales', 'inventario_existencia']
+        tablas_criticas = [
+            # Core tables
+            'login_usuario',
+            'login_usuario_bodega',
+            'main_dashboard_sucursales',
+            'main_dashboard_categoria',
+            'main_dashboard_marca',
+            'main_dashboard_iva',
+            'tipos_medida',
+            'descuentos',
+            # Products and inventory
+            'productos',
+            'inventario_bodega',
+            'inventario_existencia',
+            'inventario_traslado',
+            'inventario_traslado_linea',
+            # Facturacion
+            'facturacion_cliente',
+            'facturacion_factura',
+            'facturacion_factura_detalle',
+            'facturacion_pago',
+            'facturacion_forma_pago',
+            'facturacion_config'
+        ]
         tablas_faltantes = []
         for tabla in tablas_criticas:
             cur.execute("""

@@ -683,11 +683,78 @@ class FacturaCreateSerializer(DbAliasModelSerializer):
             'bodega': {'required': True},
         }
 
+    def to_internal_value(self, data):
+        """
+        Convierte floats a Decimal con 2 decimales ANTES de la validación de campos.
+        Esto evita errores de max_digits por problemas de precisión de float.
+        """
+        from decimal import Decimal, ROUND_HALF_UP
+        import logging
+        logger = logging.getLogger(__name__)
+
+        # Convertir datos primitivos a dict para modificarlos
+        data = dict(data)
+
+        # Convertir floats a Decimal con 2 decimales en campos monetarios
+        campos_monetarios = ['subtotal', 'total_descuento', 'total_iva', 'total', 'total_pagado', 'cambio']
+        for campo in campos_monetarios:
+            if campo in data and isinstance(data[campo], float):
+                original = data[campo]
+                data[campo] = Decimal(str(round(data[campo], 2))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                logger.info(f"Convertido {campo}: {original} -> {data[campo]}")
+
+        # Convertir floats a Decimal en los detalles
+        if 'detalles' in data:
+            for detalle in data['detalles']:
+                for campo in ['precio_unitario', 'iva_valor', 'descuento_valor', 'subtotal', 'total']:
+                    if campo in detalle and isinstance(detalle[campo], float):
+                        original = detalle[campo]
+                        detalle[campo] = Decimal(str(round(detalle[campo], 2))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                        logger.info(f"Convertido detalle.{campo}: {original} -> {detalle[campo]}")
+
+        # Convertir floats a Decimal en los pagos
+        if 'pagos' in data:
+            for pago in data['pagos']:
+                if 'monto' in pago and isinstance(pago['monto'], float):
+                    original = pago['monto']
+                    pago['monto'] = Decimal(str(round(pago['monto'], 2))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                    logger.info(f"Convertido pago.monto: {original} -> {pago['monto']}")
+
+        # Llamar al método padre con los datos convertidos
+        return super().to_internal_value(data)
+
     def validate(self, attrs):
         """Validar y convertir IDs a instancias de modelos si es necesario"""
         from .models import Sucursales, Bodega, Cliente
         from django.contrib.auth import get_user_model
+        from decimal import Decimal, ROUND_HALF_UP
         alias = self.context.get('db_alias', 'default')
+
+        # Convertir floats a Decimal con 2 decimales para evitar errores de precisión
+        campos_monetarios = ['subtotal', 'total_descuento', 'total_iva', 'total', 'total_pagado', 'cambio']
+        for campo in campos_monetarios:
+            if campo in attrs and isinstance(attrs[campo], float):
+                attrs[campo] = Decimal(str(round(attrs[campo], 2))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        # Convertir floats a Decimal en los detalles
+        if 'detalles' in attrs:
+            for detalle in attrs['detalles']:
+                for campo in ['precio_unitario', 'iva_valor', 'descuento_valor', 'subtotal', 'total']:
+                    if campo in detalle and isinstance(detalle[campo], float):
+                        detalle[campo] = Decimal(str(round(detalle[campo], 2))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        # Convertir floats a Decimal en los pagos
+        if 'pagos' in attrs:
+            for pago in attrs['pagos']:
+                if 'monto' in pago and isinstance(pago['monto'], float):
+                    pago['monto'] = Decimal(str(round(pago['monto'], 2))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        # Log para debug de conversión de float a Decimal
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Valores después de conversión - total_iva: {attrs.get('total_iva')} (tipo: {type(attrs.get('total_iva')).__name__ if attrs.get('total_iva') is not None else 'None'})")
+        if 'detalles' in attrs and attrs['detalles']:
+            logger.info(f"detalle[0].iva_valor: {attrs['detalles'][0].get('iva_valor')} (tipo: {type(attrs['detalles'][0].get('iva_valor')).__name__ if attrs['detalles'][0].get('iva_valor') is not None else 'None'})")
 
         # Validar y convertir bodega
         bodega = attrs.get('bodega')

@@ -16,9 +16,25 @@ from main_dashboard.models import (
 
 
 class Command(BaseCommand):
-    help = 'Genera datos de simulación para probar los endpoints de analytics'
+    help = """
+    Genera datos de simulación para probar los endpoints de analytics.
+
+    MODO MULTI-TENANT:
+    Este comando requiere el parámetro --tenant para especificar la base de datos
+    del tenant donde se insertarán los datos.
+
+    Ejemplos:
+        python manage.py seed_analytics_data --tenant=dagi --limpiar
+        python manage.py seed_analytics_data --tenant=123 --dias-historia=90
+        python manage.py seed_analytics_data --tenant=miempresa --facturas-por-dia=20
+    """
 
     def add_arguments(self, parser):
+        parser.add_argument(
+            '--tenant',
+            type=str,
+            help='Nombre del tenant (subdominio) o ID de tienda. Requerido para modo multi-tenant.'
+        )
         parser.add_argument(
             '--dias-historia',
             type=int,
@@ -49,7 +65,119 @@ class Command(BaseCommand):
             help='Eliminar datos existentes antes de generar nuevos'
         )
 
+    def resolver_tenant(self, tenant_identifier):
+        """
+        Resuelve el tenant y conecta a su base de datos.
+
+        Args:
+            tenant_identifier: str - Subdominio o ID de tienda
+
+        Returns:
+            tuple: (tienda_obj, db_alias)
+        """
+        from nova.models import Tiendas, Dominios
+        from nova.utils.db import conectar_db_tienda
+
+        # Intentar como ID numérico
+        if tenant_identifier.isdigit():
+            tienda = Tiendas.objects.filter(id=int(tenant_identifier)).first()
+        else:
+            # Buscar por subdominio
+            dominio_obj = Dominios.objects.filter(
+                dominio__icontains=tenant_identifier
+            ).select_related('tienda').first()
+            tienda = dominio_obj.tienda if dominio_obj else None
+
+        if not tienda:
+            raise ValueError(f"Tenant '{tenant_identifier}' no encontrado")
+
+        if not tienda.es_activo:
+            raise ValueError(f"Tienda '{tienda.nombre_tienda}' está inactiva")
+
+        alias = str(tienda.id)
+        conectar_db_tienda(alias, tienda)
+
+        return tienda, alias
+
+    def validar_estructura_tenant(self, alias):
+        """
+        Verifica que el tenant tiene las tablas necesarias.
+
+        Args:
+            alias: str - Database alias
+        """
+        from django.db import connections
+
+        tablas_requeridas = [
+            'productos',
+            'main_dashboard_sucursales',
+            'main_dashboard_categoria',
+            'main_dashboard_marca',
+            'main_dashboard_iva',
+            'inventario_bodega',
+            'inventario_existencia',
+            'facturacion_factura',
+            'facturacion_factura_detalle',
+            'facturacion_pago',
+            'facturacion_cliente',
+            'facturacion_forma_pago',
+            'login_usuario',  # Para vendedor
+        ]
+
+        with connections[alias].cursor() as cursor:
+            cursor.execute("""
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+            """)
+            tablas_existentes = {row[0] for row in cursor.fetchall()}
+
+        faltantes = set(tablas_requeridas) - tablas_existentes
+        if faltantes:
+            raise ValueError(
+                f"El tenant no tiene las tablas requeridas: {', '.join(faltantes)}"
+            )
+
     def handle(self, *args, **options):
+        # Extract tenant parameter
+        tenant_identifier = options.get('tenant')
+
+        if not tenant_identifier:
+            self.stdout.write(self.style.ERROR(
+                'ERROR: El parámetro --tenant es requerido.\n'
+                'Uso: python manage.py seed_analytics_data --tenant=dagi'
+            ))
+            return
+
+        # Resolve tenant
+        try:
+            tienda, alias = self.resolver_tenant(tenant_identifier)
+            self.stdout.write(self.style.SUCCESS(
+                f'\n🎯 Tenant: {tienda.nombre_tienda} (DB: {tienda.db_nombre})'
+            ))
+        except ValueError as e:
+            self.stdout.write(self.style.ERROR(f'Error: {str(e)}'))
+            return
+
+        # Double-check we're not seeding to default
+        if alias == 'default':
+            self.stdout.write(self.style.ERROR(
+                'ERROR: No se puede hacer seed a la base de datos "default" (bd_madre).'
+            ))
+            return
+
+        # Validate database structure
+        try:
+            self.validar_estructura_tenant(alias)
+            self.stdout.write(self.style.SUCCESS('✅ Estructura de base de datos validada'))
+        except ValueError as e:
+            self.stdout.write(self.style.ERROR(f'Error de validación: {str(e)}'))
+            return
+
+        # Store alias as instance variable for use in other methods
+        self.db_alias = alias
+
+        # Extract other parameters
         dias_historia = options['dias_historia']
         num_sucursales = options['sucursales']
         num_productos = options['productos']
@@ -110,13 +238,15 @@ class Command(BaseCommand):
 
     def limpiar_datos(self):
         """Elimina datos de prueba usando SQL directo para evitar problemas con el modelo Producto"""
-        from django.db import connection
+        from django.db import connections
 
-        with connection.cursor() as cursor:
+        with connections[self.db_alias].cursor() as cursor:
             # Eliminar en orden correcto por foreign keys
             cursor.execute("DELETE FROM facturacion_pago")
             cursor.execute("DELETE FROM facturacion_factura_detalle")
             cursor.execute("DELETE FROM facturacion_factura")
+            cursor.execute("DELETE FROM inventario_traslado_linea")
+            cursor.execute("DELETE FROM inventario_traslado")
             cursor.execute("DELETE FROM inventario_existencia")
             cursor.execute("DELETE FROM productos")
             cursor.execute("DELETE FROM inventario_bodega")
@@ -140,15 +270,15 @@ class Command(BaseCommand):
         ]
 
         for nombre in categorias_data:
-            Categoria.objects.get_or_create(nombre=nombre)
+            Categoria.objects.using(self.db_alias).get_or_create(nombre=nombre)
 
         for nombre in marcas_data:
-            Marca.objects.get_or_create(nombre=nombre)
+            Marca.objects.using(self.db_alias).get_or_create(nombre=nombre)
 
         # Crear IVA
-        Iva.objects.get_or_create(porcentaje=19, defaults={'porcentaje': 19})
-        Iva.objects.get_or_create(porcentaje=0, defaults={'porcentaje': 0})
-        Iva.objects.get_or_create(porcentaje=5, defaults={'porcentaje': 5})
+        Iva.objects.using(self.db_alias).get_or_create(porcentaje=19, defaults={'porcentaje': 19})
+        Iva.objects.using(self.db_alias).get_or_create(porcentaje=0, defaults={'porcentaje': 0})
+        Iva.objects.using(self.db_alias).get_or_create(porcentaje=5, defaults={'porcentaje': 5})
 
     def crear_sucursales_y_bodegas(self, num_sucursales):
         """Crea sucursales y sus bodegas"""
@@ -157,7 +287,7 @@ class Command(BaseCommand):
 
         for i in range(num_sucursales):
             ciudad = ciudades[i % len(ciudades)]
-            sucursal = Sucursales.objects.create(
+            sucursal = Sucursales.objects.using(self.db_alias).create(
                 nombre=f'Sucursal {ciudad} {i+1}',
                 direccion=f'Calle {random.randint(1, 100)} # {random.randint(1, 100)}',
                 ciudad=ciudad,
@@ -167,7 +297,7 @@ class Command(BaseCommand):
             sucursales.append(sucursal)
 
             # Crear bodegas para cada sucursal
-            Bodega.objects.create(
+            Bodega.objects.using(self.db_alias).create(
                 sucursal=sucursal,
                 nombre=f'Bodega Principal {sucursal.nombre}',
                 codigo=f'BOD-{sucursal.id}-01',
@@ -176,7 +306,7 @@ class Command(BaseCommand):
                 estatus=True
             )
 
-            Bodega.objects.create(
+            Bodega.objects.using(self.db_alias).create(
                 sucursal=sucursal,
                 nombre=f'Almacén {sucursal.nombre}',
                 codigo=f'ALM-{sucursal.id}-01',
@@ -189,12 +319,12 @@ class Command(BaseCommand):
 
     def crear_productos(self, num_productos, sucursales):
         """Crea productos con existencias en las bodegas"""
-        from django.db import connection
+        from django.db import connections
 
-        categorias = list(Categoria.objects.all())
-        marcas = list(Marca.objects.all())
-        ivas = list(Iva.objects.all())
-        bodegas = list(Bodega.objects.filter(es_predeterminada=True))
+        categorias = list(Categoria.objects.using(self.db_alias).all())
+        marcas = list(Marca.objects.using(self.db_alias).all())
+        ivas = list(Iva.objects.using(self.db_alias).all())
+        bodegas = list(Bodega.objects.using(self.db_alias).filter(es_predeterminada=True))
 
         productos = []
 
@@ -208,7 +338,7 @@ class Command(BaseCommand):
             sku = f'PROD-{str(i+1).zfill(4)}'
 
             # Insertar producto usando SQL directo para evitar problemas con el modelo
-            with connection.cursor() as cursor:
+            with connections[self.db_alias].cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO productos (nombre, sku, descripcion, precio, stock, id_categoria, id_marca, id_iva, codigo_barras, sucursal_id, imagen_producto, creado_en)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
@@ -236,7 +366,7 @@ class Command(BaseCommand):
             for bodega in random.sample(bodegas, min(len(bodegas), 2)):
                 stock = random.randint(10, 200)
                 minimo = random.randint(5, 20)
-                Existencia.objects.create(
+                Existencia.objects.using(self.db_alias).create(
                     producto_id=producto_id,
                     bodega=bodega,
                     cantidad=stock,
@@ -251,8 +381,8 @@ class Command(BaseCommand):
         """Crea clientes de prueba"""
         clientes = []
 
-        nombres = ['Juan', 'María', 'Carlos', 'Ana', 'Pedro', 'Laura', 'Miguel', 'Carmen']
-        apellidos = ['García', 'Pérez', 'Martínez', 'Rodríguez', 'López', 'Sánchez']
+        nombres = ['Juan', 'Maria', 'Carlos', 'Ana', 'Pedro', 'Laura', 'Miguel', 'Carmen']
+        apellidos = ['Garcia', 'Perez', 'Martinez', 'Rodriguez', 'Lopez', 'Sanchez']
 
         for i in range(num_clientes):
             tipo_persona = random.choice(['NAT', 'JUR'])
@@ -261,7 +391,7 @@ class Command(BaseCommand):
                 primer_nombre = random.choice(nombres)
                 apellidos_cliente = f'{random.choice(apellidos)} {random.choice(apellidos)}'
 
-                cliente = Cliente.objects.create(
+                cliente = Cliente.objects.using(self.db_alias).create(
                     tipo_persona='NAT',
                     primer_nombre=primer_nombre,
                     apellidos=apellidos_cliente,
@@ -270,11 +400,11 @@ class Command(BaseCommand):
                     correo=f'{primer_nombre.lower()}{i}@email.com',
                     telefono=f'{random.randint(3000000000, 3999999999)}',
                     direccion=f'Calle {random.randint(1, 100)} # {random.randint(1, 100)}',
-                    ciudad=random.choice(['Bogotá', 'Medellín', 'Cali']),
+                    ciudad=random.choice(['Bogota', 'Medellin', 'Cali']),
                     estatus=True
                 )
             else:
-                cliente = Cliente.objects.create(
+                cliente = Cliente.objects.using(self.db_alias).create(
                     tipo_persona='JUR',
                     razon_social=f'Empresa {i+1} S.A.S.',
                     tipo_documento='NIT',
@@ -282,7 +412,7 @@ class Command(BaseCommand):
                     correo=f'contacto@empresa{i+1}.com',
                     telefono=f'{random.randint(6010000000, 6999999999)}',
                     direccion=f'Carrera {random.randint(1, 100)} # {random.randint(1, 100)}',
-                    ciudad=random.choice(['Bogotá', 'Medellín', 'Cali']),
+                    ciudad=random.choice(['Bogota', 'Medellin', 'Cali']),
                     limite_credito=random.randint(1000000, 10000000),
                     dias_credito=random.choice([15, 30, 45, 60]),
                     estatus=True
@@ -302,23 +432,23 @@ class Command(BaseCommand):
         ]
 
         for forma in formas:
-            FormaPago.objects.get_or_create(codigo=forma['codigo'], defaults=forma)
+            FormaPago.objects.using(self.db_alias).get_or_create(codigo=forma['codigo'], defaults=forma)
 
-        return list(FormaPago.objects.all())
+        return list(FormaPago.objects.using(self.db_alias).all())
 
     def generar_ventas_historicas(self, sucursales, productos, clientes, formas_pago, dias, facturas_por_dia):
         """Genera ventas históricas distribuidas en el tiempo"""
-        from django.db import connection
+        from django.db import connections
 
         hoy = timezone.now()
-        bodegas = {b.sucursal_id: b for b in Bodega.objects.filter(es_predeterminada=True)}
+        bodegas = {b.sucursal_id: b for b in Bodega.objects.using(self.db_alias).filter(es_predeterminada=True)}
 
         facturas_creadas = 0
         detalles_creados = 0
 
         # Obtener vendedor (usuario) - una sola vez
         from nova.models import LoginUsuario
-        vendedor = LoginUsuario.objects.first()
+        vendedor = LoginUsuario.objects.using(self.db_alias).first()
 
         for dia in range(dias, 0, -1):
             fecha_venta = hoy - timedelta(days=dia)
@@ -338,7 +468,7 @@ class Command(BaseCommand):
 
                 # Crear factura usando SQL directo para controlar la fecha_venta
                 # (el modelo tiene auto_now_add=True que siempre usa la fecha actual)
-                with connection.cursor() as cursor:
+                with connections[self.db_alias].cursor() as cursor:
                     cursor.execute("""
                         INSERT INTO facturacion_factura
                         (numero_factura, estado, cliente_id, vendedor_id, sucursal_id, bodega_id,
@@ -369,7 +499,7 @@ class Command(BaseCommand):
                 for producto in productos_factura:
                     # Obtener el producto completo de la BD para tener el IVA
                     try:
-                        producto_completo = Producto.objects.get(id=producto.id)
+                        producto_completo = Producto.objects.using(self.db_alias).get(id=producto.id)
                         iva_porcentaje = producto_completo.iva.porcentaje if producto_completo.iva else Decimal('0')
                     except:
                         iva_porcentaje = Decimal('19')
@@ -386,7 +516,7 @@ class Command(BaseCommand):
                     total = (subtotal - descuento_valor + iva_valor).quantize(Decimal('0.01'))
 
                     # Crear detalle usando SQL directo
-                    with connection.cursor() as cursor:
+                    with connections[self.db_alias].cursor() as cursor:
                         cursor.execute("""
                             INSERT INTO facturacion_factura_detalle
                             (factura_id, producto_id, producto_nombre, producto_sku,
@@ -402,7 +532,7 @@ class Command(BaseCommand):
                     detalles_creados += 1
 
                 # Calcular totales de la factura usando SQL
-                with connection.cursor() as cursor:
+                with connections[self.db_alias].cursor() as cursor:
                     cursor.execute("""
                         SELECT
                             COALESCE(SUM(subtotal), 0) as subtotal,
@@ -417,7 +547,7 @@ class Command(BaseCommand):
                 subtotal, total_descuento, total_iva, total = totales
 
                 # Actualizar totales de la factura
-                with connection.cursor() as cursor:
+                with connections[self.db_alias].cursor() as cursor:
                     cursor.execute("""
                         UPDATE facturacion_factura
                         SET subtotal = %s, total_descuento = %s, total_iva = %s, total = %s,
@@ -434,7 +564,7 @@ class Command(BaseCommand):
                     else:
                         monto_pago = monto_total
 
-                    with connection.cursor() as cursor:
+                    with connections[self.db_alias].cursor() as cursor:
                         cursor.execute("""
                             INSERT INTO facturacion_pago
                             (factura_id, forma_pago_id, monto, referencia, autorizacion, creado_en)

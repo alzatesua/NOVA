@@ -52,6 +52,51 @@ def _get_sucursal_id(request):
     return int(sucursal_id) if sucursal_id else None
 
 
+def _resolve_tenant_alias(request):
+    """
+    Resuelve el alias de la base de datos del tenant desde el request.
+
+    Args:
+        request: Django request object
+
+    Returns:
+        str: Database alias for tenant
+
+    Raises:
+        ValueError: Si no se pueden obtener credenciales o tenant
+    """
+    from nova.models import Dominios
+    from nova.utils.db import conectar_db_tienda
+
+    # Obtener credenciales desde body o query params
+    usuario = request.data.get('usuario') or request.query_params.get('usuario')
+    token = request.data.get('token') or request.query_params.get('token')
+    subdom = request.data.get('subdominio') or request.query_params.get('subdominio')
+
+    # Si no hay subdominio, usar el host
+    if not subdom:
+        host = request.get_host().split(':')[0]
+        subdom = host.split('.')[0].lower()
+
+    if not usuario or not token:
+        raise ValueError('usuario y token son requeridos (en body o querystring).')
+
+    # Buscar tenant por Dominios y conectar
+    dominio_obj = Dominios.objects.filter(
+        dominio__icontains=subdom
+    ).select_related('tienda').first()
+
+    if not dominio_obj:
+        raise ValueError('Dominio no válido.')
+
+    tienda = dominio_obj.tienda
+    alias = str(tienda.id)
+    conectar_db_tienda(alias, tienda)
+
+    return alias
+
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def kpis_generales(request):
@@ -63,16 +108,27 @@ def kpis_generales(request):
     Query params:
         - dias: int (default 30)
         - sucursal_id: int (opcional)
+        - usuario: str (requerido)
+        - token: str (requerido)
+        - subdominio: str (opcional si se usa subdomain en Host)
     """
     try:
+        # Resolve tenant
+        alias = _resolve_tenant_alias(request)
+
         dias = int(request.query_params.get('dias', 30))
         sucursal_id = _get_sucursal_id(request)
 
-        calculator = KPICalculator(sucursal_id=sucursal_id)
+        calculator = KPICalculator(sucursal_id=sucursal_id, db_alias=alias)
         kpis = calculator.calcular_kpis_generales(dias=dias)
 
         return Response(kpis, status=status.HTTP_200_OK)
 
+    except ValueError as e:
+        return Response(
+            {'error': f'Error de autenticación: {str(e)}'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     except Exception as e:
         return Response(
             {'error': f'Error al calcular KPIs: {str(e)}'},
@@ -92,8 +148,14 @@ def ventas_totales(request):
         - fecha_inicio: ISO date string (default: hace 30 días)
         - fecha_fin: ISO date string (default: hoy)
         - sucursal_id: int (opcional)
+        - usuario: str (requerido)
+        - token: str (requerido)
+        - subdominio: str (opcional si se usa subdomain en Host)
     """
     try:
+        # Resolve tenant
+        alias = _resolve_tenant_alias(request)
+
         fecha_fin = _parse_fecha(request, 'fecha_fin', timezone.now())
         fecha_inicio = _parse_fecha(
             request, 'fecha_inicio',
@@ -103,7 +165,7 @@ def ventas_totales(request):
 
         service = VentasService()
         metrics = service.obtener_ventas_totales(
-            fecha_inicio, fecha_fin, sucursal_id
+            fecha_inicio, fecha_fin, sucursal_id, db_alias=alias
         )
 
         # Convertir Decimal a float para JSON
@@ -113,6 +175,11 @@ def ventas_totales(request):
 
         return Response(metrics, status=status.HTTP_200_OK)
 
+    except ValueError as e:
+        return Response(
+            {'error': f'Error de autenticación: {str(e)}'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     except Exception as e:
         return Response(
             {'error': f'Error al obtener ventas totales: {str(e)}'},
@@ -131,13 +198,19 @@ def ventas_tendencia(request):
     Query params:
         - dias: int (default 30)
         - sucursal_id: int (opcional)
+        - usuario: str (requerido)
+        - token: str (requerido)
+        - subdominio: str (opcional si se usa subdomain en Host)
     """
     try:
+        # Resolve tenant
+        alias = _resolve_tenant_alias(request)
+
         dias = int(request.query_params.get('dias', 30))
         sucursal_id = _get_sucursal_id(request)
 
         service = VentasService()
-        tendencia = service.obtener_tendencia_ventas(dias=dias, sucursal_id=sucursal_id)
+        tendencia = service.obtener_tendencia_ventas(dias=dias, sucursal_id=sucursal_id, db_alias=alias)
 
         # Formatear fechas y convertir Decimals
         for punto in tendencia:
@@ -147,6 +220,11 @@ def ventas_tendencia(request):
 
         return Response(tendencia, status=status.HTTP_200_OK)
 
+    except ValueError as e:
+        return Response(
+            {'error': f'Error de autenticación: {str(e)}'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     except Exception as e:
         return Response(
             {'error': f'Error al obtener tendencia: {str(e)}'},
@@ -166,8 +244,14 @@ def ventas_top_productos(request):
         - dias: int (default 30)
         - limite: int (default 10)
         - sucursal_id: int (opcional)
+        - usuario: str (requerido)
+        - token: str (requerido)
+        - subdominio: str (opcional si se usa subdomain en Host)
     """
     try:
+        # Resolve tenant
+        alias = _resolve_tenant_alias(request)
+
         dias = int(request.query_params.get('dias', 30))
         limite = int(request.query_params.get('limite', 10))
         sucursal_id = _get_sucursal_id(request)
@@ -177,7 +261,7 @@ def ventas_top_productos(request):
 
         service = VentasService()
         top = service.obtener_top_productos(
-            fecha_inicio, fecha_fin, limite, sucursal_id
+            fecha_inicio, fecha_fin, limite, sucursal_id, db_alias=alias
         )
 
         # Convertir Decimals
@@ -187,6 +271,11 @@ def ventas_top_productos(request):
 
         return Response(top, status=status.HTTP_200_OK)
 
+    except ValueError as e:
+        return Response(
+            {'error': f'Error de autenticación: {str(e)}'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     except Exception as e:
         return Response(
             {'error': f'Error al obtener top productos: {str(e)}'},
@@ -205,8 +294,14 @@ def ventas_por_categoria(request):
     Query params:
         - dias: int (default 30)
         - sucursal_id: int (opcional)
+        - usuario: str (requerido)
+        - token: str (requerido)
+        - subdominio: str (opcional si se usa subdomain en Host)
     """
     try:
+        # Resolve tenant
+        alias = _resolve_tenant_alias(request)
+
         dias = int(request.query_params.get('dias', 30))
         sucursal_id = _get_sucursal_id(request)
 
@@ -215,7 +310,7 @@ def ventas_por_categoria(request):
 
         service = VentasService()
         ventas = service.obtener_ventas_por_categoria(
-            fecha_inicio, fecha_fin, sucursal_id
+            fecha_inicio, fecha_fin, sucursal_id, db_alias=alias
         )
 
         # Convertir Decimals
@@ -225,6 +320,11 @@ def ventas_por_categoria(request):
 
         return Response(ventas, status=status.HTTP_200_OK)
 
+    except ValueError as e:
+        return Response(
+            {'error': f'Error de autenticación: {str(e)}'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     except Exception as e:
         return Response(
             {'error': f'Error al obtener ventas por categoría: {str(e)}'},
@@ -242,15 +342,21 @@ def ventas_por_sucursal(request):
 
     Query params:
         - dias: int (default 30)
+        - usuario: str (requerido)
+        - token: str (requerido)
+        - subdominio: str (opcional si se usa subdomain en Host)
     """
     try:
+        # Resolve tenant
+        alias = _resolve_tenant_alias(request)
+
         dias = int(request.query_params.get('dias', 30))
 
         fecha_fin = timezone.now()
         fecha_inicio = fecha_fin - timedelta(days=dias)
 
         service = VentasService()
-        ventas = service.obtener_ventas_por_sucursal(fecha_inicio, fecha_fin)
+        ventas = service.obtener_ventas_por_sucursal(fecha_inicio, fecha_fin, db_alias=alias)
 
         # Convertir Decimals
         for item in ventas:
@@ -261,6 +367,11 @@ def ventas_por_sucursal(request):
 
         return Response(ventas, status=status.HTTP_200_OK)
 
+    except ValueError as e:
+        return Response(
+            {'error': f'Error de autenticación: {str(e)}'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     except Exception as e:
         return Response(
             {'error': f'Error al obtener ventas por sucursal: {str(e)}'},
@@ -278,15 +389,26 @@ def inventario_resumen(request):
 
     Query params:
         - sucursal_id: int (opcional)
+        - usuario: str (requerido)
+        - token: str (requerido)
+        - subdominio: str (opcional si se usa subdomain en Host)
     """
     try:
+        # Resolve tenant
+        alias = _resolve_tenant_alias(request)
+
         sucursal_id = _get_sucursal_id(request)
 
         service = InventarioService()
-        resumen = service.obtener_resumen_inventario(sucursal_id)
+        resumen = service.obtener_resumen_inventario(sucursal_id, db_alias=alias)
 
         return Response(resumen, status=status.HTTP_200_OK)
 
+    except ValueError as e:
+        return Response(
+            {'error': f'Error de autenticación: {str(e)}'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     except Exception as e:
         return Response(
             {'error': f'Error al obtener resumen de inventario: {str(e)}'},
@@ -305,16 +427,27 @@ def inventario_stock_bajo(request):
     Query params:
         - limite: int (default 50)
         - sucursal_id: int (opcional)
+        - usuario: str (requerido)
+        - token: str (requerido)
+        - subdominio: str (opcional si se usa subdomain en Host)
     """
     try:
+        # Resolve tenant
+        alias = _resolve_tenant_alias(request)
+
         limite = int(request.query_params.get('limite', 50))
         sucursal_id = _get_sucursal_id(request)
 
         service = InventarioService()
-        productos = service.obtener_productos_stock_bajo(sucursal_id, limite)
+        productos = service.obtener_productos_stock_bajo(sucursal_id, limite, db_alias=alias)
 
         return Response(productos, status=status.HTTP_200_OK)
 
+    except ValueError as e:
+        return Response(
+            {'error': f'Error de autenticación: {str(e)}'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     except Exception as e:
         return Response(
             {'error': f'Error al obtener productos stock bajo: {str(e)}'},
@@ -333,16 +466,27 @@ def inventario_sin_rotacion(request):
     Query params:
         - dias: int (default 30)
         - sucursal_id: int (opcional)
+        - usuario: str (requerido)
+        - token: str (requerido)
+        - subdominio: str (opcional si se usa subdomain en Host)
     """
     try:
+        # Resolve tenant
+        alias = _resolve_tenant_alias(request)
+
         dias = int(request.query_params.get('dias', 30))
         sucursal_id = _get_sucursal_id(request)
 
         service = InventarioService()
-        productos = service.obtener_productos_sin_rotacion(dias, sucursal_id)
+        productos = service.obtener_productos_sin_rotacion(dias, sucursal_id, db_alias=alias)
 
         return Response(productos, status=status.HTTP_200_OK)
 
+    except ValueError as e:
+        return Response(
+            {'error': f'Error de autenticación: {str(e)}'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     except Exception as e:
         return Response(
             {'error': f'Error al obtener productos sin rotación: {str(e)}'},
@@ -360,15 +504,26 @@ def inventario_por_bodega(request):
 
     Query params:
         - sucursal_id: int (opcional)
+        - usuario: str (requerido)
+        - token: str (requerido)
+        - subdominio: str (opcional si se usa subdomain en Host)
     """
     try:
+        # Resolve tenant
+        alias = _resolve_tenant_alias(request)
+
         sucursal_id = _get_sucursal_id(request)
 
         service = InventarioService()
-        existencias = service.obtener_existencias_por_bodega(sucursal_id)
+        existencias = service.obtener_existencias_por_bodega(sucursal_id, db_alias=alias)
 
         return Response(existencias, status=status.HTTP_200_OK)
 
+    except ValueError as e:
+        return Response(
+            {'error': f'Error de autenticación: {str(e)}'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     except Exception as e:
         return Response(
             {'error': f'Error al obtener existencias por bodega: {str(e)}'},
@@ -388,17 +543,28 @@ def comparativa_periodos(request):
         - dias_actual: int (default 30)
         - dias_anterior: int (default 30)
         - sucursal_id: int (opcional)
+        - usuario: str (requerido)
+        - token: str (requerido)
+        - subdominio: str (opcional si se usa subdomain en Host)
     """
     try:
+        # Resolve tenant
+        alias = _resolve_tenant_alias(request)
+
         dias_actual = int(request.query_params.get('dias_actual', 30))
         dias_anterior = int(request.query_params.get('dias_anterior', 30))
         sucursal_id = _get_sucursal_id(request)
 
-        calculator = KPICalculator(sucursal_id=sucursal_id)
+        calculator = KPICalculator(sucursal_id=sucursal_id, db_alias=alias)
         comparativa = calculator.calcular_comparativa_periodos(dias_actual, dias_anterior)
 
         return Response(comparativa, status=status.HTTP_200_OK)
 
+    except ValueError as e:
+        return Response(
+            {'error': f'Error de autenticación: {str(e)}'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     except Exception as e:
         return Response(
             {'error': f'Error al calcular comparativa: {str(e)}'},

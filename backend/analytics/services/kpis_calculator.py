@@ -9,14 +9,16 @@ from django.utils import timezone
 class KPICalculator:
     """Calculadora de KPIs para el dashboard principal"""
 
-    def __init__(self, sucursal_id=None):
+    def __init__(self, sucursal_id=None, db_alias='default'):
         """
         Inicializa calculadora
 
         Args:
             sucursal_id: int (opcional) - Filtrar por sucursal
+            db_alias: str - Alias de la base de datos a utilizar
         """
         self.sucursal_id = sucursal_id
+        self.db_alias = db_alias
         self.ventas_service = __import__('analytics.services.ventas_service', fromlist=['VentasService']).VentasService()
         self.inventario_service = __import__('analytics.services.inventario_service', fromlist=['InventarioService']).InventarioService()
 
@@ -35,22 +37,22 @@ class KPICalculator:
 
         # KPIs de Ventas
         ventas_metricas = self.ventas_service.obtener_ventas_totales(
-            fecha_inicio, fecha_fin, self.sucursal_id
+            fecha_inicio, fecha_fin, self.sucursal_id, self.db_alias
         )
 
         # KPIs de Inventario
         inventario_metricas = self.inventario_service.obtener_resumen_inventario(
-            self.sucursal_id
+            self.sucursal_id, self.db_alias
         )
 
         # Productos con stock bajo
         stock_bajo = self.inventario_service.obtener_productos_stock_bajo(
-            self.sucursal_id, limite=10
+            self.sucursal_id, limite=10, db_alias=self.db_alias
         )
 
         # Tendencia de ventas
         tendencia = self.ventas_service.obtener_tendencia_ventas(
-            dias, self.sucursal_id
+            dias, self.sucursal_id, db_alias=self.db_alias
         )
 
         return {
@@ -86,12 +88,12 @@ class KPICalculator:
 
         # Ventas período actual
         ventas_actual = self.ventas_service.obtener_ventas_totales(
-            fecha_inicio_actual, fecha_fin_actual, self.sucursal_id
+            fecha_inicio_actual, fecha_fin_actual, self.sucursal_id, self.db_alias
         )
 
         # Ventas período anterior
         ventas_anterior = self.ventas_service.obtener_ventas_totales(
-            fecha_inicio_anterior, fecha_fin_anterior, self.sucursal_id
+            fecha_inicio_anterior, fecha_fin_anterior, self.sucursal_id, self.db_alias
         )
 
         # Cálculo de variación porcentual

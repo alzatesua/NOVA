@@ -13,7 +13,7 @@ class VentasService:
     """Servicio para métricas relacionadas con ventas"""
 
     @staticmethod
-    def obtener_ventas_totales(fecha_inicio, fecha_fin, sucursal_id=None):
+    def obtener_ventas_totales(fecha_inicio, fecha_fin, sucursal_id=None, db_alias='default'):
         """
         Obtiene las ventas totales en un período
 
@@ -21,13 +21,14 @@ class VentasService:
             fecha_inicio: datetime
             fecha_fin: datetime
             sucursal_id: int (opcional) - Filtrar por sucursal
+            db_alias: str - Alias de la base de datos a utilizar
 
         Returns:
             dict con métricas de ventas
         """
         from main_dashboard.models import Factura
 
-        queryset = Factura.objects.filter(
+        queryset = Factura.objects.using(db_alias).filter(
             fecha_venta__range=(fecha_inicio, fecha_fin),
             estado='PAG'  # Solo facturas pagadas
         )
@@ -55,13 +56,14 @@ class VentasService:
         }
 
     @staticmethod
-    def obtener_tendencia_ventas(dias=30, sucursal_id=None):
+    def obtener_tendencia_ventas(dias=30, sucursal_id=None, db_alias='default'):
         """
         Obtiene la tendencia de ventas por día
 
         Args:
             dias: int - Número de días a analizar
             sucursal_id: int (opcional)
+            db_alias: str - Alias de la base de datos a utilizar
 
         Returns:
             list de dict con ventas por día
@@ -71,7 +73,7 @@ class VentasService:
         fecha_fin = timezone.now()
         fecha_inicio = fecha_fin - timedelta(days=dias)
 
-        queryset = Factura.objects.filter(
+        queryset = Factura.objects.using(db_alias).filter(
             fecha_venta__range=(fecha_inicio, fecha_fin),
             estado='PAG'
         ).annotate(
@@ -87,7 +89,7 @@ class VentasService:
         return list(queryset)
 
     @staticmethod
-    def obtener_top_productos(fecha_inicio, fecha_fin, limite=10, sucursal_id=None):
+    def obtener_top_productos(fecha_inicio, fecha_fin, limite=10, sucursal_id=None, db_alias='default'):
         """
         Obtiene los productos más vendidos
 
@@ -96,13 +98,14 @@ class VentasService:
             fecha_fin: datetime
             limite: int - Cantidad de productos a retornar
             sucursal_id: int (opcional)
+            db_alias: str - Alias de la base de datos a utilizar
 
         Returns:
             list de dict con top productos
         """
         from main_dashboard.models import FacturaDetalle
 
-        queryset = FacturaDetalle.objects.filter(
+        queryset = FacturaDetalle.objects.using(db_alias).filter(
             factura__fecha_venta__range=(fecha_inicio, fecha_fin),
             factura__estado='PAG'
         ).values(
@@ -120,7 +123,7 @@ class VentasService:
         return list(queryset)
 
     @staticmethod
-    def obtener_ventas_por_categoria(fecha_inicio, fecha_fin, sucursal_id=None):
+    def obtener_ventas_por_categoria(fecha_inicio, fecha_fin, sucursal_id=None, db_alias='default'):
         """
         Obtiene las ventas agrupadas por categoría
 
@@ -128,13 +131,14 @@ class VentasService:
             fecha_inicio: datetime
             fecha_fin: datetime
             sucursal_id: int (opcional)
+            db_alias: str - Alias de la base de datos a utilizar
 
         Returns:
             list de dict con ventas por categoría
         """
         from main_dashboard.models import FacturaDetalle, Producto
 
-        queryset = FacturaDetalle.objects.filter(
+        queryset = FacturaDetalle.objects.using(db_alias).filter(
             factura__fecha_venta__range=(fecha_inicio, fecha_fin),
             factura__estado='PAG'
         ).select_related('producto__categoria_id')
@@ -158,20 +162,21 @@ class VentasService:
         return sorted(resultados.values(), key=lambda x: x['total_ventas'], reverse=True)
 
     @staticmethod
-    def obtener_ventas_por_sucursal(fecha_inicio, fecha_fin):
+    def obtener_ventas_por_sucursal(fecha_inicio, fecha_fin, db_alias='default'):
         """
         Obtiene las ventas agrupadas por sucursal
 
         Args:
             fecha_inicio: datetime
             fecha_fin: datetime
+            db_alias: str - Alias de la base de datos a utilizar
 
         Returns:
             list de dict con ventas por sucursal
         """
         from main_dashboard.models import Factura
 
-        queryset = Factura.objects.filter(
+        queryset = Factura.objects.using(db_alias).filter(
             fecha_venta__range=(fecha_inicio, fecha_fin),
             estado='PAG'
         ).values('sucursal_id', 'sucursal__nombre').annotate(
