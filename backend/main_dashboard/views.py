@@ -123,6 +123,27 @@ def obtener_info_tienda(request):
             if tabla == 'productos' and sucursal_id:
                 # 👇 Solo si es productos e id_sucursal fue enviado
                 cursor.execute(f"SELECT * FROM {tabla} WHERE sucursal_id = %s", [sucursal_id])
+            elif tabla == 'inventario_bodega':
+                # 📦 Filtrar bodegas según el rol del usuario
+                if user.rol in ['admin', 'almacen']:
+                    # Admin y almacacen: todas las bodegas de su sucursal
+                    if user.id_sucursal_default:
+                        cursor.execute(
+                            f"SELECT * FROM {tabla} WHERE sucursal_id = %s AND estatus = TRUE",
+                            [user.id_sucursal_default_id]
+                        )
+                    else:
+                        cursor.execute(f"SELECT * FROM {tabla} WHERE estatus = TRUE")
+                elif user.rol in ['vendedor', 'operario']:
+                    # Vendedor y operario: solo sus bodegas asignadas
+                    cursor.execute("""
+                        SELECT b.* FROM inventario_bodega b
+                        INNER JOIN login_usuario_bodega lub ON b.id = lub.id_bodega
+                        WHERE lub.id_login_usuario = %s AND b.estatus = TRUE
+                    """, [user.id])
+                else:
+                    # Otros roles: todas las bodegas activas
+                    cursor.execute(f"SELECT * FROM {tabla} WHERE estatus = TRUE")
             else:
                 cursor.execute(f"SELECT * FROM {tabla}")
 
@@ -571,6 +592,10 @@ def crear_operario(request):
         # 4) Datos del operario y sucursal
         datos_op = request.data.get('operario')
         suc_id   = request.data.get('sucursal_id')
+        bodegas_ids = request.data.get('bodegas_ids', [])  # Lista de IDs de bodegas a asignar
+
+        print(f"DEBUG: bodegas_ids recibido: {bodegas_ids}")
+
         if not datos_op or not suc_id:
             return Response(
                 {'error': 'operario y sucursal_id son requeridos'},
@@ -612,11 +637,41 @@ def crear_operario(request):
                     correo_usuario = correo_nuevo,
                     rol            = datos_op.get('rol'),
                     tienda         = tienda_local,
-                    sucursal_id    = sucursal.id
+                    id_sucursal_default_id = sucursal.id  # Usar _id para evitar error del database router
                 )
                 nuevo.set_password(datos_op.get('password'))
                 nuevo.token = generar_token_jwt(nuevo.usuario)
                 nuevo.save(using=alias)
+
+                # 7c) Asignar bodegas si se proporcionaron (para vendedores y operarios)
+                if bodegas_ids and nuevo.rol in ['vendedor', 'operario']:
+                    LoginUsuarioBodega = apps.get_model('nova', 'LoginUsuarioBodega')
+                    print(f"DEBUG: Asignando bodegas {bodegas_ids} al usuario {nuevo.usuario}")
+
+                    # Usar bulk_create para mejor performance
+                    bodegas_asignaciones = []
+                    for bodega_id in bodegas_ids:
+                        try:
+                            # Verificar que la bodega existe y pertenezca a la sucursal
+                            bodega = Bodega.objects.using(alias).get(
+                                id=bodega_id,
+                                sucursal_id=sucursal.id
+                            )
+                            bodegas_asignaciones.append(
+                                LoginUsuarioBodega(
+                                    id_login_usuario=nuevo,
+                                    id_bodega=bodega
+                                )
+                            )
+                            print(f"DEBUG: Bodega {bodega_id} preparada para asignación")
+                        except Bodega.DoesNotExist as e:
+                            print(f"DEBUG: Bodega {bodega_id} no encontrada: {e}")
+                            continue
+
+                    # Crear todas las asignaciones en una sola consulta
+                    if bodegas_asignaciones:
+                        LoginUsuarioBodega.objects.using(alias).bulk_create(bodegas_asignaciones)
+                        print(f"DEBUG: {len(bodegas_asignaciones)} bodegas asignadas correctamente")
         except IntegrityError:
             return Response(
                 {'error': 'Error de integridad: usuario o correo duplicado.'},
@@ -631,7 +686,8 @@ def crear_operario(request):
                 'usuario':     nuevo.usuario,
                 'correo':      nuevo.correo_usuario,
                 'rol':         nuevo.rol,
-                'sucursal_id': sucursal.id
+                'sucursal_id': sucursal.id,
+                'bodegas_asignadas': bodegas_ids if bodegas_ids else []
             },
             'token_operario': nuevo.token
         }, status=status.HTTP_201_CREATED)

@@ -187,15 +187,16 @@ export function createSucursal({rol, token, usuario, tokenUsuario, accessToken, 
   }, token);
 }
 
-export function createUsuario({usuario, token, subdominio, operario,sucursal_id}) {
+export function createUsuario({usuario, token, subdominio, operario, sucursal_id, bodegas_ids}) {
   return post('api/obtener/datos/api/crear-operario/',{
       usuario,
       token,
       subdominio,
       operario,
-      sucursal_id
+      sucursal_id,
+      bodegas_ids
     },
-    token                        
+    token
   )
 }
 

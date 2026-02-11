@@ -7,11 +7,12 @@ import {
   ChevronDownIcon,
   ChevronUpIcon
 } from '@heroicons/react/24/solid';
-import { fetchSucursales, actualizarfila, createUsuario } from '../services/api'; // Ajusta rutas si es necesario
+import { fetchSucursales, actualizarfila, createUsuario, fetchBodegas } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { showToast } from '../utils/toast';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
+import Select from 'react-select';
 
 export default function UsersView({ users: initialUsers, onCreated }) {
   const [users, setUsers] = useState(initialUsers);
@@ -21,6 +22,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
   const [loading, setLoading] = useState(false);
 
   const [sucursales, setSucursales] = useState([]);
+  const [bodegas, setBodegas] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
 
@@ -221,7 +223,8 @@ export default function UsersView({ users: initialUsers, onCreated }) {
     correo_usuario: '',
     password: '',
     rol: '',
-    sucursal_id: ''
+    sucursal_id: '',
+    bodegas_ids: []
   });
 
   const toggleCreateForm = () => setShowCreateForm(v => !v);
@@ -229,6 +232,28 @@ export default function UsersView({ users: initialUsers, onCreated }) {
     const { name, value } = e.target;
     setNewUser(prev => ({ ...prev, [name]: value }));
   };
+
+  // Cargar bodegas cuando cambia la sucursal seleccionada
+  useEffect(() => {
+    if (newUser.sucursal_id && (newUser.rol === 'vendedor' || newUser.rol === 'operario')) {
+      const loadBodegas = async () => {
+        try {
+          const response = await fetchBodegas({ rol, tokenUsuario, usuario, subdominio });
+          const todasBodegas = response?.datos || [];
+          // Filtrar por sucursal seleccionada
+          const bodegasFiltradas = todasBodegas.filter(
+            b => b.sucursal_id === Number(newUser.sucursal_id) || b.id_sucursal === Number(newUser.sucursal_id)
+          );
+          setBodegas(bodegasFiltradas);
+        } catch (error) {
+          console.error('Error cargando bodegas:', error);
+        }
+      };
+      loadBodegas();
+    } else {
+      setBodegas([]);
+    }
+  }, [newUser.sucursal_id, newUser.rol]);
 
   const handleSubmitNewUser = async e => {
     e.preventDefault();
@@ -240,19 +265,29 @@ export default function UsersView({ users: initialUsers, onCreated }) {
     const rolNuevo = e.target.rol.value;
     const sucursalId = e.target.sucursal_id.value;
 
+    console.log('[DEBUG ENVIANDO USUARIO]:', {
+      usuario: usuarioNuevo,
+      correo,
+      rol: rolNuevo,
+      sucursalId,
+      bodegas_ids: newUser.bodegas_ids
+    });
+
     try {
       await createUsuario({
         usuario: localStorage.getItem('usuario'),
         token: localStorage.getItem('token_usuario'),
         subdominio: window.location.hostname.split('.')[0],
         operario: { usuario: usuarioNuevo, correo_usuario: correo, password, rol: rolNuevo },
-        sucursal_id: sucursalId        
+        sucursal_id: sucursalId,
+        bodegas_ids: newUser.bodegas_ids || []
       });
 
       showToast('success');
       e.target.reset();
       onCreated();
-      setNewUser({ usuario: '', correo_usuario: '', password: '', rol: '', sucursal_id: '' });
+      setNewUser({ usuario: '', correo_usuario: '', password: '', rol: '', sucursal_id: '', bodegas_ids: [] });
+      setBodegas([]);
       setShowCreateForm(false);
     } catch (err) {
       console.log("error", err);
@@ -359,6 +394,33 @@ export default function UsersView({ users: initialUsers, onCreated }) {
               ))}
             </select>
           </div>
+
+          {/* Selector de bodegas (solo para vendedor y operario) */}
+          {(newUser.rol === 'vendedor' || newUser.rol === 'operario') && (
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Selecciona las bodegas asignadas
+              </label>
+              <Select
+                isMulti
+                options={bodegas.map(b => ({ value: b.id, label: b.nombre }))}
+                value={bodegas.filter(b => newUser.bodegas_ids?.includes(b.id)).map(b => ({ value: b.id, label: b.nombre }))}
+                onChange={(selected) => {
+                  setNewUser(prev => ({
+                    ...prev,
+                    bodegas_ids: selected.map(s => s.value)
+                  }));
+                }}
+                placeholder="Selecciona una o más bodegas..."
+                className="text-sm"
+                classNamePrefix="select"
+                noOptionsMessage={() => newUser.sucursal_id ? "No hay bodegas disponibles para esta sucursal" : "Selecciona una sucursal primero"}
+              />
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {newUser.bodegas_ids?.length || 0} bodegas seleccionadas
+              </p>
+            </div>
+          )}
           <div className="text-right">
             <button
               type="submit"

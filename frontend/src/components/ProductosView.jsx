@@ -78,7 +78,6 @@ export default function ProductsView({
   // Estados para filtro por bodega
   const [bodegaSeleccionada, setBodegaSeleccionada] = useState(null);
   const [productosPorBodega, setProductosPorBodega] = useState({});
-  const [isLoadingProductosPorBodega, setIsLoadingProductosPorBodega] = useState(false);
   const [sucursalActual, setSucursalActual] = useState(null);
 
   const [newUser, setNewUser] = useState({ sucursal_id: '' });
@@ -111,7 +110,6 @@ export default function ProductsView({
       return;
     }
 
-    setIsLoadingProductosPorBodega(true);
     try {
       console.log('[ProductosView] Llamando a obtenerProductosPorBodega...');
       const response = await obtenerProductosPorBodega({
@@ -154,14 +152,16 @@ export default function ProductsView({
           console.log('[ProductosView] Estado productosPorBodega actualizado:', newState);
           return newState;
         });
+
+        return productosMapeados; // Devolver para que Promise.all funcione
       } else {
         console.warn('[ProductosView] Respuesta sin datos:', response);
+        return [];
       }
     } catch (error) {
       console.error('[ProductosView] Error cargando productos por bodega:', error);
       showToast('Error al cargar productos de la bodega', 'error');
-    } finally {
-      setIsLoadingProductosPorBodega(false);
+      return [];
     }
   }, [subdominio, usuario, tokenUsuario]);
 
@@ -219,54 +219,56 @@ export default function ProductsView({
   const limpiarFiltroBodega = useCallback(() => {
     console.log('[ProductosView] Limpiando filtro de bodega');
     setBodegaSeleccionada(null);
-    setProductosPorBodega({});
-    showToast('Filtro de bodega limpiado', 'info');
+    // No limpiar productosPorBodega para que se muestren todos los productos de las bodegas asignadas
+    showToast('Mostrando productos de todas tus bodegas', 'info');
   }, []);
 
   // ——— Filtrado ———
   const filteredProducts = useMemo(() => {
+    let productosBase = [];
+
     // Si hay una bodega seleccionada, usar sus productos
     if (bodegaSeleccionada && productosPorBodega[bodegaSeleccionada]) {
-      const productosDeBodega = productosPorBodega[bodegaSeleccionada];
-
-      return productosDeBodega.filter(p => {
-        if (
-          searchTerm &&
-          !p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          !p.sku.toLowerCase().includes(searchTerm.toLowerCase())
-        ) return false;
-
-        if (quickFilter === 'disponible' && p.disponible_bodega <= 0) return false;
-        if (quickFilter === 'agotados' && p.disponible_bodega > 0) return false;
-        if (quickFilter === 'destacados' && !p.is_featured) return false;
-
-        if (categoryFilter && p.id_categoria !== Number(categoryFilter))
-          return false;
-
-        if (priceMin !== '' && parseFloat(p.precio) < parseFloat(priceMin)) return false;
-        if (priceMax !== '' && parseFloat(p.precio) > parseFloat(priceMax)) return false;
-
-        return true;
+      productosBase = productosPorBodega[bodegaSeleccionada];
+    }
+    // Si no hay bodega seleccionada pero el usuario es vendedor/operario,
+    // combinar productos de todas sus bodegas asignadas
+    else if (rol === 'vendedor' || rol === 'operario') {
+      // Combinar todos los productos de las bodegas del usuario
+      const todasLasBodegas = Object.keys(productosPorBodega);
+      todasLasBodegas.forEach(bodegaId => {
+        productosBase = [...productosBase, ...productosPorBodega[bodegaId]];
       });
+      // Eliminar duplicados por id de producto
+      const productosUnicos = new Map();
+      productosBase.forEach(p => productosUnicos.set(p.id, p));
+      productosBase = Array.from(productosUnicos.values());
+      console.log('[ProductosView] Productos combinados de todas las bodegas:', productosBase.length);
+    }
+    // Si no hay bodega seleccionada y es admin/almacen, usar todos los productos
+    else {
+      productosBase = products;
     }
 
-    // Si no hay bodega seleccionada, usar todos los productos
-    return products.filter(p => {
+    // Aplicar filtros adicionales
+    return productosBase.filter(p => {
       if (
         searchTerm &&
         !p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !p.sku.toLowerCase().includes(searchTerm.toLowerCase())
       ) return false;
-      
-      // Ahora usamos stock_total en lugar de stock
-      if (quickFilter === 'disponible' && p.stock_total <= 0) return false;
-      if (quickFilter === 'agotados' && p.stock_total > 0) return false;
+
+      // Usar stock_total para productos combinados o disponible_bodega para una bodega específica
+      const stock = bodegaSeleccionada ? p.disponible_bodega : p.stock_total;
+      if (quickFilter === 'disponible' && stock <= 0) return false;
+      if (quickFilter === 'agotados' && stock > 0) return false;
       if (quickFilter === 'destacados' && !p.is_featured) return false;
-      
-      // Categoria ahora es un objeto
-      if (categoryFilter && p.categoria?.id !== Number(categoryFilter))
+
+      // Categoria - puede ser objeto o id numérico
+      const categoriaId = p.categoria?.id || p.id_categoria;
+      if (categoryFilter && categoriaId !== Number(categoryFilter))
         return false;
-        
+
       if (priceMin !== '' && parseFloat(p.precio) < parseFloat(priceMin)) return false;
       if (priceMax !== '' && parseFloat(p.precio) > parseFloat(priceMax)) return false;
       if (dateFilter && new Date(p.creado_en) < new Date(dateFilter))
@@ -282,7 +284,8 @@ export default function ProductsView({
     priceMax,
     dateFilter,
     bodegaSeleccionada,
-    productosPorBodega
+    productosPorBodega,
+    rol
   ]);
 
   // ——— Infinite scroll ———
@@ -726,7 +729,31 @@ export default function ProductsView({
       try {
         const response = await fetchBodegas({ rol, tokenUsuario, usuario, subdominio });
         console.log('[ProductosView] Respuesta fetchBodegas:', response);
-        const datosBodegas = response?.datos || [];
+        let datosBodegas = response?.datos || [];
+
+        // Filtrar bodegas según las asignadas al usuario (para vendedores y operarios)
+        const bodegasSeleccionadas = localStorage.getItem('bodegas_seleccionadas');
+        if (bodegasSeleccionadas) {
+          const bodegasIds = JSON.parse(bodegasSeleccionadas);
+          if (bodegasIds.length > 0) {
+            console.log('[ProductosView] Filtrando bodegas por IDs:', bodegasIds);
+            datosBodegas = datosBodegas.filter(b => bodegasIds.includes(b.id));
+            console.log('[ProductosView] Bodegas después del filtro:', datosBodegas.length);
+
+            // Para vendedor/operario: cargar productos de todas sus bodegas
+            if (datosBodegas.length > 0 && (rol === 'vendedor' || rol === 'operario')) {
+              // Cargar productos de todas las bodegas en paralelo
+              const promesas = datosBodegas.map(b => cargarProductosPorBodega(b.id));
+              await Promise.all(promesas);
+
+              // Auto-seleccionar la primera bodega
+              const primeraBodega = datosBodegas[0];
+              console.log('[ProductosView] Auto-seleccionando primera bodega:', primeraBodega);
+              setBodegaSeleccionada(primeraBodega.id);
+            }
+          }
+        }
+
         console.log('[ProductosView] Bodegas cargadas:', datosBodegas.length, datosBodegas);
         setBodegas(datosBodegas);
       } catch (error) {

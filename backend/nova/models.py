@@ -361,6 +361,16 @@ class LoginUsuario(AbstractBaseUser, PermissionsMixin):
         related_name='usuarios',
     )
 
+    # ✅ Relación many-to-many con Bodega para asignar múltiples bodegas a usuarios
+    # Se usa through explícito para controlar la tabla intermedia
+    bodegas_asignadas = models.ManyToManyField(
+        'main_dashboard.Bodega',
+        through='LoginUsuarioBodega',
+        through_fields=('id_login_usuario', 'id_bodega'),
+        related_name='usuarios_asignados',
+        blank=True,
+    )
+
     class Meta:
         db_table = 'login_usuario'
 
@@ -385,3 +395,35 @@ class LoginUsuario(AbstractBaseUser, PermissionsMixin):
     @sucursal_id.setter
     def sucursal_id(self, value):
         self.id_sucursal_default_id = value
+
+
+class LoginUsuarioBodega(models.Model):
+    """
+    Tabla intermedia para la relación many-to-many entre LoginUsuario y Bodega.
+    Permite asignar múltiples bodegas a un usuario.
+    """
+    id_login_usuario_bodega = models.BigAutoField(primary_key=True)
+    id_login_usuario = models.ForeignKey(
+        LoginUsuario,
+        on_delete=models.CASCADE,
+        db_column='id_login_usuario',
+        related_name='bodegas_asignaciones'
+    )
+    id_bodega = models.ForeignKey(
+        'main_dashboard.Bodega',
+        on_delete=models.CASCADE,
+        db_column='id_bodega',
+        related_name='usuarios_asignaciones'
+    )
+    fecha_asignacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'login_usuario_bodega'
+        unique_together = [['id_login_usuario', 'id_bodega']]
+        indexes = [
+            models.Index(fields=['id_login_usuario']),
+            models.Index(fields=['id_bodega']),
+        ]
+
+    def __str__(self):
+        return f"Usuario {self.id_login_usuario_id} - Bodega {self.id_bodega_id}"

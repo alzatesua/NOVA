@@ -91,6 +91,61 @@ def login_view(request):
         # Generar tokens de simplejwt para refresh
         refresh = RefreshToken.for_user(user)
 
+        # Obtener bodegas según el rol del usuario
+        from main_dashboard.models import Bodega
+        bodegas_data = []
+
+        if user.rol in ['admin', 'almacen']:
+            # Admin y almacacen ven TODAS las bodegas de su sucursal
+            if sucursal:
+                bodegas = Bodega.objects.using(alias).filter(
+                    sucursal_id=sucursal.id,
+                    estatus=True
+                )
+                bodegas_data = [
+                    {
+                        'id': b.id,
+                        'nombre': b.nombre,
+                        'codigo': b.codigo,
+                        'tipo': b.tipo,
+                        'es_predeterminada': b.es_predeterminada,
+                    }
+                    for b in bodegas
+                ]
+        elif user.rol in ['vendedor', 'operario']:
+            # Vendedor y operario: ver sus bodegas asignadas, si no tiene, ver todas
+            bodegas_asignadas = user.bodegas_asignadas.using(alias).filter(estatus=True)
+
+            # SIEMPRE retornar bodegas (asignadas o todas según tenga)
+            if bodegas_asignadas.exists():
+                bodegas_data = [
+                    {
+                        'id': b.id,
+                        'nombre': b.nombre,
+                        'codigo': b.codigo,
+                        'tipo': b.tipo,
+                        'es_predeterminada': b.es_predeterminada,
+                    }
+                    for b in bodegas_asignadas
+                ]
+            else:
+                # Si NO tiene bodegas asignadas, mostrar TODAS las de su sucursal
+                if sucursal:
+                    bodegas = Bodega.objects.using(alias).filter(
+                        sucursal_id=sucursal.id,
+                        estatus=True
+                    )
+                bodegas_data = [
+                    {
+                        'id': b.id,
+                        'nombre': b.nombre,
+                        'codigo': b.codigo,
+                        'tipo': b.tipo,
+                        'es_predeterminada': b.es_predeterminada,
+                    }
+                    for b in bodegas
+                ]
+
         return Response({
             'message':   'Login exitoso',
             'usuario':   user.usuario,
@@ -101,10 +156,10 @@ def login_view(request):
             "rol": user.rol,
             "tienda": tienda.nombre_tienda,
             "tienda_slug": tienda.slug,
-            "token_usuario": token_jwt,  # Usar siempre el token JWT personalizado
+            "token_usuario": token_jwt,
             'id_sucursal_default': sucursal.id if sucursal else None,
             'nombre_sucursal': sucursal.nombre if sucursal else None,
-
+            'bodegas': bodegas_data,  # Lista de bodegas disponibles para el usuario
         }, status=status.HTTP_200_OK)
 
 
@@ -115,6 +170,55 @@ def login_view(request):
         import traceback; traceback.print_exc()
         return Response(
             {'error': 'Error interno del servidor', 'detalle': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ----------------------- BODEGAS POR SUCURSAL -----------------------
+
+@api_view(['GET'])
+def bodegas_por_sucursal(request):
+    """
+    Endpoint para obtener las bodegas de una sucursal.
+    Requiere: sucursal_id como query parameter.
+    Útil para el selector de bodegas en el login.
+    """
+    from main_dashboard.models import Bodega
+
+    sucursal_id = request.query_params.get('sucursal_id')
+
+    if not sucursal_id:
+        return Response(
+            {'error': 'Se requiere sucursal_id'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        bodegas = Bodega.objects.filter(
+            sucursal_id=sucursal_id,
+            estatus=True
+        ).order_by('nombre')
+
+        bodegas_data = [
+            {
+                'id': b.id,
+                'nombre': b.nombre,
+                'codigo': b.codigo,
+                'tipo': b.get_tipo_display(),
+                'es_predeterminada': b.es_predeterminada,
+            }
+            for b in bodegas
+        ]
+
+        return Response({
+            'bodegas': bodegas_data,
+            'total': len(bodegas_data)
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        return Response(
+            {'error': 'Error al obtener bodegas', 'detalle': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

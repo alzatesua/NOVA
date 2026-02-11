@@ -8,6 +8,9 @@ from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
 from django.db import transaction, IntegrityError
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SucursalSerializer(serializers.ModelSerializer):

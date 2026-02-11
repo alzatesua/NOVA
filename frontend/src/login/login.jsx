@@ -3,15 +3,14 @@ import { toast } from 'react-toastify';
 const API_URL = import.meta.env.VITE_API_URL;
 
 
-
-
 function Login() {
   const [correoUsuario, setCorreoUsuario] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const hostname = window.location.hostname;
     const subdominio = hostname.split('.')[0];
@@ -29,11 +28,13 @@ function Login() {
       })
     });
 
-
       const data = await response.json();
 
-
       if (response.ok) {
+        // Extraer IDs de bodegas de la respuesta
+        const bodegasIds = data.bodegas ? data.bodegas.map(b => b.id) : [];
+
+        // Guardar todos los datos en localStorage
         localStorage.setItem("accessToken", data.access);
         localStorage.setItem("token_usuario", data.token_usuario);
         localStorage.setItem("refresh_token", data.refresh);
@@ -43,19 +44,21 @@ function Login() {
         localStorage.setItem("tienda", data.tienda);
         localStorage.setItem("nombre_sucursal", data.nombre_sucursal);
         localStorage.setItem("id_sucursal", data.id_sucursal_default);
-         
+        localStorage.setItem("bodegas_seleccionadas", JSON.stringify(bodegasIds));
 
+        // Redirigir al dashboard
         window.location.href = "/dashboard";
       } else {
-          toast.error(data.error || "Credenciales inválidas.", {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "colored",
-          });
+        toast.error(data.error || "Credenciales inválidas.", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
+        });
+        setLoading(false);
       }
     } catch (err) {
       toast.error("Error al conectar con el servidor.", {
@@ -67,13 +70,14 @@ function Login() {
         draggable: true,
         theme: "colored",
       });
+      setLoading(false);
     }
   };
 
-   return (
+  return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <form 
-        onSubmit={handleSubmit} 
+      <form
+        onSubmit={handleLogin}
         className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md"
       >
         <h2 className="text-3xl font-semibold mb-6 text-center text-gray-800">
@@ -91,7 +95,8 @@ function Login() {
             value={correoUsuario}
             onChange={(e) => setCorreoUsuario(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
           />
         </div>
 
@@ -106,19 +111,21 @@ function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
           />
         </div>
 
-        {error && (
-          <p className="text-red-600 mb-4 text-sm text-center">{error}</p>
-        )}
-
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
+          disabled={loading}
+          className={`w-full py-2 rounded-md transition duration-200 ${
+            loading
+              ? 'bg-gray-400 text-white cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
         >
-          Iniciar sesión
+          {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
         </button>
 
         <div className="mt-6 text-center text-sm text-gray-600">
@@ -136,7 +143,6 @@ function Login() {
       </form>
     </div>
   );
-
 }
 
 export default Login;
