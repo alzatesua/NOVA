@@ -64,7 +64,7 @@ export default function ProductoSelectorPOS({
   const getStockColor = (stock) => {
     if (stock <= 0) return 'text-red-600 bg-red-50';
     if (stock <= 5) return 'text-orange-600 bg-orange-50';
-    return 'text-green-600 bg-green-50';
+    return 'text-sky-600 bg-sky-50';
   };
 
   return (
@@ -165,10 +165,10 @@ export default function ProductoSelectorPOS({
 
       {/* Productos agregados */}
       {productosAgregados.length > 0 && !searchQuery && (
-        <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
+        <div className="mt-4 p-4 bg-gradient-to-r from-sky-50 to-cyan-50 rounded-xl border-2 border-sky-200">
           <div className="flex items-center gap-2 mb-3">
-            <ShoppingBagIcon className="h-5 w-5 text-green-600" />
-            <p className="font-semibold text-green-800">
+            <ShoppingBagIcon className="h-5 w-5 text-sky-600" />
+            <p className="font-semibold text-sky-800">
               {productosAgregados.length} producto{productosAgregados.length !== 1 ? 's' : ''} en el carrito
             </p>
           </div>
@@ -176,11 +176,11 @@ export default function ProductoSelectorPOS({
             {productosAgregados.slice(0, 3).map((p) => (
               <div key={p.id} className="flex items-center justify-between text-sm bg-white p-2 rounded-lg">
                 <span className="font-medium text-gray-700 truncate">{p.nombre}</span>
-                <span className="font-bold text-green-600">x{p.cantidad}</span>
+                <span className="font-bold text-sky-600">x{p.cantidad}</span>
               </div>
             ))}
             {productosAgregados.length > 3 && (
-              <p className="text-xs text-green-600 text-center">
+              <p className="text-xs text-sky-600 text-center">
                 +{productosAgregados.length - 3} más
               </p>
             )}

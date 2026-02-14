@@ -1,174 +1,252 @@
 import React from 'react';
-import { BuildingStorefrontIcon, DocumentTextIcon, UserIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { BuildingStorefrontIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 
-export default function FacturaTicket({ factura, formato = '80mm' }) {
+/* ─────────────────────────────────────────────────────────────
+   FacturaTicket — Diseño POS profesional
+   • Tailwind CSS + Heroicons (igual que tu proyecto original)
+   • Sin gradientes de color (no imprimen bien en térmica)
+   • Optimizado para papel térmico 58mm / 80mm
+   
+   INSTALACIÓN DE FUENTE — añade esto en tu index.html o globals.css:
+   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+   ───────────────────────────────────────────────────────────── */
+
+const fmt = (n) =>
+  '$' +
+  parseFloat(n || 0).toLocaleString('es-CO', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+const Separador = ({ tipo = 'solid' }) => (
+  <div className="px-4 py-1 text-gray-300 text-xs tracking-widest select-none overflow-hidden">
+    {tipo === 'dashed'
+      ? '- - - - - - - - - - - - - - - - - - - - - - - - - -'
+      : '──────────────────────────────────────────────────'}
+  </div>
+);
+
+const Fila = ({ label, valor, negrita = false }) => (
+  <div className="flex justify-between items-baseline py-0.5">
+    <span className={`text-[10px] ${negrita ? 'font-bold text-gray-900' : 'text-gray-500'}`}>
+      {label}
+    </span>
+    <span className={`text-[10px] font-mono ${negrita ? 'font-bold text-gray-900' : 'font-medium text-gray-800'}`}>
+      {valor}
+    </span>
+  </div>
+);
+
+export default function FacturaTicket({ factura, formato = '80mm', empresaInfo = {} }) {
+  const empresa = {
+    nombre:    'MI TIENDA',
+    nit:       '900.123.456-7',
+    direccion: 'Calle 123 #45-67',
+    ciudad:    'Bogotá, Colombia',
+    telefono:  '(555) 123-4567',
+    email:     'ventas@mitienda.com',
+    regimen:   'Régimen Simplificado',
+    ...empresaInfo,
+  };
+
+  const anchoClase = formato === '58mm' ? 'w-[220px]' : 'w-full max-w-[302px]';
+  const textoBase  = formato === '58mm' ? 'text-[9px]' : 'text-[10px]';
+
+  // Extraer información del cliente (soporta diferentes estructuras de respuesta del backend)
+  const clienteNombre = factura?.cliente_nombre || factura?.cliente?.nombre_completo || '';
+  const clienteNit = factura?.cliente_nit || factura?.cliente?.numero_documento || '';
+
+  /* ── Estado vacío ── */
   if (!factura) {
     return (
-      <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl shadow-lg border-2 border-dashed border-gray-300 text-center">
-        <DocumentTextIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-        <p className="text-gray-500 font-medium text-lg">No hay factura para mostrar</p>
-        <p className="text-sm text-gray-400 mt-2">Completa una venta para ver el ticket aquí</p>
+      <div className={`${anchoClase} border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-gray-50`}>
+        <DocumentTextIcon className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+        <p className="text-gray-500 font-semibold text-xs">Sin factura para mostrar</p>
+        <p className="text-gray-400 text-[10px] mt-1">Completa una venta para ver el ticket</p>
       </div>
     );
   }
 
-  const styles = formato === '58mm' ? styles58mm : styles80mm;
+  const fecha    = new Date(factura.fecha_venta);
+  const fechaStr = fecha.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const horaStr  = fecha.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+  const subtotal  = parseFloat(factura.subtotal        || 0);
+  const iva       = parseFloat(factura.total_iva        || 0);
+  const descuento = parseFloat(factura.total_descuento  || 0);
+  const total     = parseFloat(factura.total            || 0);
+  const cambio    = parseFloat(factura.cambio           || 0);
 
   return (
     <div
       id="factura-ticket"
-      className="bg-white rounded-2xl shadow-2xl overflow-hidden"
-      style={{ fontFamily: 'monospace', ...styles }}
+      className={`${anchoClase} ${textoBase} bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden`}
+      style={{ fontFamily: "'IBM Plex Mono', monospace" }}
     >
-      {/* Encabezado con gradiente */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-5 text-center">
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <BuildingStorefrontIcon className="h-8 w-8" />
-          <h2 className="font-bold text-2xl tracking-wide">MI TIENDA</h2>
+      {/* ── ENCABEZADO ── */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2 text-center">
+        <div className="flex items-center justify-center gap-1.5 mb-0.5">
+          <BuildingStorefrontIcon className="h-4 w-4 text-white" />
+          <h2 className="font-bold text-sm tracking-[2px] uppercase">{empresa.nombre}</h2>
         </div>
-        <p className="text-blue-100 text-sm">NIT: 900.123.456-7</p>
-        <p className="text-blue-100 text-xs mt-1">Dirección: Calle 123 #45-67</p>
-        <p className="text-blue-100 text-xs">Tel: (555) 123-4567</p>
+        <p className="text-blue-100 text-[8px] tracking-widest uppercase mb-1">{empresa.regimen}</p>
+        <p className="text-blue-50 text-[9px]">NIT: {empresa.nit}</p>
+        <p className="text-blue-50 text-[9px]">{empresa.direccion}</p>
+        <p className="text-blue-50 text-[9px]">{empresa.ciudad}</p>
+        <p className="text-blue-50 text-[9px]">Tel: {empresa.telefono}</p>
       </div>
 
-      {/* Info factura */}
-      <div className="p-5 space-y-2 border-b-2 border-gray-100">
-        <div className="flex items-center justify-between">
-          <span className="text-gray-500 font-medium text-xs">Factura #</span>
-          <span className="font-bold text-gray-900 text-lg">{factura.numero_factura || 'N/A'}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-gray-500 font-medium text-xs flex items-center gap-1">
-            <CalendarIcon className="h-3 w-3" />
-            Fecha
-          </span>
-          <span className="text-gray-700 text-xs">
-            {new Date(factura.fecha_venta).toLocaleString()}
-          </span>
-        </div>
+      {/* ── TIPO DOCUMENTO ── */}
+      <div className="bg-sky-400 text-white text-center py-0.5 text-[9px] font-bold tracking-[2px]">
+        FACTURA DE VENTA
+      </div>
+
+      {/* ── INFO FACTURA ── */}
+      <div className="px-3 pt-2 pb-1.5">
+        <Fila label="No. Factura:" valor={`#${factura.numero_factura || 'N/A'}`} negrita />
+        <Fila label="Fecha:"       valor={fechaStr} />
+        <Fila label="Hora:"        valor={horaStr} />
         {factura.vendedor_nombre && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-500 font-medium text-xs flex items-center gap-1">
-              <UserIcon className="h-3 w-3" />
-              Cajero
-            </span>
-            <span className="text-gray-700 text-xs">{factura.vendedor_nombre}</span>
-          </div>
-        )}
-        {factura.cliente_nombre && factura.cliente_nombre !== 'Consumidor Final' && (
-          <div className="bg-blue-50 rounded-lg p-2 mt-2">
-            <p className="text-xs text-gray-500 mb-1">Cliente</p>
-            <p className="font-semibold text-gray-900 text-sm">{factura.cliente_nombre}</p>
-          </div>
+          <Fila label="Cajero:" valor={factura.vendedor_nombre} />
         )}
       </div>
 
-      {/* Productos */}
-      <div className="p-5 border-b-2 border-gray-100">
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b-2 border-gray-200">
-              <th className="text-left py-2 font-bold text-gray-700 w-16">Cant.</th>
-              <th className="text-left py-2 font-bold text-gray-700">Descripción</th>
-              <th className="text-right py-2 font-bold text-gray-700">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {factura.detalles && factura.detalles.length > 0 ? (
-              factura.detalles.map((det, i) => (
-                <tr key={i} className="border-b border-dashed border-gray-100 last:border-b-0">
-                  <td className="py-2 font-semibold text-gray-900">{det.cantidad}</td>
-                  <td className="py-2">
-                    <p className="font-medium text-gray-800 truncate" title={det.producto_nombre}>
-                      {det.producto_nombre}
-                    </p>
-                    {det.producto_sku && (
-                      <p className="text-xs text-gray-400">SKU: {det.producto_sku}</p>
-                    )}
-                    {det.producto_imei && (
-                      <p className="text-xs text-orange-600 font-medium">IMEI: {det.producto_imei}</p>
-                    )}
-                  </td>
-                  <td className="text-right py-2 font-bold text-gray-900">
-                    ${parseFloat(det.total).toFixed(2)}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="3" className="text-center py-4 text-gray-400">
-                  Sin productos
-                </td>
-              </tr>
+      {/* ── CLIENTE ── */}
+      {clienteNombre && (
+        <>
+          <Separador tipo="dashed" />
+          <div className="px-3 pb-2">
+            <p className="text-[8px] font-bold tracking-widest text-gray-400 uppercase mb-0.5">Cliente</p>
+            <p className="font-bold text-gray-900 text-[11px]">{clienteNombre}</p>
+            {clienteNit && (
+              <p className="text-[9px] text-gray-500">NIT/CC: {clienteNit}</p>
             )}
-          </tbody>
-        </table>
+          </div>
+        </>
+      )}
+
+      {/* ── PRODUCTOS ── */}
+      <Separador />
+      <div className="px-3 pb-1.5">
+        {/* Cabecera tabla */}
+        <div className="grid grid-cols-[20px_1fr_56px] gap-1 border-b-2 border-gray-900 pb-0.5 mb-0.5">
+          {['Ctd', 'Descripción', 'Total'].map((h, i) => (
+            <span
+              key={i}
+              className={`text-[8px] font-bold tracking-widest uppercase text-gray-900 ${i === 2 ? 'text-right' : ''}`}
+            >
+              {h}
+            </span>
+          ))}
+        </div>
+
+        {/* Filas de productos */}
+        {factura.detalles && factura.detalles.length > 0 ? (
+          factura.detalles.map((det, i) => (
+            <div
+              key={i}
+              className="grid grid-cols-[20px_1fr_56px] gap-1 py-1 border-b border-dashed border-gray-200 last:border-b-0 items-start"
+            >
+              <span className="font-bold text-gray-900">{det.cantidad}</span>
+              <div>
+                <p className="font-semibold text-gray-900 leading-tight break-words text-[10px]">
+                  {det.producto_nombre}
+                </p>
+                {det.precio_unitario && (
+                  <p className="text-[8px] text-gray-400 mt-0.5">c/u {fmt(det.precio_unitario)}</p>
+                )}
+                {det.producto_sku && (
+                  <p className="text-[8px] text-gray-400">SKU: {det.producto_sku}</p>
+                )}
+                {det.producto_imei && (
+                  <p className="text-[8px] font-semibold text-gray-600">IMEI: {det.producto_imei}</p>
+                )}
+              </div>
+              <span className="text-right font-bold text-gray-900 whitespace-nowrap text-[10px]">
+                {fmt(det.total)}
+              </span>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-400 py-2 text-[10px]">Sin productos</p>
+        )}
       </div>
 
-      {/* Totales */}
-      <div className="p-5 space-y-2 bg-gradient-to-b from-gray-50 to-white">
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-600">Subtotal:</span>
-          <span className="font-semibold text-gray-900">${parseFloat(factura.subtotal || 0).toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-600">IVA:</span>
-          <span className="font-semibold text-gray-900">${parseFloat(factura.total_iva || 0).toFixed(2)}</span>
-        </div>
-        {factura.total_descuento > 0 && (
-          <div className="flex justify-between items-center text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">
-            <span>Descuento:</span>
-            <span className="font-bold">-${parseFloat(factura.total_descuento).toFixed(2)}</span>
-          </div>
+      {/* ── TOTALES ── */}
+      <Separador />
+      <div className="px-3 pb-3">
+        <Fila label="Subtotal:"   valor={fmt(subtotal)} />
+        <Fila label="IVA (19%):"  valor={fmt(iva)} />
+        {descuento > 0 && (
+          <Fila label="Descuento:" valor={`-${fmt(descuento)}`} />
         )}
-        <div className="flex justify-between items-center py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl px-4 -mx-1 my-2">
-          <span className="font-bold text-lg">TOTAL:</span>
-          <span className="font-bold text-2xl">${parseFloat(factura.total || 0).toFixed(2)}</span>
+
+        {/* Total destacado — azul sólido, imprime perfecto en térmica */}
+        <div className="flex justify-between items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded px-2.5 py-1.5 my-1.5">
+          <span className="font-bold text-xs tracking-wide">TOTAL A PAGAR:</span>
+          <span className="font-bold text-sm">{fmt(total)}</span>
         </div>
 
+        {/* Formas de pago */}
         {factura.pagos && factura.pagos.length > 0 && (
-          <div className="space-y-1 mt-3 pt-3 border-t border-gray-200">
+          <div className="mt-1.5">
+            <p className="text-[8px] font-bold tracking-widest text-gray-400 uppercase mb-0.5">
+              Forma de Pago
+            </p>
             {factura.pagos.map((pago, i) => (
-              <div key={i} className="flex justify-between items-center text-xs">
-                <span className="text-gray-500">{pago.forma_pago_nombre}:</span>
-                <span className="font-semibold text-gray-900">${parseFloat(pago.monto).toFixed(2)}</span>
-              </div>
+              <Fila key={i} label={pago.forma_pago_nombre + ':'} valor={fmt(pago.monto)} />
             ))}
           </div>
         )}
 
-        {factura.cambio > 0 && (
-          <div className="flex justify-between items-center py-2 bg-blue-50 px-3 rounded-lg mt-2">
-            <span className="text-blue-700 font-semibold text-sm">Cambio:</span>
-            <span className="font-bold text-blue-700 text-lg">${parseFloat(factura.cambio).toFixed(2)}</span>
+        {/* Cambio */}
+        {cambio > 0 && (
+          <div className="flex justify-between items-center bg-sky-50 rounded px-2.5 py-1 mt-1.5">
+            <span className="font-semibold text-sky-700 text-[10px]">Cambio:</span>
+            <span className="font-bold text-gray-900 text-xs">{fmt(cambio)}</span>
           </div>
         )}
       </div>
 
-      {/* Pie de página */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 text-center px-6 py-5 border-t-2 border-gray-200">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <DocumentTextIcon className="h-5 w-5 text-blue-600" />
-          <p className="font-bold text-gray-800">¡Gracias por su compra!</p>
-        </div>
-        <p className="text-xs text-gray-500">Conserve este comprobante</p>
-        {factura.observaciones && (
-          <div className="mt-3 p-2 bg-white rounded-lg border border-gray-200">
-            <p className="text-xs text-gray-600 italic">{factura.observaciones}</p>
+      {/* ── OBSERVACIONES ── */}
+      {factura.observaciones && (
+        <>
+          <Separador tipo="dashed" />
+          <div className="px-3 pb-2">
+            <p className="text-[8px] font-bold tracking-widest text-gray-400 uppercase mb-0.5">
+              Observaciones
+            </p>
+            <p className="text-[9px] text-gray-600 italic leading-relaxed">
+              {factura.observaciones}
+            </p>
           </div>
-        )}
+        </>
+      )}
+
+      {/* ── PIE DE PÁGINA ── */}
+      <Separador />
+      <div className="px-3 pb-3 pt-1.5 text-center border-t-[2px] border-double border-gray-900">
+        <p className="font-bold text-gray-900 text-[11px] tracking-wide mb-0.5">
+          ¡GRACIAS POR SU COMPRA!
+        </p>
+        <p className="text-[8px] text-gray-400 tracking-wide mb-0.5">
+          Conserve este comprobante de pago
+        </p>
+        <p className="text-[8px] text-gray-400">{empresa.email}</p>
+        <p className="text-[7px] text-gray-300 mt-1">
+          {empresa.regimen} — No somos responsables del IVA
+        </p>
+      </div>
+
+      {/* ── BOTÓN IMPRIMIR — clase print:hidden para que no salga en papel ── */}
+      <div className="px-3 pb-3 print:hidden">
+        <button
+          onClick={() => window.print()}
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-[10px] tracking-widest py-2 rounded transition-colors"
+        >
+          🖨 IMPRIMIR TICKET
+        </button>
       </div>
     </div>
   );
 }
-
-const styles58mm = {
-  width: '220px',
-  fontSize: '10px'
-};
-
-const styles80mm = {
-  width: '100%',
-  maxWidth: '400px',
-  fontSize: '12px'
-};

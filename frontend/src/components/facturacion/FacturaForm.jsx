@@ -24,7 +24,6 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
   const [productos, setProductos] = useState([]);
   const [formasPago, setFormasPago] = useState([]);
   const [pagos, setPagos] = useState([{ forma_pago: null, monto: '', referencia: '' }]);
-  const [observaciones, setObservaciones] = useState('');
   const [loading, setLoading] = useState(false);
 
   const tokenUsuario = localStorage.getItem('token_usuario');
@@ -214,14 +213,104 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
     return Math.max(0, calcularTotalPagado() - calcularTotal());
   }
 
+  const puedeIrAPaso = (numeroPaso) => {
+    // Paso 1: Siempre accesible (cliente es opcional)
+    if (numeroPaso === 1) return true;
+
+    // Validaciones comunes de productos
+    const hayProductos = productos.length > 0;
+    const todosSeleccionados = productos.every(p => p.producto_seleccionado);
+    const todosConCantidadValida = productos.every(p => {
+      const cantidad = parseInt(p.cantidad);
+      return cantidad > 0 && cantidad <= (p.disponible || 9999);
+    });
+
+    // Paso 2: Requiere productos agregados y seleccionados con cantidad válida
+    if (numeroPaso === 2) {
+      return hayProductos && todosSeleccionados && todosConCantidadValida;
+    }
+
+    // Paso 3: Requiere productos validados Y pagos completos
+    if (numeroPaso === 3) {
+      // Validar pagos
+      const totalMayorQueCero = calcularTotal() > 0;
+      const hayPagosValidos = pagos.length > 0 && pagos.some(p => parseFloat(p.monto) > 0);
+      const pagoCompleto = calcularTotalPagado() >= calcularTotal();
+
+      return hayProductos && todosSeleccionados && todosConCantidadValida && totalMayorQueCero && hayPagosValidos && pagoCompleto;
+    }
+
+    // Paso 4: Confirmar - Mismos requisitos que paso 3
+    if (numeroPaso === 4) {
+      const totalMayorQueCero = calcularTotal() > 0;
+      const hayPagosValidos = pagos.length > 0 && pagos.some(p => parseFloat(p.monto) > 0);
+      const pagoCompleto = calcularTotalPagado() >= calcularTotal();
+
+      return hayProductos && todosSeleccionados && todosConCantidadValida && totalMayorQueCero && hayPagosValidos && pagoCompleto;
+    }
+
+    return false;
+  };
+
   const puedeAvanzar = () => {
+    let hayProductos;
+    let todosProductosSeleccionados;
+    let todosConCantidadValida;
+    let hayProductosPago;
+    let productosSeleccionados;
+    let totalMayorQueCero;
+    let hayPagosValidos;
+    let pagoCompleto;
+
     switch (pasoActual) {
       case 1:
-        return true; // Cliente es opcional
+        // Paso 1: Cliente es opcional, pero si se selecciona uno debe ser válido
+        // Se puede avanzar siempre (con o sin cliente)
+        return true;
+
       case 2:
-        return productos.length > 0 && productos.every(p => p.producto_seleccionado);
+        // Paso 2: Productos - VALIDACIONES ESTRICTAS
+        // NO se puede avanzar si:
+        // - No hay productos agregados
+        // - Hay productos sin seleccionar
+        // - Hay productos con cantidad 0 o inválida
+        hayProductos = productos.length > 0;
+
+        // Verificar que TODOS los productos tengan un producto seleccionado
+        todosProductosSeleccionados = hayProductos && productos.every(p => {
+          return p.producto_seleccionado && p.id !== null && p.id !== undefined;
+        });
+
+        // Verificar que todos los productos tengan cantidad válida
+        todosConCantidadValida = hayProductos && productos.every(p => {
+          const cantidad = parseInt(p.cantidad);
+          return cantidad > 0 && cantidad <= (p.disponible || 9999);
+        });
+
+        return hayProductos && todosProductosSeleccionados && todosConCantidadValida;
+
       case 3:
-        return calcularTotalPagado() >= calcularTotal() && productos.length > 0 && productos.every(p => p.producto_seleccionado);
+        // Paso 3: Pago - VALIDACIONES ESTRICTAS
+        // NO se puede avanzar si:
+        // - No hay productos
+        // - Productos no seleccionados
+        // - Total es 0
+        // - Pagos incompletos
+        // - Monto pagado insuficiente
+        hayProductosPago = productos.length > 0;
+        productosSeleccionados = hayProductosPago && productos.every(p => p.producto_seleccionado);
+        totalMayorQueCero = calcularTotal() > 0;
+
+        // Verificar que haya al menos un método de pago con monto
+        hayPagosValidos = pagos.length > 0 && pagos.some(p => {
+          const monto = parseFloat(p.monto);
+          return monto > 0;
+        });
+
+        pagoCompleto = calcularTotalPagado() >= calcularTotal();
+
+        return hayProductosPago && productosSeleccionados && totalMayorQueCero && hayPagosValidos && pagoCompleto;
+
       default:
         return true;
     }
@@ -231,14 +320,41 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
     if (puedeAvanzar()) {
       setPasoActual(pasoActual + 1);
     } else {
+      // Mensajes específicos según el paso actual y qué falta
+      if (pasoActual === 1) {
+        // Paso 1 - Cliente (no debería bloquearse, pero por si acaso)
+        showToast('error', '⚠️ Debes completar el paso de cliente antes de continuar');
+      }
+
       if (pasoActual === 2) {
+        // Paso 2 - Productos
         if (productos.length === 0) {
-          showToast('error', 'Debe agregar al menos un producto');
+          showToast('error', '⚠️ Debes agregar al menos un producto antes de continuar');
         } else if (!productos.every(p => p.producto_seleccionado)) {
-          showToast('error', 'Debe seleccionar un producto para cada fila');
+          const productosSinSeleccionar = productos.filter(p => !p.producto_seleccionado);
+          showToast('error', `⚠️ Hay ${productosSinSeleccionar.length} producto(s) sin seleccionar. Debes buscar y seleccionar un producto para cada fila.`);
+        } else if (!productos.every(p => {
+          const cantidad = parseInt(p.cantidad);
+          return cantidad > 0;
+        })) {
+          showToast('error', '⚠️ Todos los productos deben tener una cantidad mayor a 0');
         }
-      } else if (pasoActual === 3 && calcularTotalPagado() < calcularTotal()) {
-        showToast('error', 'El monto pagado es insuficiente');
+      }
+
+      if (pasoActual === 3) {
+        // Paso 3 - Pago
+        const productosCompletos = productos.length > 0 && productos.every(p => p.producto_seleccionado);
+
+        if (!productosCompletos || productos.length === 0) {
+          showToast('error', '⚠️ Debes agregar y seleccionar productos antes de continuar');
+        } else if (calcularTotal() === 0) {
+          showToast('error', '⚠️ El total de la venta es $0. Debes agregar productos');
+        } else if (!pagos.some(p => parseFloat(p.monto) > 0)) {
+          showToast('error', '⚠️ Debes agregar al menos un método de pago con monto antes de continuar');
+        } else if (calcularTotalPagado() < calcularTotal()) {
+          const faltante = (calcularTotal() - calcularTotalPagado()).toFixed(2);
+          showToast('error', `⚠️ Monto insuficiente. Faltan $${faltante} para completar la venta`);
+        }
       }
     }
   };
@@ -279,7 +395,6 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
         total: calcularTotal(),
         total_pagado: calcularTotalPagado(),
         cambio: calcularCambio(),
-        observaciones: observaciones || null,
         detalles: productos.filter(p => p.producto_seleccionado).map(p => {
           const precio = parseFloat(p.precio);
           const ivaPorcentaje = parseFloat(p.iva_porcentaje || 0);
@@ -351,16 +466,22 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 {/* Paso */}
                 <div className="flex flex-col items-center flex-1">
                   <button
-                    onClick={() => setPasoActual(paso.numero)}
+                    onClick={() => {
+                      if (puedeIrAPaso(paso.numero)) {
+                        setPasoActual(paso.numero);
+                      }
+                    }}
+                    disabled={!puedeIrAPaso(paso.numero)}
                     className={`
                       w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm
                       transition-all duration-300 mb-1
-                      ${esActivo 
-                        ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/50 scale-105' 
+                      ${esActivo
+                        ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/50 scale-105'
                         : estaCompletado || yaVisitado
-                        ? 'bg-green-500 text-white'
+                        ? 'bg-sky-400 text-white'
                         : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                       }
+                      ${!puedeIrAPaso(paso.numero) && !esActivo ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   >
                     {estaCompletado && !esActivo ? (
@@ -384,8 +505,8 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 {index < pasos.length - 1 && (
                   <div className={`
                     h-0.5 flex-1 mx-1 rounded-full transition-all duration-300
-                    ${yaVisitado || estaCompletado
-                      ? 'bg-green-500'
+                    ${puedeIrAPaso(paso.numero + 1)
+                      ? 'bg-sky-400'
                       : 'bg-slate-200 dark:bg-slate-700'
                     }
                   `} />
@@ -418,8 +539,8 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
         {pasoActual === 2 && (
           <div className="p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                <ShoppingCartIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              <div className="p-1.5 bg-sky-100 dark:bg-sky-900/30 rounded-lg">
+                <ShoppingCartIcon className="h-5 w-5 text-sky-600 dark:text-sky-400" />
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Productos</h3>
@@ -437,7 +558,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">No hay productos agregados</p>
                 <button
                   onClick={agregarFilaProducto}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-400 text-white text-sm font-semibold rounded-lg hover:bg-sky-500 transition-colors"
                 >
                   <PlusIcon className="h-4 w-4" />
                   Agregar primer producto
@@ -497,7 +618,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                               </div>
                               <div>
                                 <label className="block text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 mb-1">Subtotal</label>
-                                <p className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 rounded text-center font-bold text-emerald-700 dark:text-emerald-400">
+                                <p className="px-2 py-1 bg-sky-100 dark:bg-sky-900/30 rounded text-center font-bold text-sky-700 dark:text-sky-400">
                                   ${(parseFloat(fila.precio) * fila.cantidad).toFixed(2)}
                                 </p>
                               </div>
@@ -560,7 +681,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 <button
                   onClick={agregarFilaProducto}
                   disabled={!bodegaId}
-                  className="flex items-center justify-center gap-1.5 w-full px-3 py-2 text-xs sm:text-sm bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors font-semibold border border-emerald-200 dark:border-emerald-800"
+                  className="flex items-center justify-center gap-1.5 w-full px-3 py-2 text-xs sm:text-sm bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400 rounded-lg hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors font-semibold border border-sky-200 dark:border-sky-800"
                   title={!bodegaId ? "Seleccione una bodega primero" : "Agregar otro producto"}
                 >
                   <PlusIcon className="h-4 w-4" />
@@ -575,8 +696,8 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
         {pasoActual === 3 && (
           <div className="p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                <CreditCardIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <div className="p-1.5 bg-sky-100 dark:bg-sky-900/30 rounded-lg">
+                <CreditCardIcon className="h-5 w-5 text-sky-600 dark:text-sky-400" />
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Métodos de Pago</h3>
@@ -666,8 +787,8 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                   <span className="text-lg sm:text-xl font-bold text-white">${calcularTotal().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center py-1">
-                  <span className="text-xs sm:text-sm text-green-700 dark:text-green-400 font-semibold">Pagado:</span>
-                  <span className="text-sm sm:text-base font-bold text-green-600 dark:text-green-400">${calcularTotalPagado().toFixed(2)}</span>
+                  <span className="text-xs sm:text-sm text-sky-700 dark:text-sky-400 font-semibold">Pagado:</span>
+                  <span className="text-sm sm:text-base font-bold text-sky-600 dark:text-sky-400">${calcularTotalPagado().toFixed(2)}</span>
                 </div>
                 {calcularCambio() > 0 && (
                   <div className="flex justify-between items-center py-1 bg-blue-50 dark:bg-blue-900/30 rounded-lg px-2">
@@ -756,20 +877,6 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                   <span className="text-xl sm:text-2xl font-bold">${calcularTotal().toFixed(2)}</span>
                 </div>
               </div>
-
-              {/* Observaciones */}
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Observaciones (opcional)
-                </label>
-                <textarea
-                  value={observaciones}
-                  onChange={(e) => setObservaciones(e.target.value)}
-                  className="w-full px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                  rows={2}
-                  placeholder="Notas adicionales..."
-                />
-              </div>
             </div>
           </div>
         )}
@@ -805,7 +912,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
             type="button"
             onClick={handleSubmit}
             disabled={loading}
-            className="flex items-center gap-1.5 px-4 py-2 sm:px-6 sm:py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs sm:text-sm font-bold rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:from-slate-400 disabled:to-slate-500 disabled:cursor-not-allowed transition-all shadow-lg shadow-green-500/30"
+            className="flex items-center gap-1.5 px-4 py-2 sm:px-6 sm:py-2.5 bg-gradient-to-r from-sky-400 to-cyan-400 text-white text-xs sm:text-sm font-bold rounded-lg hover:from-sky-500 hover:to-cyan-500 disabled:from-slate-400 disabled:to-slate-500 disabled:cursor-not-allowed transition-all shadow-lg shadow-sky-500/30"
           >
             {loading ? (
               <>

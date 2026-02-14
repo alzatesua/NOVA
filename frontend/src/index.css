@@ -1,3 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0;700;0;900;1,1000&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0;900;1,1000&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -62,6 +66,7 @@
 
 @layer base {
   * {
+    font-family: 'Roboto', ui-sans-serif, system-ui, -apple-system, sans-serif;
     @apply border-border;
   }
   body {
@@ -210,5 +215,49 @@
     transition-property: all;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 150ms;
+  }
+}
+
+
+/* ========================================
+   IMPRESIÓN — Ticket POS optimizado
+   ======================================== */
+@media print {
+
+  /* 1. Tamaño de papel = rollo 80mm, alto automático */
+  @page {
+    margin: 0;
+    size: 80mm auto;
+  }
+
+  /* 2. Oculta todo */
+  body * {
+    visibility: hidden;
+  }
+
+  /* 3. Muestra solo el ticket */
+  #factura-ticket,
+  #factura-ticket * {
+    visibility: visible;
+  }
+
+  /* 4. Ocupa todo el ancho del papel, sin márgenes */
+  /* Después — centrado */
+  #factura-ticket {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80mm;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+  /* 5. Fuerza impresión de fondos negros (encabezado, total) */
+  #factura-ticket .bg-gray-900,
+  #factura-ticket .bg-gray-700 {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 }
