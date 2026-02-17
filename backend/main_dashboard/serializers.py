@@ -2,7 +2,8 @@ from rest_framework import serializers
 from .models import (
     Sucursales, Categoria, Marca, Iva, Producto, Descuento, TipoMedida,
     Bodega, Existencia, Traslado, TrasladoLinea,
-    Cliente, FormaPago, Factura, FacturaDetalle, Pago, ConfiguracionFactura
+    Cliente, FormaPago, Factura, FacturaDetalle, Pago, ConfiguracionFactura,
+    Cupon, ClienteCupon
 )
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
@@ -976,3 +977,39 @@ class ConfiguracionFacturaSerializer(DbAliasModelSerializer):
 
 
 
+
+
+# =========================
+# CUPONES SERIALIZERS
+# =========================
+
+class CuponSerializer(serializers.ModelSerializer):
+    tipo_display = serializers.CharField(source='get_tipo_display', read_only=True)
+
+    class Meta:
+        model = Cupon
+        fields = [
+            'id', 'nombre', 'tipo', 'tipo_display', 'valor',
+            'activo', 'fecha_vencimiento', 'creado_en', 'actualizado_en'
+        ]
+        read_only_fields = ['id', 'creado_en', 'actualizado_en']
+
+
+class ClienteCuponSerializer(serializers.ModelSerializer):
+    cupon_detalle = CuponSerializer(source='cupon', read_only=True)
+    cliente_nombre = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ClienteCupon
+        fields = [
+            'id', 'cliente', 'cliente_nombre', 'cupon', 'cupon_detalle',
+            'activo', 'cantidad_disponible', 'fecha_uso', 'creado_en'
+        ]
+        read_only_fields = ['id', 'creado_en']
+
+    def get_cliente_nombre(self, obj):
+        c = obj.cliente
+        if c.tipo_persona == 'JUR':
+            return c.razon_social or ''
+        partes = filter(None, [c.primer_nombre, c.segundo_nombre, c.apellidos])
+        return ' '.join(partes)

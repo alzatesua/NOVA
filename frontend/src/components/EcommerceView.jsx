@@ -1,3 +1,5 @@
+//prueba de funcionalidad juan
+//prueba edwin
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { fetchProductosEcommerce } from '../services/api';
 import { Navbar, Nav, Form, Container, Button } from 'react-bootstrap';
@@ -9,7 +11,8 @@ import {
   Grid3x3,
   ChevronDown,
   Moon,
-  Sun
+  Sun,
+  FileText
 } from 'lucide-react';
 
 // Paleta de colores ecológica para movilidad eléctrica
@@ -18,6 +21,7 @@ const COLORS = {
   verdeSecundario: '#4CAF50',     // Green
   verdeMenta: '#81C784',          // Light Green
   verdeOscuro: '#1B5E20',         // Dark Green
+  verdeClaro: '#E8F5E9',          // Very Light Green (Material Design Green 50)
   beigeCrema: '#FFF8E1',          // Cream
   blanco: '#FFFFFF',
   grisClaro: '#F5F5F5',
@@ -479,6 +483,10 @@ export default function EcommerceView() {
   }, 0);
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+
+  // Debug: mostrar en consola el estado del carrito
+  console.log('Cart items:', cart);
+  console.log('Cart item count:', cartItemCount);
 
   // Función para obtener emoji según categoría
   const getCategoryEmoji = (category) => {
@@ -1329,6 +1337,14 @@ export default function EcommerceView() {
                   <span>Contacto</span>
                 </button>
 
+                <button
+                  onClick={() => setActiveSection('infórmate')}
+                  className={`nav-btn-futuristic ${activeSection === 'infórmate' ? 'active' : ''}`}
+                >
+                  <FileText size={18} strokeWidth={2} />
+                  <span>Infórmate</span>
+                </button>
+
                 {/* Dropdown de Categorías */}
                 {categories.length > 0 && (
                   <div style={{ position: 'relative', display: 'inline-block' }} ref={dropdownRef}>
@@ -1419,8 +1435,12 @@ export default function EcommerceView() {
               {/* Carrito y Búsqueda - Alineados */}
               <div className="d-flex align-items-center gap-2 gap-lg-3">
                 {/* Carrito - Enviar directamente a WhatsApp */}
-                <button
-                  className="nav-btn-futuristic position-relative flex-shrink-0"
+                <div className="position-relative flex-shrink-0" style={{ padding: '5px', marginRight: '5px' }}>
+                  <button
+                    className="nav-btn-futuristic position-relative"
+                    style={{
+                      padding: '10px 15px'
+                    }}
                   onClick={() => {
                     if (cart.length > 0) {
                       // Verificar autenticación ANTES de enviar a WhatsApp
@@ -1438,7 +1458,7 @@ export default function EcommerceView() {
                   title="Completar pedido por WhatsApp"
                 >
                   <svg
-                    style={{ width: '18px', height: '18px' }}
+                    style={{ width: '24px', height: '24px' }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1447,13 +1467,31 @@ export default function EcommerceView() {
                   </svg>
                   {cartItemCount > 0 && (
                     <span
-                      className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
-                      style={{ backgroundColor: COLORS.acentoNaranja }}
+                      className="badge rounded-pill"
+                      style={{
+                        position: 'absolute',
+                        top: '2px',
+                        right: '2px',
+                        backgroundColor: '#DC2626',
+                        color: 'white',
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        minWidth: '18px',
+                        height: '18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '0 5px',
+                        border: '2px solid white',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+                        zIndex: 9999
+                      }}
                     >
                       {cartItemCount}
                     </span>
                   )}
-                </button>
+                  </button>
+                </div>
 
                 {/* Botón de Modo Oscuro */}
                 <button
@@ -1726,9 +1764,9 @@ export default function EcommerceView() {
                       onClick={() => setActiveSection('productos')}
                       className="px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-white text-base sm:text-lg md:text-xl shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
                       style={{
-                        backgroundColor: COLORS.blanco,
-                        color: COLORS.verdePrincipal,
-                        border: '3px solid rgba(255, 255, 255, 0.5)'
+                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                        backdropFilter: 'blur(10px)',
+                        border: '3px solid rgba(255, 255, 255, 0.3)'
                       }}
                     >
                       ⚡ Ver Productos
@@ -2013,51 +2051,69 @@ export default function EcommerceView() {
 
         {/* Sección CONTACTO */}
         {activeSection === 'contacto' && (
-          <div className="relative" style={{ minHeight: '100vh', overflow: 'hidden', backgroundColor: '#1a1a1a' }}>
-            {/* Video de fondo - YouTube */}
-            <iframe
-              src="https://www.youtube.com/embed/u0-sOiWYr80?autoplay=1&mute=1&loop=1&playlist=u0-sOiWYr80&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1"
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                zIndex: 0,
-                pointerEvents: 'none',
-                border: 'none'
-              }}
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              title="Video de fondo"
-            />
+          <div className="animated-bg relative" style={{ minHeight: '100vh', paddingTop: '2rem', paddingBottom: '2rem', paddingLeft: '0.5rem', paddingRight: '0.5rem', position: 'relative', overflow: 'hidden' }}>
+            {/* Formas flotantes animadas */}
+            <div className="floating-shape" style={{
+              width: '80px',
+              height: '80px',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              top: '10%',
+              left: '5%',
+              animationDelay: '0s'
+            }}></div>
+            <div className="floating-shape" style={{
+              width: '120px',
+              height: '120px',
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              top: '60%',
+              right: '10%',
+              animationDelay: '2s'
+            }}></div>
+            <div className="floating-circle" style={{
+              width: '60px',
+              height: '60px',
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              bottom: '20%',
+              left: '20%',
+              animationDelay: '1s'
+            }}></div>
+            <div className="floating-circle" style={{
+              width: '40px',
+              height: '40px',
+              backgroundColor: 'rgba(255, 255, 255, 0.12)',
+              top: '30%',
+              right: '30%',
+              animationDelay: '3s'
+            }}></div>
 
-            {/* Overlay oscuro sobre el video */}
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                zIndex: 1,
-                pointerEvents: 'none'
-              }}
-            ></div>
+            {/* Rayos/Relámpagos flotantes */}
+            <div className="floating-bolt" style={{
+              fontSize: '40px',
+              top: '15%',
+              left: '15%',
+              animationDelay: '0s'
+            }}>⚡</div>
+            <div className="floating-bolt" style={{
+              fontSize: '30px',
+              top: '70%',
+              right: '20%',
+              animationDelay: '5s'
+            }}>⚡</div>
+            <div className="floating-bolt" style={{
+              fontSize: '35px',
+              bottom: '25%',
+              left: '10%',
+              animationDelay: '8s'
+            }}>⚡</div>
+            <div className="floating-bolt" style={{
+              fontSize: '25px',
+              top: '40%',
+              right: '8%',
+              animationDelay: '3s'
+            }}>⚡</div>
 
             {/* Contenido */}
-            <div
-              style={{
-                position: 'relative',
-                zIndex: 10,
-                minHeight: '100vh',
-                paddingTop: '2rem',
-                paddingBottom: '2rem',
-                paddingLeft: '0.5rem',
-                paddingRight: '0.5rem'
-              }}
-            >
+            <div className="relative z-10">
               <div style={{ maxWidth: '56rem', margin: '0 auto' }}>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8 md:mb-12 text-center text-white" style={{ textShadow: '2px 2px 8px rgba(0, 0, 0, 0.7)' }}>
                 Contáctanos
@@ -2188,6 +2244,482 @@ export default function EcommerceView() {
                   </form>
                 </div>
               </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Sección INFÓRMATE - Leyes y Regulaciones Vehículos Eléctricos */}
+        {activeSection === 'infórmate' && (
+          <div className="py-8 sm:py-12 px-2 sm:px-4" style={{ backgroundColor: darkMode ? DARK_COLORS.background : COLORS.verdeClaro }}>
+            <div className="max-w-6xl mx-auto">
+              {/* Header */}
+              <div className="text-center mb-8 sm:mb-12">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdePrincipal }}>
+                  📋 Infórmate sobre Vehículos Eléctricos
+                </h1>
+                <p className="text-base sm:text-lg md:text-xl" style={{ color: COLORS.grisMedio }}>
+                  Todo lo que necesitas saber sobre leyes, regulaciones y beneficios en Colombia
+                </p>
+                <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm" style={{ backgroundColor: 'rgba(46, 125, 50, 0.1)', border: '2px solid #2E7D32' }}>
+                  <span>✅ Fuentes Oficiales</span>
+                  <span>•</span>
+                  <span>Actualizado 2025</span>
+                </div>
+              </div>
+
+              {/* Marco Legal Principal */}
+              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
+                  <span>⚖️</span>
+                  <span>Marco Legal Colombia</span>
+                </h2>
+                <div className="space-y-4 sm:space-y-6">
+                  {/* Ley 1964 de 2019 */}
+                  <div className="border-l-4 rounded-lg p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Ley 1964 de 2019</h3>
+                    <p className="text-sm sm:text-base mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
+                      Ley de Movilidad Eléctrica y Transporte Sostenible. Establece los beneficios tributarios para vehículos híbridos y eléctricos.
+                    </p>
+                    <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
+                      <li>✦ <strong>Exento de IVA (0% vs 19%):</strong> No se paga impuesto sobre el valor del vehículo</li>
+                      <li>✦ <strong>Exento de impuesto de rodamiento:</strong> Ahorro de hasta 15% del valor del vehículo</li>
+                      <li>✦ <strong>Exento de gravamen arancelario:</strong> Para importación de componentes</li>
+                    </ul>
+                    <a
+                      href="https://www.funcionpublica.gov.co/eva/gestornormativo/ley-1964-2019"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-2 sm:mt-3 text-xs sm:text-sm font-semibold underline"
+                      style={{ color: COLORS.verdePrincipal }}
+                    >
+                      🔗 Ver Ley Oficial →
+                    </a>
+                  </div>
+
+                  {/* CONPES 4075 de 2012 */}
+                  <div className="border-l-4 rounded-lg p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>CONPES 4075 de 2012</h3>
+                    <p className="text-sm sm:text-base mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
+                      Documento Conpes de Política de Promoción de Vehículos Eficientes. Define metas y lineamientos para la adopción de vehículos eléctricos.
+                    </p>
+                    <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
+                      <li>✦ Objetivo: 30% de ventas de vehículos particulares eléctricos para 2030</li>
+                      <li>✦ Zonas de bajas emisiones (ZBE) en ciudades principales</li>
+                      <li>✦ Infraestructura de carga pública obligatoria</li>
+                    </ul>
+                    <a
+                      href="https://colaboracion.dnp.gov.co/INT/Anexos/10/conpes-4075-2012-resumen-1.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-2 sm:mt-3 text-xs sm:text-sm font-semibold underline"
+                      style={{ color: COLORS.verdePrincipal }}
+                    >
+                      🔗 Ver Documento DNP →
+                    </a>
+                  </div>
+
+                  {/* Resolución 1064 de 2019 */}
+                  <div className="border-l-4 rounded-lg p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Resolución 1064 de 2019</h3>
+                    <p className="text-sm sm:text-base mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
+                      Reglamento técnico de vehículos eléctricos. Establece requisitos de seguridad, etiquetado y homologación.
+                    </p>
+                    <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
+                      <li>✦ Requisitos de seguridad y emisiones</li>
+                      <li>✦ Etiquetado de eficiencia energética</li>
+                      <li>✦ Normas de producción y comercialización</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Beneficios Detallados */}
+              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
+                  <span>💰</span>
+                  <span>Beneficios Tributarios y Financieros</span>
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
+                  {/* Exención IVA */}
+                  <div className="rounded-xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.08)' }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Exención de IVA</h3>
+                    <p className="text-sm sm:text-base mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
+                      Los vehículos 100% eléctricos están exentos del Impuesto sobre el Valor Agregado (19%).
+                    </p>
+                    <div className="text-xs sm:text-sm p-3 sm:p-4 rounded-lg" style={{ backgroundColor: 'rgba(255, 215, 0, 0.1)' }}>
+                      <strong>Ejemplo:</strong> Vehículo de $30,000,000
+                      <br />• Con IVA: $35,700,000
+                      <br />• Sin IVA: $30,000,000
+                      <br />• <strong>Ahorro: $5,700,000</strong>
+                    </div>
+                  </div>
+
+                  {/* Exención Rodamiento */}
+                  <div className="rounded-xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.08)' }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Exención Impuesto Rodamiento</h3>
+                    <p className="text-sm sm:text-base mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
+                      Exención del impuesto nacional sobre vehículos automotores (15% del valor).
+                    </p>
+                    <div className="text-xs sm:text-sm p-3 sm:p-4 rounded-lg" style={{ backgroundColor: 'rgba(255, 215, 0, 0.1)' }}>
+                      <strong>Ejemplo:</strong> Vehículo de $30,000,000
+                      <br />• Con impuesto: $34,500,000
+                      <br />• Sin impuesto: $30,000,000
+                      <br />• <strong>Ahorro: $4,500,000</strong>
+                    </div>
+                  </div>
+
+                  {/* Estacionamiento Gratuito */}
+                  <div className="rounded-xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.08)' }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Estacionamiento Gratuito</h3>
+                    <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>
+                      Derecho a estacionamiento gratuito en zonas públicas y parquederos municipales.
+                    </p>
+                    <ul className="text-xs sm:text-sm space-y-1" style={{ color: COLORS.grisMedio }}>
+                      <li>• Zonas de parqueadero público</li>
+                      <li>• Parquederos distritales</li>
+                      <li>• Tarifas preferenciales en zones privadas</li>
+                    </ul>
+                  </div>
+
+                  {/* Zonas Exclusivas */}
+                  <div className="rounded-xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.08)' }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Zonas de Bajas Emisiones</h3>
+                    <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>
+                      Acceso prioritario y exclusivo a zonas restringidas por contaminación.
+                    </p>
+                    <ul className="text-xs sm:text-sm space-y-1" style={{ color: COLORS.grisMedio }}>
+                      <li>• Pico y placa sin restricción</li>
+                      <li>• Carriles exclusivos en Bogotá</li>
+                      <li>• Zonas de bajas emisiones (ZBE)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Requisitos Obligatorios */}
+              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
+                  <span>📝</span>
+                  <span>Requisitos para Circular en Colombia</span>
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">1️⃣</span>
+                      <div>
+                        <h4 className="font-bold text-sm sm:text-base mb-1" style={{ color: COLORS.verdeOscuro }}>Matrícula Nacional</h4>
+                        <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
+                          Trámite en Secretaría de Movilidad con factura de compraventa, SOAT y revisión técnico-mecánica.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">2️⃣</span>
+                      <div>
+                        <h4 className="font-bold text-sm sm:text-base mb-1" style={{ color: COLORS.verdeOscuro }}>Tarjeta de Propiedad</h4>
+                        <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
+                          Registro en RUNT con placa especial para vehículo eléctrico.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">3️⃣</span>
+                      <div>
+                        <h4 className="font-bold text-sm sm:text-base mb-1" style={{ color: COLORS.verdeOscuro }}>SOAT Obligatorio</h4>
+                        <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
+                          Seguro obligatorio de accidentes de tránsito. Se adquiere con aseguradoras autorizadas.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">4️⃣</span>
+                      <div>
+                        <h4 className="font-bold text-sm sm:text-base mb-1" style={{ color: COLORS.verdeOscuro }}>Revisión Técnico-Mecánica</h4>
+                        <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
+                          Centros de revisión autorizados para vehículos eléctricos. Verificación de batería y motor.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">5️⃣</span>
+                      <div>
+                        <h4 className="font-bold text-sm sm:text-base mb-1" style={{ color: COLORS.verdeOscuro }}>Tag o Calcomanía Verde</h4>
+                        <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
+                          Etiqueta distintiva que identifica al vehículo como cero emisiones. Se coloca en parabrisas trasero.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">6️⃣</span>
+                      <div>
+                        <h4 className="font-bold text-sm sm:text-base mb-1" style={{ color: COLORS.verdeOscuro }}>Seguro Contra Terceros</h4>
+                        <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
+                          Póliza de responsabilidad civil que cubre daños a terceros. Mínimo obligatorio según la ley.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Clasificación de Vehículos */}
+              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
+                  <span>⚡</span>
+                  <span>Tipos de Vehículos Eléctricos</span>
+                </h2>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {/* Eléctrico Puro */}
+                  <div className="rounded-xl p-4 sm:p-6 border-2" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>100% Eléctrico (BEV)</h3>
+                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
+                      Vehículo que funciona exclusivamente con motor eléctrico y baterías recargables.
+                    </p>
+                    <div className="space-y-1 sm:space-y-2">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <span className="text-green-500">✅</span>
+                        <span>Exento IVA: <strong>Sí</strong></span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <span className="text-green-500">✅</span>
+                        <span>Exento rodamiento: <strong>Sí</strong></span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <span className="text-green-500">✅</span>
+                        <span>Pico y placa: <strong>Restriction-free</strong></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Híbrido Enchufable */}
+                  <div className="rounded-xl p-4 sm:p-6 border-2" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdeSecundario }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Híbrido Enchufable (PHEV)</h3>
+                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
+                      Combina motor eléctrico con motor de combustión. Batería recargable desde red eléctrica.
+                    </p>
+                    <div className="space-y-1 sm:space-y-2">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <span className="text-green-500">✅</span>
+                        <span>Exento IVA: <strong>Sí</strong></span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <span className="text-green-500">✅</span>
+                        <span>Exento rodamiento: <strong>Sí</strong></span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <span className="text-yellow-500">⚠️</span>
+                        <span>Etiquetado: <strong>Medio ambiente</strong></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Híbrido Convencional */}
+                  <div className="rounded-xl p-4 sm:p-6 border-2" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdeMenta }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Híbrido (HEV)</h3>
+                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
+                      Sistema dual que no se puede recargar desde red. El motor eléctrico asiste al de combustión.
+                    </p>
+                    <div className="space-y-1 sm:space-y-2">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <span className="text-yellow-500">⚠️</span>
+                        <span>Exento IVA: <strong>Parcial</strong></span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <span className="text-yellow-500">⚠️</span>
+                        <span>Etiquetado: <strong>Medio ambiente</strong></span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
+                        <span className="text-green-500">✅</span>
+                        <span>Menor consumo combustible</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Importación y Comercialización */}
+              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
+                  <span>🚢</span>
+                  <span>Importación y Comercialización</span>
+                </h2>
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="rounded-xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.08)' }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Requisitos de Importación</h3>
+                    <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm" style={{ color: COLORS.grisOscuro }}>
+                      <li>📄 <strong>Registro de Importador:</strong> Inscribirse en el RUNT ante la DIAN</li>
+                      <li>🏷️ <strong>Declaración de Importación:</strong> Formulario ante DIAN</li>
+                      <li>✅ <strong>Homologación:</strong> Certificado de conformidad con normas técnicas colombianas</li>
+                      <li>🔌 <strong>Conexión de Carga:</strong> Debe cumplir con norma COL 1008</li>
+                      <li>🏳 <strong>Velocidad Máxima:</strong> Limitada según categoría (ej: patinete &lt; 25 km/h, bicicleta &lt; 30 km/h)</li>
+                    </ul>
+                  </div>
+
+                  <div className="rounded-xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.08)' }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Trámites en DIAN</h3>
+                    <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm" style={{ color: COLORS.grisOscuro }}>
+                      <li>1. <strong>Registro de importador:</strong> Trámite virtual o presencial</li>
+                      <li>2. <strong>Aceptación de la declaración:</strong> 15 días hábiles para liquidar</li>
+                      <li>3. <strong>Planilla de importación:</strong> Debe estar aceptada antes del arribo</li>
+                      <li>4. <strong>Gravamen arancelario:</strong> 0% para vehículos eléctricos (posición 8703.80.00)</li>
+                      <li>5. <strong>ICA:</strong> Impuesto de industria y comercio municipal (variable por ciudad)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Infraestructura de Carga */}
+              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
+                  <span>🔌</span>
+                  <span>Infraestructura de Carga</span>
+                </h2>
+                <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Tipos de Carga</h3>
+                    <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm" style={{ color: COLORS.grisOscuro }}>
+                      <div className="rounded-lg p-3 sm:p-4" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)' }}>
+                        <strong>Carga Nivel 1 (2-3 horas):</strong>
+                        <br />Toma convencional 110V - para carga nocturna domiciliaria
+                      </div>
+                      <div className="rounded-lg p-3 sm:p-4" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)' }}>
+                        <strong>Carga Nivel 2 (1-2 horas):</strong>
+                        <br />Toma 220V - para oficinas y comercios
+                      </div>
+                      <div className="rounded-lg p-3 sm:p-4" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)' }}>
+                        <strong>Carga Rápida (20-40 min):</strong>
+                        <br />Carga DC en estaciones públicas - 40-50 km de autonomía en 30 min
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Aplicaciones Móviles</h3>
+                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
+                      Mapa de puntos de carga en Colombia:
+                    </p>
+                    <ul className="text-xs sm:text-sm space-y-1" style={{ color: COLORS.grisMedio }}>
+                      <li>📱 <strong>ChargeHub:</strong> Red más grande de puntos de recarga</li>
+                      <li>📱 <strong>Abr chargue:</strong> Mapa global de estaciones</li>
+                      <li>📱 <strong>PlugShare:</strong> Comunidad de usuarios de VE</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Zonas de Restricción (Pico y Placa) */}
+              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
+                  <span>🚗</span>
+                  <span>Pico y Placa - Excepciones</span>
+                </h2>
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="rounded-xl p-4 sm:p-6 border-l-4" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Bogotá</h3>
+                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
+                      Los vehículos 100% eléctricos están <strong>exentos</strong> de la restricción de pico y placa.
+                    </p>
+                    <ul className="text-xs sm:text-sm space-y-1" style={{ color: COLORS.grisMedio }}>
+                      <li>✓ Circular cualquier día de la semana</li>
+                      <li>✓ Cualquier hora del día</li>
+                      <li>✓ Sin restricción por placa terminada en número</li>
+                    </ul>
+                  </div>
+
+                  <div className="rounded-xl p-4 sm:p-6 border-l-4" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Medellín</h3>
+                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
+                      Vehículos eléctricos y híbridos enchufables tienen excepciones en ciertas restricciones.
+                    </p>
+                    <ul className="text-xs sm:text-sm space-y-1" style={{ color: COLORS.grisMedio }}>
+                      <li>✓ Zonas de bajas emisiones en el centro</li>
+                      <li>✓ Preferencia en carriles exclusivos</li>
+                      <li>✓ Estacionamiento prioritario</li>
+                    </ul>
+                  </div>
+
+                  <div className="rounded-xl p-4 sm:p-6 border-l-4" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Cali</h3>
+                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
+                      Beneficios similares para vehículos cero emisiones en zonas ambientales protegidas.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fuentes Oficiales */}
+              <div className="rounded-2xl shadow-xl p-6 sm:p-8" style={{ backgroundColor: COLORS.blanco }}>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
+                  <span>🔗</span>
+                  <span>Fuentes Oficiales</span>
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="space-y-3 sm:space-y-4">
+                    <h3 className="text-base sm:text-lg font-bold" style={{ color: COLORS.verdePrincipal }}>Gobierno Nacional</h3>
+                    <ul className="space-y-2 text-xs sm:text-sm">
+                      <li>
+                        <a href="https://www.mintransporte.gov.co/" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.verdePrincipal }}>
+                          🚛 Ministerio de Transporte
+                        </a>
+                      </li>
+                      <li>
+                        <a href="https://www.minambiente.gov.co/" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.verdePrincipal }}>
+                          🌿 Ministerio de Ambiente
+                        </a>
+                      </li>
+                      <li>
+                        <a href="https://www.dian.gov.co/" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.verdePrincipal }}>
+                          💼 DIAN - Impuestos y Aduanas
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="space-y-3 sm:space-y-4">
+                    <h3 className="text-base sm:text-lg font-bold" style={{ color: COLORS.verdePrincipal }}>Entidades Reguladoras</h3>
+                    <ul className="space-y-2 text-xs sm:text-sm">
+                      <li>
+                        <a href="https://www.runt.com.co/" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.verdePrincipal }}>
+                          📋 RUNT - Registro Único Nacional de Tránsito
+                        </a>
+                      </li>
+                      <li>
+                        <a href="https://www.minenergia.gov.co/" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.verdePrincipal }}>
+                          ⚡ Ministerio de Minas y Energía
+                        </a>
+                      </li>
+                      <li>
+                        <a href="https://www.sic.gov.co/" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.verdePrincipal }}>
+                          🛡️ SIC - Superintendencia de Industria y Comercio
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-xl" style={{ backgroundColor: 'rgba(255, 215, 0, 0.1)', border: '2px dashed #FFD700' }}>
+                  <p className="text-xs sm:text-sm font-semibold mb-2" style={{ color: COLORS.grisOscuro }}>
+                    ⚠️ Importante: La información presentada está basada en la normativa vigente a 2025. Los requisitos y beneficios pueden cambiar. Consulta siempre las fuentes oficiales antes de tomar decisiones de compra o importación.
+                  </p>
+                  <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
+                    Esta sección es informativa y no constituye asesoría legal. Para procedimientos específicos, consulta con un abogado especializado en derecho administrativo y tributario.
+                  </p>
+                </div>
+              </div>
+
+              {/* Call to Action */}
+              <div className="text-center mt-8 sm:mt-12">
+                <button
+                  onClick={() => setActiveSection('productos')}
+                  className="px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-white text-base sm:text-lg shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
+                  style={{ backgroundColor: COLORS.verdePrincipal }}
+                >
+                  🛍️ Ver Nuestros Vehículos Eléctricos
+                </button>
               </div>
             </div>
           </div>
@@ -2558,8 +3090,41 @@ export default function EcommerceView() {
       )}
 
       {/* Footer */}
-      <footer className="mt-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 p-8 sm:p-10 md:p-12 lg:p-16 text-white" style={{ backgroundColor: COLORS.grisOscuro }}>
+      <footer className="mt-auto" style={{ position: 'relative', overflow: 'hidden' }}>
+        {/* Video de fondo */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 0
+          }}
+        >
+          <source src="/videos/patinetas.mp4" type="video/mp4" />
+        </video>
+
+        {/* Overlay oscuro para legibilidad */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            zIndex: 1
+          }}
+        ></div>
+
+        {/* Contenido del footer */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 p-8 sm:p-10 md:p-12 lg:p-16 text-white" style={{ backgroundColor: 'transparent', position: 'relative', zIndex: 10 }}>
           {/* Columna 1: Dirección */}
           <div>
             <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-5 uppercase">📍 {nombreTienda}</h3>
