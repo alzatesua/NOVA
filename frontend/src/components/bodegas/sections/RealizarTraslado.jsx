@@ -200,17 +200,17 @@ export default function RealizarTraslado({
   const mostrarOpcionRecibir = onRecibirTraslado && onCargarTraslados;
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-xl">
+    <div className="bg-white/80 dark:!bg-slate-900/80 backdrop-blur-sm rounded-2xl p-8 border border-white/20 dark:!border-slate-800 shadow-xl">
       <div className="flex items-center gap-4 mb-6">
         <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl">
           <ArrowPathRoundedSquareIcon className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-slate-800">
+          <h3 className="text-xl font-bold text-slate-800 dark:!text-slate-100 dark:!text-slate-100">
             {mostrarOpcionRecibir ? 'Gestión de Traslados' : 'Realizar Traslado'}
           </h3>
-          <p className="text-sm text-slate-600">
-            {mostrarOpcionRecibir 
+          <p className="text-sm text-slate-600 dark:!text-slate-400 dark:!text-slate-400">
+            {mostrarOpcionRecibir
               ? 'Crea nuevos traslados o recibe traslados pendientes'
               : 'Transfiere productos entre bodegas de manera eficiente'
             }
@@ -229,17 +229,17 @@ export default function RealizarTraslado({
                   setModo('crear');
                   setShowTrasladosForm(true);
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-50 rounded-2xl p-8 border-2 border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 text-left"
+                className="group relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-8 border-2 border-blue-100 dark:!border-slate-700 hover:border-blue-300 dark:hover:border-slate-600 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 text-left"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-full blur-3xl"></div>
                 <div className="relative">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                     <ArrowPathRoundedSquareIcon className="w-8 h-8 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-slate-800 mb-2">
+                  <h4 className="text-lg font-semibold text-slate-800 dark:!text-slate-100 mb-2">
                     Crear Nuevo Traslado
                   </h4>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-600 dark:!text-slate-400">
                     Transfiere productos entre bodegas de forma manual
                   </p>
                 </div>
@@ -251,17 +251,17 @@ export default function RealizarTraslado({
                   setModo('recibir');
                   setShowTrasladosForm(true);
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-50 rounded-2xl p-8 border-2 border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 text-left"
+                className="group relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-8 border-2 border-blue-100 dark:!border-slate-700 hover:border-blue-300 dark:hover:border-slate-600 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 text-left"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full blur-3xl"></div>
                 <div className="relative">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                     <ArchiveBoxArrowDownIcon className="w-8 h-8 text-white" />
                   </div>
-                  <h4 className="text-lg font-semibold text-slate-800 mb-2">
+                  <h4 className="text-lg font-semibold text-slate-800 dark:!text-slate-100 mb-2">
                     Recibir Traslados
                   </h4>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-600 dark:!text-slate-400">
                     Acepta traslados pendientes enviados a esta bodega
                   </p>
                   {trasladosDisponibles.length > 0 && (
@@ -278,8 +278,8 @@ export default function RealizarTraslado({
             <div className="text-center py-12">
               <div className="bg-gradient-to-br from-blue-50 to-blue-50 rounded-2xl p-8 border border-blue-100 max-w-md mx-auto">
                 <ArrowPathRoundedSquareIcon className="w-16 h-16 text-orange-500 mx-auto mb-4" />
-                <h4 className="text-lg font-semibold text-slate-800 mb-2">Configurar Nuevo Traslado</h4>
-                <p className="text-sm text-slate-600 mb-6">Selecciona productos y configura el traslado entre bodegas</p>
+                <h4 className="text-lg font-semibold text-slate-800 dark:!text-slate-100 mb-2">Configurar Nuevo Traslado</h4>
+                <p className="text-sm text-slate-600 dark:!text-slate-400 mb-6">Selecciona productos y configura el traslado entre bodegas</p>
                 <button
                   onClick={() => {
                     setModo('crear');
@@ -299,12 +299,12 @@ export default function RealizarTraslado({
         // ========================================
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-4">
-            <h4 className="text-lg font-semibold text-slate-800">
+            <h4 className="text-lg font-semibold text-slate-800 dark:!text-slate-100">
               Traslados Pendientes de Recibir
             </h4>
             <button
               onClick={() => setShowTrasladosForm(false)}
-              className="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors"
+              className="px-4 py-2 text-slate-600 dark:!text-slate-400 hover:text-slate-800 dark:!text-slate-100 font-medium transition-colors"
             >
               ← Volver
             </button>
@@ -313,10 +313,10 @@ export default function RealizarTraslado({
           {isLoadingTraslados ? (
             <div className="text-center py-12">
               <div className="w-12 h-12 border-4 border-slate-200 border-t-green-500 rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-slate-600">Cargando traslados disponibles...</p>
+              <p className="text-slate-600 dark:!text-slate-400">Cargando traslados disponibles...</p>
             </div>
           ) : trasladosDisponibles.length === 0 ? (
-            <div className="text-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+            <div className="text-center py-12 bg-slate-50 dark:!bg-slate-800 rounded-2xl border-2 border-dashed border-slate-200 dark:!border-slate-700">
               <ArchiveBoxArrowDownIcon className="w-16 h-16 text-slate-300 mx-auto mb-4" />
               <h5 className="text-lg font-semibold text-slate-700 mb-2">
                 No hay traslados pendientes
@@ -326,7 +326,7 @@ export default function RealizarTraslado({
               </p>
               <button
                 onClick={() => setShowTrasladosForm(false)}
-                className="px-6 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-xl transition-colors"
+                className="px-6 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:!text-slate-300 font-medium rounded-xl transition-colors"
               >
                 Volver al inicio
               </button>
@@ -352,7 +352,7 @@ export default function RealizarTraslado({
                           <div className={`w-3 h-3 rounded-full ${
                             seleccionado ? 'bg-green-500' : 'bg-slate-300'
                           }`}></div>
-                          <h5 className="text-lg font-semibold text-slate-800">
+                          <h5 className="text-lg font-semibold text-slate-800 dark:!text-slate-100">
                             Traslado #{traslado.id}
                           </h5>
                           <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
@@ -376,7 +376,7 @@ export default function RealizarTraslado({
                         </div>
 
                         {traslado.observaciones && (
-                          <p className="text-sm text-slate-600 italic">
+                          <p className="text-sm text-slate-600 dark:!text-slate-400 italic">
                             "{traslado.observaciones}"
                           </p>
                         )}
@@ -401,10 +401,10 @@ export default function RealizarTraslado({
 
           {/* Botones de acción */}
           {trasladosDisponibles.length > 0 && (
-            <div className="flex justify-end gap-4 pt-6 border-t border-slate-200">
+            <div className="flex justify-end gap-4 pt-6 border-t border-slate-200 dark:!border-slate-700">
               <button
                 onClick={() => setShowTrasladosForm(false)}
-                className="px-6 py-3 text-slate-700 font-medium rounded-xl border-2 border-slate-200 hover:bg-slate-50 transition-all"
+                className="px-6 py-3 text-slate-700 font-medium rounded-xl border-2 border-slate-200 dark:!border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
               >
                 Cancelar
               </button>
@@ -452,7 +452,7 @@ export default function RealizarTraslado({
           >
             <div className="space-y-6">
               {newProducts.map((product, index) => (
-                <div key={index} className="bg-white/90 backdrop-blur-md rounded-2xl p-6 border border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div key={index} className="bg-white/90 dark:!bg-slate-900/90 backdrop-blur-md rounded-2xl p-6 border border-slate-200/50 dark:!border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                       <div className="relative">
@@ -462,7 +462,7 @@ export default function RealizarTraslado({
                         <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white"></div>
                       </div>
                       <div>
-                        <h4 className="text-lg font-bold text-slate-800">Traslado {index + 1}</h4>
+                        <h4 className="text-lg font-bold text-slate-800 dark:!text-slate-100">Traslado {index + 1}</h4>
                         <p className="text-xs text-slate-500">Configuración de traslado</p>
                       </div>
                     </div>
@@ -494,7 +494,7 @@ export default function RealizarTraslado({
                               updateLine(index, "bodega_origen", val);
                               updateLine(index, "producto_id", "");
                             }}
-                            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 shadow-sm hover:shadow-md appearance-none"
+                            className="w-full px-4 py-3 bg-white dark:!bg-slate-800 border border-slate-300 dark:!border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 shadow-sm hover:shadow-md appearance-none"
                           >
                             <option value="">Seleccionar origen...</option>
                             {isLoadingBodegas ? (
@@ -516,7 +516,7 @@ export default function RealizarTraslado({
                             required
                             value={product.bodega_destino ?? ""}
                             onChange={(e) => updateLine(index, "bodega_destino", e.target.value ? Number(e.target.value) : "")}
-                            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md appearance-none"
+                            className="w-full px-4 py-3 bg-white dark:!bg-slate-800 border border-slate-300 dark:!border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md appearance-none"
                           >
                             <option value="">Seleccionar destino...</option>
                             {isLoadingBodegas ? (
@@ -577,7 +577,7 @@ export default function RealizarTraslado({
                             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                               {lIndex + 1}
                             </div>
-                            <span className="text-sm font-medium text-slate-600">Producto {lIndex + 1}</span>
+                            <span className="text-sm font-medium text-slate-600 dark:!text-slate-400">Producto {lIndex + 1}</span>
                           </div>
                           
                           <button
@@ -603,7 +603,7 @@ export default function RealizarTraslado({
                             <input
                               ref={(el) => (barcodeRefs.current[lIndex] = el)}
                               type="text"
-                              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                              className="w-full px-4 py-3 bg-white dark:!bg-slate-800 border border-slate-300 dark:!border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md"
                               value={linea.codigo ?? ""}
                               placeholder="Escanea o escribe un código..."
                               onChange={(e) => onBarcodeChange(index, lIndex, e.target.value)}
@@ -619,7 +619,7 @@ export default function RealizarTraslado({
                               type="number"
                               min={1}
                               placeholder="0"
-                              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                              className="w-full px-4 py-3 bg-white dark:!bg-slate-800 border border-slate-300 dark:!border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md"
                               value={linea.cantidad ?? ""}
                               onChange={(e) => {
                                 const v = e.target.value === "" ? "" : Math.max(1, Number(e.target.value));
@@ -648,7 +648,7 @@ export default function RealizarTraslado({
                               );
                               updateLine(index, "lineas", next);
                             }}
-                            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-slate-50 disabled:text-slate-400"
+                            className="w-full px-4 py-3 bg-white dark:!bg-slate-800 border border-slate-300 dark:!border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-slate-50 disabled:text-slate-400"
                           >
                             <option value="">
                               {product.bodega_origen ? "Buscar producto..." : "Selecciona primero la bodega de origen"}
@@ -727,7 +727,7 @@ export default function RealizarTraslado({
                   </div>
 
                   {/* Observaciones / Tránsito */}
-                  <div className="border-t border-slate-200 pt-6">
+                  <div className="border-t border-slate-200 dark:!border-slate-700 pt-6">
                     <div className="flex items-center gap-2 mb-4">
                       <div className="w-1 h-6 bg-gradient-to-b from-amber-500 to-orange-500 rounded-full"></div>
                       <h5 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">Configuraciones Adicionales</h5>
@@ -767,14 +767,14 @@ export default function RealizarTraslado({
                         )}
 
                         <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
-                          <h5 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                          <h5 className="text-sm font-semibold text-slate-800 dark:!text-slate-100 mb-3 flex items-center gap-2">
                             <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
                             Estado del Traslado
                           </h5>
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                             <div className="flex items-center gap-2">
-                              <span className="text-slate-600">Destino:</span>
+                              <span className="text-slate-600 dark:!text-slate-400">Destino:</span>
                               {product.bodega_destino ? (
                                 <span className="px-2 py-1 text-xs font-medium rounded-lg bg-emerald-100 text-emerald-700">
                                   ✅ Seleccionado
@@ -787,7 +787,7 @@ export default function RealizarTraslado({
                             </div>
 
                             <div className="flex items-center gap-2">
-                              <span className="text-slate-600">Origen:</span>
+                              <span className="text-slate-600 dark:!text-slate-400">Origen:</span>
                               {product.bodega_origen ? (
                                 <span className="px-2 py-1 text-xs font-medium rounded-lg bg-emerald-100 text-emerald-700">
                                   ✅ Seleccionado
@@ -800,7 +800,7 @@ export default function RealizarTraslado({
                             </div>
 
                             <div className="flex items-center gap-2">
-                              <span className="text-slate-600">Observación:</span>
+                              <span className="text-slate-600 dark:!text-slate-400">Observación:</span>
                               {product.observaciones ? (
                                 <span className="px-2 py-1 text-xs font-medium rounded-lg bg-emerald-100 text-emerald-700">
                                   ✅ Incluida
@@ -833,7 +833,7 @@ export default function RealizarTraslado({
               </div>
             </div>
 
-            <div className="flex justify-end gap-4 pt-6 border-t border-slate-200/60">
+            <div className="flex justify-end gap-4 pt-6 border-t border-slate-200 dark:!border-slate-700/60">
               <button type="button" onClick={() => setShowTrasladosForm(false)} className="px-6 py-3 text-slate-700 font-medium rounded-xl border-2 border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200">
                 Cancelar
               </button>

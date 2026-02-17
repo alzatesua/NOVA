@@ -317,7 +317,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
               className={`px-3 py-1 rounded-full text-sm transition-colors ${
                 quickFilter === label.toLowerCase()
                   ? 'bg-blue-600 dark:bg-blue-500 text-white'
-                  : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'
+                  : 'bg-slate-200 dark:!bg-slate-800 text-slate-700 dark:!text-slate-300 hover:bg-slate-300 dark:hover:!bg-slate-700'
               }`}
             >
               {label}
@@ -341,7 +341,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
           onSubmit={handleSubmitNewUser}
           className="bg-white dark:!bg-slate-900 p-6 rounded-lg shadow-md border border-slate-200 dark:!border-slate-800 space-y-4 mb-6 transition-colors"
         >
-          <h4 className="text-lg font-medium text-slate-900 dark:text-slate-100">Crear Nuevo Usuario</h4>
+          <h4 className="text-lg font-medium text-slate-900 dark:!text-slate-100">Crear Nuevo Usuario</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input
               name="usuario"
@@ -349,7 +349,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
               value={newUser.usuario}
               onChange={handleNewFieldChange}
               required
-              className="border dark:border-slate-700 rounded px-2 py-1 text-sm dark:bg-slate-800 dark:text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+              className="border dark:!border-slate-700 rounded px-2 py-1 text-sm dark:!bg-slate-800 dark:!text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
             />
             <input
               name="correo_usuario"
@@ -358,7 +358,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
               value={newUser.correo_usuario}
               onChange={handleNewFieldChange}
               required
-              className="border dark:border-slate-700 rounded px-2 py-1 text-sm dark:bg-slate-800 dark:text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+              className="border dark:!border-slate-700 rounded px-2 py-1 text-sm dark:!bg-slate-800 dark:!text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
             />
             <input
               name="password"
@@ -367,13 +367,13 @@ export default function UsersView({ users: initialUsers, onCreated }) {
               value={newUser.password}
               onChange={handleNewFieldChange}
               required
-              className="border dark:border-slate-700 rounded px-2 py-1 text-sm dark:bg-slate-800 dark:text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+              className="border dark:!border-slate-700 rounded px-2 py-1 text-sm dark:!bg-slate-800 dark:!text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
             />
             <select
               name="sucursal_id"
               value={newUser.sucursal_id}
               onChange={handleNewFieldChange}
-              className="border dark:border-slate-700 rounded px-2 py-1 text-sm dark:bg-slate-800 dark:text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+              className="border dark:!border-slate-700 rounded px-2 py-1 text-sm dark:!bg-slate-800 dark:!text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
               required
             >
               <option value="">Seleccione una sucursal</option>
@@ -386,7 +386,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
               value={newUser.rol}
               onChange={handleNewFieldChange}
               required
-              className="border dark:border-slate-700 rounded px-2 py-1 text-sm dark:bg-slate-800 dark:text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+              className="border dark:!border-slate-700 rounded px-2 py-1 text-sm dark:!bg-slate-800 dark:!text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
             >
               <option value="" disabled>-- Selecciona un rol --</option>
               {availableRoles.map(r => (
@@ -398,7 +398,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
           {/* Selector de bodegas (solo para vendedor y operario) */}
           {(newUser.rol === 'vendedor' || newUser.rol === 'operario') && (
             <div className="mt-4">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:!text-slate-300 mb-2">
                 Selecciona las bodegas asignadas
               </label>
               <Select
@@ -416,7 +416,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                 classNamePrefix="select"
                 noOptionsMessage={() => newUser.sucursal_id ? "No hay bodegas disponibles para esta sucursal" : "Selecciona una sucursal primero"}
               />
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 dark:!text-slate-400 mt-1">
                 {newUser.bodegas_ids?.length || 0} bodegas seleccionadas
               </p>
             </div>
@@ -437,7 +437,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
       {viewMode === 'card' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredUsers.length === 0 && !loading && (
-            <p className="col-span-full text-center text-slate-500 dark:text-slate-400">No se encontraron usuarios.</p>
+            <p className="col-span-full text-center text-slate-500 dark:!text-slate-400">No se encontraron usuarios.</p>
           )}
 
           {filteredUsers.map(u => {
@@ -448,11 +448,11 @@ export default function UsersView({ users: initialUsers, onCreated }) {
             return (
               <div
                 key={u.id_login_usuario}
-                className="bg-white dark:!bg-slate-900 rounded-2xl shadow-md p-6 border border-slate-100 dark:!border-slate-800 flex flex-col break-words transition-colors"
+                className="bg-white dark:!bg-slate-900 rounded-2xl shadow-md p-5 border border-slate-100 dark:!border-blue-500 flex flex-col break-words hover:shadow-xl hover:shadow-blue-500/20 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-300 ease-out group"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h5
-                    className="text-xl font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[70%]"
+                    className="text-xl font-semibold text-slate-900 dark:!text-slate-100 truncate max-w-[70%] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300"
                     title={u.usuario}
                   >
                     {u.usuario}
@@ -466,10 +466,10 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                   >
                     <span
                       className={`inline-flex items-center text-sm font-medium px-2.5 py-0.5 rounded-full
-                        transition-colors duration-200 ${
+                        transition-all duration-300 group-hover:scale-110 ${
                           u.is_active
-                            ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                            : 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300'
+                            ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-800/70'
+                            : 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 group-hover:bg-red-200 dark:group-hover:bg-red-800/70'
                         }`}
                     >
                       {togglingId === u.id_login_usuario ? (
@@ -503,9 +503,9 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                   </button>
                 </div>
 
-                <dl className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
-                  <div className="flex justify-between">
-                    <dt className="font-medium text-slate-500 dark:text-slate-400">Correo</dt>
+                <dl className="space-y-2 text-sm text-slate-700 dark:!text-slate-300 group/dl">
+                  <div className="flex justify-between group-hover/dl:translate-x-1 transition-transform duration-300">
+                    <dt className="font-medium text-slate-500 dark:!text-slate-400">Correo</dt>
                     <dd
                       className="truncate max-w-[60%]"
                       title={u.correo_usuario}
@@ -513,8 +513,8 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                       {u.correo_usuario}
                     </dd>
                   </div>
-                  <div className="flex justify-between">
-                    <dt className="font-medium text-slate-500 dark:text-slate-400">Sucursal</dt>
+                  <div className="flex justify-between group-hover/dl:translate-x-1 transition-transform duration-300">
+                    <dt className="font-medium text-slate-500 dark:!text-slate-400">Sucursal</dt>
                     <dd
                       className="truncate max-w-[60%]"
                       title={sucursales.find(s => s.id === u.id_sucursal_default)?.nombre || '—'}
@@ -527,7 +527,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                 <div className="mt-4 text-right">
                   <button
                     onClick={() => toggleDetails(u.id_login_usuario)}
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center transition-colors"
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center transition-all duration-300 hover:scale-105 group-hover:translate-x-1"
                   >
                     {isExpanded ? (
                       <>Ocultar <ChevronUpIcon className="w-4 h-4 ml-1" /></>
@@ -539,12 +539,12 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                 </div>
 
                 {isExpanded && (
-                  <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                  <div className="mt-4 pt-4 border-t border-slate-200 dark:!border-slate-800 space-y-2 text-sm text-slate-700 dark:!text-slate-300">
                     <div>
-                      <span className="font-medium text-slate-500 dark:text-slate-400">Rol:</span>{' '}
+                      <span className="font-medium text-slate-500 dark:!text-slate-400">Rol:</span>{' '}
                       {isEditing ? (
                         <select
-                          className="border dark:border-slate-700 rounded px-2 py-1 text-sm dark:bg-slate-800 dark:text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                          className="border dark:!border-slate-700 rounded px-2 py-1 text-sm dark:!bg-slate-800 dark:!text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                           value={fields.rol}
                           onChange={e => handleFieldChange(u.id_login_usuario, 'rol', e.target.value)}
                         >
@@ -559,10 +559,10 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                     </div>
 
                     <div>
-                      <span className="font-medium text-slate-500 dark:text-slate-400">Usuario:</span>{' '}
+                      <span className="font-medium text-slate-500 dark:!text-slate-400">Usuario:</span>{' '}
                       {isEditing ? (
                         <input
-                          className="border dark:border-slate-700 rounded px-2 py-1 text-sm dark:bg-slate-800 dark:text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                          className="border dark:!border-slate-700 rounded px-2 py-1 text-sm dark:!bg-slate-800 dark:!text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                           value={fields.usuario}
                           onChange={e => handleFieldChange(u.id_login_usuario, 'usuario', e.target.value)}
                         />
@@ -572,10 +572,10 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                     </div>
 
                     <div>
-                      <span className="font-medium text-slate-500 dark:text-slate-400">Sucursal:</span>{' '}
+                      <span className="font-medium text-slate-500 dark:!text-slate-400">Sucursal:</span>{' '}
                       {isEditing ? (
                         <select
-                          className="border dark:border-slate-700 rounded px-2 py-1 text-sm dark:bg-slate-800 dark:text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                          className="border dark:!border-slate-700 rounded px-2 py-1 text-sm dark:!bg-slate-800 dark:!text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                           value={fields.id_sucursal_default}
                           onChange={e => handleFieldChange(u.id_login_usuario, 'id_sucursal_default', e.target.value)}
                         >
@@ -590,7 +590,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                     </div>
 
                     <div>
-                      <span className="font-medium text-slate-500 dark:text-slate-400">Fecha de creación:</span> {fields.creado_en}
+                      <span className="font-medium text-slate-500 dark:!text-slate-400">Fecha de creación:</span> {fields.creado_en}
                     </div>
 
                     {u.foto_perfil && (
@@ -598,7 +598,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                         <img
                           src={u.foto_perfil}
                           alt="Foto de perfil"
-                          className="w-20 h-20 rounded-full object-cover border border-slate-200 dark:border-slate-700"
+                          className="w-20 h-20 rounded-full object-cover border border-slate-200 dark:!border-slate-700"
                         />
                       </div>
                     )}
@@ -614,7 +614,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
                           </button>
                           <button
                             onClick={() => toggleEdit(u.id_login_usuario)}
-                            className="bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm px-3 py-1 rounded hover:bg-slate-400 dark:hover:bg-slate-600 transition-colors"
+                            className="bg-slate-300 dark:bg-slate-700 text-slate-800 dark:!text-slate-200 text-sm px-3 py-1 rounded hover:bg-slate-400 dark:hover:bg-slate-600 transition-colors"
                           >
                             Cancelar
                           </button>

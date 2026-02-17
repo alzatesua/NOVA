@@ -125,7 +125,7 @@ export default function EnviarTraslado({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+    <div className="bg-white dark:!bg-slate-900 rounded-2xl shadow-xl border border-gray-100 dark:!border-slate-800 overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-6 text-white">
         <div className="flex items-center gap-4">
@@ -154,7 +154,7 @@ export default function EnviarTraslado({
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
               placeholder="Buscar por ID, estado, bodega o observaciones..."
-              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:!bg-slate-800 border border-gray-200 dark:!border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
 
@@ -163,7 +163,7 @@ export default function EnviarTraslado({
             <button
               type="button"
               onClick={() => setMostrarFiltros(!mostrarFiltros)}
-              className="flex items-center gap-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+              className="flex items-center gap-2 px-4 py-3 bg-gray-100 dark:!bg-slate-800 hover:bg-gray-200 dark:hover:!bg-slate-700 rounded-xl transition-colors"
             >
               <FunnelIcon className="w-5 h-5" />
               Filtros
@@ -183,8 +183,8 @@ export default function EnviarTraslado({
 
         {/* Panel de filtros */}
         {mostrarFiltros && (
-          <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-            <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+          <div className="bg-gray-50 dark:!bg-slate-800 rounded-xl p-4 border border-gray-200 dark:!border-slate-700">
+            <h4 className="font-semibold text-gray-700 dark:!text-slate-300 mb-3 flex items-center gap-2">
               <FunnelIcon className="w-4 h-4" />
               Opciones de filtrado
             </h4>
@@ -196,7 +196,7 @@ export default function EnviarTraslado({
                   onChange={(e) => setSoloBorradores(e.target.checked)}
                   className="rounded border-gray-300 text-indigo-600 focus:ring-blue-500"
                 />
-                <span className="text-sm text-gray-700 flex items-center gap-1">
+                <span className="text-sm text-gray-700 dark:!text-slate-300 flex items-center gap-1">
                   <DocumentDuplicateIcon className="w-4 h-4" />
                   Solo borradores (BOR)
                 </span>
@@ -209,7 +209,7 @@ export default function EnviarTraslado({
                   onChange={(e) => setSoloMios(e.target.checked)}
                   className="rounded border-gray-300 text-indigo-600 focus:ring-blue-500"
                 />
-                <span className="text-sm text-gray-700 flex items-center gap-1">
+                <span className="text-sm text-gray-700 dark:!text-slate-300 flex items-center gap-1">
                   <UserIcon className="w-4 h-4" />
                   Solo mis traslados
                 </span>
@@ -244,7 +244,7 @@ export default function EnviarTraslado({
             <div className="p-8 text-center">
               <div className="inline-flex items-center gap-3">
                 <div className="w-6 h-6 border-2 border-gray-300 border-t-indigo-500 rounded-full animate-spin"></div>
-                <span className="text-gray-600">Cargando traslados...</span>
+                <span className="text-gray-600 dark:!text-slate-400">Cargando traslados...</span>
               </div>
             </div>
           ) : errorProductos ? (
@@ -267,15 +267,15 @@ export default function EnviarTraslado({
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-50 dark:!bg-slate-800 border-b border-gray-200 dark:!border-slate-700">
                   <tr className="text-left">
-                    <th className="px-6 py-4 font-semibold text-gray-700">ID</th>
-                    <th className="px-6 py-4 font-semibold text-gray-700">Bodega Origen</th>
-                    <th className="px-6 py-4 font-semibold text-gray-700">Bodega Destino</th>
-                    <th className="px-6 py-4 font-semibold text-gray-700">Estado</th>
-                    <th className="px-6 py-4 font-semibold text-gray-700">Observaciones</th>
-                    <th className="px-6 py-4 font-semibold text-gray-700">Fecha Creación</th>
-                    <th className="px-6 py-4 font-semibold text-gray-700">Acciones</th>
+                    <th className="px-6 py-4 font-semibold text-gray-700 dark:!text-slate-300">ID</th>
+                    <th className="px-6 py-4 font-semibold text-gray-700 dark:!text-slate-300">Bodega Origen</th>
+                    <th className="px-6 py-4 font-semibold text-gray-700 dark:!text-slate-300">Bodega Destino</th>
+                    <th className="px-6 py-4 font-semibold text-gray-700 dark:!text-slate-300">Estado</th>
+                    <th className="px-6 py-4 font-semibold text-gray-700 dark:!text-slate-300">Observaciones</th>
+                    <th className="px-6 py-4 font-semibold text-gray-700 dark:!text-slate-300">Fecha Creación</th>
+                    <th className="px-6 py-4 font-semibold text-gray-700 dark:!text-slate-300">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -288,7 +288,7 @@ export default function EnviarTraslado({
                       <tr
                         ref={rowRef}
                         key={String(traslado.id)}
-                        className={`hover:bg-gray-50 transition-colors ${
+                        className={`hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors ${
                           reciente ? 'bg-amber-50/50' : ''
                         }`}
                       >
@@ -304,10 +304,10 @@ export default function EnviarTraslado({
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-gray-700">
+                        <td className="px-6 py-4 text-gray-700 dark:!text-slate-300">
                           {traslado.bodega_origen_id ?? '—'}
                         </td>
-                        <td className="px-6 py-4 text-gray-700">
+                        <td className="px-6 py-4 text-gray-700 dark:!text-slate-300">
                           {traslado.bodega_destino_id ?? '—'}
                         </td>
                         <td className="px-6 py-4">
@@ -315,12 +315,12 @@ export default function EnviarTraslado({
                             {traslado.estado ?? '—'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-gray-700 max-w-xs">
+                        <td className="px-6 py-4 text-gray-700 dark:!text-slate-300 max-w-xs">
                           <div className="truncate" title={traslado.observaciones}>
                             {traslado.observaciones ?? '—'}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-gray-600">
+                        <td className="px-6 py-4 text-gray-600 dark:!text-slate-400">
                           {traslado.creado_en ? (
                             <div className="space-y-1">
                               <div className="text-sm">
@@ -372,7 +372,7 @@ export default function EnviarTraslado({
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-3 text-gray-700 font-medium bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all"
+            className="px-6 py-3 text-gray-700 dark:!text-slate-300 dark:!text-slate-300 font-medium bg-white dark:!bg-slate-800 border-2 border-gray-300 dark:!border-slate-700 rounded-xl hover:bg-gray-50 dark:hover:!bg-slate-700 hover:border-gray-400 dark:hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all"
           >
             Cerrar
           </button>

@@ -15,6 +15,7 @@ export default function Modal({ children, onClose }) {
         className="
           relative
           bg-white
+          dark:!bg-slate-900
           rounded-xl
           shadow-lg
           w-full
@@ -33,14 +34,14 @@ export default function Modal({ children, onClose }) {
           type="button"
           onClick={onClose}
           className="
-            absolute top-4 right-4 
-            p-1 bg-white bg-opacity-80 rounded-full 
-            hover:bg-opacity-100 transition 
+            absolute top-4 right-4
+            p-1 bg-white dark:!bg-slate-800 bg-opacity-80 rounded-full
+            hover:bg-opacity-100 dark:hover:!bg-slate-700 transition
             focus:outline-none
           "
           aria-label="Cerrar"
         >
-          <XMarkIcon className="h-6 w-6 text-gray-600 hover:text-gray-800" />
+          <XMarkIcon className="h-6 w-6 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200" />
         </button>
 
         {children}

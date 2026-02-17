@@ -187,6 +187,22 @@ class IvaSerializer(serializers.ModelSerializer):
 
 
 class DbAliasModelSerializer(serializers.ModelSerializer):
+    def build_field(self, field_name, info, model_class, nested_depth):
+        """
+        Sobrescribir para convertir min_value de int a Decimal para campos DecimalField.
+        Esto soluciona el warning: "fields min_value in DecimalField should be Decimal type"
+        """
+        from decimal import Decimal
+        field = super().build_field(field_name, info, model_class, nested_depth)
+
+        # Si el campo tiene min_value y es un DecimalField, convertir min_value a Decimal
+        if hasattr(field, 'min_value') and field.min_value is not None:
+            from rest_framework.fields import DecimalField
+            if isinstance(field, DecimalField) and isinstance(field.min_value, int):
+                field.min_value = Decimal(str(field.min_value))
+
+        return field
+
     def _alias(self):
         return self.context.get('db_alias') or 'default'
 

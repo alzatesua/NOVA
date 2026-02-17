@@ -338,7 +338,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
   return (
     <div className="space-y-3">
       {/* Indicador de pasos horizontal - Compacto */}
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm p-3 border border-slate-200 dark:border-slate-800">
+      <div className="bg-white dark:!bg-slate-900 rounded-lg shadow-sm p-3 border border-slate-200 dark:!border-slate-800">
         <div className="flex items-center justify-between">
           {pasos.map((paso, index) => {
             const Icono = paso.icono;
@@ -359,7 +359,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                         ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/50 scale-105' 
                         : estaCompletado || yaVisitado
                         ? 'bg-green-500 text-white'
-                        : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                        : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:!text-slate-400'
                       }
                     `}
                   >
@@ -373,7 +373,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                     text-[10px] sm:text-xs font-semibold text-center
                     ${esActivo 
                       ? 'text-blue-600 dark:text-blue-400' 
-                      : 'text-slate-600 dark:text-slate-400'
+                      : 'text-slate-600 dark:!text-slate-400'
                     }
                   `}>
                     {paso.titulo}
@@ -397,7 +397,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
       </div>
 
       {/* Contenido del paso actual - Compacto */}
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 min-h-[350px]">
+      <div className="bg-white dark:!bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:!border-slate-800 min-h-[350px]">
         {/* Paso 1: Cliente */}
         {pasoActual === 1 && (
           <div className="p-3 sm:p-4">
@@ -406,8 +406,8 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 <UserCircleIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Información del Cliente</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Busca o crea un cliente (opcional)</p>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:!text-slate-100">Información del Cliente</h3>
+                <p className="text-xs text-slate-500 dark:!text-slate-400">Busca o crea un cliente (opcional)</p>
               </div>
             </div>
             <ClienteSelector cliente={cliente} onClienteChange={setCliente} />
@@ -422,8 +422,8 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 <ShoppingCartIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Productos</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Agrega productos a la venta</p>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:!text-slate-100">Productos</h3>
+                <p className="text-xs text-slate-500 dark:!text-slate-400">Agrega productos a la venta</p>
               </div>
             </div>
 
@@ -432,9 +432,9 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 <p className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-400 font-medium">Seleccione una bodega para agregar productos</p>
               </div>
             ) : productos.length === 0 ? (
-              <div className="text-center py-8 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+              <div className="text-center py-8 bg-slate-50 dark:!bg-slate-800 rounded-lg border border-slate-200 dark:!border-slate-700">
                 <ShoppingCartIcon className="h-10 w-10 mx-auto text-slate-400 dark:text-slate-600 mb-2" />
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">No hay productos agregados</p>
+                <p className="text-sm text-slate-600 dark:!text-slate-400 mb-3">No hay productos agregados</p>
                 <button
                   onClick={agregarFilaProducto}
                   className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
@@ -447,7 +447,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
               <div className="space-y-2">
                 {/* Lista de productos */}
                 {productos.map((fila, index) => (
-                  <div key={fila.fila_id} className="bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-2 sm:p-3">
+                  <div key={fila.fila_id} className="bg-slate-50 dark:!bg-slate-800 rounded-lg border border-slate-200 dark:!border-slate-700 p-2 sm:p-3">
                     <div className="flex items-start gap-2">
                       {/* Número de fila */}
                       <div className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs sm:text-sm font-bold">
@@ -461,10 +461,10 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                           <div className="space-y-2">
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 truncate">
+                                <p className="text-sm sm:text-base font-bold text-slate-900 dark:!text-slate-100 truncate">
                                   {fila.nombre}
                                 </p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                <p className="text-xs text-slate-500 dark:!text-slate-400">
                                   SKU: {fila.sku} • Disponible: {fila.disponible}
                                 </p>
                               </div>
@@ -479,24 +479,24 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                             {/* Cantidad y precio */}
                             <div className="grid grid-cols-3 gap-2 text-xs sm:text-sm">
                               <div>
-                                <label className="block text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 mb-1">Cantidad</label>
+                                <label className="block text-[10px] sm:text-xs text-slate-600 dark:!text-slate-400 mb-1">Cantidad</label>
                                 <input
                                   type="number"
                                   min="1"
                                   max={fila.disponible}
                                   value={fila.cantidad}
                                   onChange={(e) => actualizarCantidad(fila.fila_id, e.target.value)}
-                                  className="w-full px-2 py-1 text-sm border border-slate-200 dark:border-slate-700 rounded text-center focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+                                  className="w-full px-2 py-1 text-sm border border-slate-200 dark:!border-slate-700 rounded text-center focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:!bg-slate-900 text-slate-900 dark:!text-slate-100"
                                 />
                               </div>
                               <div>
-                                <label className="block text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 mb-1">Precio Unit.</label>
-                                <p className="px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded text-center font-bold text-slate-900 dark:text-slate-100">
+                                <label className="block text-[10px] sm:text-xs text-slate-600 dark:!text-slate-400 mb-1">Precio Unit.</label>
+                                <p className="px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded text-center font-bold text-slate-900 dark:!text-slate-100">
                                   ${parseFloat(fila.precio).toFixed(2)}
                                 </p>
                               </div>
                               <div>
-                                <label className="block text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 mb-1">Subtotal</label>
+                                <label className="block text-[10px] sm:text-xs text-slate-600 dark:!text-slate-400 mb-1">Subtotal</label>
                                 <p className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 rounded text-center font-bold text-emerald-700 dark:text-emerald-400">
                                   ${(parseFloat(fila.precio) * fila.cantidad).toFixed(2)}
                                 </p>
@@ -505,7 +505,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
 
                             {/* Buscador colapsado */}
                             {fila.mostrar_buscador && (
-                              <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                              <div className="pt-2 border-t border-slate-200 dark:!border-slate-700">
                                 <ProductoSelectorPOS
                                   bodegaId={bodegaId}
                                   onProductoSelect={(producto) => asignarProductoAFila(fila.fila_id, producto)}
@@ -518,8 +518,8 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                           // Sin producto seleccionado - Mostrar buscador
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 mb-2">
-                              <MagnifyingGlassIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                              <p className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400">
+                              <MagnifyingGlassIcon className="h-4 w-4 text-slate-500 dark:!text-slate-400" />
+                              <p className="text-xs sm:text-sm font-semibold text-slate-600 dark:!text-slate-400">
                                 Buscar producto para esta fila
                               </p>
                             </div>
@@ -579,8 +579,8 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 <CreditCardIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Métodos de Pago</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Configura cómo se realizará el pago</p>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:!text-slate-100">Métodos de Pago</h3>
+                <p className="text-xs text-slate-500 dark:!text-slate-400">Configura cómo se realizará el pago</p>
               </div>
             </div>
 
@@ -598,7 +598,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                   <select
                     value={pago.forma_pago || ''}
                     onChange={(e) => actualizarPago(index, 'forma_pago', parseInt(e.target.value))}
-                    className="flex-1 px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                    className="flex-1 px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100"
                     required
                   >
                     <option value="">Seleccionar método...</option>
@@ -614,7 +614,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                     value={pago.monto}
                     onChange={(e) => actualizarPago(index, 'monto', e.target.value)}
                     placeholder="Monto"
-                    className="w-full sm:w-28 px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                    className="w-full sm:w-28 px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100"
                     required
                   />
 
@@ -623,7 +623,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                     value={pago.referencia}
                     onChange={(e) => actualizarPago(index, 'referencia', e.target.value)}
                     placeholder="Ref. (opcional)"
-                    className="flex-1 px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                    className="flex-1 px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100"
                   />
 
                   {pagos.length > 1 && (
@@ -651,15 +651,15 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
 
             {/* Resumen de totales - Compacto */}
             <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 p-3 rounded-lg border border-slate-200 dark:border-slate-600">
-              <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">Resumen</h4>
+              <h4 className="text-sm font-bold text-slate-900 dark:!text-slate-100 mb-2">Resumen</h4>
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center py-1 border-b border-slate-200 dark:border-slate-600">
-                  <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Subtotal:</span>
-                  <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">${calcularSubtotal().toFixed(2)}</span>
+                  <span className="text-xs sm:text-sm text-slate-600 dark:!text-slate-400">Subtotal:</span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900 dark:!text-slate-100">${calcularSubtotal().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center py-1 border-b border-slate-200 dark:border-slate-600">
-                  <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">IVA:</span>
-                  <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">${calcularIVA().toFixed(2)}</span>
+                  <span className="text-xs sm:text-sm text-slate-600 dark:!text-slate-400">IVA:</span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900 dark:!text-slate-100">${calcularIVA().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg px-2">
                   <span className="text-sm sm:text-base font-bold text-white">TOTAL:</span>
@@ -688,51 +688,51 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 <DocumentCheckIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Confirmar Venta</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Revisa antes de finalizar</p>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:!text-slate-100">Confirmar Venta</h3>
+                <p className="text-xs text-slate-500 dark:!text-slate-400">Revisa antes de finalizar</p>
               </div>
             </div>
 
             {/* Resumen compacto con scroll si es necesario */}
             <div className="space-y-3 max-h-[450px] overflow-y-auto">
               {/* Cliente */}
-              <div className="bg-slate-50 dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
-                <h4 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1">
+              <div className="bg-slate-50 dark:!bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:!border-slate-700">
+                <h4 className="text-xs sm:text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-1.5 flex items-center gap-1">
                   <UserCircleIcon className="h-3.5 w-3.5" />
                   Cliente
                 </h4>
                 {cliente ? (
                   <div>
-                    <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">{cliente.nombre_completo}</p>
-                    <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400">{cliente.tipo_documento}: {cliente.numero_documento}</p>
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 dark:!text-slate-100">{cliente.nombre_completo}</p>
+                    <p className="text-[10px] sm:text-xs text-slate-600 dark:!text-slate-400">{cliente.tipo_documento}: {cliente.numero_documento}</p>
                   </div>
                 ) : (
-                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Consumidor Final</p>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:!text-slate-400">Consumidor Final</p>
                 )}
               </div>
 
               {/* Productos */}
-              <div className="bg-slate-50 dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
-                <h4 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1">
+              <div className="bg-slate-50 dark:!bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:!border-slate-700">
+                <h4 className="text-xs sm:text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-1.5 flex items-center gap-1">
                   <ShoppingCartIcon className="h-3.5 w-3.5" />
                   Productos ({productos.filter(p => p.producto_seleccionado).length})
                 </h4>
                 <div className="space-y-1 max-h-36 overflow-y-auto">
                   {productos.filter(p => p.producto_seleccionado).map((p) => (
-                    <div key={p.fila_id} className="flex justify-between items-center py-1 border-b border-slate-200 dark:border-slate-700 last:border-0">
+                    <div key={p.fila_id} className="flex justify-between items-center py-1 border-b border-slate-200 dark:!border-slate-700 last:border-0">
                       <div className="flex-1 min-w-0 mr-2">
-                        <p className="text-xs sm:text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{p.nombre}</p>
-                        <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">{p.cantidad} × ${parseFloat(p.precio).toFixed(2)}</p>
+                        <p className="text-xs sm:text-sm font-medium text-slate-900 dark:!text-slate-100 truncate">{p.nombre}</p>
+                        <p className="text-[10px] sm:text-xs text-slate-500 dark:!text-slate-400">{p.cantidad} × ${parseFloat(p.precio).toFixed(2)}</p>
                       </div>
-                      <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex-shrink-0">${(parseFloat(p.precio) * p.cantidad).toFixed(2)}</p>
+                      <p className="text-xs sm:text-sm font-bold text-slate-900 dark:!text-slate-100 flex-shrink-0">${(parseFloat(p.precio) * p.cantidad).toFixed(2)}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Pagos */}
-              <div className="bg-slate-50 dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
-                <h4 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1">
+              <div className="bg-slate-50 dark:!bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:!border-slate-700">
+                <h4 className="text-xs sm:text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-1.5 flex items-center gap-1">
                   <CreditCardIcon className="h-3.5 w-3.5" />
                   Métodos de Pago
                 </h4>
@@ -741,8 +741,8 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                     const formaPago = formasPago.find(f => f.id === pago.forma_pago);
                     return (
                       <div key={index} className="flex justify-between items-center text-xs sm:text-sm">
-                        <span className="text-slate-700 dark:text-slate-300">{formaPago?.nombre || 'N/A'}</span>
-                        <span className="font-semibold text-slate-900 dark:text-slate-100">${parseFloat(pago.monto).toFixed(2)}</span>
+                        <span className="text-slate-700 dark:!text-slate-300">{formaPago?.nombre || 'N/A'}</span>
+                        <span className="font-semibold text-slate-900 dark:!text-slate-100">${parseFloat(pago.monto).toFixed(2)}</span>
                       </div>
                     );
                   })}
@@ -759,13 +759,13 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
 
               {/* Observaciones */}
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-1.5">
                   Observaciones (opcional)
                 </label>
                 <textarea
                   value={observaciones}
                   onChange={(e) => setObservaciones(e.target.value)}
-                  className="w-full px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                  className="w-full px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100"
                   rows={2}
                   placeholder="Notas adicionales..."
                 />
@@ -781,7 +781,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
           <button
             type="button"
             onClick={handleAnterior}
-            className="flex items-center gap-1 px-3 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-semibold rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:!text-slate-200 text-xs sm:text-sm font-semibold rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
           >
             <ArrowLeftIcon className="h-3.5 w-3.5" />
             Anterior

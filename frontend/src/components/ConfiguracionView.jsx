@@ -353,10 +353,10 @@ export default function ConfiguracionView() {
       return (
         <div className="text-center py-12">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:!bg-slate-800 mb-3 transition-colors duration-200">
-            <i className='bx bx-inbox text-3xl text-slate-400 dark:!text-slate-600'></i>
+            <i className='bx bx-inbox text-3xl text-slate-400 dark:text-slate-600'></i>
           </div>
           <p className="text-base text-slate-500 dark:!text-slate-400 font-medium transition-colors duration-200">No hay {tabs.find(t => t.id === activeTab)?.label.toLowerCase()} registrados</p>
-          <p className="text-xs text-slate-400 dark:!text-slate-500 mt-1 transition-colors duration-200">Crea uno nuevo para comenzar</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 transition-colors duration-200">Crea uno nuevo para comenzar</p>
         </div>
       );
     }
@@ -372,14 +372,14 @@ export default function ConfiguracionView() {
               <div className="flex-1">
                 {activeTab === 'ivas' ? (
                   <p className="font-semibold text-base text-slate-800 dark:!text-slate-100 flex items-center gap-2 transition-colors duration-200">
-                    <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
+                    <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 dark:bg-opacity-20 flex items-center justify-center transition-colors duration-200">
                       <i className='bx bx-percent text-sm text-[rgb(37,99,235)]'></i>
                     </span>
                     {item.porcentaje}%
                   </p>
                 ) : activeTab === 'descuentos' ? (
                   <p className="font-semibold text-base text-slate-800 dark:!text-slate-100 flex items-center gap-2 transition-colors duration-200">
-                    <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
+                    <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 dark:bg-opacity-20 flex items-center justify-center transition-colors duration-200">
                       <i className='bx bx-discount text-sm text-[rgb(37,99,235)]'></i>
                     </span>
                     {item.porcentaje || item.Descuento}%
@@ -387,7 +387,7 @@ export default function ConfiguracionView() {
                 ) : activeTab === 'categorias' ? (
                   <>
                     <p className="font-semibold text-base text-slate-800 dark:!text-slate-100 flex items-center gap-2 transition-colors duration-200">
-                      <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
+                      <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 dark:bg-opacity-20 flex items-center justify-center transition-colors duration-200">
                         <i className='bx bx-category text-sm text-[rgb(37,99,235)]'></i>
                       </span>
                       {item.nombre}
@@ -398,34 +398,34 @@ export default function ConfiguracionView() {
                   </>
                 ) : activeTab === 'marcas' ? (
                   <p className="font-semibold text-base text-slate-800 dark:!text-slate-100 flex items-center gap-2 transition-colors duration-200">
-                    <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
+                    <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 dark:bg-opacity-20 flex items-center justify-center transition-colors duration-200">
                       <i className='bx bx-tag text-sm text-[rgb(37,99,235)]'></i>
                     </span>
                     {item.nombre}
                   </p>
                 ) : (
                   <p className="font-semibold text-base text-slate-800 dark:!text-slate-100 flex items-center gap-2 transition-colors duration-200">
-                    <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
+                    <span className="w-7 h-7 rounded-lg bg-[rgb(37,99,235)] bg-opacity-10 dark:bg-opacity-20 flex items-center justify-center transition-colors duration-200">
                       <i className='bx bx-ruler text-sm text-[rgb(37,99,235)]'></i>
                     </span>
                     {item.nombre}
                   </p>
                 )}
                 {item.id && (
-                  <p className="text-xs text-slate-400 dark:!text-slate-600 mt-1.5 ml-9 transition-colors duration-200">ID: {item.id}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-600 mt-1.5 ml-9 transition-colors duration-200">ID: {item.id}</p>
                 )}
               </div>
               <div className="flex gap-1">
                 <button
                   onClick={() => handleEdit(item)}
-                  className="p-1.5 text-gray-400 hover:text-[rgb(37,99,235)] hover:bg-[rgb(37,99,235)] hover:bg-opacity-10 rounded-lg transition-all"
+                  className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-[rgb(37,99,235)] hover:bg-[rgb(37,99,235)] hover:bg-opacity-10 rounded-lg transition-all"
                   title="Editar"
                 >
                   <i className='bx bx-edit-alt text-base'></i>
                 </button>
                 <button
                   onClick={() => handleDelete(item)}
-                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                  className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:!text-red-400 hover:bg-red-50 dark:hover:!bg-red-900 dark:hover:!bg-opacity-20 rounded-lg transition-all"
                   title="Eliminar"
                 >
                   <i className='bx bx-trash text-base'></i>
@@ -502,7 +502,7 @@ export default function ConfiguracionView() {
                   className="w-full px-3 py-2.5 border border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
                   placeholder="Ej: Mi Tienda Online"
                 />
-                <p className="text-xs text-slate-400 dark:!text-slate-500 mt-1.5 transition-colors duration-200">Este nombre se mostrará en el header de tu tienda</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5 transition-colors duration-200">Este nombre se mostrará en el header de tu tienda</p>
               </div>
 
               <div>
@@ -517,12 +517,12 @@ export default function ConfiguracionView() {
                   className="w-full px-3 py-2.5 border border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(37,99,235)] focus:border-transparent transition-all text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
                   placeholder="Ej: 573000000000"
                 />
-                <p className="text-xs text-slate-400 dark:!text-slate-500 mt-1.5 transition-colors duration-200">
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5 transition-colors duration-200">
                   Código de país + número (sin el signo +). Ej: 57 para Colombia, 54 para Argentina
                 </p>
               </div>
 
-              <div className="bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] bg-opacity-5 border border-[rgb(37,99,235)] border-opacity-20 rounded-xl p-5">
+              <div className="bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] bg-opacity-5 dark:bg-opacity-10 border border-[rgb(37,99,235)] border-opacity-20 dark:border-opacity-30 rounded-xl p-5 transition-colors duration-200">
                 <h4 className="font-semibold text-slate-800 dark:!text-slate-100 mb-3 flex items-center gap-2 text-sm transition-colors duration-200">
                   <i className='bx bx-info-circle text-[rgb(37,99,235)] text-lg'></i>
                   ¿Cómo funciona?
@@ -690,7 +690,7 @@ export default function ConfiguracionView() {
 
         {/* Lista de items (ocultar en tab tienda) */}
         {activeTab !== 'tienda' && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 relative">
+          <div className="bg-white dark:!bg-slate-900 rounded-xl shadow-md border border-slate-100 dark:!border-slate-800 relative transition-colors duration-200">
             {/* Botón de crear flotante */}
             <button
               onClick={handleCreate}

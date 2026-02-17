@@ -37,8 +37,8 @@ export default function StatCard({
     <div className="bg-white dark:!bg-slate-900 rounded-lg shadow p-6 hover:shadow-lg transition-all duration-200 border border-slate-200 dark:!border-slate-800">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">{title}</p>
-          <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{value}</p>
+          <p className="text-sm font-medium text-slate-600 dark:!text-slate-400 mb-1">{title}</p>
+          <p className="text-3xl font-bold text-slate-900 dark:!text-slate-100">{value}</p>
           {trend !== null && (
             <div className={`flex items-center mt-2 text-sm ${
               trendUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
@@ -46,7 +46,7 @@ export default function StatCard({
               <span className="font-semibold">
                 {trendUp ? '↑' : '↓'} {Math.abs(trend)}%
               </span>
-              <span className="text-slate-500 dark:text-slate-400 ml-1">vs período anterior</span>
+              <span className="text-slate-500 dark:!text-slate-400 ml-1">vs período anterior</span>
             </div>
           )}
         </div>

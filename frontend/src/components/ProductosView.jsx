@@ -839,7 +839,7 @@ export default function ProductsView({
 
       {/* ——— Banner indicador de filtro por bodega ——— */}
       {bodegaSeleccionada && (
-        <div className="bg-amber-50 dark:!bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-r-lg mb-6 flex items-center justify-between">
+        <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-r-lg mb-6 flex items-center justify-between">
           <div className="flex items-center">
             <TruckIcon className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-3" />
             <div>
@@ -881,7 +881,7 @@ export default function ProductsView({
                 value={priceMin}
                 onChange={e => setPriceMin(e.target.value)}
               />
-              <span className="text-slate-500 dark:text-slate-400">–</span>
+              <span className="text-slate-500 dark:!text-slate-400">–</span>
               <input
                 type="number"
                 placeholder="Precio max"
@@ -1447,7 +1447,7 @@ export default function ProductsView({
                 <button
                   type="button"
                   onClick={() => setShowCreateForm(false)}
-                  className="px-5 py-2 bg-slate-200 dark:!bg-slate-700 text-slate-700 dark:!text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
+                  className="px-5 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:!text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
                 >
                   Cancelar
                 </button>

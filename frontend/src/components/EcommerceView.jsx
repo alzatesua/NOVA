@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { fetchProducts } from '../services/api';
+import { fetchProductosEcommerce } from '../services/api';
 import { Navbar, Nav, Form, Container, Button } from 'react-bootstrap';
 import {
   House,
@@ -226,6 +226,35 @@ export default function EcommerceView() {
     }
   }, [activeSection]);
 
+  // Función para transformar productos de la API al formato del componente
+  const transformarProducto = (productoAPI) => {
+    return {
+      // Campos básicos
+      id: productoAPI.id,
+      sku: productoAPI.sku,
+      nombre: productoAPI.nombre,
+      descripcion: productoAPI.descripcion,
+      stock: productoAPI.stock,
+      estado: productoAPI.estado,
+
+      // Campos transformados (anidados → planos)
+      precio_venta: productoAPI.precio,
+      categoria_nombre: productoAPI.categoria?.nombre || null,
+      marca_nombre: productoAPI.marca?.nombre || null,
+      iva_porcentaje: productoAPI.iva?.porcentaje || null,
+      descuento_porcentaje: productoAPI.descuento?.porcentaje || null,
+      tipo_medida_nombre: productoAPI.tipo_medida?.nombre || null,
+
+      // Campos adicionales
+      codigo_barras: productoAPI.codigo_barras,
+      imei: productoAPI.imei,
+      imagen: productoAPI.imagen_producto || null,
+      atributo: productoAPI.atributo,
+      valor_atributo: productoAPI.valor_atributo,
+      creado_en: productoAPI.creado_en,
+    };
+  };
+
   // Cargar productos
   useEffect(() => {
     const loadProducts = async () => {
@@ -234,19 +263,17 @@ export default function EcommerceView() {
 
         let productos = [];
 
-        // Intentar cargar productos del backend
+        // Intentar cargar productos del backend con la nueva API e-commerce
         try {
-          const { datos } = await fetchProducts({
-            usuario: null,
-            tokenUsuario: null,
-            subdominio: subdominio,
-            publico: true
+          const response = await fetchProductosEcommerce({
+            subdominio: subdominio
           });
 
-          // Solo usar productos del backend si existen y tienen datos
-          if (datos && Array.isArray(datos) && datos.length > 0) {
-            productos = datos;
-            console.log('✅ Productos cargados del backend:', productos.length);
+          // La nueva API retorna: { ok, mensaje, total_productos, data }
+          if (response.ok && response.data && Array.isArray(response.data) && response.data.length > 0) {
+            // Transformar productos al formato que espera el componente
+            productos = response.data.map(transformarProducto);
+            console.log('✅ Productos cargados del backend (API E-commerce):', productos.length);
           } else {
             console.log('⚠️ No hay productos en backend, usando productos de ejemplo');
           }

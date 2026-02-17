@@ -297,15 +297,15 @@ export default function AjustarExistencia({
   }, [productoEncontrado?.imagen_producto, fullUrl]);
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-xl p-5 border border-white/20 shadow-lg">
+    <div className="bg-white/90 dark:!bg-slate-900/90 backdrop-blur-sm rounded-xl p-5 border border-white/20 dark:!border-slate-800 shadow-lg">
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
         <div className="p-2 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg">
           <SparklesIcon className="w-4 h-4 text-white" />
         </div>
         <div>
-          <h3 className="text-base font-bold text-slate-800">Ajuste de inventario</h3>
-          <p className="text-xs text-slate-600">Modifica inventarios con búsqueda inteligente por código de barras</p>
+          <h3 className="text-base font-bold text-slate-800 dark:!text-slate-100">Ajuste de inventario</h3>
+          <p className="text-xs text-slate-600 dark:!text-slate-400">Modifica inventarios con búsqueda inteligente por código de barras</p>
         </div>
       </div>
 
@@ -316,14 +316,14 @@ export default function AjustarExistencia({
             {/* Fila 1: Código de barras y Bodega */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                <label className="block text-xs font-medium text-slate-700 dark:!text-slate-300 mb-1.5">
                   <MagnifyingGlassIcon className="w-3.5 h-3.5 inline mr-1" />
                   Código de Barras
                 </label>
                 <input
                   ref={barcodeRef}
                   type="text"
-                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs
+                  className="w-full px-3 py-2 bg-white dark:!bg-slate-800 border border-slate-300 dark:!border-slate-700 rounded-lg text-xs
                             focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
                             transition-all duration-200 shadow-sm hover:shadow-md"
                   value={codigoBarras}
@@ -333,14 +333,14 @@ export default function AjustarExistencia({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:!text-slate-300 mb-1.5">
                   Bodega <span className="text-rose-400">*</span>
                 </label>
                 <select
                   required
                   value={ajusteForm?.bodega || ''}
                   onChange={(e) => onBodegaSelect(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs
+                  className="w-full px-3 py-2 bg-white dark:!bg-slate-800 border border-slate-300 dark:!border-slate-700 rounded-lg text-xs
                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                             transition-all duration-200 shadow-sm hover:shadow-md appearance-none"
                 >
@@ -362,34 +362,34 @@ export default function AjustarExistencia({
                   )}
                 </select>
                 {bodegaSeleccionada && (
-                  <p className="text-xs text-emerald-600 mt-1">✓ {bodegaSeleccionada.nombre}</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">✓ {bodegaSeleccionada.nombre}</p>
                 )}
               </div>
             </div>
 
             {/* Producto encontrado */}
             {productoEncontrado && (
-              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-3 border border-emerald-200">
+              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-lg p-3 border border-emerald-200 dark:border-emerald-700">
                 <div className="flex items-center gap-2 mb-2">
-                  <CheckCircleIcon className="w-4 h-4 text-emerald-600" />
-                  <span className="text-xs font-semibold text-emerald-800">Producto Encontrado</span>
+                  <CheckCircleIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-200">Producto Encontrado</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                   <div>
-                    <span className="text-emerald-600 font-medium">Nombre:</span>
-                    <p className="font-semibold text-slate-800 truncate">{productoEncontrado?.nombre}</p>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">Nombre:</span>
+                    <p className="font-semibold text-slate-800 dark:!text-slate-200 truncate">{productoEncontrado?.nombre}</p>
                   </div>
                   <div>
-                    <span className="text-emerald-600 font-medium">Stock:</span>
-                    <p className="font-semibold text-slate-800">{productoEncontrado?.stock ?? 'N/A'}</p>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">Stock:</span>
+                    <p className="font-semibold text-slate-800 dark:!text-slate-200">{productoEncontrado?.stock ?? 'N/A'}</p>
                   </div>
                   <div>
-                    <span className="text-emerald-600 font-medium">ID:</span>
-                    <p className="font-semibold text-slate-800">{productoEncontrado?.id}</p>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">ID:</span>
+                    <p className="font-semibold text-slate-800 dark:!text-slate-200">{productoEncontrado?.id}</p>
                   </div>
                   <div>
-                    <span className="text-emerald-600 font-medium">Bodega:</span>
-                    <p className="font-semibold text-slate-800 truncate">{bodegaSeleccionada?.nombre || 'N/A'}</p>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">Bodega:</span>
+                    <p className="font-semibold text-slate-800 dark:!text-slate-200 truncate">{bodegaSeleccionada?.nombre || 'N/A'}</p>
                   </div>
                 </div>
               </div>
@@ -398,12 +398,12 @@ export default function AjustarExistencia({
             {/* Fila 2: ID Producto, Selector manual, Ajuste */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:!text-slate-300 mb-1.5">
                   ID del Producto <span className="text-rose-400">*</span>
                 </label>
                 <input
                   type="number"
-                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs
+                  className="w-full px-3 py-2 bg-white dark:!bg-slate-800 border border-slate-200 dark:!border-slate-700 rounded-lg text-xs
                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                             transition-all duration-200"
                   value={ajusteForm?.producto ?? ''}
@@ -413,19 +413,19 @@ export default function AjustarExistencia({
                   readOnly={!!productoEncontrado}
                 />
                 {productoEncontrado && (
-                  <p className="text-xs text-emerald-600 mt-1">✓ Autocompletado</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">✓ Autocompletado</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                <label className="block text-xs font-medium text-slate-700 dark:!text-slate-300 mb-1.5">
                   O selecciona manualmente
                 </label>
                 <select
                   disabled={!ajusteForm?.bodega}
                   value={ajusteForm?.producto ?? ''}
                   onChange={(e) => onProductoSelect(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs
+                  className="w-full px-3 py-2 bg-white dark:!bg-slate-800 border border-slate-200 dark:!border-slate-700 rounded-lg text-xs
                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                             transition-all duration-200 disabled:opacity-50"
                 >
@@ -472,12 +472,12 @@ export default function AjustarExistencia({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:!text-slate-300 mb-1.5">
                   Ajuste <span className="text-rose-400">*</span>
                 </label>
                 <input
                   type="number"
-                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs
+                  className="w-full px-3 py-2 bg-white dark:!bg-slate-800 border border-slate-200 dark:!border-slate-700 rounded-lg text-xs
                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                             transition-all duration-200"
                   value={ajusteForm?.delta ?? ''}
@@ -486,7 +486,7 @@ export default function AjustarExistencia({
                   placeholder="+10 o -5"
                   required
                 />
-                <p className="text-xs text-slate-500 mt-1">Positivo suma, negativo resta</p>
+                <p className="text-xs text-slate-500 dark:!text-slate-400 mt-1">Positivo suma, negativo resta</p>
               </div>
             </div>
           </div>
@@ -494,12 +494,12 @@ export default function AjustarExistencia({
           {/* Columna derecha - Imagen y resumen */}
           <div className="lg:col-span-4 space-y-4">
             {/* Imagen del producto */}
-            <div className="bg-white rounded-lg border border-slate-200 p-3">
-              <h5 className="text-xs font-semibold text-slate-700 mb-2 text-center">
+            <div className="bg-white dark:!bg-slate-800 rounded-lg border border-slate-200 dark:!border-slate-700 p-3">
+              <h5 className="text-xs font-semibold text-slate-700 dark:!text-slate-300 mb-2 text-center">
                 Imagen del Producto
               </h5>
-              <div className="w-full aspect-square bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg
-                            border border-slate-200 flex items-center justify-center overflow-hidden relative">
+              <div className="w-full aspect-square bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-lg
+                            border border-slate-200 dark:!border-slate-700 flex items-center justify-center overflow-hidden relative">
                 {imgUrl && !imgError && (
                   <img
                     key={imgUrl}
@@ -511,7 +511,7 @@ export default function AjustarExistencia({
                 )}
 
                 {(!imgUrl || imgError) && (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 absolute inset-0">
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 absolute inset-0">
                     <CubeIcon className="w-12 h-12 mb-2" />
                     <span className="text-xs font-medium">
                       {productoEncontrado
@@ -525,28 +525,28 @@ export default function AjustarExistencia({
 
             {/* Resumen del ajuste */}
             {productoEncontrado && ajusteForm?.delta !== '' && (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-3">
-                <h5 className="text-xs font-semibold text-blue-800 mb-2 text-center">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg border border-blue-200 dark:border-blue-700 p-3">
+                <h5 className="text-xs font-semibold text-blue-800 dark:!text-blue-200 mb-2 text-center">
                   📊 Resumen del Ajuste
                 </h5>
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center p-1.5 bg-white rounded-lg">
-                    <span className="text-xs text-slate-600">Stock Actual:</span>
-                    <span className="font-bold text-slate-800 text-sm">
+                  <div className="flex justify-between items-center p-1.5 bg-white dark:!bg-slate-800 rounded-lg">
+                    <span className="text-xs text-slate-600 dark:!text-slate-400">Stock Actual:</span>
+                    <span className="font-bold text-slate-800 dark:!text-slate-200 text-sm">
                       {productoEncontrado?.stock ?? '?'}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center p-1.5 bg-white rounded-lg">
-                    <span className="text-xs text-slate-600">Ajuste:</span>
+                  <div className="flex justify-between items-center p-1.5 bg-white dark:!bg-slate-800 rounded-lg">
+                    <span className="text-xs text-slate-600 dark:!text-slate-400">Ajuste:</span>
                     <span className={`font-bold text-sm ${
-                      Number(ajusteForm.delta) > 0 ? 'text-emerald-600' : 'text-rose-600'
+                      Number(ajusteForm.delta) > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                     }`}>
                       {Number(ajusteForm.delta) > 0 ? '+' : ''}{ajusteForm.delta}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center p-1.5 bg-indigo-100 rounded-lg border border-indigo-200">
-                    <span className="text-xs font-semibold text-indigo-800">Stock Final:</span>
-                    <span className="font-bold text-indigo-600 text-sm">
+                  <div className="flex justify-between items-center p-1.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg border border-indigo-200 dark:border-indigo-700">
+                    <span className="text-xs font-semibold text-indigo-800 dark:text-indigo-200">Stock Final:</span>
+                    <span className="font-bold text-indigo-600 dark:text-indigo-300 text-sm">
                       {stockResultante ?? '?'}
                     </span>
                   </div>
@@ -557,12 +557,12 @@ export default function AjustarExistencia({
         </div>
 
         {/* Botones de acción */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:!border-slate-700">
           <button
             type="button"
             onClick={() => handleTabChange('administrar')}
-            className="px-4 py-2 text-slate-700 font-medium rounded-lg border border-slate-200
-                      hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 text-xs"
+            className="px-4 py-2 text-slate-700 dark:!text-slate-300 font-medium rounded-lg border border-slate-200 dark:!border-slate-700
+                      hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 text-xs"
           >
             Cancelar
           </button>
