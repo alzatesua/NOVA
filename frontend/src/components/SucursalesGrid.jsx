@@ -454,7 +454,7 @@ export default function SucursalesGrid() {
               className={`px-2.5 py-1 rounded-full text-xs transition duration-300 transform ${
                 quickFilter === label.toLowerCase()
                   ? 'bg-blue-500 text-white shadow-lg'
-                  : 'bg-slate-100 dark:!bg-slate-800 text-slate-700 dark:!text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105'
+                  : 'bg-slate-100 dark:!bg-slate-800 text-slate-700 dark:!text-slate-300 hover:bg-slate-200 dark:hover:!bg-slate-700 hover:scale-105'
               }`}
             >
               {label}
@@ -495,15 +495,15 @@ export default function SucursalesGrid() {
           {filteredSucursales.map((suc) => (
             <div
               key={suc.id}
-              className="bg-white dark:!bg-slate-900 rounded-xl shadow p-4 flex flex-col h-full cursor-pointer hover:shadow-xl transition-shadow duration-300 border border-slate-200 dark:!border-slate-800"
+              className="bg-white dark:!bg-slate-900 rounded-xl shadow p-4 flex flex-col h-full cursor-pointer hover:shadow-xl hover:shadow-blue-500/20 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-300 ease-out border border-slate-200 dark:!border-blue-500 hover:border-blue-400 dark:hover:!border-blue-400 group"
             >
               {/* Header de la tarjeta */}
               <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:!border-slate-800">
-                <h5 className="text-lg font-semibold text-slate-800 dark:!text-slate-100">{suc.nombre}</h5>
+                <h5 className="text-lg font-semibold text-slate-800 dark:!text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">{suc.nombre}</h5>
 
                 <div className="flex items-center gap-2">
                   {/* Pill de usuarios */}
-                  <span className="inline-flex items-center bg-blue-50 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center bg-blue-50 dark:!bg-blue-900/50 text-blue-800 dark:!text-blue-200 text-xs font-medium px-2 py-0.5 rounded-full border border-blue-200 dark:!border-blue-500 group-hover:scale-110 group-hover:bg-blue-100 dark:group-hover:!bg-blue-800/70 transition-all duration-300">
                     <UsersIcon className="w-3.5 h-3.5 mr-1" />
                     {encargadosData[suc.id] ?? 0}
                   </span>
@@ -515,13 +515,14 @@ export default function SucursalesGrid() {
                     title={`Bodegas de ${suc.nombre}`}
                     className="
                       inline-flex items-center gap-1
-                      bg-amber-50 text-amber-800
+                      bg-amber-50 dark:!bg-amber-900/50 text-amber-800 dark:!text-amber-200
                       text-xs font-medium
                       px-2 py-0.5 rounded-full
-                      border border-amber-200
-                      hover:bg-amber-100
-                      focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-1
-                      transition
+                      border border-amber-200 dark:!border-amber-500
+                      hover:bg-amber-100 dark:hover:bg-amber-900/70
+                      group-hover:scale-110 group-hover:bg-amber-100 dark:group-hover:!bg-amber-800/70
+                      focus:outline-none focus:ring-2 focus:ring-amber-400 dark:!focus:ring-amber-500 focus:ring-offset-1
+                      transition-all duration-300
                     "
                   >
                     <BuildingStorefrontIcon className="w-3.5 h-3.5" />
@@ -532,13 +533,13 @@ export default function SucursalesGrid() {
               </div>
 
               {/* Datos */}
-              <dl className="flex-grow grid grid-cols-1 gap-y-1.5">
+              <dl className="flex-grow grid grid-cols-1 gap-y-1.5 group/dl">
                 {[
                   ['Dirección', suc.direccion],
                   ['Ciudad', suc.ciudad],
                   ['País', suc.pais],
                 ].map(([dt, dd]) => (
-                  <div key={dt} className="flex justify-between">
+                  <div key={dt} className="flex justify-between group-hover/dl:translate-x-1 transition-transform duration-300">
                     <dt className="text-xs text-slate-500 dark:!text-slate-400">{dt}</dt>
                     <dd className="text-xs text-slate-700 dark:!text-slate-300">{dd}</dd>
                   </div>

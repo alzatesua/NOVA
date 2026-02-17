@@ -237,6 +237,19 @@ export function fetchProductosConExistencias({
   );
 }
 
+// API Productos E-commerce - Multi-tenant por subdominio
+// Retorna todos los productos con su ficha técnica completa
+export function fetchProductosEcommerce({
+  subdominio
+}) {
+  return post(
+    'api/productos/list/',
+    {
+      subdominio
+    }
+  );
+}
+
 
 export function fetchAllProducts({
   usuario,

@@ -138,7 +138,7 @@ export default function ProductsTable({ products = [] }) {
     <div className="relative">
       {/* Bulk toolbar */}
       {selectedIds.size > 0 && (
-        <div className="mb-4 p-4 bg-blue-50 dark:!bg-blue-900/30 border border-blue-200 dark:!border-blue-800 rounded flex items-center justify-between transition-colors duration-200">
+        <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded flex items-center justify-between transition-colors duration-200">
           <span className="text-slate-700 dark:!text-slate-300">{selectedIds.size} seleccionado(s)</span>
           <pre className="bg-white dark:!bg-slate-800 p-2 text-xs overflow-auto max-h-40 text-slate-800 dark:!text-slate-200 rounded border border-slate-200 dark:!border-slate-700 transition-colors duration-200">
             {JSON.stringify(selectedData, null, 2)}
@@ -147,7 +147,7 @@ export default function ProductsTable({ products = [] }) {
       )}
 
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200 dark:!divide-slate-800 bg-white dark:!bg-slate-900 transition-colors duration-200">
+        <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:!bg-slate-900 transition-colors duration-200">
           <thead className="bg-slate-50 dark:!bg-slate-950">
             <tr>
               <th className="px-4 py-2">
@@ -155,7 +155,7 @@ export default function ProductsTable({ products = [] }) {
                   type="checkbox"
                   checked={allVisible(visibleProducts)}
                   onChange={toggleSelectAll}
-                  className="h-4 w-4 text-blue-600 border-slate-300 dark:border-slate-700 rounded"
+                  className="h-4 w-4 text-blue-600 border-slate-300 dark:!border-slate-700 rounded"
                 />
               </th>
               <th className="px-4 py-2 text-left text-slate-700 dark:!text-slate-300">Nombre</th>
@@ -168,15 +168,15 @@ export default function ProductsTable({ products = [] }) {
               <th className="px-4 py-2 text-center text-slate-700 dark:!text-slate-300">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:!divide-slate-800">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {visibleProducts.map(p => (
-              <tr key={p.id} className={`hover:bg-slate-50 dark:hover:!bg-slate-800/50 transition-colors duration-200 ${selectedIds.has(p.id)?'bg-blue-50 dark:!bg-blue-900/30':''}`}>
+              <tr key={p.id} className={`hover:bg-slate-50 dark:hover:!bg-slate-800/50 transition-colors duration-200 ${selectedIds.has(p.id)?'bg-blue-50 dark:bg-blue-900/30':''}`}>
                 <td className="px-4 py-2">
                   <input
                     type="checkbox"
                     checked={selectedIds.has(p.id)}
                     onChange={() => toggleSelect(p.id)}
-                    className="h-4 w-4 text-blue-600 border-slate-300 dark:border-slate-700 rounded"
+                    className="h-4 w-4 text-blue-600 border-slate-300 dark:!border-slate-700 rounded"
                   />
                 </td>
                 <td className="px-4 py-2">
@@ -210,12 +210,12 @@ export default function ProductsTable({ products = [] }) {
                     <div className="inline-flex items-center space-x-1">
                       <button
                         onClick={() => onFieldChange('cantidad', Math.max(0, editFields.cantidad - 1))}
-                        className="px-1 py-0.5 bg-slate-200 dark:!bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
+                        className="px-1 py-0.5 bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
                       >−</button>
                       <span className="w-8 text-center">{editFields.cantidad}</span>
                       <button
                         onClick={() => onFieldChange('cantidad', editFields.cantidad + 1)}
-                        className="px-1 py-0.5 bg-slate-200 dark:!bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
+                        className="px-1 py-0.5 bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
                       >+</button>
                     </div>
                   ) : (
@@ -233,7 +233,7 @@ export default function ProductsTable({ products = [] }) {
                   {editRowId === p.id ? (
                     <>
                       <button onClick={() => saveRow(p.id)} className="bg-emerald-600 text-white p-1 rounded hover:bg-emerald-700 transition-colors duration-200">Guardar</button>
-                      <button onClick={cancelEdit} className="bg-slate-300 dark:!bg-slate-700 text-slate-800 dark:!text-slate-200 p-1 rounded hover:bg-slate-400 dark:hover:!bg-slate-600 transition-colors duration-200">Cancelar</button>
+                      <button onClick={cancelEdit} className="bg-slate-300 dark:bg-slate-700 text-slate-800 dark:!text-slate-200 p-1 rounded hover:bg-slate-400 dark:hover:!bg-slate-600 transition-colors duration-200">Cancelar</button>
                     </>
                   ) : (
                     <>
@@ -252,7 +252,7 @@ export default function ProductsTable({ products = [] }) {
             {visibleCount < localProducts.length && (
               <tr ref={loadMoreRef}>
                 <td colSpan="9" className="p-4 text-center">
-                  <svg className="animate-spin h-6 w-6 text-slate-600 dark:text-slate-400 mx-auto" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-6 w-6 text-slate-600 dark:!text-slate-400 mx-auto" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
                   </svg>

@@ -16,7 +16,7 @@ function InfoSucursal() {
   }, []);
 
   return (
-    <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-md shadow-sm text-xs text-slate-600 dark:text-slate-300 transition-colors duration-200">
+    <div className="p-2 bg-slate-100 dark:!bg-slate-800 rounded-md shadow-sm text-xs text-slate-600 dark:!text-slate-300 transition-colors duration-200">
       {/*<h2 className="text-sm font-semibold mb-1">Información de la sucursal</h2>
       <div className="space-y-0.5 leading-tight">
         <p><strong className="font-medium">Nombre:</strong> {nombreSucursal}</p>
@@ -36,7 +36,7 @@ function getRandomColor() {
 }
 
 export default function Navbar({ rol: propRol, onViewChange, onLogout, currentView }) {
-  const adminButtons = ['dashboard', 'usuarios', 'sucursales', 'productos', 'configuracion', 'noticias', 'facturacion'];
+  const adminButtons = ['dashboard', 'usuarios', 'sucursales', 'productos', 'configuracion', 'facturacion'];
   const operarioButtons = ['entrada', 'productos', 'facturacion'];
 
   const { usuario, rol } = useAuth();
@@ -76,10 +76,10 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
   }, []);
 
   return (
-  <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 shadow-md px-6 py-3.5 flex justify-between items-center border-b border-slate-300 dark:border-slate-700 transition-colors duration-200">
+  <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 shadow-md px-6 py-3.5 flex justify-between items-center border-b border-slate-300 dark:!border-slate-700 transition-colors duration-200">
       <span className="text-blue-600 dark:text-blue-400 font-bold text-xl cursor-pointer select-none transition-colors duration-200">Logo</span>
       <InfoSucursal />
-      <div className="hidden md:flex space-x-8 text-slate-700 dark:text-slate-200 font-semibold tracking-wide">
+      <div className="hidden md:flex space-x-8 text-slate-700 dark:!text-slate-200 font-semibold tracking-wide">
         {list.map(view => (
           <button
             key={view}
@@ -98,12 +98,12 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setNotifOpen(prev => !prev)}
-            className="relative p-2.5 rounded-full bg-slate-100 dark:bg-slate-800 shadow-sm hover:shadow-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+            className="relative p-2.5 rounded-full bg-slate-100 dark:!bg-slate-800 shadow-sm hover:shadow-md hover:bg-slate-200 dark:hover:!bg-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
             aria-haspopup="true"
             aria-expanded={notifOpen}
             aria-label="Notificaciones"
           >
-            <BellIcon className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+            <BellIcon className="h-5 w-5 text-slate-600 dark:!text-slate-300" />
 
             {notifications.length > 0 && (
               <span
@@ -118,26 +118,26 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
 
           {notifOpen && (
             <div
-              className="absolute right-0 mt-2 w-80 max-h-80 overflow-auto bg-white dark:bg-slate-800 rounded-xl shadow-lg ring-1 ring-slate-200 dark:ring-slate-700
+              className="absolute right-0 mt-2 w-80 max-h-80 overflow-auto bg-white dark:!bg-slate-800 rounded-xl shadow-lg ring-1 ring-slate-200 dark:ring-slate-700
                 focus:outline-none z-50 origin-top-right animate-fadeIn"
               role="menu"
               aria-orientation="vertical"
               aria-labelledby="notifications-menu"
             >
-              <div className="px-6 py-3 border-b border-slate-200 dark:border-slate-700 font-semibold text-slate-800 dark:text-slate-100 text-lg">
+              <div className="px-6 py-3 border-b border-slate-200 dark:!border-slate-700 font-semibold text-slate-800 dark:!text-slate-100 text-lg">
                 Mis notificaciones
               </div>
               {notifications.length === 0 ? (
-                <div className="px-6 py-4 text-slate-500 dark:text-slate-400 text-center italic">No hay notificaciones.</div>
+                <div className="px-6 py-4 text-slate-500 dark:!text-slate-400 text-center italic">No hay notificaciones.</div>
               ) : (
                 notifications.map(({ id, message, time }) => (
                   <div
                     key={id}
-                    className="px-6 py-3 border-b border-slate-100 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer transition-colors duration-150"
+                    className="px-6 py-3 border-b border-slate-100 dark:!border-slate-700 hover:bg-blue-50 dark:hover:!bg-slate-700 cursor-pointer transition-colors duration-150"
                     role="menuitem"
                     tabIndex={0}
                   >
-                    <p className="text-slate-800 dark:text-slate-100 font-medium">{message}</p>
+                    <p className="text-slate-800 dark:!text-slate-100 font-medium">{message}</p>
                     <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{time}</p>
                   </div>
                 ))
@@ -156,14 +156,14 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
             aria-label="Menú de perfil"
           >
             <div
-              className="h-10 w-10 rounded-full flex items-center justify-center text-white font-semibold shadow-md select-none border-2 border-white dark:border-slate-700"
+              className="h-10 w-10 rounded-full flex items-center justify-center text-white font-semibold shadow-md select-none border-2 border-white dark:!border-slate-700"
               style={{ background: avatarBg }}
             >
               {usuario ? usuario.charAt(0).toUpperCase() : 'U'}
             </div>
-            <span className="hidden md:block text-slate-700 dark:text-slate-200 font-semibold select-none tracking-wide">{usuario || 'Usuario'}</span>
+            <span className="hidden md:block text-slate-700 dark:!text-slate-200 font-semibold select-none tracking-wide">{usuario || 'Usuario'}</span>
             <svg
-              className={`w-4 h-4 text-slate-500 dark:text-slate-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`}
+              className={`w-4 h-4 text-slate-500 dark:!text-slate-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -176,31 +176,31 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
 
           {profileOpen && (
             <div
-              className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-lg ring-1 ring-slate-200 dark:ring-slate-700
+              className="absolute right-0 mt-2 w-64 bg-white dark:!bg-slate-800 rounded-xl shadow-lg ring-1 ring-slate-200 dark:ring-slate-700
                 focus:outline-none z-50 origin-top-right animate-fadeIn"
               role="menu"
               aria-orientation="vertical"
               aria-labelledby="user-menu"
             >
-              <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
-                <p className="text-slate-900 dark:text-slate-100 font-semibold truncate">{usuario}</p>
+              <div className="px-6 py-4 border-b border-slate-200 dark:!border-slate-700">
+                <p className="text-slate-900 dark:!text-slate-100 font-semibold truncate">{usuario}</p>
                 <p className="text-slate-400 dark:text-slate-500 text-xs mt-1 uppercase tracking-wide">{rol}</p>
               </div>
               <button
                 onClick={toggleTheme}
-                className="w-full text-left px-6 py-3 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-150 text-slate-700 dark:text-slate-200"
+                className="w-full text-left px-6 py-3 flex items-center justify-between hover:bg-slate-100 dark:hover:!bg-slate-700 transition-colors duration-150 text-slate-700 dark:!text-slate-200"
                 role="menuitem"
               >
                 <span className="font-semibold">{theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>
                 {theme === 'dark' ? (
                   <SunIcon className="h-5 w-5 text-amber-400" />
                 ) : (
-                  <MoonIcon className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                  <MoonIcon className="h-5 w-5 text-slate-600 dark:!text-slate-400" />
                 )}
               </button>
               <button
                 onClick={onLogout}
-                className="w-full text-left px-6 py-3 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white transition-colors duration-150 rounded-b-xl font-semibold text-slate-700 dark:text-slate-200"
+                className="w-full text-left px-6 py-3 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white transition-colors duration-150 rounded-b-xl font-semibold text-slate-700 dark:!text-slate-200"
                 role="menuitem"
               >
                 Cerrar Sesión

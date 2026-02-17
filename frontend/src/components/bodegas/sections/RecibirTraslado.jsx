@@ -181,7 +181,7 @@ export default function RecibirTraslado({
     : (recibirForm?.trasladoId ? 1 : 0);
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+    <div className="bg-white dark:!bg-slate-900 rounded-2xl shadow-xl border border-gray-100 dark:!border-slate-800 overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-6 text-white">
         <div className="flex items-center gap-4">
@@ -200,14 +200,14 @@ export default function RecibirTraslado({
       <form ref={formRef} onSubmit={manejarEnvio} className="p-6 space-y-6">
         
         {/* Selector de modo */}
-        <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
+        <div className="flex gap-2 p-1 bg-gray-100 dark:!bg-slate-800 rounded-xl">
           <button
             type="button"
             onClick={() => setModoSeleccion('manual')}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
               modoSeleccion === 'manual'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-white text-gray-900 dark:!text-slate-100 shadow-sm'
+                : 'text-gray-600 dark:!text-slate-400 hover:text-gray-900 dark:!text-slate-100'
             }`}
           >
             <DocumentTextIcon className="w-4 h-4" />
@@ -218,8 +218,8 @@ export default function RecibirTraslado({
             onClick={() => setModoSeleccion('lista')}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
               modoSeleccion === 'lista'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-white text-gray-900 dark:!text-slate-100 shadow-sm'
+                : 'text-gray-600 dark:!text-slate-400 hover:text-gray-900 dark:!text-slate-100'
             }`}
           >
             <MagnifyingGlassIcon className="w-4 h-4" />
@@ -244,7 +244,7 @@ export default function RecibirTraslado({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
+              <label className="block text-sm font-semibold text-gray-700 dark:!text-slate-300">
                 ID del Traslado *
               </label>
               <input
@@ -255,7 +255,7 @@ export default function RecibirTraslado({
                 className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 required
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-slate-500">
                 Ingresa el número de ID del traslado que quieres recibir
               </p>
             </div>
@@ -272,13 +272,13 @@ export default function RecibirTraslado({
                   value={filtro}
                   onChange={(e) => setFiltro(e.target.value)}
                   placeholder="Buscar por ID, bodega, producto..."
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:!bg-slate-800 border border-gray-200 dark:!border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
                 {filtro && (
                   <button
                     type="button"
                     onClick={() => setFiltro('')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:!text-slate-400"
                   >
                     <XCircleIcon className="w-5 h-5" />
                   </button>
@@ -290,7 +290,7 @@ export default function RecibirTraslado({
                 className={`px-4 py-3 rounded-xl border-2 font-medium transition-all flex items-center gap-2 ${
                   seleccionandoMultiple
                     ? 'bg-purple-50 border-purple-500 text-purple-700'
-                    : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
+                    : 'bg-white border-gray-300 text-gray-700 dark:!text-slate-300 hover:border-gray-400'
                 }`}
               >
                 <Squares2X2Icon className="w-5 h-5" />
@@ -321,8 +321,8 @@ export default function RecibirTraslado({
               {isLoadingTraslados ? (
                 <div className="p-8 text-center">
                   <div className="inline-flex items-center gap-3">
-                    <div className="w-6 h-6 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin"></div>
-                    <span className="text-gray-600">Cargando traslados disponibles...</span>
+                    <div className="w-6 h-6 border-2 border-gray-300 dark:!border-slate-700 border-t-green-500 rounded-full animate-spin"></div>
+                    <span className="text-gray-600 dark:!text-slate-400">Cargando traslados disponibles...</span>
                   </div>
                 </div>
               ) : errorTraslados ? (
@@ -337,7 +337,7 @@ export default function RecibirTraslado({
                 </div>
               ) : !trasladosParaRecibir.length ? (
                 <div className="p-8 text-center">
-                  <div className="text-gray-500">
+                  <div className="text-gray-500 dark:text-slate-500">
                     <ArchiveBoxArrowDownIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                     <h4 className="font-medium mb-2">No hay traslados disponibles</h4>
                     <p className="text-sm">
@@ -386,7 +386,7 @@ export default function RecibirTraslado({
                               )}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-semibold text-gray-900">
+                                  <span className="font-semibold text-gray-900 dark:!text-slate-100">
                                     Traslado #{traslado.id}
                                   </span>
                                   {reciente && (
@@ -400,22 +400,22 @@ export default function RecibirTraslado({
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-sm text-gray-600 mt-1">
+                                <div className="text-sm text-gray-600 dark:!text-slate-400 mt-1">
                                   <span className="font-medium">{obtenerNombreBodega(traslado.bodega_origen_id)}</span>
                                   <span className="mx-2">→</span>
                                   <span className="font-medium">{obtenerNombreBodega(traslado.bodega_destino_id)}</span>
                                 </div>
                                 <div className="flex items-center gap-4 mt-2 text-sm">
-                                  <div className="flex items-center gap-1 text-gray-600">
+                                  <div className="flex items-center gap-1 text-gray-600 dark:!text-slate-400">
                                     <CubeIcon className="w-4 h-4" />
                                     <span>{totalProductos} producto{totalProductos !== 1 ? 's' : ''}</span>
                                   </div>
-                                  <div className="text-gray-500">
+                                  <div className="text-gray-500 dark:text-slate-500">
                                     Total: {totalCantidad} unidad{totalCantidad !== 1 ? 'es' : ''}
                                   </div>
                                 </div>
                                 {traslado.observaciones && (
-                                  <div className="text-sm text-gray-500 mt-1 truncate">
+                                  <div className="text-sm text-gray-500 dark:text-slate-500 mt-1 truncate">
                                     {traslado.observaciones}
                                   </div>
                                 )}
@@ -427,7 +427,7 @@ export default function RecibirTraslado({
                                 {estadoInfo.texto}
                               </div>
                               {fechaEnvio && (
-                                <div className="text-xs text-gray-500">
+                                <div className="text-xs text-gray-500 dark:text-slate-500">
                                   {toRelative(fechaEnvio)}
                                 </div>
                               )}
@@ -437,15 +437,15 @@ export default function RecibirTraslado({
 
                         {/* Detalles expandibles */}
                         {mostrarDetalles === traslado.id && traslado.lineas?.length > 0 && (
-                          <div className="px-4 pb-4 bg-gray-50 border-t border-gray-200">
-                            <div className="text-xs font-semibold text-gray-700 mb-2 mt-3">
+                          <div className="px-4 pb-4 bg-gray-50 border-t border-gray-200 dark:!border-slate-700">
+                            <div className="text-xs font-semibold text-gray-700 dark:!text-slate-300 mb-2 mt-3">
                               Productos en este traslado:
                             </div>
                             <div className="space-y-1">
                               {traslado.lineas.map((linea, idx) => (
                                 <div key={idx} className="flex justify-between items-center text-sm py-1">
-                                  <span className="text-gray-700">{linea.producto_nombre || `Producto ${linea.producto}`}</span>
-                                  <div className="flex items-center gap-3 text-gray-600">
+                                  <span className="text-gray-700 dark:!text-slate-300">{linea.producto_nombre || `Producto ${linea.producto}`}</span>
+                                  <div className="flex items-center gap-3 text-gray-600 dark:!text-slate-400">
                                     <span>Cantidad: {linea.cantidad}</span>
                                     <span className="text-amber-600">Pendiente: {linea.pendiente_por_recibir || 0}</span>
                                   </div>
@@ -463,7 +463,7 @@ export default function RecibirTraslado({
                               e.stopPropagation();
                               setMostrarDetalles(mostrarDetalles === traslado.id ? null : traslado.id);
                             }}
-                            className="w-full px-4 py-2 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors border-t border-gray-200"
+                            className="w-full px-4 py-2 text-xs text-gray-600 dark:!text-slate-400 hover:text-gray-900 dark:!text-slate-100 hover:bg-gray-100 transition-colors border-t border-gray-200 dark:!border-slate-700"
                           >
                             {mostrarDetalles === traslado.id ? '▲ Ocultar productos' : '▼ Ver productos'}
                           </button>
@@ -504,11 +504,11 @@ export default function RecibirTraslado({
         )}
 
         {/* Footer con botones */}
-        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:!border-slate-700">
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-3 text-gray-700 font-medium bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all"
+            className="px-6 py-3 text-gray-700 dark:!text-slate-300 font-medium bg-white border-2 border-gray-300 dark:!border-slate-700 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-400 dark:hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all"
           >
             Cerrar
           </button>

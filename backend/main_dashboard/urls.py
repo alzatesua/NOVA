@@ -32,6 +32,9 @@ from .views import (
     # listar_facturas,
 )
 
+# Importar vista de productos e-commerce
+from .views_productosEcomerce import ProductoView
+
 # Router DRF
 router = DefaultRouter()
 # REMOVER esta línea:
@@ -56,6 +59,9 @@ urlpatterns = [
 
     # ← AGREGAR ESTA LÍNEA:
     path('productos-existencias/list/', ProductoExistenciasView.as_view(), name='productos_existencias_list'),
+
+    # API Productos E-commerce (Multi-tenant por subdominio)
+    path('productos/list/', ProductoView.as_view(), name='productos_ecommerce_list'),
 
     # NOTA: Las rutas de facturación están en urls_facturacion.py
     # y se incluyen en nova/urls.py con el prefijo 'api/facturacion/'

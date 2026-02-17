@@ -27,8 +27,10 @@ urlpatterns = [
 
     # >>>>> SOLO UNA VEZ montas el API DRF <<<<<
     path('api/', include(router.urls)),  # Add router before urls_traslados to avoid conflicts
+    path('api/', include('main_dashboard.urls')),  # Incluir rutas de productos e-commerce
     path('api/', include('main_dashboard.urls_traslados')),
     path('api/facturacion/', include('main_dashboard.urls_facturacion')),
+    path('api/cupones/', include('main_dashboard.urls_cupones')),
 
     path('api/refresh_custom/', views.refresh_token_custom_view),
     path('api/countries/', views.get_countries, name='get_countries'),

@@ -128,13 +128,13 @@ export default function SucursalesForm({ onCreated }) {
   };
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-lg max-w-3xl mx-auto">
-      <h4 className="text-2xl font-semibold mb-6 text-gray-900">Nueva Sucursal</h4>
+    <div className="bg-white dark:!bg-slate-900 p-8 rounded-xl shadow-lg max-w-3xl mx-auto">
+      <h4 className="text-2xl font-semibold mb-6 text-gray-900 dark:!text-slate-100">Nueva Sucursal</h4>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
         {/* País */}
         <div className="flex flex-col">
-          <label htmlFor="pais" className="mb-2 text-sm font-medium text-gray-700 select-none">País</label>
+          <label htmlFor="pais" className="mb-2 text-sm font-medium text-gray-700 dark:!text-slate-300 select-none">País</label>
           <select
             id="pais"
             name="pais"
@@ -142,7 +142,7 @@ export default function SucursalesForm({ onCreated }) {
             onChange={e => setSelectedPais(e.target.value)}
             disabled={loading || isLoadingPaises}
             required
-            className="px-5 py-3 rounded-lg border border-gray-300 bg-gray-50
+            className="px-5 py-3 rounded-lg border border-gray-300 dark:!border-slate-700 bg-gray-50 dark:!bg-slate-800
               focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 hover:border-blue-400"
           >
             <option value="" disabled>
@@ -166,7 +166,7 @@ export default function SucursalesForm({ onCreated }) {
             onChange={e => setSelectedCiudad(e.target.value)}
             disabled={loading || isLoadingCiudades || !selectedPais}
             required
-            className="px-5 py-3 rounded-lg border border-gray-300 bg-gray-50
+            className="px-5 py-3 rounded-lg border border-gray-300 dark:!border-slate-700 bg-gray-50 dark:!bg-slate-800
               focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 hover:border-blue-400"
           >
             <option value="" disabled>
@@ -190,7 +190,7 @@ export default function SucursalesForm({ onCreated }) {
             onChange={e => setSelectedRegion(e.target.value)}
             disabled={loading || isLoadingRegiones || !selectedCiudad}
             required
-            className="px-5 py-3 rounded-lg border border-gray-300 bg-gray-50
+            className="px-5 py-3 rounded-lg border border-gray-300 dark:!border-slate-700 bg-gray-50 dark:!bg-slate-800
               focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 hover:border-blue-400"
           >
             <option value="" disabled>
@@ -213,7 +213,7 @@ export default function SucursalesForm({ onCreated }) {
             required
             placeholder="Nombre"
             disabled={loading}
-            className="px-5 py-3 rounded-lg border border-gray-300 bg-gray-50
+            className="px-5 py-3 rounded-lg border border-gray-300 dark:!border-slate-700 bg-gray-50 dark:!bg-slate-800
               focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 placeholder-gray-400 hover:border-blue-400"
           />
         </div>
@@ -226,7 +226,7 @@ export default function SucursalesForm({ onCreated }) {
             required
             placeholder="Dirección"
             disabled={loading}
-            className="px-5 py-3 rounded-lg border border-gray-300 bg-gray-50
+            className="px-5 py-3 rounded-lg border border-gray-300 dark:!border-slate-700 bg-gray-50 dark:!bg-slate-800
               focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 placeholder-gray-400 hover:border-blue-400"
           />
         </div>
@@ -237,8 +237,8 @@ export default function SucursalesForm({ onCreated }) {
             type="submit"
             disabled={loading}
             className="inline-flex items-center justify-center
-              px-7 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md
-              hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300
+              px-7 py-3 bg-blue-600 text-white dark:text-blue-100 font-semibold rounded-lg shadow-md
+              hover:bg-blue-700 dark:hover:bg-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-400
               transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (

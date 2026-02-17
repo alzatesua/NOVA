@@ -859,6 +859,61 @@ class ConfiguracionFactura(models.Model):
 
 
 # =========================
+# CUPONES
+# =========================
+
+class Cupon(models.Model):
+    """Cupón de descuento. Puede ser un valor fijo o un porcentaje."""
+    TIPO_CHOICES = [
+        ('PCT', 'Porcentaje'),
+        ('VAL', 'Valor fijo'),
+    ]
+
+    nombre = models.CharField(max_length=100)
+    tipo = models.CharField(max_length=3, choices=TIPO_CHOICES, default='PCT')
+    valor = models.DecimalField(
+        max_digits=10, decimal_places=2,
+        help_text='Porcentaje (ej. 15.00) o valor monetario fijo según el tipo'
+    )
+    activo = models.BooleanField(default=True)
+    fecha_vencimiento = models.DateField(blank=True, null=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'cupones'
+        verbose_name = 'Cupón'
+        verbose_name_plural = 'Cupones'
+
+    def __str__(self):
+        sufijo = '%' if self.tipo == 'PCT' else ''
+        return f'{self.nombre} ({self.valor}{sufijo})'
+
+
+class ClienteCupon(models.Model):
+    """Relación entre un cliente y un cupón asignado."""
+    cliente = models.ForeignKey(
+        Cliente, on_delete=models.CASCADE, related_name='cupones_asignados'
+    )
+    cupon = models.ForeignKey(
+        Cupon, on_delete=models.CASCADE, related_name='clientes_asignados'
+    )
+    activo = models.BooleanField(default=True)
+    cantidad_disponible = models.PositiveIntegerField(default=1)
+    fecha_uso = models.DateTimeField(blank=True, null=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'cliente_cupones'
+        verbose_name = 'Cupón de Cliente'
+        verbose_name_plural = 'Cupones de Clientes'
+        unique_together = ('cliente', 'cupon')
+
+    def __str__(self):
+        return f'{self.cliente} - {self.cupon.nombre} (x{self.cantidad_disponible})'
+
+
+# =========================
 # SIGNALS - Sincronización Automática de Stock
 # =========================
 

@@ -111,12 +111,12 @@ export default function Dashboard() {
         )}
 
         {/* VISTA DE NOTICIAS - Carrusel + link del catálogo */}
-        {view === 'noticias' && (
+        {/*{view === 'noticias' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
             bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
             <NoticiasView />
           </div>
-        )}
+        )}*/}
 
         {/* VISTA DE FACTURACIÓN - SIN PROPS, USA DATOS INTERNOS */}
         {view === 'facturacion' && (

@@ -108,7 +108,7 @@ export default function DashboardView() {
       {/* Header con selector de período */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Período:</label>
+          <label className="text-sm font-medium text-slate-700 dark:!text-slate-300">Período:</label>
           <select
             value={dias}
             onChange={(e) => setDias(Number(e.target.value))}
@@ -145,7 +145,7 @@ export default function DashboardView() {
               href="/tienda"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 bg-white dark:!bg-slate-800 text-emerald-600 dark:text-emerald-400 rounded-lg font-semibold hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors shadow-md text-center"
+              className="px-6 py-3 bg-white dark:!bg-slate-800 text-emerald-600 dark:text-emerald-400 rounded-lg font-semibold hover:bg-emerald-50 dark:hover:!bg-slate-700 transition-colors shadow-md text-center"
             >
               Ver Tienda
             </a>
@@ -213,7 +213,7 @@ export default function DashboardView() {
             <svg className="w-6 h-6 text-amber-600 dark:text-amber-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <p className="text-amber-800 dark:text-amber-200">
+            <p className="text-amber-800 dark:!text-amber-200">
               <span className="font-semibold">Alerta:</span> Tienes {kpis.alertas.productos_stock_bajo} productos con stock bajo
             </p>
           </div>

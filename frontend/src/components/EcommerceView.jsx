@@ -1,5 +1,7 @@
+//prueba de funcionalidad juan
+//prueba edwin
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { fetchProducts } from '../services/api';
+import { fetchProductosEcommerce } from '../services/api';
 import { Navbar, Nav, Form, Container, Button } from 'react-bootstrap';
 import {
   House,
@@ -10,7 +12,9 @@ import {
   ChevronDown,
   Moon,
   Sun,
-  BookOpen
+  BookOpen,
+  Sun,
+  FileText
 } from 'lucide-react';
 
 // Paleta de colores ecológica para movilidad eléctrica
@@ -19,6 +23,7 @@ const COLORS = {
   verdeSecundario: '#4CAF50',     // Green
   verdeMenta: '#81C784',          // Light Green
   verdeOscuro: '#1B5E20',         // Dark Green
+  verdeClaro: '#E8F5E9',          // Very Light Green (Material Design Green 50)
   beigeCrema: '#FFF8E1',          // Cream
   blanco: '#FFFFFF',
   grisClaro: '#F5F5F5',
@@ -227,6 +232,35 @@ export default function EcommerceView() {
     }
   }, [activeSection]);
 
+  // Función para transformar productos de la API al formato del componente
+  const transformarProducto = (productoAPI) => {
+    return {
+      // Campos básicos
+      id: productoAPI.id,
+      sku: productoAPI.sku,
+      nombre: productoAPI.nombre,
+      descripcion: productoAPI.descripcion,
+      stock: productoAPI.stock,
+      estado: productoAPI.estado,
+
+      // Campos transformados (anidados → planos)
+      precio_venta: productoAPI.precio,
+      categoria_nombre: productoAPI.categoria?.nombre || null,
+      marca_nombre: productoAPI.marca?.nombre || null,
+      iva_porcentaje: productoAPI.iva?.porcentaje || null,
+      descuento_porcentaje: productoAPI.descuento?.porcentaje || null,
+      tipo_medida_nombre: productoAPI.tipo_medida?.nombre || null,
+
+      // Campos adicionales
+      codigo_barras: productoAPI.codigo_barras,
+      imei: productoAPI.imei,
+      imagen: productoAPI.imagen_producto || null,
+      atributo: productoAPI.atributo,
+      valor_atributo: productoAPI.valor_atributo,
+      creado_en: productoAPI.creado_en,
+    };
+  };
+
   // Cargar productos
   useEffect(() => {
     const loadProducts = async () => {
@@ -235,19 +269,17 @@ export default function EcommerceView() {
 
         let productos = [];
 
-        // Intentar cargar productos del backend
+        // Intentar cargar productos del backend con la nueva API e-commerce
         try {
-          const { datos } = await fetchProducts({
-            usuario: null,
-            tokenUsuario: null,
-            subdominio: subdominio,
-            publico: true
+          const response = await fetchProductosEcommerce({
+            subdominio: subdominio
           });
 
-          // Solo usar productos del backend si existen y tienen datos
-          if (datos && Array.isArray(datos) && datos.length > 0) {
-            productos = datos;
-            console.log('✅ Productos cargados del backend:', productos.length);
+          // La nueva API retorna: { ok, mensaje, total_productos, data }
+          if (response.ok && response.data && Array.isArray(response.data) && response.data.length > 0) {
+            // Transformar productos al formato que espera el componente
+            productos = response.data.map(transformarProducto);
+            console.log('✅ Productos cargados del backend (API E-commerce):', productos.length);
           } else {
             console.log('⚠️ No hay productos en backend, usando productos de ejemplo');
           }
@@ -453,6 +485,10 @@ export default function EcommerceView() {
   }, 0);
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+
+  // Debug: mostrar en consola el estado del carrito
+  console.log('Cart items:', cart);
+  console.log('Cart item count:', cartItemCount);
 
   // Función para obtener emoji según categoría
   const getCategoryEmoji = (category) => {
@@ -1311,6 +1347,14 @@ export default function EcommerceView() {
                   <span>Infórmate</span>
                 </button>
 
+                <button
+                  onClick={() => setActiveSection('infórmate')}
+                  className={`nav-btn-futuristic ${activeSection === 'infórmate' ? 'active' : ''}`}
+                >
+                  <FileText size={18} strokeWidth={2} />
+                  <span>Infórmate</span>
+                </button>
+
                 {/* Dropdown de Categorías */}
                 {categories.length > 0 && (
                   <div style={{ position: 'relative', display: 'inline-block' }} ref={dropdownRef}>
@@ -1401,8 +1445,12 @@ export default function EcommerceView() {
               {/* Carrito y Búsqueda - Alineados */}
               <div className="d-flex align-items-center gap-2 gap-lg-3">
                 {/* Carrito - Enviar directamente a WhatsApp */}
-                <button
-                  className="nav-btn-futuristic position-relative flex-shrink-0"
+                <div className="position-relative flex-shrink-0" style={{ padding: '5px', marginRight: '5px' }}>
+                  <button
+                    className="nav-btn-futuristic position-relative"
+                    style={{
+                      padding: '10px 15px'
+                    }}
                   onClick={() => {
                     if (cart.length > 0) {
                       // Verificar autenticación ANTES de enviar a WhatsApp
@@ -1420,7 +1468,7 @@ export default function EcommerceView() {
                   title="Completar pedido por WhatsApp"
                 >
                   <svg
-                    style={{ width: '18px', height: '18px' }}
+                    style={{ width: '24px', height: '24px' }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1429,13 +1477,31 @@ export default function EcommerceView() {
                   </svg>
                   {cartItemCount > 0 && (
                     <span
-                      className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
-                      style={{ backgroundColor: COLORS.acentoNaranja }}
+                      className="badge rounded-pill"
+                      style={{
+                        position: 'absolute',
+                        top: '2px',
+                        right: '2px',
+                        backgroundColor: '#DC2626',
+                        color: 'white',
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        minWidth: '18px',
+                        height: '18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '0 5px',
+                        border: '2px solid white',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+                        zIndex: 9999
+                      }}
                     >
                       {cartItemCount}
                     </span>
                   )}
-                </button>
+                  </button>
+                </div>
 
                 {/* Botón de Modo Oscuro */}
                 <button

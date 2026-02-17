@@ -242,7 +242,7 @@ function ProductCard({
                   onClick={() =>
                     onFieldChange(id, 'stock', Math.max(0, fields.stock - 1))
                   }
-                  className="px-2 py-1 bg-slate-200 dark:!bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
+                  className="px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
                 >
                   −
                 </button>
@@ -252,7 +252,7 @@ function ProductCard({
                   onClick={() =>
                     onFieldChange(id, 'stock', fields.stock + 1)
                   }
-                  className="px-2 py-1 bg-slate-200 dark:!bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
+                  className="px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
                 >
                   +
                 </button>
@@ -319,7 +319,7 @@ function ProductCard({
                   </button>
                   <button
                     onClick={() => onToggleEdit(id)}
-                    className="bg-slate-300 dark:!bg-slate-700 text-slate-800 dark:!text-slate-200 text-sm px-3 py-1 rounded hover:bg-slate-400 dark:hover:!bg-slate-600 transition-colors duration-200"
+                    className="bg-slate-300 dark:bg-slate-700 text-slate-800 dark:!text-slate-200 text-sm px-3 py-1 rounded hover:bg-slate-400 dark:hover:!bg-slate-600 transition-colors duration-200"
                   >
                     Cancelar
                   </button>

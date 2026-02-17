@@ -79,14 +79,14 @@ export default function DashboardCarousel() {
       {/* Flechas */}
       <button
         onClick={goPrev}
-        className="absolute left-2 top-1/2 -translate-y-1/2 bg-slate-900/50 dark:!bg-slate-700/70 hover:bg-slate-900/70 dark:hover:!bg-slate-600/80 text-white rounded-full p-3 focus:outline-none shadow-lg transition z-20 backdrop-blur-sm"
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-slate-900/50 dark:bg-slate-700/70 hover:bg-slate-900/70 dark:hover:!bg-slate-600/80 text-white rounded-full p-3 focus:outline-none shadow-lg transition z-20 backdrop-blur-sm"
         aria-label="Anterior"
       >
         ‹
       </button>
       <button
         onClick={goNext}
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-900/50 dark:!bg-slate-700/70 hover:bg-slate-900/70 dark:hover:!bg-slate-600/80 text-white rounded-full p-3 focus:outline-none shadow-lg transition z-20 backdrop-blur-sm"
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-900/50 dark:bg-slate-700/70 hover:bg-slate-900/70 dark:hover:!bg-slate-600/80 text-white rounded-full p-3 focus:outline-none shadow-lg transition z-20 backdrop-blur-sm"
         aria-label="Siguiente"
       >
         ›
@@ -99,7 +99,7 @@ export default function DashboardCarousel() {
             key={idx}
             onClick={() => setCurrentIndex(idx)}
             className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-              idx === currentIndex ? 'bg-blue-400' : 'bg-slate-300 dark:!bg-slate-600 hover:bg-blue-300 dark:hover:!bg-slate-500'
+              idx === currentIndex ? 'bg-blue-400' : 'bg-slate-300 dark:bg-slate-600 hover:bg-blue-300 dark:hover:!bg-slate-500'
             }`}
             aria-label={`Ir al slide ${idx + 1}`}
           />
