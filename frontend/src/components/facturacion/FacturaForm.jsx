@@ -478,13 +478,8 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                       ${esActivo
                         ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/50 scale-105'
                         : estaCompletado || yaVisitado
-<<<<<<< HEAD
-                        ? 'bg-sky-400 text-white'
-                        : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
-=======
                         ? 'bg-green-500 text-white'
-                        : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:!text-slate-400'
->>>>>>> edwin
+                        : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                       }
                       ${!puedeIrAPaso(paso.numero) && !esActivo ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
@@ -622,13 +617,8 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                                 </p>
                               </div>
                               <div>
-<<<<<<< HEAD
-                                <label className="block text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 mb-1">Subtotal</label>
-                                <p className="px-2 py-1 bg-sky-100 dark:bg-sky-900/30 rounded text-center font-bold text-sky-700 dark:text-sky-400">
-=======
                                 <label className="block text-[10px] sm:text-xs text-slate-600 dark:!text-slate-400 mb-1">Subtotal</label>
                                 <p className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 rounded text-center font-bold text-emerald-700 dark:text-emerald-400">
->>>>>>> edwin
                                   ${(parseFloat(fila.precio) * fila.cantidad).toFixed(2)}
                                 </p>
                               </div>
@@ -887,8 +877,6 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                   <span className="text-xl sm:text-2xl font-bold">${calcularTotal().toFixed(2)}</span>
                 </div>
               </div>
-<<<<<<< HEAD
-=======
 
               {/* Observaciones */}
               <div>
@@ -903,7 +891,6 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                   placeholder="Notas adicionales..."
                 />
               </div>
->>>>>>> edwin
             </div>
           </div>
         )}

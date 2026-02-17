@@ -62,7 +62,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    
+
     # Renderizado (para API en navegador y JSON en frontend)
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
@@ -74,6 +74,7 @@ REST_FRAMEWORK = {
 
     # Autenticación: COMENTAR SessionAuthentication para APIs puras
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',  # ← Comentar esta línea
         'rest_framework.authentication.BasicAuthentication',
     ),
@@ -93,6 +94,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',  # Para blacklist de tokens
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -243,7 +245,31 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 #para la expiracion del token jwt
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,  # Rotar refresh tokens
+    'BLACKLIST_AFTER_ROTATION': True,  # Poner en blacklist el antiguo
+    'UPDATE_LAST_LOGIN': True,  # Actualizar ultimo_login automáticamente
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'type',
+
+    # Tokens incluidos en respuesta
+    'TOKEN_OBTAIN_SERIALIZER': 'main_dashboard.serializers.TokenObtainPairSerializer',
+    'TOKEN_REFRESH_SERIALIZER': 'main_dashboard.serializers.TokenRefreshSerializer',
+    'TOKEN_VERIFY_SERIALIZER': 'rest_framework_simplejwt.serializers.TokenVerifySerializer',
+    'TOKEN_BLACKLIST_SERIALIZER': 'rest_framework_simplejwt.serializers.BlacklistTokenSerializer',
 }
 
 

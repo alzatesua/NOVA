@@ -67,6 +67,7 @@ function App() {
         draggable
         pauseOnHover
         theme="colored"
+        style={{ zIndex: 10000 }}
       />
       <Routes>
         {/* RUTAS PÚBLICAS */}

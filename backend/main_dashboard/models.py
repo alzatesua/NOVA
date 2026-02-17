@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.db.models import Sum
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 class Sucursales(models.Model):
     nombre = models.CharField(max_length=100)
@@ -624,6 +625,113 @@ class Cliente(models.Model):
     def nombre_completo(self):
         """Retorna el nombre completo formateado"""
         return self.__str__()
+
+
+# =========================
+# CLIENTE TIENDA (Autenticación E-commerce)
+# =========================
+
+class ClienteTiendaManager(BaseUserManager):
+    """Manager personalizado para ClienteTienda"""
+    def create_user(self, email, password, **extra_fields):
+        if not email:
+            raise ValueError('El email es obligatorio')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password, **extra_fields):
+        extra_fields.setdefault('rol', 'admin')
+        extra_fields.setdefault('estado', 'activo')
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+
+
+class ClienteTienda(AbstractBaseUser, PermissionsMixin):
+    """
+    Cliente del e-commerce desacoplado del modelo fiscal.
+    Hereda de AbstractBaseUser para integración con sistema de auth de Django.
+    """
+    ROLES_CHOICES = [
+        ('cliente', 'Cliente E-commerce'),
+        ('admin', 'Administrador Tienda'),
+        ('vendedor', 'Vendedor POS'),
+    ]
+    ESTADOS_CHOICES = [
+        ('activo', 'Activo'),
+        ('inactivo', 'Inactivo'),
+        ('pendiente', 'Pendiente de Activación'),
+    ]
+
+    # Campos AbstractBaseUser requeridos
+    id = models.BigAutoField(primary_key=True)
+    email = models.EmailField(unique=True, max_length=254)
+    password = models.CharField(max_length=255)  # Django lo maneja automáticamente
+
+    # Campos adicionales
+    rol = models.CharField(max_length=20, choices=ROLES_CHOICES, default='cliente')
+    estado = models.CharField(max_length=20, choices=ESTADOS_CHOICES, default='pendiente')
+
+    # Vinculación opcional con cliente fiscal
+    cliente = models.ForeignKey(
+        'Cliente',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='cuenta_tienda',
+        db_column='cliente_id'
+    )
+
+    # Timestamps
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+    ultimo_login = models.DateTimeField(null=True, blank=True)
+
+    # Campos requeridos por AbstractBaseUser/PermissionsMixin
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
+    # Related names para evitar conflictos con LoginUsuario
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name='groups',
+        blank=True,
+        help_text='The groups this user belongs to.',
+        related_name="cliente_tienda_set",
+        related_query_name="cliente_tienda",
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name='user permissions',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        related_name="cliente_tienda_set",
+        related_query_name="cliente_tienda",
+    )
+
+    objects = ClienteTiendaManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    class Meta:
+        db_table = 'clientes_tienda'
+        verbose_name = 'Cliente Tienda'
+        verbose_name_plural = 'Clientes Tienda'
+        indexes = [
+            models.Index(fields=['email']),
+            models.Index(fields=['estado']),
+            models.Index(fields=['cliente_id']),
+        ]
+
+    def __str__(self):
+        return self.email
+
+    # Django maneja set_password y check_password automáticamente via AbstractBaseUser
 
 
 class FormaPago(models.Model):

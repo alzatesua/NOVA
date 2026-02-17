@@ -4,9 +4,9 @@
 const BASE_URL = 'https://dagi.co/';
 const id_sucursal = localStorage.getItem("id_sucursal");
 
-async function post(endpoint, body, token) {
+// Funciones internas que hacen la petición SIN lógica de refresh (para evitar recursión)
+async function _postRaw(endpoint, body, token) {
   const url = `${BASE_URL}${endpoint}`;
-  console.log(`POST ${url}`, body);
   const res = await fetch(url, {
     method: 'POST',
     headers: {
@@ -17,31 +17,12 @@ async function post(endpoint, body, token) {
   });
 
   const json = await res.json().catch(() => null);
-  console.log(`Response ${res.status}:`, json);
-
-  if (!res.ok) {
-    console.error('API Error:', {
-      status: res.status,
-      statusText: res.statusText,
-      responseBody: json
-    });
-
-    // Detectar CUALQUIER error 401 y limpiar sesión
-    if (res.status === 401) {
-      console.warn('⚠️ Error 401 detectado. Limpiando sesión y redirigiendo al login...');
-      localStorage.clear();
-      window.location.href = '/login';
-      throw { message: 'Sesión expirada. Por favor inicia sesión nuevamente.', details: json };
-    }
-
-    const msg = json?.mensaje || json?.detail || res.statusText;
-    throw { message: msg, details: json };
-  }
-  return json;
+  return { res, json };
 }
 
-async function get(endpoint, token) {
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
+async function _getRaw(endpoint, token) {
+  const url = `${BASE_URL}${endpoint}`;
+  const res = await fetch(url, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -50,7 +31,79 @@ async function get(endpoint, token) {
   });
 
   const json = await res.json().catch(() => null);
+  return { res, json };
+}
 
+async function post(endpoint, body, token, skipRefresh = false) {
+  console.log(`POST ${BASE_URL}${endpoint}`, body);
+
+  // Primera intento
+  let { res, json } = await _postRaw(endpoint, body, token);
+  console.log(`Response ${res.status}:`, json);
+
+  // Si la petición falló con 401 y NO estamos saltando el refresh (para evitar recursión)
+  // Y NO es un endpoint de login/refresh (no tiene sentido refrescar en esos casos)
+  if (!res.ok && res.status === 401 && !skipRefresh) {
+    // NO intentar refrescar token para endpoints de auth
+    const isAuthEndpoint = endpoint.includes('api/auth/login') ||
+                           endpoint.includes('api/auth/refresh') ||
+                           endpoint.includes('api/auth/register');
+
+    if (!isAuthEndpoint) {
+      console.warn('⚠️ Error 401 detectado. Intentando refresh de token...');
+
+      const refreshToken = localStorage.getItem('auth_refresh_token');
+
+      if (refreshToken) {
+        try {
+          const subdominio = window.location.hostname.split('.')[0];
+
+          // Usar _postRaw para evitar recursión (skipRefresh=true)
+          const refreshResult = await _postRaw('api/auth/refresh/', {
+            refresh: refreshToken,
+            subdominio
+          }, null);
+
+          if (refreshResult.res.ok && refreshResult.json.access) {
+            // Guardar nuevo access token
+            const newAccessToken = refreshResult.json.access;
+            localStorage.setItem('auth_access_token', newAccessToken);
+            console.log('✅ Token refrescado exitosamente');
+
+            // Reintentar la petición original con el nuevo token
+            const retryResult = await _postRaw(endpoint, body, newAccessToken);
+            if (retryResult.res.ok) {
+              console.log(`✅ Reintento exitoso después de refresh`);
+              return retryResult.json;
+            }
+            // Si el reintento falló, continuar con el error normal
+            res = retryResult.res;
+            json = retryResult.json;
+          }
+        } catch (refreshError) {
+          console.error('❌ Error al refrescar token:', refreshError);
+        }
+      }
+    }
+
+    // Si llegamos aquí, no se pudo refrescar el token (o era un endpoint de auth)
+    // Solo limpiar tokens si NO es un endpoint de auth
+    if (!isAuthEndpoint) {
+      console.warn('⚠️ No se pudo refrescar el token. Limpiando tokens de autenticación...');
+      localStorage.removeItem('auth_access_token');
+      localStorage.removeItem('auth_refresh_token');
+      localStorage.removeItem('auth_usuario');
+
+      // Lanzar error especial para que el componente lo capture
+      throw {
+        message: 'SESSION_EXPIRED',
+        isAuthError: true,
+        details: json
+      };
+    }
+  }
+
+  // Manejo normal de errores (no 401, o 401 después de intentar refresh)
   if (!res.ok) {
     console.error('API Error:', {
       status: res.status,
@@ -58,13 +111,86 @@ async function get(endpoint, token) {
       responseBody: json
     });
 
-    // Detectar CUALQUIER error 401 y limpiar sesión
-    if (res.status === 401) {
-      console.warn('⚠️ Error 401 detectado. Limpiando sesión y redirigiendo al login...');
-      localStorage.clear();
-      window.location.href = '/login';
-      throw { message: 'Sesión expirada. Por favor inicia sesión nuevamente.', details: json };
+    const msg = json?.mensaje || json?.detail || res.statusText;
+    throw { message: msg, details: json };
+  }
+
+  return json;
+}
+
+async function get(endpoint, token, skipRefresh = false) {
+  // Primer intento
+  let { res, json } = await _getRaw(endpoint, token);
+
+  // Si la petición falló con 401 y NO estamos saltando el refresh (para evitar recursión)
+  // Y NO es un endpoint de login/refresh (no tiene sentido refrescar en esos casos)
+  if (!res.ok && res.status === 401 && !skipRefresh) {
+    // NO intentar refrescar token para endpoints de auth
+    const isAuthEndpoint = endpoint.includes('api/auth/login') ||
+                           endpoint.includes('api/auth/refresh') ||
+                           endpoint.includes('api/auth/register');
+
+    if (!isAuthEndpoint) {
+      console.warn('⚠️ Error 401 detectado (GET). Intentando refresh de token...');
+
+      const refreshToken = localStorage.getItem('auth_refresh_token');
+
+      if (refreshToken) {
+        try {
+          const subdominio = window.location.hostname.split('.')[0];
+
+          // Usar _postRaw para evitar recursión (skipRefresh=true)
+          const refreshResult = await _postRaw('api/auth/refresh/', {
+            refresh: refreshToken,
+            subdominio
+          }, null);
+
+          if (refreshResult.res.ok && refreshResult.json.access) {
+            // Guardar nuevo access token
+            const newAccessToken = refreshResult.json.access;
+            localStorage.setItem('auth_access_token', newAccessToken);
+            console.log('✅ Token refrescado exitosamente (GET)');
+
+            // Reintentar la petición original con el nuevo token
+            const retryResult = await _getRaw(endpoint, newAccessToken);
+            if (retryResult.res.ok) {
+              console.log(`✅ Reintento exitoso después de refresh (GET)`);
+              return retryResult.json;
+            }
+            // Si el reintento falló, continuar con el error normal
+            res = retryResult.res;
+            json = retryResult.json;
+          }
+        } catch (refreshError) {
+          console.error('❌ Error al refrescar token (GET):', refreshError);
+        }
+      }
     }
+
+    // Si llegamos aquí, no se pudo refrescar el token (o era un endpoint de auth)
+    // Solo limpiar tokens si NO es un endpoint de auth
+    if (!isAuthEndpoint) {
+      console.warn('⚠️ No se pudo refrescar el token (GET). Limpiando tokens de autenticación...');
+      localStorage.removeItem('auth_access_token');
+      localStorage.removeItem('auth_refresh_token');
+      localStorage.removeItem('auth_usuario');
+
+      // Lanzar error especial para que el componente lo capture
+      throw {
+        message: 'SESSION_EXPIRED',
+        isAuthError: true,
+        details: json
+      };
+    }
+  }
+
+  // Manejo normal de errores (no 401, o 401 después de intentar refresh)
+  if (!res.ok) {
+    console.error('API Error (GET):', {
+      status: res.status,
+      statusText: res.statusText,
+      responseBody: json
+    });
 
     const msg = json?.mensaje || json?.detail || res.statusText;
     throw { message: msg, details: json };
@@ -830,4 +956,138 @@ export function fetchFacturas({
 }
 
 
+// =========================
+// AUTH API - E-commerce
+// =========================
+
+/**
+ * Registro de nuevo usuario (CASO A)
+ */
+export function registrarUsuario({
+  email,
+  password,
+  passwordConfirm,
+  datosCliente = {}
+}) {
+  const token = localStorage.getItem('token_usuario');
+  const usuario = localStorage.getItem('usuario');
+  const subdominio = window.location.hostname.split('.')[0];
+
+  return post('api/auth/register/', {
+    usuario,
+    token,
+    subdominio,
+    email,
+    password,
+    password_confirm: passwordConfirm,
+    ...datosCliente
+  });
+}
+
+/**
+ * Login de usuario
+ */
+export function loginUsuario({ email, password }) {
+  const token = localStorage.getItem('token_usuario');
+  const usuario = localStorage.getItem('usuario');
+  const subdominio = window.location.hostname.split('.')[0];
+
+  return post('api/auth/login/', {
+    usuario,
+    token,
+    subdominio,
+    email,
+    password
+  });
+}
+
+/**
+ * Activar cuenta para cliente existente (CASO B)
+ */
+export function activarCuenta({
+  email,
+  numeroDocumento,
+  password,
+  passwordConfirm
+}) {
+  const token = localStorage.getItem('token_usuario');
+  const usuario = localStorage.getItem('usuario');
+  const subdominio = window.location.hostname.split('.')[0];
+
+  return post('api/auth/activate-account/', {
+    usuario,
+    token,
+    subdominio,
+    email,
+    numero_documento: numeroDocumento,
+    password,
+    password_confirm: passwordConfirm
+  });
+}
+
+/**
+ * Solicitar código de activación
+ */
+export function solicitarActivacion({ email }) {
+  const token = localStorage.getItem('token_usuario');
+  const usuario = localStorage.getItem('usuario');
+  const subdominio = window.location.hostname.split('.')[0];
+
+  return post('api/auth/request-activation/', {
+    usuario,
+    token,
+    subdominio,
+    email
+  });
+}
+
+/**
+ * Obtener usuario actual
+ */
+export function getUsuarioActual() {
+  const token = localStorage.getItem('token_usuario');
+  const usuario = localStorage.getItem('usuario');
+  const subdominio = window.location.hostname.split('.')[0];
+  const accessToken = localStorage.getItem('auth_access_token');
+
+  return get(`api/auth/me/?usuario=${usuario}&token=${token}&subdominio=${subdominio}`, accessToken);
+}
+
+/**
+ * Renovar access token usando refresh token
+ */
+export function refreshAccessToken() {
+  const subdominio = window.location.hostname.split('.')[0];
+  const refreshToken = localStorage.getItem('auth_refresh_token');
+
+  return post('api/auth/refresh/', {
+    refresh: refreshToken,
+    subdominio
+  });
+}
+
+/**
+ * Logout - Invalida refresh token
+ */
+export function logout() {
+  const token = localStorage.getItem('token_usuario');
+  const usuario = localStorage.getItem('usuario');
+  const subdominio = window.location.hostname.split('.')[0];
+  const refreshToken = localStorage.getItem('auth_refresh_token');
+
+  const promise = post('api/auth/logout/', {
+    usuario,
+    token,
+    subdominio,
+    refresh_token: refreshToken
+  }, token);
+
+  // Limpiar localStorage
+  localStorage.removeItem('auth_access_token');
+  localStorage.removeItem('auth_refresh_token');
+  localStorage.removeItem('auth_usuario');
+  localStorage.removeItem('ecommerce_customer');
+
+  return promise;
+}
 

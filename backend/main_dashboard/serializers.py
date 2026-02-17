@@ -3,7 +3,7 @@ from .models import (
     Sucursales, Categoria, Marca, Iva, Producto, Descuento, TipoMedida,
     Bodega, Existencia, Traslado, TrasladoLinea,
     Cliente, FormaPago, Factura, FacturaDetalle, Pago, ConfiguracionFactura,
-    Cupon, ClienteCupon
+    Cupon, ClienteCupon, ClienteTienda
 )
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
@@ -12,6 +12,11 @@ from django.db import transaction, IntegrityError
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Importaciones para SimpleJWT
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 
 class SucursalSerializer(serializers.ModelSerializer):
@@ -1013,3 +1018,284 @@ class ClienteCuponSerializer(serializers.ModelSerializer):
             return c.razon_social or ''
         partes = filter(None, [c.primer_nombre, c.segundo_nombre, c.apellidos])
         return ' '.join(partes)
+
+
+# =========================
+# AUTH SERIALIZERS (SimpleJWT + Custom)
+# =========================
+
+class ClienteTiendaSerializer(DbAliasModelSerializer):
+    """Serializer base para ClienteTienda"""
+    cliente_nombre = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ClienteTienda
+        fields = [
+            'id', 'email', 'rol', 'estado', 'cliente_id',
+            'cliente_nombre', 'creado_en', 'actualizado_en', 'ultimo_login'
+        ]
+        read_only_fields = ['id', 'creado_en', 'actualizado_en', 'ultimo_login']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def get_cliente_nombre(self, obj):
+        if obj.cliente:
+            return obj.cliente.nombre_completo
+        return None
+
+
+class CustomTokenObtainPairSerializer(serializers.Serializer):
+    """
+    Serializer personalizado para login de ClienteTienda.
+    NO hereda de SimpleJWT para evitar conflicto con AUTH_USER_MODEL global.
+    """
+    email = serializers.EmailField(write_only=True)
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+
+    def validate(self, attrs):
+        # Obtener alias del tenant desde context
+        alias = self.context.get('db_alias', 'default')
+
+        # Buscar el usuario ClienteTienda usando el tenant específico
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        if not email or not password:
+            raise serializers.ValidationError({
+                'email': 'Email y contraseña son requeridos'
+            })
+
+        # Buscar usuario en la BD del tenant
+        user = None
+        try:
+            # Buscar usuario por email en este tenant
+            user = ClienteTienda.objects.using(alias).get(email=email)
+
+            # Verificar contraseña
+            if user.check_password(password):
+                # Verificar que esté activo
+                if not user.is_active or user.estado != 'activo':
+                    raise serializers.ValidationError({
+                        'email': 'Esta cuenta no está activa.'
+                    })
+            else:
+                user = None
+        except ClienteTienda.DoesNotExist:
+            pass
+
+        if user is None:
+            raise serializers.ValidationError({
+                'email': 'Credenciales inválidas'
+            })
+
+        # Generar tokens manualmente
+        from rest_framework_simplejwt.tokens import RefreshToken
+        refresh = RefreshToken.for_user(user)
+
+        data = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+
+        # Obtener tenant_id desde context
+        tienda_id = self.context.get('tienda_id', None)
+
+        # Personalizar response con info del tenant
+        data['tenant_id'] = tienda_id
+        data['user'] = ClienteTiendaSerializer(user, context={'db_alias': alias}).data
+
+        return data
+
+# Mantener referencia para compatibilidad con settings.py
+TokenObtainPairSerializer = CustomTokenObtainPairSerializer
+
+
+class TokenRefreshSerializer(TokenRefreshSerializer):
+    """
+    Serializer personalizado para refresh.
+    Incluye tenant_id en el nuevo token.
+    """
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Agregar tenant_id al response
+        tienda_id = self.context.get('tienda_id', None)
+        data['tenant_id'] = tienda_id
+
+        return data
+
+
+class RegistroSerializer(DbAliasModelSerializer):
+    """
+    Serializer para registro desde tienda (CASO A).
+    Crea ClienteTienda y opcionalmente facturacion_cliente.
+    """
+    password = serializers.CharField(write_only=True, min_length=8, required=True)
+    password_confirm = serializers.CharField(write_only=True, required=True)
+
+    # Datos opcionales del cliente fiscal
+    tipo_persona = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    primer_nombre = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    segundo_nombre = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    apellidos = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    razon_social = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    tipo_documento = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    numero_documento = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    telefono = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    direccion = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    ciudad = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+    class Meta:
+        model = ClienteTienda
+        fields = [
+            'email', 'password', 'password_confirm',
+            'tipo_persona', 'primer_nombre', 'segundo_nombre', 'apellidos',
+            'razon_social', 'tipo_documento', 'numero_documento',
+            'telefono', 'direccion', 'ciudad'
+        ]
+
+    def validate_email(self, value):
+        """Verificar que el email no existe en este tenant"""
+        alias = self.context.get('db_alias', 'default')
+        if ClienteTienda.objects.using(alias).filter(email=value).exists():
+            raise serializers.ValidationError('Ya existe una cuenta con este email.')
+        return value
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password_confirm']:
+            raise serializers.ValidationError({'password_confirm': 'Las contraseñas no coinciden'})
+        return attrs
+
+    def create(self, validated_data):
+        alias = self.context.get('db_alias', 'default')
+
+        # Extraer password y datos de cliente
+        password = validated_data.pop('password')
+        validated_data.pop('password_confirm')
+
+        datos_cliente = {
+            'tipo_persona': validated_data.pop('tipo_persona', 'NAT'),
+            'primer_nombre': validated_data.pop('primer_nombre', None),
+            'segundo_nombre': validated_data.pop('segundo_nombre', None),
+            'apellidos': validated_data.pop('apellidos', None),
+            'razon_social': validated_data.pop('razon_social', None),
+            'tipo_documento': validated_data.pop('tipo_documento', None),
+            'numero_documento': validated_data.pop('numero_documento', None),
+            'telefono': validated_data.pop('telefono', None),
+            'direccion': validated_data.pop('direccion', None),
+            'ciudad': validated_data.pop('ciudad', None),
+            'correo': validated_data.get('email')  # Usar el mismo email
+        }
+
+        try:
+            with transaction.atomic(using=alias):
+                # 1. Crear usuario
+                usuario = ClienteTienda(
+                    email=validated_data['email'],
+                    rol='cliente',
+                    estado='activo'  # Registro directo: activo inmediatamente
+                )
+                usuario.set_password(password)
+
+                # 2. Crear cliente fiscal si hay datos suficientes
+                if any(datos_cliente.values()):
+                    cliente = Cliente.objects.using(alias).create(**datos_cliente)
+                    usuario.cliente = cliente
+
+                usuario.save(using=alias)
+
+                return usuario
+        except Exception as e:
+            raise serializers.ValidationError(f'Error al crear usuario: {str(e)}')
+
+
+class ActivarCuentaSerializer(DbAliasModelSerializer):
+    """
+    Serializer para activar cuenta de cliente existente (CASO B).
+    """
+    email = serializers.EmailField(required=True)
+    numero_documento = serializers.CharField(required=True)
+    password = serializers.CharField(write_only=True, min_length=8, required=True)
+    password_confirm = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = ClienteTienda
+        fields = ['email', 'numero_documento', 'password', 'password_confirm']
+
+    def validate(self, attrs):
+        alias = self.context.get('db_alias', 'default')
+
+        if attrs['password'] != attrs['password_confirm']:
+            raise serializers.ValidationError({'password_confirm': 'Las contraseñas no coinciden'})
+
+        # Verificar que existe el cliente fiscal
+        try:
+            cliente = Cliente.objects.using(alias).get(
+                correo=attrs['email'],
+                numero_documento=attrs['numero_documento']
+            )
+        except Cliente.DoesNotExist:
+            raise serializers.ValidationError(
+                'No se encontró un cliente con esos datos. '
+                'Verifica el email y número de documento.'
+            )
+
+        # Verificar que no tenga usuario ya creado
+        if hasattr(cliente, 'cuenta_tienda') and cliente.cuenta_tienda:
+            raise serializers.ValidationError(
+                'Esta cuenta ya ha sido activada. Si olvidaste tu contraseña, '
+                'usa la opción de recuperación.'
+            )
+
+        self.context['cliente'] = cliente
+        return attrs
+
+    def create(self, validated_data):
+        alias = self.context.get('db_alias', 'default')
+        cliente = self.context['cliente']
+        password = validated_data.pop('password')
+        validated_data.pop('password_confirm')
+
+        try:
+            with transaction.atomic(using=alias):
+                usuario = ClienteTienda(
+                    email=validated_data['email'],
+                    rol='cliente',
+                    estado='activo',
+                    cliente=cliente
+                )
+                usuario.set_password(password)
+                usuario.save(using=alias)
+
+                return usuario
+        except Exception as e:
+            raise serializers.ValidationError(f'Error al activar cuenta: {str(e)}')
+
+
+class SolicitarActivacionSerializer(serializers.Serializer):
+    """
+    Serializer para solicitar código de activación.
+    En un sistema real enviaría email con código/token.
+    """
+    email = serializers.EmailField(required=True)
+
+    def validate_email(self, value):
+        alias = self.context.get('db_alias', 'default')
+
+        # Verificar que existe cliente con ese email
+        try:
+            cliente = Cliente.objects.using(alias).get(correo=value)
+        except Cliente.DoesNotExist:
+            raise serializers.ValidationError(
+                'No se encontró un cliente registrado con ese email.'
+            )
+
+        # Verificar que no tenga usuario activo
+        if hasattr(cliente, 'cuenta_tienda') and cliente.cuenta_tienda:
+            if cliente.cuenta_tienda.estado == 'activo':
+                raise serializers.ValidationError(
+                    'Esta cuenta ya está activa. Puedes iniciar sesión directamente.'
+                )
+
+        return value

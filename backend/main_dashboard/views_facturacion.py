@@ -45,7 +45,14 @@ class FacturacionTenantMixin:
     _tenant_user = None
     _tenant_tienda = None
 
-    def _resolve_alias(self, request):
+    def _resolve_alias(self, request, require_auth=True):
+        """
+        Resuelve el alias de BD del tenant.
+
+        Args:
+            request: El request HTTP
+            require_auth: Si True, requiere usuario y token. Si False, solo resuelve el tenant por subdominio.
+        """
         if self.db_alias:
             return self.db_alias
 
@@ -59,9 +66,6 @@ class FacturacionTenantMixin:
             host = request.get_host().split(':')[0]
             subdom = host.split('.')[0].lower()
 
-        if not usuario or not token:
-            raise ValueError('usuario y token son requeridos (en body o querystring).')
-
         # Buscar tenant por Dominios y conectar
         dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).select_related('tienda').first()
         if not dominio_obj:
@@ -71,31 +75,37 @@ class FacturacionTenantMixin:
         alias = str(tienda.id)
         conectar_db_tienda(alias, tienda)
 
-        # Validar usuario en tenant DB
-        from django.apps import apps
-        LoginUsuario = apps.get_model('nova', 'LoginUsuario')
-        user = LoginUsuario.objects.using(alias).filter(usuario=usuario).first()
-        if not user:
-            raise ValueError('Usuario no encontrado.')
+        # Si se requiere autenticación, validar usuario y token
+        if require_auth:
+            if not usuario or not token:
+                raise ValueError('usuario y token son requeridos (en body o querystring).')
 
-        # Validar/refresh token
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except ExpiredSignatureError:
-            from nova.utils.db import generar_token_jwt
-            nuevo = generar_token_jwt(usuario)
-            user.token = nuevo
-            user.save(using=alias)
-            token = nuevo
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        except InvalidTokenError:
-            raise ValueError('Token inválido.')
+            # Validar usuario en tenant DB
+            from django.apps import apps
+            LoginUsuario = apps.get_model('nova', 'LoginUsuario')
+            user = LoginUsuario.objects.using(alias).filter(usuario=usuario).first()
+            if not user:
+                raise ValueError('Usuario no encontrado.')
 
-        if payload.get("usuario") != usuario or user.token != token:
-            raise ValueError('Token no coincide.')
+            # Validar/refresh token
+            try:
+                payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            except ExpiredSignatureError:
+                from nova.utils.db import generar_token_jwt
+                nuevo = generar_token_jwt(usuario)
+                user.token = nuevo
+                user.save(using=alias)
+                token = nuevo
+                payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            except InvalidTokenError:
+                raise ValueError('Token inválido.')
+
+            if payload.get("usuario") != usuario or user.token != token:
+                raise ValueError('Token no coincide.')
+
+            self._tenant_user = user
 
         self.db_alias = alias
-        self._tenant_user = user
         self._tenant_tienda = tienda
         return self.db_alias
 
