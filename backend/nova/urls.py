@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/', include('main_dashboard.urls_traslados')),
     path('api/facturacion/', include('main_dashboard.urls_facturacion')),
     path('api/cupones/', include('main_dashboard.urls_cupones')),
+    path('api/', include('main_dashboard.urls_ecommerce_clientes')),
 
     path('api/refresh_custom/', views.refresh_token_custom_view),
     path('api/countries/', views.get_countries, name='get_countries'),

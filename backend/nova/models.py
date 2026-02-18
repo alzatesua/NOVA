@@ -427,3 +427,81 @@ class LoginUsuarioBodega(models.Model):
 
     def __str__(self):
         return f"Usuario {self.id_login_usuario_id} - Bodega {self.id_bodega_id}"
+
+
+class ClienteEcommerce(models.Model):
+    """
+    Modelo para clientes del e-commerce.
+    Almacena información de clientes de las tiendas.
+    """
+    TIPO_PERSONA_CHOICES = [
+        ('NAT', 'Natural'),
+        ('JUR', 'Jurídica'),
+    ]
+
+    id_cliente = models.AutoField(primary_key=True)
+    tienda = models.ForeignKey(
+        'Tiendas',
+        on_delete=models.CASCADE,
+        related_name='clientes_ecommerce',
+        null=True,
+        blank=True
+    )
+
+    # Datos de autenticación
+    email = models.EmailField(unique=True, max_length=255)
+    password = models.CharField(max_length=128)  # Password hasheado
+    is_active = models.BooleanField(default=False)  # Requiere activación
+    telefono = models.CharField(max_length=20)
+
+    # Datos del cliente
+    tipo_persona = models.CharField(
+        max_length=3,
+        choices=TIPO_PERSONA_CHOICES,
+        default='NAT'
+    )
+    primer_nombre = models.CharField(max_length=100)
+    segundo_nombre = models.CharField(max_length=100, blank=True, null=True)
+    apellidos = models.CharField(max_length=100, blank=True, null=True)
+    razon_social = models.CharField(max_length=255, blank=True, null=True)
+    direccion = models.TextField(blank=True, null=True)
+    ciudad = models.CharField(max_length=100, blank=True, null=True)
+
+    # Timestamps
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+    ultimo_login = models.DateTimeField(blank=True, null=True)
+
+    # Token de activación
+    token_activacion = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        db_table = 'clientes_ecommerce'
+        verbose_name = 'Cliente E-commerce'
+        verbose_name_plural = 'Clientes E-commerce'
+        indexes = [
+            models.Index(fields=['email']),
+            models.Index(fields=['tienda']),
+            models.Index(fields=['is_active']),
+        ]
+
+    def __str__(self):
+        if self.tipo_persona == 'NAT':
+            return f"{self.primer_nombre} {self.apellidos or ''} - {self.email}"
+        else:
+            return f"{self.razon_social or self.email}"
+
+    @property
+    def id(self):
+        """Propiedad para compatibilidad con SimpleJWT y otras librerías que esperan 'id'."""
+        return self.id_cliente
+
+    def set_password(self, raw_password):
+        """Hashea y establece la contraseña."""
+        from django.contrib.auth.hashers import make_password
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        """Verifica si la contraseña es correcta."""
+        from django.contrib.auth.hashers import check_password
+        return check_password(raw_password, self.password)

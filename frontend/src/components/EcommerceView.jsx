@@ -1,8 +1,8 @@
-//prueba de funcionalidad juan
-//prueba edwin
+
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { fetchProductosEcommerce } from '../services/api';
+import { fetchProductosEcommerce, registrarUsuario, loginUsuario, activarCuenta, logout } from '../services/api';
 import { Navbar, Nav, Form, Container, Button } from 'react-bootstrap';
+import { showToast } from '../utils/toast';
 import {
   House,
   Users,
@@ -12,36 +12,13 @@ import {
   ChevronDown,
   Moon,
   Sun,
-  FileText
+  BookOpen,
 } from 'lucide-react';
-
-// Paleta de colores ecológica para movilidad eléctrica
-const COLORS = {
-  verdePrincipal: '#2E7D32',      // Forest Green
-  verdeSecundario: '#4CAF50',     // Green
-  verdeMenta: '#81C784',          // Light Green
-  verdeOscuro: '#1B5E20',         // Dark Green
-  verdeClaro: '#E8F5E9',          // Very Light Green (Material Design Green 50)
-  beigeCrema: '#FFF8E1',          // Cream
-  blanco: '#FFFFFF',
-  grisClaro: '#F5F5F5',
-  grisMedio: '#757575',
-  grisOscuro: '#424242',
-  negro: '#212121',
-  acentoNaranja: '#FFA726',       // Orange para CTAs
-  acentoTurquesa: '#26A69A',      // Turquoise para detalles
-};
-
-// Colores para modo oscuro
-const DARK_COLORS = {
-  background: '#1a1a1a',
-  cardBackground: '#2d2d2d',
-  textPrimary: '#ffffff',
-  textSecondary: '#b0b0b0',
-  borderColor: '#404040',
-  navbarBackground: '#212121',
-  inputBackground: '#3d3d3d',
-};
+import { COLORS, DARK_COLORS } from './ecommerce/constants/colors';
+import AboutSection from './ecommerce/sections/AboutSection';
+import ContactSection from './ecommerce/sections/ContactSection';
+import LearnSection from './ecommerce/sections/LearnSection';
+import EcommerceFooter from './ecommerce/shared/EcommerceFooter';
 
 export default function EcommerceView() {
   console.log('🚀 Componente EcommerceView renderizado - VERSIÓN VIDEO ACTUALIZADA');
@@ -74,12 +51,17 @@ export default function EcommerceView() {
   const [customerData, setCustomerData] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true);
+  const [showActivateMode, setShowActivateMode] = useState(false);
   const [authForm, setAuthForm] = useState({
+    // Registro
     nombre: '',
     email: '',
     telefono: '',
     direccion: '',
-    password: ''
+    password: '',
+    password_confirm: '',
+    // Activación
+    numero_documento: ''
   });
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const userDropdownRef = useRef(null);
@@ -103,16 +85,26 @@ export default function EcommerceView() {
 
   // Cargar datos del cliente al iniciar
   useEffect(() => {
-    const savedCustomer = localStorage.getItem('ecommerce_customer');
+    const accessToken = localStorage.getItem('auth_access_token');
+    const savedUser = localStorage.getItem('auth_usuario');
     const savedCoupons = localStorage.getItem('ecommerce_coupons');
 
     console.log('=== Cargando datos al iniciar ===');
-    console.log('savedCustomer:', savedCustomer);
+    console.log('accessToken:', accessToken);
+    console.log('savedUser:', savedUser);
 
-    if (savedCustomer) {
-      setCustomerData(JSON.parse(savedCustomer));
-      setIsLoggedIn(true);
-      console.log('Usuario detectado, isLoggedIn = true');
+    if (accessToken && savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        setCustomerData(user);
+        setIsLoggedIn(true);
+        console.log('Usuario detectado, isLoggedIn = true');
+      } catch (e) {
+        console.error('Error parseando usuario:', e);
+        localStorage.removeItem('auth_access_token');
+        localStorage.removeItem('auth_refresh_token');
+        localStorage.removeItem('auth_usuario');
+      }
     } else {
       setIsLoggedIn(false);
       console.log('No hay usuario, isLoggedIn = false');
@@ -434,9 +426,14 @@ export default function EcommerceView() {
     // Verificar si hay cliente logueado
     const savedCustomer = localStorage.getItem('ecommerce_customer');
 
-    // Si NO está logueado o NO hay cliente en localStorage, mostrar modal de autenticación
+    // Si NO está logueado o NO hay cliente en localStorage, abrir modal de registro
     if (!isLoggedIn || !savedCustomer) {
+      // Cambiar al modo de registro
+      setIsLoginMode(false);
+      // Abrir el modal de autenticación
       setShowAuthModal(true);
+      // Mostrar mensaje informativo
+      showToast('info', '🔐 Debes registrarte o iniciar sesión para agregar productos al carrito');
       return;
     }
 
@@ -455,7 +452,7 @@ export default function EcommerceView() {
       return [...prevCart, { ...product, quantity }];
     });
 
-    alert(`✅ ${product.nombre} agregado al carrito`);
+    showToast('success', `✅ ${product.nombre} agregado al carrito`);
   };
 
   const removeFromCart = (productId) => {
@@ -547,13 +544,13 @@ export default function EcommerceView() {
 
   const sendToWhatsApp = () => {
     if (cart.length === 0) {
-      alert('Tu carrito está vacío');
+      showToast('error', 'Tu carrito está vacío');
       return;
     }
 
     // Verificar si está logueado
     if (!isLoggedIn) {
-      setShowAuthModal(true);
+      console.log('🔒 Usuario no logueado. No se puede enviar pedido.');
       return;
     }
 
@@ -565,13 +562,12 @@ export default function EcommerceView() {
   // Reseñas
   const handleSubmitReview = () => {
     if (!isLoggedIn) {
-      alert('Debes iniciar sesión para dejar una reseña y ganar cupones de descuento');
-      setShowAuthModal(true);
+      console.log('🔒 Usuario no logueado. No se puede dejar reseña.');
       return;
     }
 
     if (!newReview.comment) {
-      alert('Por favor escribe tu reseña');
+      showToast('error', 'Por favor escribe tu reseña');
       return;
     }
 
@@ -606,83 +602,165 @@ export default function EcommerceView() {
 
   // ==================== AUTENTICACIÓN ====================
 
-  const handleRegister = () => {
-    // Validar campos
-    if (!authForm.nombre || !authForm.email || !authForm.telefono || !authForm.password) {
-      alert('Por favor completa todos los campos requeridos');
+  const resetAuthForm = () => {
+    setAuthForm({
+      nombre: '',
+      email: '',
+      telefono: '',
+      direccion: '',
+      password: '',
+      password_confirm: '',
+      numero_documento: ''
+    });
+  };
+
+  const handleRegister = async () => {
+    // Validar campos (usando trim para evitar espacios en blanco)
+    const nombre = authForm.nombre?.trim() || '';
+    const email = authForm.email?.trim() || '';
+    const telefono = authForm.telefono?.trim() || '';
+    const password = authForm.password || '';
+    const passwordConfirm = authForm.password_confirm || '';
+
+    if (!nombre || !email || !telefono || !password || !passwordConfirm) {
+      showToast('error', 'Por favor completa todos los campos requeridos');
       return;
     }
 
     // Validar email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(authForm.email)) {
-      alert('Por favor ingresa un email válido');
+      showToast('error', 'Por favor ingresa un email válido');
       return;
     }
 
-    // Crear objeto de cliente
-    const customer = {
-      id: Date.now(),
-      nombre: authForm.nombre,
-      email: authForm.email,
-      telefono: authForm.telefono,
-      direccion: authForm.direccion || '',
-      fechaRegistro: new Date().toISOString(),
-      totalCompras: 0,
-      reseñas: 0
-    };
+    // Validar contraseña
+    if (authForm.password.length < 8) {
+      showToast('error', 'La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
 
-    // Guardar en localStorage
-    localStorage.setItem('ecommerce_customer', JSON.stringify(customer));
+    if (authForm.password !== authForm.password_confirm) {
+      showToast('error', 'Las contraseñas no coinciden');
+      return;
+    }
 
-    // Actualizar estado
-    setCustomerData(customer);
-    setIsLoggedIn(true);
-    setShowAuthModal(false);
-    setAuthForm({ nombre: '', email: '', telefono: '', direccion: '', password: '' });
+    try {
+      const response = await registrarUsuario({
+        email: authForm.email,
+        password: authForm.password,
+        passwordConfirm: authForm.password_confirm,
+        datosCliente: {
+          tipo_persona: 'NAT',
+          primer_nombre: authForm.nombre,
+          apellidos: '',
+          telefono: authForm.telefono,
+          direccion: authForm.direccion
+        }
+      });
 
-    alert(`¡Bienvenido/a ${customer.nombre}! 🎉\n\nTu cuenta ha sido creada exitosamente.\nAhora puedes agregar productos al carrito y dejar reseñas para ganar cupones de descuento.`);
+      // Guardar tokens y usuario
+      localStorage.setItem('auth_access_token', response.access);
+      localStorage.setItem('auth_refresh_token', response.refresh);
+      localStorage.setItem('auth_usuario', JSON.stringify(response.user));
+      localStorage.setItem('ecommerce_customer', JSON.stringify(response.user));
+
+      setCustomerData(response.user);
+      setIsLoggedIn(true);
+      setShowAuthModal(false);
+      resetAuthForm();
+
+      showToast('success', `¡Bienvenido/a ${response.user.email}! Tu cuenta ha sido creada exitosamente.`);
+    } catch (error) {
+      showToast('error', error.message || 'Error al registrar usuario');
+    }
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Validar campos
     if (!authForm.email || !authForm.password) {
-      alert('Por favor ingresa tu email y contraseña');
+      showToast('error', 'Por favor ingresa tu email y contraseña');
       return;
     }
 
-    // Buscar cliente en localStorage
-    const savedCustomer = localStorage.getItem('ecommerce_customer');
+    try {
+      const response = await loginUsuario({
+        email: authForm.email,
+        password: authForm.password
+      });
 
-    if (!savedCustomer) {
-      alert('No se encontró una cuenta con ese email. Por favor regístrate.');
-      setIsLoginMode(false);
-      return;
+      // Guardar tokens y usuario
+      localStorage.setItem('auth_access_token', response.access);
+      localStorage.setItem('auth_refresh_token', response.refresh);
+      localStorage.setItem('auth_usuario', JSON.stringify(response.user));
+      localStorage.setItem('ecommerce_customer', JSON.stringify(response.user));
+
+      setCustomerData(response.user);
+      setIsLoggedIn(true);
+      setShowAuthModal(false);
+      resetAuthForm();
+
+      showToast('success', `¡Hola de nuevo ${response.user.email}!`);
+    } catch (error) {
+      showToast('error', error.message || 'Error al iniciar sesión');
     }
-
-    const customer = JSON.parse(savedCustomer);
-
-    // Verificar email (en un sistema real también verificarías el password)
-    if (customer.email !== authForm.email) {
-      alert('Email o contraseña incorrectos');
-      return;
-    }
-
-    // Actualizar estado
-    setCustomerData(customer);
-    setIsLoggedIn(true);
-    setShowAuthModal(false);
-    setAuthForm({ nombre: '', email: '', telefono: '', direccion: '', password: '' });
-
-    alert(`¡Hola de nuevo ${customer.nombre}! 👋\n\nBienvenido/a de nuevo.`);
   };
 
-  const handleLogout = () => {
+  const handleActivateAccount = async () => {
+    // Validar campos
+    if (!authForm.email || !authForm.numero_documento ||
+        !authForm.password || !authForm.password_confirm) {
+      showToast('error', 'Por favor completa todos los campos');
+      return;
+    }
+
+    if (authForm.password !== authForm.password_confirm) {
+      showToast('error', 'Las contraseñas no coinciden');
+      return;
+    }
+
+    if (authForm.password.length < 8) {
+      showToast('error', 'La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
+    try {
+      const response = await activarCuenta({
+        email: authForm.email,
+        numeroDocumento: authForm.numero_documento,
+        password: authForm.password,
+        passwordConfirm: authForm.password_confirm
+      });
+
+      // Guardar tokens y usuario
+      localStorage.setItem('auth_access_token', response.access);
+      localStorage.setItem('auth_refresh_token', response.refresh);
+      localStorage.setItem('auth_usuario', JSON.stringify(response.user));
+
+      setCustomerData(response.user);
+      setIsLoggedIn(true);
+      setShowAuthModal(false);
+      setShowActivateMode(false);
+      resetAuthForm();
+
+      showToast('success', '¡Cuenta activada exitosamente! Ya puedes iniciar sesión.');
+    } catch (error) {
+      showToast('error', error.message || 'Error al activar cuenta');
+    }
+  };
+
+  const handleLogout = async () => {
     if (confirm('¿Estás seguro/a de que quieres cerrar sesión?')) {
+      try {
+        await logout();
+      } catch (error) {
+        console.error('Error en logout:', error);
+      }
+
       setIsLoggedIn(false);
       setCustomerData(null);
-      // NOTA: No eliminamos los cupones guardados
-      alert('Has cerrado sesión correctamente. Tus cupones se han mantenido guardados.');
+
+      showToast('success', 'Has cerrado sesión correctamente.');
     }
   };
 
@@ -1341,7 +1419,7 @@ export default function EcommerceView() {
                   onClick={() => setActiveSection('infórmate')}
                   className={`nav-btn-futuristic ${activeSection === 'infórmate' ? 'active' : ''}`}
                 >
-                  <FileText size={18} strokeWidth={2} />
+                  <BookOpen size={18} strokeWidth={2} />
                   <span>Infórmate</span>
                 </button>
 
@@ -1437,25 +1515,25 @@ export default function EcommerceView() {
                 {/* Carrito - Enviar directamente a WhatsApp */}
                 <div className="position-relative flex-shrink-0" style={{ padding: '5px', marginRight: '5px' }}>
                   <button
-                    className="nav-btn-futuristic position-relative"
+                    className={`nav-btn-futuristic position-relative ${!isLoggedIn ? 'opacity-50' : ''}`}
                     style={{
-                      padding: '10px 15px'
+                      padding: '10px 15px',
+                      cursor: !isLoggedIn ? 'not-allowed' : 'pointer'
                     }}
                   onClick={() => {
                     if (cart.length > 0) {
                       // Verificar autenticación ANTES de enviar a WhatsApp
                       if (!isLoggedIn) {
-                        console.log('Botón carrito - Usuario NO logueado, mostrando modal');
-                        setShowAuthModal(true);
+                        console.log('Botón carrito - Usuario NO logueado');
                         return;
                       }
                       console.log('Botón carrito - Usuario logueado, enviando a WhatsApp');
                       sendToWhatsApp();
                     } else {
-                      alert('Tu carrito está vacío');
+                      showToast('error', 'Tu carrito está vacío');
                     }
                   }}
-                  title="Completar pedido por WhatsApp"
+                  title={!isLoggedIn ? 'Inicia sesión para completar tu pedido' : 'Completar pedido por WhatsApp'}
                 >
                   <svg
                     style={{ width: '24px', height: '24px' }}
@@ -1764,9 +1842,9 @@ export default function EcommerceView() {
                       onClick={() => setActiveSection('productos')}
                       className="px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-white text-base sm:text-lg md:text-xl shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
                       style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                        backgroundColor: 'rgba(46, 125, 50, 0.15)',
                         backdropFilter: 'blur(10px)',
-                        border: '3px solid rgba(255, 255, 255, 0.3)'
+                        border: '2px solid rgba(46, 125, 50, 0.4)'
                       }}
                     >
                       ⚡ Ver Productos
@@ -1775,9 +1853,9 @@ export default function EcommerceView() {
                       onClick={() => setActiveSection('nosotros')}
                       className="px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-white text-base sm:text-lg md:text-xl shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
                       style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                        backgroundColor: 'rgba(46, 125, 50, 0.15)',
                         backdropFilter: 'blur(10px)',
-                        border: '3px solid rgba(255, 255, 255, 0.3)'
+                        border: '2px solid rgba(46, 125, 50, 0.4)'
                       }}
                     >
                       🌱 Conoce Más
@@ -1884,65 +1962,7 @@ export default function EcommerceView() {
         )}
 
         {/* Sección NOSOTROS */}
-        {activeSection === 'nosotros' && (
-          <div className="py-8 sm:py-12 px-2 sm:px-4">
-            <div className="max-w-4xl mx-auto">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8 text-center" style={{ color: COLORS.verdeOscuro }}>
-                Sobre Nosotros
-              </h1>
-
-              <div className="rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.beigeCrema }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdePrincipal }}>
-                  Nuestra Misión
-                </h2>
-                <p className="text-base sm:text-lg leading-relaxed mb-4 sm:mb-6" style={{ color: COLORS.grisOscuro }}>
-                  En {nombreTienda}, estamos comprometidos con revolucionar la forma en que las personas se mueven.
-                  Nuestra misión es proporcionar soluciones de movilidad eléctrica accesibles, sostenibles y de alta calidad
-                  que contribuyan a un futuro más limpio y verde para todos.
-                </p>
-
-                <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdePrincipal }}>
-                  Por Qué Elegirnos
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-6">
-                  <div className="text-center p-3 sm:p-4">
-                    <div className="text-4xl sm:text-5xl mb-2">🌱</div>
-                    <h3 className="font-bold text-base sm:text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>100% Ecológico</h3>
-                    <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                      Todos nuestros productos son cero emisiones
-                    </p>
-                  </div>
-                  <div className="text-center p-3 sm:p-4">
-                    <div className="text-4xl sm:text-5xl mb-2">⚡</div>
-                    <h3 className="font-bold text-base sm:text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>Alta Potencia</h3>
-                    <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                      Baterías de larga duración y rendimiento
-                    </p>
-                  </div>
-                  <div className="text-center p-3 sm:p-4">
-                    <div className="text-4xl sm:text-5xl mb-2">🛡️</div>
-                    <h3 className="font-bold text-base sm:text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>Garantía Premium</h3>
-                    <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                      Soporte técnico y garantía extendida
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl shadow-xl p-4 sm:p-6 md:p-8" style={{ backgroundColor: COLORS.verdeMenta + '20' }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdePrincipal }}>
-                  Nuestro Compromiso Ambiental
-                </h2>
-                <p className="text-base sm:text-lg leading-relaxed" style={{ color: COLORS.grisOscuro }}>
-                  Cada producto que vendemos ayuda a reducir la huella de carbono. Trabajamos directamente con
-                  fabricantes que utilizan materiales reciclables y procesos de producción sostenibles.
-                  Además, donamos el 5% de nuestras utilidades a organizaciones dedicadas a la reforestación
-                  y conservación del medio ambiente.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+        <AboutSection activeSection={activeSection} nombreTienda={nombreTienda} darkMode={darkMode} />
 
         {/* Sección PRODUCTOS */}
         {activeSection === 'productos' && (
@@ -2028,10 +2048,10 @@ export default function EcommerceView() {
                         e.stopPropagation();
                         addToCart(product);
                       }}
-                      className="w-full mt-2 sm:mt-3 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-white shadow-md hover:shadow-lg transition-all text-xs sm:text-sm"
+                      className="w-full mt-2 sm:mt-3 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-white shadow-md transition-all text-xs sm:text-sm hover:shadow-lg"
                       style={{ backgroundColor: COLORS.acentoNaranja }}
                     >
-                      Agregar al Carrito
+                      {isLoggedIn ? '🛒 Agregar al Carrito' : '🔐 Regístrate para comprar'}
                     </button>
                   </div>
                 </div>
@@ -2050,680 +2070,10 @@ export default function EcommerceView() {
         )}
 
         {/* Sección CONTACTO */}
-        {activeSection === 'contacto' && (
-          <div className="animated-bg relative" style={{ minHeight: '100vh', paddingTop: '2rem', paddingBottom: '2rem', paddingLeft: '0.5rem', paddingRight: '0.5rem', position: 'relative', overflow: 'hidden' }}>
-            {/* Formas flotantes animadas */}
-            <div className="floating-shape" style={{
-              width: '80px',
-              height: '80px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              top: '10%',
-              left: '5%',
-              animationDelay: '0s'
-            }}></div>
-            <div className="floating-shape" style={{
-              width: '120px',
-              height: '120px',
-              backgroundColor: 'rgba(255, 255, 255, 0.08)',
-              top: '60%',
-              right: '10%',
-              animationDelay: '2s'
-            }}></div>
-            <div className="floating-circle" style={{
-              width: '60px',
-              height: '60px',
-              backgroundColor: 'rgba(255, 255, 255, 0.15)',
-              bottom: '20%',
-              left: '20%',
-              animationDelay: '1s'
-            }}></div>
-            <div className="floating-circle" style={{
-              width: '40px',
-              height: '40px',
-              backgroundColor: 'rgba(255, 255, 255, 0.12)',
-              top: '30%',
-              right: '30%',
-              animationDelay: '3s'
-            }}></div>
+        <ContactSection activeSection={activeSection} whatsappNumber={whatsappNumber} darkMode={darkMode} />
 
-            {/* Rayos/Relámpagos flotantes */}
-            <div className="floating-bolt" style={{
-              fontSize: '40px',
-              top: '15%',
-              left: '15%',
-              animationDelay: '0s'
-            }}>⚡</div>
-            <div className="floating-bolt" style={{
-              fontSize: '30px',
-              top: '70%',
-              right: '20%',
-              animationDelay: '5s'
-            }}>⚡</div>
-            <div className="floating-bolt" style={{
-              fontSize: '35px',
-              bottom: '25%',
-              left: '10%',
-              animationDelay: '8s'
-            }}>⚡</div>
-            <div className="floating-bolt" style={{
-              fontSize: '25px',
-              top: '40%',
-              right: '8%',
-              animationDelay: '3s'
-            }}>⚡</div>
-
-            {/* Contenido */}
-            <div className="relative z-10">
-              <div style={{ maxWidth: '56rem', margin: '0 auto' }}>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8 md:mb-12 text-center text-white" style={{ textShadow: '2px 2px 8px rgba(0, 0, 0, 0.7)' }}>
-                Contáctanos
-              </h1>
-
-              <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-                <div className="rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 backdrop-blur-md bg-white/90">
-                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: COLORS.verdePrincipal }}>
-                    Información de Contacto
-                  </h2>
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="flex items-center space-x-2 sm:space-x-3">
-                      <span className="text-xl sm:text-2xl">📍</span>
-                      <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>Calle Principal #123, Ciudad</p>
-                    </div>
-                    <div className="flex items-center space-x-2 sm:space-x-3">
-                      <span className="text-xl sm:text-2xl">📞</span>
-                      <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>Tel: {whatsappNumber}</p>
-                    </div>
-                    <div className="flex items-center space-x-2 sm:space-x-3">
-                      <span className="text-xl sm:text-2xl">✉️</span>
-                      <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>info@ecomotion.com</p>
-                    </div>
-                    <div className="flex items-center space-x-2 sm:space-x-3">
-                      <span className="text-xl sm:text-2xl">⏰</span>
-                      <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>Lun-Sáb: 9:00 AM - 7:00 PM</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 sm:mt-8">
-                    <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdeOscuro }}>
-                      Síguenos en Redes
-                    </h3>
-                    <div className="flex space-x-3 sm:space-x-4">
-                      <a
-                        href={`https://wa.me/${whatsappNumber}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
-                        style={{ backgroundColor: '#25D366' }}
-                      >
-                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                        </svg>
-                      </a>
-                      <a
-                        href="https://facebook.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
-                        style={{ backgroundColor: '#1877F2' }}
-                      >
-                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                        </svg>
-                      </a>
-                      <a
-                        href="https://instagram.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
-                        style={{ backgroundColor: '#E4405F' }}
-                      >
-                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                        </svg>
-                      </a>
-                      <a
-                        href="https://youtube.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
-                        style={{ backgroundColor: '#FF0000' }}
-                      >
-                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                        </svg>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 backdrop-blur-md bg-white/90">
-                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: COLORS.verdePrincipal }}>
-                    Envíanos un Mensaje
-                  </h2>
-                  <form className="space-y-3 sm:space-y-4">
-                    <div>
-                      <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2" style={{ color: COLORS.grisOscuro }}>
-                        Nombre Completo
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base bg-white"
-                        style={{ borderColor: COLORS.verdeMenta }}
-                        placeholder="Tu nombre"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2" style={{ color: COLORS.grisOscuro }}>
-                        Correo Electrónico
-                      </label>
-                      <input
-                        type="email"
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base bg-white"
-                        style={{ borderColor: COLORS.verdeMenta }}
-                        placeholder="tu@email.com"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2" style={{ color: COLORS.grisOscuro }}>
-                        Mensaje
-                      </label>
-                      <textarea
-                        rows="4"
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base bg-white"
-                        style={{ borderColor: COLORS.verdeMenta }}
-                        placeholder="¿En qué podemos ayudarte?"
-                      ></textarea>
-                    </div>
-                    <button
-                      type="button"
-                      className="w-full px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-white shadow-lg hover:shadow-xl transition-all text-sm sm:text-base"
-                      style={{ backgroundColor: COLORS.verdePrincipal }}
-                    >
-                      Enviar Mensaje
-                    </button>
-                  </form>
-                </div>
-              </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Sección INFÓRMATE - Leyes y Regulaciones Vehículos Eléctricos */}
-        {activeSection === 'infórmate' && (
-          <div className="py-8 sm:py-12 px-2 sm:px-4" style={{ backgroundColor: darkMode ? DARK_COLORS.background : COLORS.verdeClaro }}>
-            <div className="max-w-6xl mx-auto">
-              {/* Header */}
-              <div className="text-center mb-8 sm:mb-12">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdePrincipal }}>
-                  📋 Infórmate sobre Vehículos Eléctricos
-                </h1>
-                <p className="text-base sm:text-lg md:text-xl" style={{ color: COLORS.grisMedio }}>
-                  Todo lo que necesitas saber sobre leyes, regulaciones y beneficios en Colombia
-                </p>
-                <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm" style={{ backgroundColor: 'rgba(46, 125, 50, 0.1)', border: '2px solid #2E7D32' }}>
-                  <span>✅ Fuentes Oficiales</span>
-                  <span>•</span>
-                  <span>Actualizado 2025</span>
-                </div>
-              </div>
-
-              {/* Marco Legal Principal */}
-              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
-                  <span>⚖️</span>
-                  <span>Marco Legal Colombia</span>
-                </h2>
-                <div className="space-y-4 sm:space-y-6">
-                  {/* Ley 1964 de 2019 */}
-                  <div className="border-l-4 rounded-lg p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Ley 1964 de 2019</h3>
-                    <p className="text-sm sm:text-base mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
-                      Ley de Movilidad Eléctrica y Transporte Sostenible. Establece los beneficios tributarios para vehículos híbridos y eléctricos.
-                    </p>
-                    <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                      <li>✦ <strong>Exento de IVA (0% vs 19%):</strong> No se paga impuesto sobre el valor del vehículo</li>
-                      <li>✦ <strong>Exento de impuesto de rodamiento:</strong> Ahorro de hasta 15% del valor del vehículo</li>
-                      <li>✦ <strong>Exento de gravamen arancelario:</strong> Para importación de componentes</li>
-                    </ul>
-                    <a
-                      href="https://www.funcionpublica.gov.co/eva/gestornormativo/ley-1964-2019"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mt-2 sm:mt-3 text-xs sm:text-sm font-semibold underline"
-                      style={{ color: COLORS.verdePrincipal }}
-                    >
-                      🔗 Ver Ley Oficial →
-                    </a>
-                  </div>
-
-                  {/* CONPES 4075 de 2012 */}
-                  <div className="border-l-4 rounded-lg p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>CONPES 4075 de 2012</h3>
-                    <p className="text-sm sm:text-base mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
-                      Documento Conpes de Política de Promoción de Vehículos Eficientes. Define metas y lineamientos para la adopción de vehículos eléctricos.
-                    </p>
-                    <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                      <li>✦ Objetivo: 30% de ventas de vehículos particulares eléctricos para 2030</li>
-                      <li>✦ Zonas de bajas emisiones (ZBE) en ciudades principales</li>
-                      <li>✦ Infraestructura de carga pública obligatoria</li>
-                    </ul>
-                    <a
-                      href="https://colaboracion.dnp.gov.co/INT/Anexos/10/conpes-4075-2012-resumen-1.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mt-2 sm:mt-3 text-xs sm:text-sm font-semibold underline"
-                      style={{ color: COLORS.verdePrincipal }}
-                    >
-                      🔗 Ver Documento DNP →
-                    </a>
-                  </div>
-
-                  {/* Resolución 1064 de 2019 */}
-                  <div className="border-l-4 rounded-lg p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Resolución 1064 de 2019</h3>
-                    <p className="text-sm sm:text-base mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
-                      Reglamento técnico de vehículos eléctricos. Establece requisitos de seguridad, etiquetado y homologación.
-                    </p>
-                    <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                      <li>✦ Requisitos de seguridad y emisiones</li>
-                      <li>✦ Etiquetado de eficiencia energética</li>
-                      <li>✦ Normas de producción y comercialización</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Beneficios Detallados */}
-              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
-                  <span>💰</span>
-                  <span>Beneficios Tributarios y Financieros</span>
-                </h2>
-                <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-                  {/* Exención IVA */}
-                  <div className="rounded-xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.08)' }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Exención de IVA</h3>
-                    <p className="text-sm sm:text-base mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
-                      Los vehículos 100% eléctricos están exentos del Impuesto sobre el Valor Agregado (19%).
-                    </p>
-                    <div className="text-xs sm:text-sm p-3 sm:p-4 rounded-lg" style={{ backgroundColor: 'rgba(255, 215, 0, 0.1)' }}>
-                      <strong>Ejemplo:</strong> Vehículo de $30,000,000
-                      <br />• Con IVA: $35,700,000
-                      <br />• Sin IVA: $30,000,000
-                      <br />• <strong>Ahorro: $5,700,000</strong>
-                    </div>
-                  </div>
-
-                  {/* Exención Rodamiento */}
-                  <div className="rounded-xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.08)' }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Exención Impuesto Rodamiento</h3>
-                    <p className="text-sm sm:text-base mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
-                      Exención del impuesto nacional sobre vehículos automotores (15% del valor).
-                    </p>
-                    <div className="text-xs sm:text-sm p-3 sm:p-4 rounded-lg" style={{ backgroundColor: 'rgba(255, 215, 0, 0.1)' }}>
-                      <strong>Ejemplo:</strong> Vehículo de $30,000,000
-                      <br />• Con impuesto: $34,500,000
-                      <br />• Sin impuesto: $30,000,000
-                      <br />• <strong>Ahorro: $4,500,000</strong>
-                    </div>
-                  </div>
-
-                  {/* Estacionamiento Gratuito */}
-                  <div className="rounded-xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.08)' }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Estacionamiento Gratuito</h3>
-                    <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>
-                      Derecho a estacionamiento gratuito en zonas públicas y parquederos municipales.
-                    </p>
-                    <ul className="text-xs sm:text-sm space-y-1" style={{ color: COLORS.grisMedio }}>
-                      <li>• Zonas de parqueadero público</li>
-                      <li>• Parquederos distritales</li>
-                      <li>• Tarifas preferenciales en zones privadas</li>
-                    </ul>
-                  </div>
-
-                  {/* Zonas Exclusivas */}
-                  <div className="rounded-xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.08)' }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Zonas de Bajas Emisiones</h3>
-                    <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>
-                      Acceso prioritario y exclusivo a zonas restringidas por contaminación.
-                    </p>
-                    <ul className="text-xs sm:text-sm space-y-1" style={{ color: COLORS.grisMedio }}>
-                      <li>• Pico y placa sin restricción</li>
-                      <li>• Carriles exclusivos en Bogotá</li>
-                      <li>• Zonas de bajas emisiones (ZBE)</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Requisitos Obligatorios */}
-              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
-                  <span>📝</span>
-                  <span>Requisitos para Circular en Colombia</span>
-                </h2>
-                <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">1️⃣</span>
-                      <div>
-                        <h4 className="font-bold text-sm sm:text-base mb-1" style={{ color: COLORS.verdeOscuro }}>Matrícula Nacional</h4>
-                        <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                          Trámite en Secretaría de Movilidad con factura de compraventa, SOAT y revisión técnico-mecánica.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">2️⃣</span>
-                      <div>
-                        <h4 className="font-bold text-sm sm:text-base mb-1" style={{ color: COLORS.verdeOscuro }}>Tarjeta de Propiedad</h4>
-                        <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                          Registro en RUNT con placa especial para vehículo eléctrico.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">3️⃣</span>
-                      <div>
-                        <h4 className="font-bold text-sm sm:text-base mb-1" style={{ color: COLORS.verdeOscuro }}>SOAT Obligatorio</h4>
-                        <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                          Seguro obligatorio de accidentes de tránsito. Se adquiere con aseguradoras autorizadas.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">4️⃣</span>
-                      <div>
-                        <h4 className="font-bold text-sm sm:text-base mb-1" style={{ color: COLORS.verdeOscuro }}>Revisión Técnico-Mecánica</h4>
-                        <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                          Centros de revisión autorizados para vehículos eléctricos. Verificación de batería y motor.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">5️⃣</span>
-                      <div>
-                        <h4 className="font-bold text-sm sm:text-base mb-1" style={{ color: COLORS.verdeOscuro }}>Tag o Calcomanía Verde</h4>
-                        <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                          Etiqueta distintiva que identifica al vehículo como cero emisiones. Se coloca en parabrisas trasero.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">6️⃣</span>
-                      <div>
-                        <h4 className="font-bold text-sm sm:text-base mb-1" style={{ color: COLORS.verdeOscuro }}>Seguro Contra Terceros</h4>
-                        <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                          Póliza de responsabilidad civil que cubre daños a terceros. Mínimo obligatorio según la ley.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Clasificación de Vehículos */}
-              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
-                  <span>⚡</span>
-                  <span>Tipos de Vehículos Eléctricos</span>
-                </h2>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {/* Eléctrico Puro */}
-                  <div className="rounded-xl p-4 sm:p-6 border-2" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>100% Eléctrico (BEV)</h3>
-                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
-                      Vehículo que funciona exclusivamente con motor eléctrico y baterías recargables.
-                    </p>
-                    <div className="space-y-1 sm:space-y-2">
-                      <div className="flex items-center gap-2 text-xs sm:text-sm">
-                        <span className="text-green-500">✅</span>
-                        <span>Exento IVA: <strong>Sí</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs sm:text-sm">
-                        <span className="text-green-500">✅</span>
-                        <span>Exento rodamiento: <strong>Sí</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs sm:text-sm">
-                        <span className="text-green-500">✅</span>
-                        <span>Pico y placa: <strong>Restriction-free</strong></span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Híbrido Enchufable */}
-                  <div className="rounded-xl p-4 sm:p-6 border-2" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdeSecundario }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Híbrido Enchufable (PHEV)</h3>
-                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
-                      Combina motor eléctrico con motor de combustión. Batería recargable desde red eléctrica.
-                    </p>
-                    <div className="space-y-1 sm:space-y-2">
-                      <div className="flex items-center gap-2 text-xs sm:text-sm">
-                        <span className="text-green-500">✅</span>
-                        <span>Exento IVA: <strong>Sí</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs sm:text-sm">
-                        <span className="text-green-500">✅</span>
-                        <span>Exento rodamiento: <strong>Sí</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs sm:text-sm">
-                        <span className="text-yellow-500">⚠️</span>
-                        <span>Etiquetado: <strong>Medio ambiente</strong></span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Híbrido Convencional */}
-                  <div className="rounded-xl p-4 sm:p-6 border-2" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdeMenta }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Híbrido (HEV)</h3>
-                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
-                      Sistema dual que no se puede recargar desde red. El motor eléctrico asiste al de combustión.
-                    </p>
-                    <div className="space-y-1 sm:space-y-2">
-                      <div className="flex items-center gap-2 text-xs sm:text-sm">
-                        <span className="text-yellow-500">⚠️</span>
-                        <span>Exento IVA: <strong>Parcial</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs sm:text-sm">
-                        <span className="text-yellow-500">⚠️</span>
-                        <span>Etiquetado: <strong>Medio ambiente</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs sm:text-sm">
-                        <span className="text-green-500">✅</span>
-                        <span>Menor consumo combustible</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Importación y Comercialización */}
-              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
-                  <span>🚢</span>
-                  <span>Importación y Comercialización</span>
-                </h2>
-                <div className="space-y-4 sm:space-y-6">
-                  <div className="rounded-xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.08)' }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Requisitos de Importación</h3>
-                    <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm" style={{ color: COLORS.grisOscuro }}>
-                      <li>📄 <strong>Registro de Importador:</strong> Inscribirse en el RUNT ante la DIAN</li>
-                      <li>🏷️ <strong>Declaración de Importación:</strong> Formulario ante DIAN</li>
-                      <li>✅ <strong>Homologación:</strong> Certificado de conformidad con normas técnicas colombianas</li>
-                      <li>🔌 <strong>Conexión de Carga:</strong> Debe cumplir con norma COL 1008</li>
-                      <li>🏳 <strong>Velocidad Máxima:</strong> Limitada según categoría (ej: patinete &lt; 25 km/h, bicicleta &lt; 30 km/h)</li>
-                    </ul>
-                  </div>
-
-                  <div className="rounded-xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(46, 125, 50, 0.08)' }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Trámites en DIAN</h3>
-                    <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm" style={{ color: COLORS.grisOscuro }}>
-                      <li>1. <strong>Registro de importador:</strong> Trámite virtual o presencial</li>
-                      <li>2. <strong>Aceptación de la declaración:</strong> 15 días hábiles para liquidar</li>
-                      <li>3. <strong>Planilla de importación:</strong> Debe estar aceptada antes del arribo</li>
-                      <li>4. <strong>Gravamen arancelario:</strong> 0% para vehículos eléctricos (posición 8703.80.00)</li>
-                      <li>5. <strong>ICA:</strong> Impuesto de industria y comercio municipal (variable por ciudad)</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Infraestructura de Carga */}
-              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
-                  <span>🔌</span>
-                  <span>Infraestructura de Carga</span>
-                </h2>
-                <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Tipos de Carga</h3>
-                    <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm" style={{ color: COLORS.grisOscuro }}>
-                      <div className="rounded-lg p-3 sm:p-4" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)' }}>
-                        <strong>Carga Nivel 1 (2-3 horas):</strong>
-                        <br />Toma convencional 110V - para carga nocturna domiciliaria
-                      </div>
-                      <div className="rounded-lg p-3 sm:p-4" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)' }}>
-                        <strong>Carga Nivel 2 (1-2 horas):</strong>
-                        <br />Toma 220V - para oficinas y comercios
-                      </div>
-                      <div className="rounded-lg p-3 sm:p-4" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)' }}>
-                        <strong>Carga Rápida (20-40 min):</strong>
-                        <br />Carga DC en estaciones públicas - 40-50 km de autonomía en 30 min
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Aplicaciones Móviles</h3>
-                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
-                      Mapa de puntos de carga en Colombia:
-                    </p>
-                    <ul className="text-xs sm:text-sm space-y-1" style={{ color: COLORS.grisMedio }}>
-                      <li>📱 <strong>ChargeHub:</strong> Red más grande de puntos de recarga</li>
-                      <li>📱 <strong>Abr chargue:</strong> Mapa global de estaciones</li>
-                      <li>📱 <strong>PlugShare:</strong> Comunidad de usuarios de VE</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Zonas de Restricción (Pico y Placa) */}
-              <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.blanco }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
-                  <span>🚗</span>
-                  <span>Pico y Placa - Excepciones</span>
-                </h2>
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="rounded-xl p-4 sm:p-6 border-l-4" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Bogotá</h3>
-                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
-                      Los vehículos 100% eléctricos están <strong>exentos</strong> de la restricción de pico y placa.
-                    </p>
-                    <ul className="text-xs sm:text-sm space-y-1" style={{ color: COLORS.grisMedio }}>
-                      <li>✓ Circular cualquier día de la semana</li>
-                      <li>✓ Cualquier hora del día</li>
-                      <li>✓ Sin restricción por placa terminada en número</li>
-                    </ul>
-                  </div>
-
-                  <div className="rounded-xl p-4 sm:p-6 border-l-4" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Medellín</h3>
-                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
-                      Vehículos eléctricos y híbridos enchufables tienen excepciones en ciertas restricciones.
-                    </p>
-                    <ul className="text-xs sm:text-sm space-y-1" style={{ color: COLORS.grisMedio }}>
-                      <li>✓ Zonas de bajas emisiones en el centro</li>
-                      <li>✓ Preferencia en carriles exclusivos</li>
-                      <li>✓ Estacionamiento prioritario</li>
-                    </ul>
-                  </div>
-
-                  <div className="rounded-xl p-4 sm:p-6 border-l-4" style={{ backgroundColor: 'rgba(46, 125, 50, 0.05)', borderColor: COLORS.verdePrincipal }}>
-                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.verdePrincipal }}>Cali</h3>
-                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.grisOscuro }}>
-                      Beneficios similares para vehículos cero emisiones en zonas ambientales protegidas.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Fuentes Oficiales */}
-              <div className="rounded-2xl shadow-xl p-6 sm:p-8" style={{ backgroundColor: COLORS.blanco }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-3" style={{ color: COLORS.verdeOscuro }}>
-                  <span>🔗</span>
-                  <span>Fuentes Oficiales</span>
-                </h2>
-                <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-                  <div className="space-y-3 sm:space-y-4">
-                    <h3 className="text-base sm:text-lg font-bold" style={{ color: COLORS.verdePrincipal }}>Gobierno Nacional</h3>
-                    <ul className="space-y-2 text-xs sm:text-sm">
-                      <li>
-                        <a href="https://www.mintransporte.gov.co/" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.verdePrincipal }}>
-                          🚛 Ministerio de Transporte
-                        </a>
-                      </li>
-                      <li>
-                        <a href="https://www.minambiente.gov.co/" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.verdePrincipal }}>
-                          🌿 Ministerio de Ambiente
-                        </a>
-                      </li>
-                      <li>
-                        <a href="https://www.dian.gov.co/" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.verdePrincipal }}>
-                          💼 DIAN - Impuestos y Aduanas
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="space-y-3 sm:space-y-4">
-                    <h3 className="text-base sm:text-lg font-bold" style={{ color: COLORS.verdePrincipal }}>Entidades Reguladoras</h3>
-                    <ul className="space-y-2 text-xs sm:text-sm">
-                      <li>
-                        <a href="https://www.runt.com.co/" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.verdePrincipal }}>
-                          📋 RUNT - Registro Único Nacional de Tránsito
-                        </a>
-                      </li>
-                      <li>
-                        <a href="https://www.minenergia.gov.co/" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.verdePrincipal }}>
-                          ⚡ Ministerio de Minas y Energía
-                        </a>
-                      </li>
-                      <li>
-                        <a href="https://www.sic.gov.co/" target="_blank" rel="noopener noreferrer" style={{ color: COLORS.verdePrincipal }}>
-                          🛡️ SIC - Superintendencia de Industria y Comercio
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-xl" style={{ backgroundColor: 'rgba(255, 215, 0, 0.1)', border: '2px dashed #FFD700' }}>
-                  <p className="text-xs sm:text-sm font-semibold mb-2" style={{ color: COLORS.grisOscuro }}>
-                    ⚠️ Importante: La información presentada está basada en la normativa vigente a 2025. Los requisitos y beneficios pueden cambiar. Consulta siempre las fuentes oficiales antes de tomar decisiones de compra o importación.
-                  </p>
-                  <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                    Esta sección es informativa y no constituye asesoría legal. Para procedimientos específicos, consulta con un abogado especializado en derecho administrativo y tributario.
-                  </p>
-                </div>
-              </div>
-
-              {/* Call to Action */}
-              <div className="text-center mt-8 sm:mt-12">
-                <button
-                  onClick={() => setActiveSection('productos')}
-                  className="px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-white text-base sm:text-lg shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
-                  style={{ backgroundColor: COLORS.verdePrincipal }}
-                >
-                  🛍️ Ver Nuestros Vehículos Eléctricos
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Sección INFÓRMATE - Legislación Colombia */}
+        <LearnSection activeSection={activeSection} darkMode={darkMode} />
       </main>
 
       {/* Modal del Producto con Ficha Técnica */}
@@ -2841,10 +2191,10 @@ export default function EcommerceView() {
                           addToCart(selectedProduct);
                           setShowProductModal(false);
                         }}
-                        className="flex-1 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 rounded-xl font-bold text-white text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl transition-all"
+                        className="flex-1 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 rounded-xl font-bold text-white text-sm sm:text-base md:text-lg shadow-lg transition-all hover:shadow-xl"
                         style={{ backgroundColor: COLORS.acentoNaranja }}
                       >
-                        🛒 Agregar al Carrito
+                        🛒 {isLoggedIn ? 'Agregar al Carrito' : '🔐 Regístrate para comprar'}
                       </button>
                       <button
                         onClick={() => {
@@ -2852,10 +2202,10 @@ export default function EcommerceView() {
                           setShowProductModal(false);
                           setShowCart(true);
                         }}
-                        className="flex-1 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 rounded-xl font-bold text-white text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl transition-all"
+                        className="flex-1 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 rounded-xl font-bold text-white text-sm sm:text-base md:text-lg shadow-lg transition-all hover:shadow-xl"
                         style={{ backgroundColor: COLORS.verdePrincipal }}
                       >
-                        ⚡ Comprar Ahora
+                        ⚡ {isLoggedIn ? 'Comprar Ahora' : '🔐 Regístrate aquí'}
                       </button>
                     </div>
                   </div>
@@ -3074,13 +2424,14 @@ export default function EcommerceView() {
                   </div>
                   <button
                     onClick={sendToWhatsApp}
-                    className="w-full py-4 rounded-lg font-bold text-white text-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-3"
+                    disabled={!isLoggedIn}
+                    className={`w-full py-4 rounded-lg font-bold text-white text-lg shadow-lg transition-all flex items-center justify-center space-x-3 ${!isLoggedIn ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl'}`}
                     style={{ backgroundColor: COLORS.verdePrincipal }}
                   >
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                     </svg>
-                    <span>Completar Pedido por WhatsApp</span>
+                    <span>{isLoggedIn ? 'Completar Pedido por WhatsApp' : '🔒 Inicia sesión para comprar'}</span>
                   </button>
                 </div>
               )}
@@ -3090,129 +2441,11 @@ export default function EcommerceView() {
       )}
 
       {/* Footer */}
-      <footer className="mt-auto" style={{ position: 'relative', overflow: 'hidden' }}>
-        {/* Video de fondo */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            zIndex: 0
-          }}
-        >
-          <source src="/videos/patinetas.mp4" type="video/mp4" />
-        </video>
-
-        {/* Overlay oscuro para legibilidad */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            zIndex: 1
-          }}
-        ></div>
-
-        {/* Contenido del footer */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 p-8 sm:p-10 md:p-12 lg:p-16 text-white" style={{ backgroundColor: 'transparent', position: 'relative', zIndex: 10 }}>
-          {/* Columna 1: Dirección */}
-          <div>
-            <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-5 uppercase">📍 {nombreTienda}</h3>
-            <div className="space-y-2 sm:space-y-3 text-sm" style={{ color: COLORS.grisClaro }}>
-              <p>Calle Principal #123</p>
-              <p>Ciudad, País</p>
-              <p>Tel: {whatsappNumber}</p>
-              <p>Email: info@ecomotion.com</p>
-            </div>
-          </div>
-
-          {/* Columna 2: Links */}
-          <div>
-            <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-5 uppercase">🔗 Links Útiles</h3>
-            <div className="space-y-2 sm:space-y-3 text-sm">
-              <button
-                onClick={() => setActiveSection('nosotros')}
-                className="block hover:underline"
-                style={{ color: COLORS.grisClaro }}
-              >
-                ¿Quiénes Somos?
-              </button>
-              <button className="block hover:underline" style={{ color: COLORS.grisClaro }}>
-                Política de Envíos
-              </button>
-              <button className="block hover:underline" style={{ color: COLORS.grisClaro }}>
-                Términos y Condiciones
-              </button>
-              <button className="block hover:underline" style={{ color: COLORS.grisClaro }}>
-                Garantías
-              </button>
-            </div>
-          </div>
-
-          {/* Columna 3: Redes Sociales */}
-          <div>
-            <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-5 uppercase">🌐 Síguenos</h3>
-            <div className="flex space-x-3 sm:space-x-4">
-              <a
-                href={`https://wa.me/${whatsappNumber}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
-                style={{ backgroundColor: '#25D366' }}
-              >
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                </svg>
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
-                style={{ backgroundColor: '#1877F2' }}
-              >
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
-                style={{ backgroundColor: '#E4405F' }}
-              >
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
-                style={{ backgroundColor: '#FF0000' }}
-              >
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
-
-
-      </footer>
+      <EcommerceFooter
+        nombreTienda={nombreTienda}
+        whatsappNumber={whatsappNumber}
+        onNavigate={setActiveSection}
+      />
 
       {/* ==================== MODALES ==================== */}
       {/* MODAL DE AUTENTICACIÓN */}
@@ -3226,14 +2459,28 @@ export default function EcommerceView() {
           right: 0,
           bottom: 0
         }}>
-          <div className="rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden" style={{
+          <div className="rounded-2xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden relative" style={{
             backgroundColor: darkMode ? DARK_COLORS.cardBackground : COLORS.blanco,
-            maxHeight: '90vh',
-            overflowY: 'auto'
+            maxHeight: '95vh',
+            display: 'flex',
+            flexDirection: 'column'
           }}>
+            {/* Botón de cerrar (X) */}
+            <button
+              onClick={() => {
+                setShowAuthModal(false);
+                resetAuthForm();
+              }}
+              className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xl transition-all"
+              style={{ zIndex: 10 }}
+              title="Cerrar"
+            >
+              ✕
+            </button>
+
             {/* Header */}
-            <div className="p-6 text-center" style={{ backgroundColor: COLORS.verdePrincipal }}>
-              <h2 className="text-2xl font-bold text-white mb-2">
+            <div className="p-6 text-center relative" style={{ backgroundColor: COLORS.verdePrincipal }}>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
                 {isLoginMode ? '🔐 Iniciar Sesión' : '📝 Registrarse'}
               </h2>
               <p className="text-white/90 text-sm">
@@ -3244,7 +2491,9 @@ export default function EcommerceView() {
             </div>
 
             {/* Body */}
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 overflow-y-auto" style={{
+              maxHeight: 'calc(95vh - 200px)' // Altura máxima menos header y footer
+            }}>
               {!isLoginMode && (
                 <div>
                   <label className="block text-sm font-semibold mb-2" style={{ color: darkMode ? DARK_COLORS.textPrimary : COLORS.verdeOscuro }}>
@@ -3325,6 +2574,22 @@ export default function EcommerceView() {
                 />
               </div>
 
+              {!isLoginMode && (
+                <div>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.verdeOscuro }}>
+                    Confirmar Contraseña *
+                  </label>
+                  <input
+                    type="password"
+                    value={authForm.password_confirm}
+                    onChange={(e) => setAuthForm({ ...authForm, password_confirm: e.target.value })}
+                    className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none"
+                    style={{ borderColor: COLORS.verdeMenta }}
+                    placeholder="••••••••"
+                  />
+                </div>
+              )}
+
               {/* Info de cupones */}
               {!isLoginMode && (
                 <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.beigeCrema }}>
@@ -3361,7 +2626,7 @@ export default function EcommerceView() {
               <button
                 onClick={() => {
                   setShowAuthModal(false);
-                  setAuthForm({ nombre: '', email: '', telefono: '', direccion: '', password: '' });
+                  resetAuthForm();
                 }}
                 className="w-full py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               >
@@ -3436,7 +2701,7 @@ export default function EcommerceView() {
                 onClick={() => {
                   // Copiar código al portapapeles
                   navigator.clipboard.writeText(earnedCoupon.codigo);
-                  alert('Código copiado: ' + earnedCoupon.codigo);
+                  showToast('success', 'Código copiado: ' + earnedCoupon.codigo);
                 }}
                 className="w-full py-3 rounded-xl font-bold text-white shadow-lg hover:shadow-xl transition-all"
                 style={{ backgroundColor: COLORS.acentoNaranja }}

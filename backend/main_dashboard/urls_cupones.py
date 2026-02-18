@@ -17,16 +17,18 @@ cliente_cupon_detail = ClienteCuponViewSet.as_view({
 })
 cliente_cupon_usar      = ClienteCuponViewSet.as_view({'post': 'usar'})
 cliente_cupon_por_cliente = ClienteCuponViewSet.as_view({'get': 'por_cliente'})
+cliente_cupon_mis_cupones = ClienteCuponViewSet.as_view({'get': 'mis_cupones', 'post': 'mis_cupones'})
 
 app_name = 'cupones_api'
 urlpatterns = [
     # Cupones maestro
-    path('cupones/', cupon_list, name='cupon_list'),
-    path('cupones/<int:pk>/', cupon_detail, name='cupon_detail'),
+    path('', cupon_list, name='cupon_list'),
+    path('<int:pk>/', cupon_detail, name='cupon_detail'),
 
     # Asignaciones cliente-cupón
     path('cliente-cupones/', cliente_cupon_list, name='cliente_cupon_list'),
     path('cliente-cupones/<int:pk>/', cliente_cupon_detail, name='cliente_cupon_detail'),
     path('cliente-cupones/<int:pk>/usar/', cliente_cupon_usar, name='cliente_cupon_usar'),
     path('cliente-cupones/cliente/<int:cliente_id>/', cliente_cupon_por_cliente, name='cliente_cupon_por_cliente'),
+    path('cliente-cupones/mis-cupones/', cliente_cupon_mis_cupones, name='cliente_cupon_mis_cupones'),
 ]
