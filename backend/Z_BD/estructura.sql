@@ -371,3 +371,46 @@ ON CONFLICT (codigo) DO NOTHING;
 
 COMMENT ON TABLE facturacion_forma_pago IS 'Formas de pago por defecto del sistema';
 
+
+
+
+
+
+
+
+
+-- Tabla de cupones (maestro)
+CREATE TABLE cupones (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    tipo VARCHAR(3) NOT NULL DEFAULT 'PCT',
+    valor DECIMAL(10, 2) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_vencimiento DATE NULL,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de asignaciones de cupones a clientes
+CREATE TABLE cliente_cupones (
+    id SERIAL PRIMARY KEY,
+    cliente_id INTEGER NOT NULL,
+    cupon_id INTEGER NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    cantidad_disponible INTEGER NOT NULL DEFAULT 1,
+    fecha_uso TIMESTAMP NULL,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (cliente_id, cupon_id),
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
+    FOREIGN KEY (cupon_id) REFERENCES cupones(id) ON DELETE CASCADE
+);
+
+-- Índices recomendados para mejor rendimiento
+CREATE INDEX idx_cliente_cupones_cliente ON cliente_cupones(cliente_id);
+CREATE INDEX idx_cliente_cupones_cupon ON cliente_cupones(cupon_id);
+CREATE INDEX idx_cupones_activos ON cupones(activo);
+CREATE INDEX idx_cupones_vencimiento ON cupones(fecha_vencimiento);
+
+-- Comentario sobre las tablas
+COMMENT ON TABLE cupones IS 'Cupones de descuento: porcentaje (PCT) o valor fijo (VAL)';
+COMMENT ON TABLE cliente_cupones IS 'Asignación de cupones a clientes con control de cantidad disponible';

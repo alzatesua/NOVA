@@ -11,6 +11,7 @@ from django.db import transaction
 from .models import Cupon, ClienteCupon, Cliente
 from .serializers import CuponSerializer, ClienteCuponSerializer
 from .views_facturacion import FacturacionTenantMixin
+from nova.models import Dominios
 
 import logging
 
@@ -221,4 +222,88 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             serializer = self.get_serializer(qs, many=True)
             return Response({'cupones': serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get', 'post'], url_path='mis-cupones')
+    def mis_cupones(self, request):
+        """
+        Lista los cupones del cliente por correo (API pública).
+
+        Acepta parámetros en query string o en el body:
+        - correo: Correo del cliente (requerido)
+        - subdominio: Subdominio de la tienda (requerido)
+
+        Retorna:
+        - cupones: Lista de cupones con detalles
+        - total_cupones: Cantidad total de cupones disponibles para redimir
+        """
+        try:
+            # Obtener subdominio de query params o body
+            subdom = request.query_params.get('subdominio') or request.data.get('subdominio')
+            correo = request.query_params.get('correo') or request.data.get('correo')
+
+            if not subdom:
+                return Response(
+                    {'detail': 'El parámetro subdominio es requerido.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if not correo:
+                return Response(
+                    {'detail': 'El parámetro correo es requerido.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Resolver alias solo con subdominio (sin requerir usuario/token)
+            host = request.get_host().split(':')[0]
+            subdominio = subdom if subdom else host.split('.')[0].lower()
+
+            dominio_obj = Dominios.objects.filter(dominio__icontains=subdominio).select_related('tienda').first()
+            if not dominio_obj or not dominio_obj.tienda:
+                return Response(
+                    {'detail': 'Dominio no válido.'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
+            tienda = dominio_obj.tienda
+            alias = str(tienda.id)
+
+            # Conectar a la BD de la tienda dinámicamente
+            from nova.utils.db import conectar_db_tienda
+            conectar_db_tienda(alias, tienda)
+
+            # Buscar cliente por correo
+            cliente = Cliente.objects.using(alias).filter(correo__iexact=correo).first()
+
+            if not cliente:
+                return Response(
+                    {'detail': 'No se encontró un cliente con ese correo.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Obtener cupones del cliente (solo activos y con disponibilidad)
+            qs = (
+                ClienteCupon.objects.using(alias)
+                .filter(cliente=cliente, activo=True, cantidad_disponible__gt=0)
+                .select_related('cupon')
+            )
+
+            # Filtrar cupones no vencidos
+            hoy = timezone.now().date()
+            qs = [obj for obj in qs if obj.cupon.fecha_vencimiento is None or obj.cupon.fecha_vencimiento >= hoy]
+
+            # Calcular total de cupones disponibles
+            total_cupones = sum(obj.cantidad_disponible for obj in qs)
+
+            serializer = self.get_serializer(qs, many=True)
+
+            return Response({
+                'cliente_id': cliente.id,
+                'cliente_nombre': f"{cliente.primer_nombre or ''} {cliente.apellidos or ''}".strip() or cliente.razon_social or 'Cliente',
+                'cupones': serializer.data,
+                'total_cupones': total_cupones
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f'Error obteniendo cupones del cliente: {e}')
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

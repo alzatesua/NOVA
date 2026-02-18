@@ -1,5 +1,4 @@
-//prueba de funcionalidad juan
-//prueba edwin
+
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { fetchProductosEcommerce, registrarUsuario, loginUsuario, activarCuenta, logout } from '../services/api';
 import { Navbar, Nav, Form, Container, Button } from 'react-bootstrap';
@@ -14,36 +13,12 @@ import {
   Moon,
   Sun,
   BookOpen,
-  FileText
 } from 'lucide-react';
-
-// Paleta de colores ecológica para movilidad eléctrica
-const COLORS = {
-  verdePrincipal: '#2E7D32',      // Forest Green
-  verdeSecundario: '#4CAF50',     // Green
-  verdeMenta: '#81C784',          // Light Green
-  verdeOscuro: '#1B5E20',         // Dark Green
-  verdeClaro: '#E8F5E9',          // Very Light Green (Material Design Green 50)
-  beigeCrema: '#FFF8E1',          // Cream
-  blanco: '#FFFFFF',
-  grisClaro: '#F5F5F5',
-  grisMedio: '#757575',
-  grisOscuro: '#424242',
-  negro: '#212121',
-  acentoNaranja: '#FFA726',       // Orange para CTAs
-  acentoTurquesa: '#26A69A',      // Turquoise para detalles
-};
-
-// Colores para modo oscuro
-const DARK_COLORS = {
-  background: '#1a1a1a',
-  cardBackground: '#2d2d2d',
-  textPrimary: '#ffffff',
-  textSecondary: '#b0b0b0',
-  borderColor: '#404040',
-  navbarBackground: '#212121',
-  inputBackground: '#3d3d3d',
-};
+import { COLORS, DARK_COLORS } from './ecommerce/constants/colors';
+import AboutSection from './ecommerce/sections/AboutSection';
+import ContactSection from './ecommerce/sections/ContactSection';
+import LearnSection from './ecommerce/sections/LearnSection';
+import EcommerceFooter from './ecommerce/shared/EcommerceFooter';
 
 export default function EcommerceView() {
   console.log('🚀 Componente EcommerceView renderizado - VERSIÓN VIDEO ACTUALIZADA');
@@ -451,10 +426,21 @@ export default function EcommerceView() {
     // Verificar si hay cliente logueado
     const savedCustomer = localStorage.getItem('ecommerce_customer');
 
+<<<<<<< HEAD
     // Si NO está logueado o NO hay cliente en localStorage, no hacer nada
     // (El botón estará deshabilitado visualmente, esta es una validación adicional)
     if (!isLoggedIn || !savedCustomer) {
       console.log('🔒 Usuario no logueado. No se puede agregar al carrito.');
+=======
+    // Si NO está logueado o NO hay cliente en localStorage, abrir modal de registro
+    if (!isLoggedIn || !savedCustomer) {
+      // Cambiar al modo de registro
+      setIsLoginMode(false);
+      // Abrir el modal de autenticación
+      setShowAuthModal(true);
+      // Mostrar mensaje informativo
+      showToast('info', '🔐 Debes registrarte o iniciar sesión para agregar productos al carrito');
+>>>>>>> edwin
       return;
     }
 
@@ -684,6 +670,10 @@ export default function EcommerceView() {
       localStorage.setItem('auth_access_token', response.access);
       localStorage.setItem('auth_refresh_token', response.refresh);
       localStorage.setItem('auth_usuario', JSON.stringify(response.user));
+<<<<<<< HEAD
+=======
+      localStorage.setItem('ecommerce_customer', JSON.stringify(response.user));
+>>>>>>> edwin
 
       setCustomerData(response.user);
       setIsLoggedIn(true);
@@ -713,6 +703,10 @@ export default function EcommerceView() {
       localStorage.setItem('auth_access_token', response.access);
       localStorage.setItem('auth_refresh_token', response.refresh);
       localStorage.setItem('auth_usuario', JSON.stringify(response.user));
+<<<<<<< HEAD
+=======
+      localStorage.setItem('ecommerce_customer', JSON.stringify(response.user));
+>>>>>>> edwin
 
       setCustomerData(response.user);
       setIsLoggedIn(true);
@@ -1446,7 +1440,7 @@ export default function EcommerceView() {
                   onClick={() => setActiveSection('infórmate')}
                   className={`nav-btn-futuristic ${activeSection === 'infórmate' ? 'active' : ''}`}
                 >
-                  <FileText size={18} strokeWidth={2} />
+                  <BookOpen size={18} strokeWidth={2} />
                   <span>Infórmate</span>
                 </button>
 
@@ -1989,65 +1983,7 @@ export default function EcommerceView() {
         )}
 
         {/* Sección NOSOTROS */}
-        {activeSection === 'nosotros' && (
-          <div className="py-8 sm:py-12 px-2 sm:px-4">
-            <div className="max-w-4xl mx-auto">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8 text-center" style={{ color: COLORS.verdeOscuro }}>
-                Sobre Nosotros
-              </h1>
-
-              <div className="rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.beigeCrema }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdePrincipal }}>
-                  Nuestra Misión
-                </h2>
-                <p className="text-base sm:text-lg leading-relaxed mb-4 sm:mb-6" style={{ color: COLORS.grisOscuro }}>
-                  En {nombreTienda}, estamos comprometidos con revolucionar la forma en que las personas se mueven.
-                  Nuestra misión es proporcionar soluciones de movilidad eléctrica accesibles, sostenibles y de alta calidad
-                  que contribuyan a un futuro más limpio y verde para todos.
-                </p>
-
-                <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdePrincipal }}>
-                  Por Qué Elegirnos
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-6">
-                  <div className="text-center p-3 sm:p-4">
-                    <div className="text-4xl sm:text-5xl mb-2">🌱</div>
-                    <h3 className="font-bold text-base sm:text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>100% Ecológico</h3>
-                    <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                      Todos nuestros productos son cero emisiones
-                    </p>
-                  </div>
-                  <div className="text-center p-3 sm:p-4">
-                    <div className="text-4xl sm:text-5xl mb-2">⚡</div>
-                    <h3 className="font-bold text-base sm:text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>Alta Potencia</h3>
-                    <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                      Baterías de larga duración y rendimiento
-                    </p>
-                  </div>
-                  <div className="text-center p-3 sm:p-4">
-                    <div className="text-4xl sm:text-5xl mb-2">🛡️</div>
-                    <h3 className="font-bold text-base sm:text-lg mb-2" style={{ color: COLORS.verdeOscuro }}>Garantía Premium</h3>
-                    <p className="text-xs sm:text-sm" style={{ color: COLORS.grisMedio }}>
-                      Soporte técnico y garantía extendida
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl shadow-xl p-4 sm:p-6 md:p-8" style={{ backgroundColor: COLORS.verdeMenta + '20' }}>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.verdePrincipal }}>
-                  Nuestro Compromiso Ambiental
-                </h2>
-                <p className="text-base sm:text-lg leading-relaxed" style={{ color: COLORS.grisOscuro }}>
-                  Cada producto que vendemos ayuda a reducir la huella de carbono. Trabajamos directamente con
-                  fabricantes que utilizan materiales reciclables y procesos de producción sostenibles.
-                  Además, donamos el 5% de nuestras utilidades a organizaciones dedicadas a la reforestación
-                  y conservación del medio ambiente.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+        <AboutSection activeSection={activeSection} nombreTienda={nombreTienda} darkMode={darkMode} />
 
         {/* Sección PRODUCTOS */}
         {activeSection === 'productos' && (
@@ -2133,11 +2069,18 @@ export default function EcommerceView() {
                         e.stopPropagation();
                         addToCart(product);
                       }}
+<<<<<<< HEAD
                       disabled={!isLoggedIn}
                       className={`w-full mt-2 sm:mt-3 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-white shadow-md transition-all text-xs sm:text-sm ${!isLoggedIn ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'}`}
                       style={{ backgroundColor: COLORS.acentoNaranja }}
                     >
                       {isLoggedIn ? 'Agregar al Carrito' : '🔒 Inicia sesión para comprar'}
+=======
+                      className="w-full mt-2 sm:mt-3 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-white shadow-md transition-all text-xs sm:text-sm hover:shadow-lg"
+                      style={{ backgroundColor: COLORS.acentoNaranja }}
+                    >
+                      {isLoggedIn ? '🛒 Agregar al Carrito' : '🔐 Regístrate para comprar'}
+>>>>>>> edwin
                     </button>
                   </div>
                 </div>
@@ -2156,6 +2099,7 @@ export default function EcommerceView() {
         )}
 
         {/* Sección CONTACTO */}
+<<<<<<< HEAD
         {activeSection === 'contacto' && (
           <div className="py-8 sm:py-12 px-2 sm:px-4" style={{ backgroundColor: COLORS.grisClaro }}>
               <div style={{ maxWidth: '56rem', margin: '0 auto' }}>
@@ -2604,6 +2548,12 @@ export default function EcommerceView() {
             </div>
           </div>
         )}
+=======
+        <ContactSection activeSection={activeSection} whatsappNumber={whatsappNumber} darkMode={darkMode} />
+
+        {/* Sección INFÓRMATE - Legislación Colombia */}
+        <LearnSection activeSection={activeSection} darkMode={darkMode} />
+>>>>>>> edwin
       </main>
 
       {/* Modal del Producto con Ficha Técnica */}
@@ -2721,11 +2671,18 @@ export default function EcommerceView() {
                           addToCart(selectedProduct);
                           setShowProductModal(false);
                         }}
+<<<<<<< HEAD
                         disabled={!isLoggedIn}
                         className={`flex-1 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 rounded-xl font-bold text-white text-sm sm:text-base md:text-lg shadow-lg transition-all ${!isLoggedIn ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl'}`}
                         style={{ backgroundColor: COLORS.acentoNaranja }}
                       >
                         🛒 {isLoggedIn ? 'Agregar al Carrito' : 'Inicia sesión'}
+=======
+                        className="flex-1 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 rounded-xl font-bold text-white text-sm sm:text-base md:text-lg shadow-lg transition-all hover:shadow-xl"
+                        style={{ backgroundColor: COLORS.acentoNaranja }}
+                      >
+                        🛒 {isLoggedIn ? 'Agregar al Carrito' : '🔐 Regístrate para comprar'}
+>>>>>>> edwin
                       </button>
                       <button
                         onClick={() => {
@@ -2733,11 +2690,18 @@ export default function EcommerceView() {
                           setShowProductModal(false);
                           setShowCart(true);
                         }}
+<<<<<<< HEAD
                         disabled={!isLoggedIn}
                         className={`flex-1 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 rounded-xl font-bold text-white text-sm sm:text-base md:text-lg shadow-lg transition-all ${!isLoggedIn ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl'}`}
                         style={{ backgroundColor: COLORS.verdePrincipal }}
                       >
                         ⚡ {isLoggedIn ? 'Comprar Ahora' : 'Inicia sesión'}
+=======
+                        className="flex-1 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 rounded-xl font-bold text-white text-sm sm:text-base md:text-lg shadow-lg transition-all hover:shadow-xl"
+                        style={{ backgroundColor: COLORS.verdePrincipal }}
+                      >
+                        ⚡ {isLoggedIn ? 'Comprar Ahora' : '🔐 Regístrate aquí'}
+>>>>>>> edwin
                       </button>
                     </div>
                   </div>
@@ -2973,6 +2937,7 @@ export default function EcommerceView() {
       )}
 
       {/* Footer */}
+<<<<<<< HEAD
       <footer className="mt-auto" style={{ position: 'relative', overflow: 'hidden' }}>
         {/* Video de fondo */}
         <video
@@ -3096,6 +3061,13 @@ export default function EcommerceView() {
 
 
       </footer>
+=======
+      <EcommerceFooter
+        nombreTienda={nombreTienda}
+        whatsappNumber={whatsappNumber}
+        onNavigate={setActiveSection}
+      />
+>>>>>>> edwin
 
       {/* ==================== MODALES ==================== */}
       {/* MODAL DE AUTENTICACIÓN */}

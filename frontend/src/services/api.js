@@ -955,6 +955,99 @@ export function fetchFacturas({
   }, token);
 }
 
+// ==================== AUTENTICACIÓN CLIENTES ECOMMERCE ====================
+
+// Registrar usuario de ecommerce
+export async function registrarUsuario({ email, password, passwordConfirm, datosCliente }) {
+  const url = `${BASE_URL}api/ecommerce/clientes/registro/`;
+  console.log(`POST ${url}`, { email, datosCliente });
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password, password_confirm: passwordConfirm, datos_cliente: datosCliente }),
+  });
+
+  const json = await res.json().catch(() => null);
+  console.log(`Response ${res.status}:`, json);
+
+  if (!res.ok) {
+    throw new Error(json?.message || json?.detail || 'Error al registrar usuario');
+  }
+
+  return json;
+}
+
+// Login usuario de ecommerce
+export async function loginUsuario({ email, password }) {
+  const url = `${BASE_URL}api/ecommerce/clientes/login/`;
+  console.log(`POST ${url}`, { email });
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const json = await res.json().catch(() => null);
+  console.log(`Response ${res.status}:`, json);
+
+  if (!res.ok) {
+    throw new Error(json?.message || json?.detail || 'Error al iniciar sesión');
+  }
+
+  return json;
+}
+
+// Activar cuenta de usuario
+export async function activarCuenta({ email, numero_documento, password, password_confirm }) {
+  const url = `${BASE_URL}api/ecommerce/clientes/activar-cuenta/`;
+  console.log(`POST ${url}`, { email, numero_documento });
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, numero_documento, password, password_confirm }),
+  });
+
+  const json = await res.json().catch(() => null);
+  console.log(`Response ${res.status}:`, json);
+
+  if (!res.ok) {
+    throw new Error(json?.message || json?.detail || 'Error al activar cuenta');
+  }
+
+  return json;
+}
+
+// Logout usuario de ecommerce
+export async function logout() {
+  const accessToken = localStorage.getItem('auth_access_token');
+  const url = `${BASE_URL}api/ecommerce/clientes/logout/`;
+  console.log(`POST ${url}`);
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+    },
+  });
+
+  // Limpiar tokens del localStorage
+  localStorage.removeItem('auth_access_token');
+  localStorage.removeItem('auth_refresh_token');
+  localStorage.removeItem('auth_usuario');
+
+  return res.ok;
+}
+
 
 // =========================
 // AUTH API - E-commerce
