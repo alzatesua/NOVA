@@ -1,12 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { COLORS, DARK_COLORS } from '../constants/colors';
 
 /**
  * ContactSection - Sección "Contacto" del ecommerce
  *
- * Muestra información de contacto y formulario
+ * Muestra información de contacto y formulario funcional
  */
 export default function ContactSection({ activeSection, whatsappNumber = '+573000000000', darkMode = false }) {
+  // Estados del formulario
+  const [formData, setFormData] = useState({
+    nombre_completo: '',
+    email: '',
+    mensaje: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null); // 'success' | 'error' | null
+
   // Solo renderizar si esta sección está activa
   if (activeSection !== 'contacto') {
     return null;
@@ -15,6 +24,62 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
   const bgColor = darkMode ? DARK_COLORS.background : COLORS.grisClaro;
   const cardBg = darkMode ? DARK_COLORS.cardBackground : 'rgba(255, 255, 255, 0.9)';
   const textColor = darkMode ? DARK_COLORS.textPrimary : COLORS.grisOscuro;
+
+  // Función para obtener subdominio
+  const getSubdomain = () => {
+    const host = window.location.hostname;
+    if (host.includes('localhost') || host.includes('127.0.0.1')) {
+      return 'tu-subdominio-dev'; // Para desarrollo local
+    }
+    return host.split('.')[0];
+  };
+
+  // Manejar cambio de inputs
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Enviar formulario
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      const response = await fetch('/api/contacto/enviar/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          subdominio: getSubdomain()
+        })
+      });
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        // Resetear formulario
+        setFormData({
+          nombre_completo: '',
+          email: '',
+          mensaje: ''
+        });
+      } else {
+        setSubmitStatus('error');
+        console.error('Error enviando formulario:', await response.json());
+      }
+    } catch (error) {
+      setSubmitStatus('error');
+      console.error('Error de red:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -227,7 +292,19 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
                 style={{ color: COLORS.verdePrincipal }}>
               Envíanos un Mensaje
             </h2>
-            <form className="space-y-3 sm:space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+              {submitStatus === 'success' && (
+                <div className="p-3 rounded-lg" style={{ backgroundColor: '#d4edda', color: '#155724' }}>
+                  ¡Mensaje enviado exitosamente! Te contactaremos pronto.
+                </div>
+              )}
+
+              {submitStatus === 'error' && (
+                <div className="p-3 rounded-lg" style={{ backgroundColor: '#f8d7da', color: '#721c24' }}>
+                  Error al enviar el mensaje. Por favor intenta nuevamente.
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2"
                        style={{ color: COLORS.grisOscuro }}>
@@ -235,7 +312,12 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
                 </label>
                 <input
                   type="text"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base bg-white"
+                  name="nombre_completo"
+                  value={formData.nombre_completo}
+                  onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base bg-white disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ borderColor: COLORS.verdeMenta }}
                   placeholder="Tu nombre"
                 />
@@ -247,7 +329,12 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
                 </label>
                 <input
                   type="email"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base bg-white"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base bg-white disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ borderColor: COLORS.verdeMenta }}
                   placeholder="tu@email.com"
                 />
@@ -258,18 +345,24 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
                   Mensaje
                 </label>
                 <textarea
+                  name="mensaje"
+                  value={formData.mensaje}
+                  onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
                   rows="4"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base bg-white"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base bg-white disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ borderColor: COLORS.verdeMenta }}
                   placeholder="¿En qué podemos ayudarte?"
                 ></textarea>
               </div>
               <button
-                type="button"
-                className="w-full px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-white shadow-lg hover:shadow-xl transition-all text-sm sm:text-base"
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-white shadow-lg hover:shadow-xl transition-all text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: COLORS.verdePrincipal }}
               >
-                Enviar Mensaje
+                {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
               </button>
             </form>
           </div>

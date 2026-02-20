@@ -414,3 +414,43 @@ CREATE INDEX idx_cupones_vencimiento ON cupones(fecha_vencimiento);
 -- Comentario sobre las tablas
 COMMENT ON TABLE cupones IS 'Cupones de descuento: porcentaje (PCT) o valor fijo (VAL)';
 COMMENT ON TABLE cliente_cupones IS 'Asignación de cupones a clientes con control de cantidad disponible';
+
+-- ============================================================
+-- TABLA DE CONTACTOS RECIBIDOS DESDE EL FORMULARIO WEB
+-- ============================================================
+CREATE TABLE IF NOT EXISTS contactos (
+    id BIGSERIAL PRIMARY KEY,
+
+    -- Datos del formulario
+    nombre_completo VARCHAR(255) NOT NULL,
+    email VARCHAR(254) NOT NULL,
+    mensaje TEXT NOT NULL,
+
+    -- Tracking multitenant
+    subdominio VARCHAR(100) NOT NULL,
+    tienda_id INTEGER NOT NULL,
+
+    -- Estado y procesamiento
+    leido BOOLEAN DEFAULT FALSE,
+    respondido BOOLEAN DEFAULT FALSE,
+    fecha_respuesta TIMESTAMP,
+
+    -- Metadata para auditoría
+    ip_cliente VARCHAR(45),
+    user_agent TEXT,
+    origen_referer VARCHAR(500),
+
+    -- Timestamps
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices para optimización
+CREATE INDEX IF NOT EXISTS idx_contactos_email ON contactos(email);
+CREATE INDEX IF NOT EXISTS idx_contactos_tienda ON contactos(tienda_id);
+CREATE INDEX IF NOT EXISTS idx_contactos_subdominio ON contactos(subdominio);
+CREATE INDEX IF NOT EXISTS idx_contactos_creado_en ON contactos(creado_en DESC);
+CREATE INDEX IF NOT EXISTS idx_contactos_leido_respondido ON contactos(leido, respondido);
+CREATE INDEX IF NOT EXISTS idx_contactos_sin_responder ON contactos(respondido) WHERE respondido = FALSE;
+
+COMMENT ON TABLE contactos IS 'Mensajes de contacto recibidos desde el formulario web de e-commerce';

@@ -1022,6 +1022,49 @@ class ClienteCupon(models.Model):
 
 
 # =========================
+# CONTACTOS E-COMMERCE
+# =========================
+
+class Contacto(models.Model):
+    """
+    Mensajes de contacto recibidos desde el formulario web.
+    Multitenant: cada mensaje está asociado a una tienda específica.
+    """
+    nombre_completo = models.CharField(max_length=255)
+    email = models.EmailField(max_length=254)
+    mensaje = models.TextField()
+
+    subdominio = models.CharField(max_length=100)
+    tienda_id = models.IntegerField()
+
+    leido = models.BooleanField(default=False)
+    respondido = models.BooleanField(default=False)
+    fecha_respuesta = models.DateTimeField(blank=True, null=True)
+
+    ip_cliente = models.CharField(max_length=45, blank=True, null=True)
+    user_agent = models.TextField(blank=True, null=True)
+    origen_referer = models.CharField(max_length=500, blank=True, null=True)
+
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'contactos'
+        verbose_name = 'Contacto'
+        verbose_name_plural = 'Contactos'
+        ordering = ('-creado_en',)
+
+    def __str__(self):
+        return f'{self.nombre_completo} ({self.email}) - {self.creado_en.strftime("%Y-%m-%d %H:%M")}'
+
+    def marcar_como_respondido(self):
+        self.respondido = True
+        self.leido = True
+        self.fecha_respuesta = timezone.now()
+        self.save(update_fields=['respondido', 'leido', 'fecha_respuesta'])
+
+
+# =========================
 # SIGNALS - Sincronización Automática de Stock
 # =========================
 

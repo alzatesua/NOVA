@@ -3,7 +3,7 @@ from .models import (
     Sucursales, Categoria, Marca, Iva, Producto, Descuento, TipoMedida,
     Bodega, Existencia, Traslado, TrasladoLinea,
     Cliente, FormaPago, Factura, FacturaDetalle, Pago, ConfiguracionFactura,
-    Cupon, ClienteCupon, ClienteTienda
+    Cupon, ClienteCupon, ClienteTienda, Contacto
 )
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
@@ -1299,3 +1299,40 @@ class SolicitarActivacionSerializer(serializers.Serializer):
                 )
 
         return value
+
+
+# =========================
+# CONTACTOS SERIALIZERS
+# =========================
+
+class ContactoCreateSerializer(DbAliasModelSerializer):
+    """Serializer para crear contactos desde el formulario público"""
+
+    class Meta:
+        model = Contacto
+        fields = ['nombre_completo', 'email', 'mensaje']
+        extra_kwargs = {
+            'nombre_completo': {'required': True, 'allow_blank': False},
+            'email': {'required': True, 'allow_blank': False},
+            'mensaje': {'required': True, 'allow_blank': False},
+        }
+
+    def validate_nombre_completo(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError('El nombre completo es requerido')
+        return value.strip()
+
+    def validate_email(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError('El email es requerido')
+        return value.strip().lower()
+
+    def validate_mensaje(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError('El mensaje es requerido')
+        mensaje_limpio = value.strip()
+        if len(mensaje_limpio) < 10:
+            raise serializers.ValidationError('El mensaje debe tener al menos 10 caracteres')
+        if len(mensaje_limpio) > 5000:
+            raise serializers.ValidationError('El mensaje no puede exceder 5000 caracteres')
+        return mensaje_limpio
