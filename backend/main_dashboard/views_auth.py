@@ -1,372 +1,633 @@
 """
 Vistas para autenticación de e-commerce (multitenant).
-Integra SimpleJWT con FacturacionTenantMixin.
+Usa SimpleJWT para tokens y blacklist para logout.
 """
-from rest_framework import status
+from django.contrib.auth import authenticate
+from django.utils import timezone
+from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from django.utils import timezone
-import logging
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from .models import ClienteTienda, Cliente
-from .serializers import (
-    ClienteTiendaSerializer, RegistroSerializer,
-    ActivarCuentaSerializer, SolicitarActivacionSerializer
-)
-from .views_facturacion import FacturacionTenantMixin
-
-# SimpleJWT
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError
-
-logger = logging.getLogger(__name__)
+from .serializers import ClienteTiendaSerializer, ClienteSerializer
+from nova.models import Dominios, Tiendas
+from nova.utils.db import conectar_db_tienda
+from multi_db_router import set_current_tienda_db
 
 
-# ============================================================
-#                    LoginView (SimpleJWT)
-# ============================================================
-class LoginView(FacturacionTenantMixin, TokenObtainPairView):
-    """
-    POST /api/auth/login/
+# ============================================================================
+# SERIALIZADORES
+# ============================================================================
 
-    Login de usuario usando SimpleJWT.
+class RegistroSerializer(serializers.Serializer):
+    """Serializer para registro de usuarios de tienda"""
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(required=True, write_only=True, min_length=6)
+    rol = serializers.CharField(default='cliente')
 
-    Body:
-    {
-        "email": "cliente@ejemplo.com",
-        "password": "Password123!"
-    }
-    """
-    permission_classes = [AllowAny]
-    # Usar nuestro serializer personalizado
-    serializer_class = None  # Se asigna dinámicamente
+    def validate_email(self, value):
+        """Verificar que el email no esté registrado"""
+        db_alias = self.context.get('db_alias', 'default')
+        if ClienteTienda.objects.using(db_alias).filter(email=value).exists():
+            raise ValidationError("Este email ya está registrado")
+        return value
 
-    def get_serializer_class(self):
-        """Retornar nuestro serializer personalizado"""
-        from .serializers import TokenObtainPairSerializer
-        return TokenObtainPairSerializer
 
-    def post(self, request, *args, **kwargs):
+class LoginSerializer(serializers.Serializer):
+    """Serializer para login"""
+    email = serializers.EmailField(required=True, help_text="Email del usuario")
+    password = serializers.CharField(
+        required=True,
+        write_only=True,
+        help_text="Contraseña del usuario",
+        style={'input_type': 'password'}
+    )
+
+    def validate(self, attrs):
+        # Obtener alias del tenant desde context
+        alias = self.context.get('db_alias', 'default')
+
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        # Buscar usuario en la BD del tenant
         try:
-            # Resolver tenant y agregar al context
-            alias = self._resolve_alias(request)
-            tienda = self._tenant_tienda
+            user = ClienteTienda.objects.using(alias).get(email=email)
 
-            # Actualizar el serializer context con tenant info
-            serializer_context = self.get_serializer_context()
-            serializer_context.update({
-                'db_alias': alias,
-                'tienda_id': tienda.id
+            # Verificar contraseña
+            if user.check_password(password):
+                # Verificar que esté activo o pendiente (ambos permiten login)
+                if user.estado not in ['activo', 'pendiente']:
+                    raise serializers.ValidationError({
+                        'email': 'Esta cuenta no está activa.'
+                    })
+            else:
+                raise serializers.ValidationError({
+                    'email': 'Credenciales inválidas'
+                })
+        except ClienteTienda.DoesNotExist:
+            raise serializers.ValidationError({
+                'email': 'Credenciales inválidas'
             })
 
-            return super().post(request, *args, **kwargs)
-
-        except Exception as e:
-            logger.error(f'Error en login: {str(e)}')
-            return Response({
-                'error': str(e)
-            }, status=status.HTTP_401_UNAUTHORIZED)
+        # Guardar usuario en attrs para usar en la vista
+        attrs['user'] = user
+        return attrs
 
 
-# ============================================================
-#                    RefreshTokenView (SimpleJWT)
-# ============================================================
-class RefreshTokenView(FacturacionTenantMixin, TokenRefreshView):
+# ============================================================================
+# VISTAS DE AUTENTICACIÓN
+# ============================================================================
+
+class RegistroView(APIView):
     """
-    POST /api/auth/refresh/
+    Registro de nuevo cliente de tienda (multitenant).
 
-    Renueva access token usando refresh token.
-
+    POST /api/auth/register/
     Body:
-    {
-        "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    }
+        - email: Email del usuario
+        - password: Contraseña (mínimo 6 caracteres)
+        - rol: Rol del usuario (opcional, defecto: 'cliente')
+        - subdominio: Subdominio de la tienda (REQUERIDO para desarrollo local)
+        - ...campos adicionales del cliente fiscal (opcionales)
     """
     permission_classes = [AllowAny]
 
-    def post(self, request, *args, **kwargs):
-        try:
-            alias = self._resolve_alias(request)
-            tienda = self._tenant_tienda
-
-            # Actualizar el serializer context con tenant info
-            from .serializers import TokenRefreshSerializer
-
-            # Obtener el serializer context actual
-            serializer_context = self.get_serializer_context()
-            serializer_context.update({
-                'db_alias': alias,
-                'tienda_id': tienda.id
-            })
-
-            return super().post(request, *args, **kwargs)
-
-        except Exception as e:
-            logger.error(f'Error en refresh: {str(e)}')
-            return Response({
-                'error': 'Token inválido o expirado'
-            }, status=status.HTTP_401_UNAUTHORIZED)
-
-
-# ============================================================
-#                    LogoutView
-# ============================================================
-class LogoutView(FacturacionTenantMixin, APIView):
-    """
-    POST /api/auth/logout/
-
-    Invalida el refresh token (blacklist).
-
-    Body:
-    {
-        "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    }
-    """
     def post(self, request):
         try:
-            refresh_token = request.data.get('refresh_token')
+            # Obtener subdominio
+            subdom = request.data.get('subdominio') or request.query_params.get('subdominio')
+
+            if not subdom:
+                return Response(
+                    {'detail': 'El parámetro subdominio es requerido.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Resolver alias
+            host = request.get_host().split(':')[0]
+            subdominio = subdom if subdom else host.split('.')[0].lower()
+
+            dominio_obj = Dominios.objects.filter(
+                dominio__icontains=subdominio
+            ).select_related('tienda').first()
+
+            if not dominio_obj or not dominio_obj.tienda:
+                return Response(
+                    {'detail': 'Dominio no válido.'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
+            tienda = dominio_obj.tienda
+            alias = str(tienda.id)
+
+            # Conectar a la BD de la tienda dinámicamente
+            conectar_db_tienda(alias, tienda)
+
+            # IMPORTANTE: Establecer la BD actual para el TiendaDatabaseRouter
+            set_current_tienda_db({'alias': alias, 'tienda_id': tienda.id})
+
+        except Exception as e:
+            return Response({
+                'detail': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validar datos
+        serializer = RegistroSerializer(data=request.data, context={'db_alias': alias})
+        if not serializer.is_valid():
+            return Response({
+                'detail': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            with transaction.atomic(using=alias):
+                from django.contrib.auth.hashers import make_password
+                email = serializer.validated_data['email']
+                password = serializer.validated_data['password']
+                rol = serializer.validated_data.get('rol', 'cliente')
+
+                # Crear usuario de tienda
+                usuario = ClienteTienda(
+                    email=email,
+                    password=make_password(password),
+                    rol=rol,
+                    estado='activo'  # Usuario activo por defecto
+                )
+                usuario.save(using=alias)
+
+                # Si se proporcionaron datos fiscales adicionales, crear/vincular Cliente
+                cliente_data = {
+                    'tipo_persona': request.data.get('tipo_persona'),
+                    'tipo_documento': request.data.get('tipo_documento'),
+                    'numero_documento': request.data.get('numero_documento'),
+                    'correo': request.data.get('email'),
+                    'telefono': request.data.get('telefono'),
+                    'direccion': request.data.get('direccion'),
+                    'ciudad': request.data.get('ciudad'),
+                    'primer_nombre': request.data.get('primer_nombre'),
+                    'segundo_nombre': request.data.get('segundo_nombre'),
+                    'apellidos': request.data.get('apellidos'),
+                    'razon_social': request.data.get('razon_social'),
+                    'n_registro_mercantil': request.data.get('n_registro_mercantil'),
+                }
+
+                # Filtrar campos None Y vacíos
+                cliente_data = {k: v for k, v in cliente_data.items() if v not in [None, '']}
+
+                # VALIDACIÓN: NAT requiere nombre/apellidos, JUR requiere razón_social
+                if cliente_data:
+                    tipo_persona = cliente_data.get('tipo_persona', 'NAT')
+                    crear_cliente = False
+
+                    if tipo_persona == 'NAT':
+                        crear_cliente = cliente_data.get('primer_nombre') or cliente_data.get('apellidos')
+                    elif tipo_persona == 'JUR':
+                        crear_cliente = cliente_data.get('razon_social') is not None
+
+                    if crear_cliente:
+                        try:
+                            if cliente_data.get('numero_documento'):
+                                cliente_existente = Cliente.objects.using(alias).filter(
+                                    numero_documento=cliente_data['numero_documento']
+                                ).first()
+                                if cliente_existente:
+                                    usuario.cliente = cliente_existente
+                                else:
+                                    nuevo_cliente = Cliente(**cliente_data)
+                                    nuevo_cliente.save(using=alias)
+                                    usuario.cliente = nuevo_cliente
+                            else:
+                                nuevo_cliente = Cliente(**cliente_data)
+                                nuevo_cliente.save(using=alias)
+                                usuario.cliente = nuevo_cliente
+                            usuario.save(using=alias)
+                        except Exception:
+                            pass  # Si falla el cliente, continuamos sin él
+
+                # Generar tokens
+                refresh = RefreshToken.for_user(usuario)
+
+                return Response({
+                    'message': 'Usuario registrado exitosamente',
+                    'user': ClienteTiendaSerializer(usuario).data,
+                    'tokens': {
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                    },
+                    'tenant_info': {
+                        'alias': alias,
+                        'tienda_id': tienda.id,
+                        'tienda_nombre': tienda.nombre_tienda,
+                        'db_name': tienda.db_nombre
+                    }
+                }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({
+                'detail': f'Error al registrar: {str(e)}'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LoginView(APIView):
+    """
+    Login de usuario (multitenant).
+
+    POST /api/auth/login/
+    Body:
+        - email: Email del usuario
+        - password: Contraseña
+        - subdominio: Subdominio de la tienda (REQUERIDO para desarrollo local)
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        try:
+            # Obtener subdominio
+            subdom = request.data.get('subdominio') or request.query_params.get('subdominio')
+
+            if not subdom:
+                return Response(
+                    {'detail': 'El parámetro subdominio es requerido.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Resolver alias
+            host = request.get_host().split(':')[0]
+            subdominio = subdom if subdom else host.split('.')[0].lower()
+
+            dominio_obj = Dominios.objects.filter(
+                dominio__icontains=subdominio
+            ).select_related('tienda').first()
+
+            if not dominio_obj or not dominio_obj.tienda:
+                return Response(
+                    {'detail': 'Dominio no válido.'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
+            tienda = dominio_obj.tienda
+            alias = str(tienda.id)
+
+            # Conectar a la BD de la tienda dinámicamente
+            conectar_db_tienda(alias, tienda)
+
+            # IMPORTANTE: Establecer la BD actual para el TiendaDatabaseRouter
+            set_current_tienda_db({'alias': alias, 'tienda_id': tienda.id})
+
+        except Exception as e:
+            return Response({
+                'detail': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validar credenciales con nuestro serializer
+        serializer = LoginSerializer(
+            data=request.data,
+            context={'db_alias': alias}
+        )
+
+        if not serializer.is_valid():
+            return Response({
+                'detail': serializer.errors
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            user = serializer.validated_data['user']
+
+            # Actualizar ultimo_login
+            user.ultimo_login = timezone.now()
+            user.save(using=alias, update_fields=['ultimo_login'])
+
+            # Generar tokens
+            refresh = RefreshToken.for_user(user)
+
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': ClienteTiendaSerializer(user).data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({
+                'detail': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RefreshTokenView(TokenRefreshView):
+    """
+    Renovar token de acceso (SimpleJWT).
+
+    POST /api/auth/refresh/
+    Body:
+        - refresh: Refresh token
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            response = super().post(request, *args, **kwargs)
+            return response
+
+        except InvalidToken:
+            return Response({
+                'detail': 'El refresh token no es válido o ha expirado'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class LogoutView(APIView):
+    """
+    Cerrar sesión y agregar refresh token a blacklist.
+
+    POST /api/auth/logout/
+    Body:
+        - refresh: Refresh token a invalidar
+    Headers:
+        - Authorization: Bearer <access_token>
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get('refresh')
             if not refresh_token:
                 return Response({
-                    'error': 'refresh_token requerido'
+                    'detail': 'Refresh token requerido'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # Usar el modelo BlacklistedToken para agregar a la blacklist
-            from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
-
+            # Invalidar el refresh token
             token = RefreshToken(refresh_token)
-
-            # Crear entrada en blacklist
-            BlacklistedToken.objects.create(
-                token=str(token),
-                blacklisted_at=timezone.now()
-            )
+            token.blacklist()
 
             return Response({
-                'mensaje': 'Sesión cerrada correctamente'
+                'message': 'Sesión cerrada exitosamente'
             }, status=status.HTTP_200_OK)
+
         except TokenError:
             return Response({
-                'error': 'Token inválido o expirado'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f'Error en logout: {str(e)}')
-            return Response({
-                'error': str(e)
+                'detail': 'Token inválido o ya expirado'
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-# ============================================================
-#                    RegistroView (CASO A)
-# ============================================================
-class RegistroView(FacturacionTenantMixin, APIView):
+class UsuarioActualView(APIView):
     """
-    POST /api/auth/register/
+    Obtener/Actualizar información del usuario autenticado.
 
-    Registro de nuevo usuario desde tienda (CASO A).
-
-    Body:
-    {
-        "email": "cliente@ejemplo.com",
-        "password": "Password123!",
-        "password_confirm": "Password123!",
-
-        // Opcionales: datos del cliente fiscal
-        "tipo_persona": "NAT",
-        "primer_nombre": "Juan",
-        "apellidos": "Pérez",
-        "telefono": "3001234567",
-        "direccion": "Calle 123",
-        "ciudad": "Bogotá"
-    }
+    GET /api/auth/me/ - Obtener perfil
+    PUT/PATCH /api/auth/me/ - Actualizar perfil
+    Headers:
+        - Authorization: Bearer <access_token>
     """
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        try:
-            # Resolver tenant SIN requerir autenticación (require_auth=False)
-            alias = self._resolve_alias(request, require_auth=False)
-            serializer = RegistroSerializer(
-                data=request.data,
-                context={'db_alias': alias}
-            )
-            serializer.is_valid(raise_exception=True)
-
-            usuario = serializer.save()
-
-            # Generar tokens usando SimpleJWT
-            from rest_framework_simplejwt.tokens import RefreshToken
-            refresh = RefreshToken.for_user(usuario)
-
-            return Response({
-                'mensaje': 'Registro exitoso',
-                'user': ClienteTiendaSerializer(usuario, context={'db_alias': alias}).data,
-                'access': str(refresh.access_token),
-                'refresh': str(refresh)
-            }, status=status.HTTP_201_CREATED)
-
-        except Exception as e:
-            logger.error(f'Error en registro: {str(e)}')
-            return Response({
-                'error': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-
-# ============================================================
-#                    UsuarioActualView
-# ============================================================
-class UsuarioActualView(FacturacionTenantMixin, APIView):
-    """
-    GET /api/auth/me/
-
-    Obtiene información del usuario autenticado.
-    """
     def get(self, request):
-        try:
-            alias = self._resolve_alias(request)
+        usuario = request.user
+        serializer = ClienteTiendaSerializer(usuario)
 
-            # Obtener usuario desde el token
-            usuario = self._get_usuario_from_token(request, alias)
+        # Agregar información del cliente fiscal si está vinculado
+        data = serializer.data
+        if usuario.cliente:
+            data['cliente_fiscal'] = ClienteSerializer(usuario.cliente).data
 
-            if not usuario:
-                return Response({
-                    'error': 'Token inválido o expirado'
-                }, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(data, status=status.HTTP_200_OK)
 
-            serializer = ClienteTiendaSerializer(
-                usuario,
-                context={'db_alias': alias}
-            )
+    def put(self, request):
+        """Actualizar perfil del usuario"""
+        usuario = request.user
+        serializer = ClienteTiendaSerializer(
+            usuario,
+            data=request.data,
+            partial=True
+        )
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            logger.error(f'Error obteniendo usuario: {str(e)}')
+        if serializer.is_valid():
+            serializer.save()
             return Response({
-                'error': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-    def _get_usuario_from_token(self, request, alias):
-        """Extrae usuario desde token JWT"""
-        import jwt
-        from django.conf import settings
-
-        # Obtener token desde Authorization header o query params
-        auth_header = request.headers.get('Authorization', '')
-        token = None
-
-        if auth_header.startswith('Bearer '):
-            token = auth_header[7:]
-        else:
-            token = request.query_params.get('token') or request.data.get('access')
-
-        if not token:
-            return None
-
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-            user_id = payload.get('user_id') or payload.get('user_id')
-
-            if user_id:
-                return ClienteTienda.objects.using(alias).get(pk=user_id)
-        except Exception as e:
-            logger.error(f'Error decodificando token: {str(e)}')
-            return None
-
-
-# ============================================================
-#                    ActivarCuentaView (CASO B)
-# ============================================================
-class ActivarCuentaView(FacturacionTenantMixin, APIView):
-    """
-    POST /api/auth/activate-account/
-
-    Activa cuenta para cliente fiscal existente (CASO B).
-
-    Body:
-    {
-        "email": "cliente@ejemplo.com",
-        "numero_documento": "12345678",
-        "password": "Password123!",
-        "password_confirm": "Password123!"
-    }
-    """
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        try:
-            alias = self._resolve_alias(request)
-            serializer = ActivarCuentaSerializer(
-                data=request.data,
-                context={'db_alias': alias}
-            )
-            serializer.is_valid(raise_exception=True)
-
-            usuario = serializer.save()
-
-            # Generar tokens usando SimpleJWT
-            from rest_framework_simplejwt.tokens import RefreshToken
-            refresh = RefreshToken.for_user(usuario)
-
-            return Response({
-                'mensaje': 'Cuenta activada exitosamente',
-                'user': ClienteTiendaSerializer(usuario, context={'db_alias': alias}).data,
-                'access': str(refresh.access_token),
-                'refresh': str(refresh)
-            }, status=status.HTTP_201_CREATED)
-
-        except Exception as e:
-            logger.error(f'Error en activación: {str(e)}')
-            return Response({
-                'error': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-
-# ============================================================
-#                    SolicitarActivacionView
-# ============================================================
-class SolicitarActivacionView(FacturacionTenantMixin, APIView):
-    """
-    POST /api/auth/request-activation/
-
-    Solicita código de activación (envía email).
-
-    Body:
-    {
-        "email": "cliente@ejemplo.com"
-    }
-
-    En un sistema real:
-    1. Genera código único
-    2. Envía email con enlace de activación
-    3. Almacena código temporal
-
-    Por ahora, retorna confirmación.
-    """
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        try:
-            alias = self._resolve_alias(request)
-            serializer = SolicitarActivacionSerializer(
-                data=request.data,
-                context={'db_alias': alias}
-            )
-            serializer.is_valid(raise_exception=True)
-
-            email = serializer.validated_data['email']
-
-            # TODO: Implementar envío real de email
-            # Por ahora, retornamos confirmación
-
-            return Response({
-                'mensaje': f'Se ha enviado un correo a {email} con las instrucciones de activación.',
-                'email': email
+                'message': 'Perfil actualizado',
+                'user': serializer.data
             }, status=status.HTTP_200_OK)
 
+        return Response({
+            'detail': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request):
+        """Actualización parcial del perfil"""
+        return self.put(request)
+
+
+class ActivarCuentaView(APIView):
+    """
+    Activar cuenta de cliente existente (multitenant).
+
+    Permite activar clientes que ya existen en el sistema fiscal
+    creando su cuenta de acceso a la tienda.
+
+    POST /api/auth/activate-account/
+    Body:
+        - email: Email para la cuenta de acceso
+        - numero_documento: Número de documento del cliente fiscal existente
+        - password: Contraseña para la cuenta de acceso
+        - password_confirm: Confirmación de contraseña
+        - subdominio: Subdominio de la tienda (REQUERIDO)
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        try:
+            # Obtener subdominio
+            subdom = request.data.get('subdominio') or request.query_params.get('subdominio')
+
+            if not subdom:
+                return Response(
+                    {'detail': 'El parámetro subdominio es requerido.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Resolver alias
+            host = request.get_host().split(':')[0]
+            subdominio = subdom if subdom else host.split('.')[0].lower()
+
+            dominio_obj = Dominios.objects.filter(
+                dominio__icontains=subdominio
+            ).select_related('tienda').first()
+
+            if not dominio_obj or not dominio_obj.tienda:
+                return Response(
+                    {'detail': 'Dominio no válido.'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
+            tienda = dominio_obj.tienda
+            alias = str(tienda.id)
+
+            # Conectar a la BD de la tienda dinámicamente
+            conectar_db_tienda(alias, tienda)
+
+            # IMPORTANTE: Establecer la BD actual para el TiendaDatabaseRouter
+            set_current_tienda_db({'alias': alias, 'tienda_id': tienda.id})
+
         except Exception as e:
-            logger.error(f'Error solicitando activación: {str(e)}')
             return Response({
-                'error': str(e)
+                'detail': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
+
+        email = request.data.get('email')
+        numero_documento = request.data.get('numero_documento')
+        password = request.data.get('password')
+        password_confirm = request.data.get('password_confirm')
+
+        # Validaciones básicas
+        if not email or not numero_documento or not password:
+            return Response({
+                'detail': 'Se requieren: email, numero_documento, password'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if password != password_confirm:
+            return Response({
+                'detail': 'Las contraseñas no coinciden'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verificar que el email no esté ya registrado en esta tienda
+        if ClienteTienda.objects.using(alias).filter(email=email).exists():
+            return Response({
+                'detail': 'El email ya tiene una cuenta activa en esta tienda'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Buscar cliente fiscal por documento
+        cliente = Cliente.objects.using(alias).filter(
+            numero_documento=numero_documento
+        ).first()
+
+        if not cliente:
+            return Response({
+                'detail': 'No se encontró un cliente con ese número de documento en esta tienda'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Crear cuenta de tienda
+        try:
+            from django.contrib.auth.hashers import make_password
+            with transaction.atomic(using=alias):
+                # Crear usuario manualmente
+                usuario_tienda = ClienteTienda(
+                    email=email,
+                    password=make_password(password),
+                    rol='cliente',
+                    estado='activo',
+                    cliente=cliente
+                )
+                # Guardar explícitamente en la BD del tenant
+                usuario_tienda.save(using=alias)
+
+                # Generar tokens
+                refresh = RefreshToken.for_user(usuario_tienda)
+
+                return Response({
+                    'message': 'Cuenta activada exitosamente',
+                    'user': ClienteTiendaSerializer(usuario_tienda).data,
+                    'cliente_fiscal': ClienteSerializer(cliente).data,
+                    'tokens': {
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                    }
+                }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({
+                'detail': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SolicitarActivacionView(APIView):
+    """
+    Solicitar código de activación para cuenta existente (multitenant).
+
+    POST /api/auth/request-activation/
+    Body:
+        - email: Email del cliente
+        - numero_documento: Número de documento del cliente
+        - subdominio: Subdominio de la tienda (REQUERIDO)
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        try:
+            # Obtener subdominio
+            subdom = request.data.get('subdominio') or request.query_params.get('subdominio')
+
+            if not subdom:
+                return Response(
+                    {'detail': 'El parámetro subdominio es requerido.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Resolver alias
+            host = request.get_host().split(':')[0]
+            subdominio = subdom if subdom else host.split('.')[0].lower()
+
+            dominio_obj = Dominios.objects.filter(
+                dominio__icontains=subdominio
+            ).select_related('tienda').first()
+
+            if not dominio_obj or not dominio_obj.tienda:
+                return Response(
+                    {'detail': 'Dominio no válido.'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
+            tienda = dominio_obj.tienda
+            alias = str(tienda.id)
+
+            # Conectar a la BD de la tienda dinámicamente
+            conectar_db_tienda(alias, tienda)
+
+            # IMPORTANTE: Establecer la BD actual para el TiendaDatabaseRouter
+            set_current_tienda_db({'alias': alias, 'tienda_id': tienda.id})
+
+        except Exception as e:
+            return Response({
+                'detail': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        email = request.data.get('email')
+        numero_documento = request.data.get('numero_documento')
+
+        if not email or not numero_documento:
+            return Response({
+                'detail': 'Se requieren: email, numero_documento'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verificar que el cliente existe en esta tienda
+        cliente = Cliente.objects.using(alias).filter(
+            numero_documento=numero_documento,
+            correo__iexact=email
+        ).first()
+
+        if not cliente:
+            # Por seguridad, no revelar si el cliente existe o no
+            return Response({
+                'message': 'Si los datos son correctos, recibirá instrucciones en su correo',
+                'detail': 'Se ha enviado un correo con las instrucciones de activación'
+            }, status=status.HTTP_200_OK)
+
+        # Verificar si ya tiene cuenta en esta tienda
+        if ClienteTienda.objects.using(alias).filter(email=email).exists():
+            return Response({
+                'detail': 'Este email ya tiene una cuenta activa en esta tienda. Si olvidó su contraseña, use la opción de recuperar contraseña'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            'message': 'Solicitud recibida',
+            'detail': 'Se ha enviado un correo con las instrucciones para activar su cuenta',
+            'email': email
+        }, status=status.HTTP_200_OK)

@@ -982,15 +982,16 @@ export async function registrarUsuario({ email, password, passwordConfirm, datos
 
 // Login usuario de ecommerce
 export async function loginUsuario({ email, password }) {
-  const url = `${BASE_URL}api/ecommerce/clientes/login/`;
-  console.log(`POST ${url}`, { email });
+  const subdominio = window.location.hostname.split('.')[0];
+  const url = `${BASE_URL}api/auth/login/`;
+  console.log(`POST ${url}`, { email, subdominio });
 
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, subdominio }),
   });
 
   const json = await res.json().catch(() => null);
@@ -1049,138 +1050,57 @@ export async function logout() {
 }
 
 
-// =========================
-// AUTH API - E-commerce
-// =========================
+// ==================== CUPONES ====================
 
 /**
- * Registro de nuevo usuario (CASO A)
+ * Obtiene los cupones del cliente actual por correo
+ * Usa la API pública que no requiere autenticación
  */
-export function registrarUsuario({
-  email,
-  password,
-  passwordConfirm,
-  datosCliente = {}
-}) {
-  const token = localStorage.getItem('token_usuario');
-  const usuario = localStorage.getItem('usuario');
+export async function obtenerMisCupones({ correo }) {
   const subdominio = window.location.hostname.split('.')[0];
+  const url = `${BASE_URL}api/cupones/cliente-cupones/mis-cupones/?correo=${encodeURIComponent(correo)}&subdominio=${encodeURIComponent(subdominio)}`;
 
-  return post('api/auth/register/', {
-    usuario,
-    token,
-    subdominio,
-    email,
-    password,
-    password_confirm: passwordConfirm,
-    ...datosCliente
-  });
+  console.log(`[CUPONES API] GET ${url}`);
+
+  try {
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const json = await res.json().catch(() => null);
+    console.log(`[CUPONES API] Response ${res.status}:`, json);
+
+    if (!res.ok) {
+      throw new Error(json?.detail || 'Error al obtener cupones');
+    }
+
+    return json;
+  } catch (error) {
+    console.error('[CUPONES API] Error en la petición:', error);
+    throw error;
+  }
 }
 
 /**
- * Login de usuario
+ * Usa un cupón (decrementa cantidad_disponible)
  */
-export function loginUsuario({ email, password }) {
-  const token = localStorage.getItem('token_usuario');
+export async function usarCupon({ cuponId }) {
+  const token = localStorage.getItem('auth_access_token');
   const usuario = localStorage.getItem('usuario');
+  const tokenUsuario = localStorage.getItem('token_usuario');
   const subdominio = window.location.hostname.split('.')[0];
 
-  return post('api/auth/login/', {
-    usuario,
-    token,
-    subdominio,
-    email,
-    password
-  });
-}
+  if (!token) {
+    throw new Error('No hay token de autenticación');
+  }
 
-/**
- * Activar cuenta para cliente existente (CASO B)
- */
-export function activarCuenta({
-  email,
-  numeroDocumento,
-  password,
-  passwordConfirm
-}) {
-  const token = localStorage.getItem('token_usuario');
-  const usuario = localStorage.getItem('usuario');
-  const subdominio = window.location.hostname.split('.')[0];
-
-  return post('api/auth/activate-account/', {
-    usuario,
-    token,
-    subdominio,
-    email,
-    numero_documento: numeroDocumento,
-    password,
-    password_confirm: passwordConfirm
-  });
-}
-
-/**
- * Solicitar código de activación
- */
-export function solicitarActivacion({ email }) {
-  const token = localStorage.getItem('token_usuario');
-  const usuario = localStorage.getItem('usuario');
-  const subdominio = window.location.hostname.split('.')[0];
-
-  return post('api/auth/request-activation/', {
-    usuario,
-    token,
-    subdominio,
-    email
-  });
-}
-
-/**
- * Obtener usuario actual
- */
-export function getUsuarioActual() {
-  const token = localStorage.getItem('token_usuario');
-  const usuario = localStorage.getItem('usuario');
-  const subdominio = window.location.hostname.split('.')[0];
-  const accessToken = localStorage.getItem('auth_access_token');
-
-  return get(`api/auth/me/?usuario=${usuario}&token=${token}&subdominio=${subdominio}`, accessToken);
-}
-
-/**
- * Renovar access token usando refresh token
- */
-export function refreshAccessToken() {
-  const subdominio = window.location.hostname.split('.')[0];
-  const refreshToken = localStorage.getItem('auth_refresh_token');
-
-  return post('api/auth/refresh/', {
-    refresh: refreshToken,
+  return post(`api/cupones/cliente-cupon/${cuponId}/usar/`, {
+    usuario: tokenUsuario || usuario,
+    token: tokenUsuario,
     subdominio
-  });
-}
-
-/**
- * Logout - Invalida refresh token
- */
-export function logout() {
-  const token = localStorage.getItem('token_usuario');
-  const usuario = localStorage.getItem('usuario');
-  const subdominio = window.location.hostname.split('.')[0];
-  const refreshToken = localStorage.getItem('auth_refresh_token');
-
-  const promise = post('api/auth/logout/', {
-    usuario,
-    token,
-    subdominio,
-    refresh_token: refreshToken
   }, token);
-
-  // Limpiar localStorage
-  localStorage.removeItem('auth_access_token');
-  localStorage.removeItem('auth_refresh_token');
-  localStorage.removeItem('auth_usuario');
-  localStorage.removeItem('ecommerce_customer');
-
-  return promise;
 }
 

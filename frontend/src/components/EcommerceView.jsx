@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { fetchProductosEcommerce, registrarUsuario, loginUsuario, activarCuenta, logout } from '../services/api';
+import { fetchProductosEcommerce, registrarUsuario, loginUsuario, activarCuenta, logout, obtenerMisCupones } from '../services/api';
 import { Navbar, Nav, Form, Container, Button } from 'react-bootstrap';
 import { showToast } from '../utils/toast';
 import {
@@ -670,6 +670,9 @@ export default function EcommerceView() {
       setShowAuthModal(false);
       resetAuthForm();
 
+      // Cargar cupones del usuario desde el backend
+      loadCouponsFromBackend();
+
       showToast('success', `¡Bienvenido/a ${response.user.email}! Tu cuenta ha sido creada exitosamente.`);
     } catch (error) {
       showToast('error', error.message || 'Error al registrar usuario');
@@ -699,6 +702,9 @@ export default function EcommerceView() {
       setIsLoggedIn(true);
       setShowAuthModal(false);
       resetAuthForm();
+
+      // Cargar cupones del usuario desde el backend
+      loadCouponsFromBackend();
 
       showToast('success', `¡Hola de nuevo ${response.user.email}!`);
     } catch (error) {
@@ -779,6 +785,83 @@ export default function EcommerceView() {
     };
 
     return coupon;
+  };
+
+  // Cargar cupones desde el backend
+  const loadCouponsFromBackend = async () => {
+    if (!customerData?.email) {
+      console.warn('[CUPONES] No hay email del cliente para cargar cupones. customerData:', customerData);
+      return;
+    }
+
+    try {
+      console.log('[CUPONES] Cargando cupones del cliente:', customerData.email);
+      const response = await obtenerMisCupones({ correo: customerData.email });
+
+      console.log('[CUPONES] Respuesta del backend:', response);
+
+      // Mostrar mensaje si existe
+      if (response.mensaje) {
+        console.log('[CUPONES] Mensaje del backend:', response.mensaje);
+      }
+
+      // Verificar si hay cupones en la respuesta
+      console.log('[CUPONES] Cantidad de cupones en respuesta:', response.cupones?.length || 0);
+      if (response.cupones && response.cupones.length > 0) {
+        console.log('[CUPONES] Primer cupón (crudo):', response.cupones[0]);
+      }
+
+      // Transformar los cupones del backend al formato local
+      const backendCoupons = (response.cupones || []).map((cc, idx) => {
+        // El serializer retorna 'cupon_detalle' con la info completa del cupón
+        const cupon = cc.cupon_detalle || cc.cupon || {};
+
+        console.log(`[CUPONES] Procesando cupón #${idx}:`, {
+          'cc.cupon_detalle': cc.cupon_detalle,
+          'cc.cupon': cc.cupon,
+          'cupon (merged)': cupon
+        });
+
+        // Mapear campos del backend al formato local
+        const codigo = cupon.nombre || cupon.codigo || 'DESCONOCIDO';
+        const descuento = parseFloat(cupon.valor || cupon.descuento || 0);
+
+        console.log(`[CUPONES] Mapeo: nombre=${cupon.nombre} → codigo=${codigo}, valor=${cupon.valor} → descuento=${descuento}`);
+
+        const transformed = {
+          codigo: codigo,
+          descuento: descuento,
+          fechaGeneracion: cc.creado_en,
+          usado: !cc.activo || cc.cantidad_disponible <= 0,
+          cantidadDisponible: cc.cantidad_disponible,
+          id: cc.id,
+          generadoLocal: false, // Marcar como viene del backend
+          // Datos adicionales del cupón para referencia
+          tipo: cupon.tipo,
+          tipo_display: cupon.tipo_display,
+          fecha_vencimiento: cupon.fecha_vencimiento
+        };
+        console.log('[CUPONES] Cupón transformado:', transformed);
+        return transformed;
+      });
+
+      console.log('[CUPONES] Cupones del backend transformados:', backendCoupons);
+
+      // Combinar con cupones locales (generados por reseñas)
+      const localCoupons = coupons.filter(c => c.generadoLocal === true);
+      console.log('[CUPONES] Cupones locales:', localCoupons);
+
+      const allCoupons = [...backendCoupons, ...localCoupons];
+
+      setCoupons(allCoupons);
+      localStorage.setItem('ecommerce_coupons', JSON.stringify(allCoupons));
+
+      console.log(`[CUPONES] Total de cupones: ${allCoupons.length} (${backendCoupons.length} del backend, ${localCoupons.length} locales)`);
+    } catch (error) {
+      console.error('[CUPONES] Error cargando cupones:', error.message);
+      console.error('[CUPONES] Detalle del error:', error);
+      // Si falla, mantener los cupones locales
+    }
   };
 
   const saveCoupon = (coupon) => {
@@ -1642,8 +1725,10 @@ export default function EcommerceView() {
                         </div>
 
                         <button
-                          onClick={() => {
+                          onClick={async () => {
                             setShowUserDropdown(false);
+                            // Cargar cupones frescos del backend antes de mostrar el modal
+                            await loadCouponsFromBackend();
                             setShowCouponModal(true);
                           }}
                           style={{
@@ -2745,19 +2830,26 @@ export default function EcommerceView() {
               {coupons.slice().reverse().map((coupon, index) => (
                 <div key={index} className="border rounded-xl p-4" style={{ borderColor: COLORS.verdeMenta }}>
                   <div className="flex justify-between items-center">
-                    <div>
-                      <div className="text-2xl font-bold" style={{ color: COLORS.verdePrincipal, fontFamily: 'monospace' }}>
+                    <div className="flex-1">
+                      <div className="text-2xl font-bold mb-1" style={{ color: COLORS.verdePrincipal, fontFamily: 'monospace' }}>
                         {coupon.codigo}
                       </div>
-                      <div className="text-sm" style={{ color: COLORS.grisMedio }}>
+                      <div className="text-xs" style={{ color: COLORS.grisMedio }}>
                         {formatCouponDate(coupon.fechaGeneracion)}
                       </div>
+                      {coupon.cantidadDisponible !== undefined && coupon.cantidadDisponible > 1 && (
+                        <div className="text-xs mt-1 px-2 py-1 inline-block rounded" style={{ backgroundColor: COLORS.verdeClaro, color: COLORS.verdeOscuro }}>
+                          {coupon.cantidadDisponible} disponible(s)
+                        </div>
+                      )}
                     </div>
-                    <div className="text-right">
+                    <div className="text-right ml-4">
                       <div className="text-3xl font-bold" style={{ color: COLORS.acentoNaranja }}>
                         {coupon.descuento}%
                       </div>
-                      <div className="text-xs" style={{ color: COLORS.grisMedio }}>
+                      <div className="text-xs font-semibold" style={{
+                        color: coupon.usado ? COLORS.grisMedio : COLORS.verdePrincipal
+                      }}>
                         {coupon.usado ? 'Usado' : 'Activo'}
                       </div>
                     </div>

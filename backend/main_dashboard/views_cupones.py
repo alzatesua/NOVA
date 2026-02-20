@@ -272,14 +272,39 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             from nova.utils.db import conectar_db_tienda
             conectar_db_tienda(alias, tienda)
 
-            # Buscar cliente por correo
+            # Buscar cliente por correo (Cliente fiscal)
             cliente = Cliente.objects.using(alias).filter(correo__iexact=correo).first()
+            logger.info(f'[CUPONES] Buscando Cliente fiscal para correo={correo}, encontrado={cliente is not None}')
 
+            # Si no se encuentra Cliente fiscal, buscar ClienteTienda (usuario e-commerce)
+            cliente_tienda = None
             if not cliente:
-                return Response(
-                    {'detail': 'No se encontró un cliente con ese correo.'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+                from .models import ClienteTienda
+                cliente_tienda = ClienteTienda.objects.using(alias).filter(email__iexact=correo).first()
+                logger.info(f'[CUPONES] Buscando ClienteTienda para correo={correo}, encontrado={cliente_tienda is not None}')
+
+                if not cliente_tienda:
+                    # No existe ningún usuario (ni fiscal ni e-commerce) con ese correo
+                    logger.warning(f'[CUPONES] No se encontró ningún cliente con correo={correo}')
+                    return Response(
+                        {'detail': 'No se encontró un cliente con ese correo.'},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+
+                # Usar el Cliente fiscal asociado al ClienteTienda (puede ser None)
+                cliente = cliente_tienda.cliente
+                logger.info(f'[CUPONES] Cliente fiscal asociado al ClienteTienda: {cliente is not None}')
+
+            # Si no hay Cliente fiscal (ni directo ni asociado al ClienteTienda), retornar vacío
+            if not cliente:
+                logger.info(f'[CUPONES] Usuario existe pero sin registro fiscal, retornando vacío')
+                return Response({
+                    'cliente_id': cliente_tienda.id if cliente_tienda else None,
+                    'cliente_nombre': correo,
+                    'cupones': [],
+                    'total_cupones': 0,
+                    'mensaje': 'Usuario encontrado pero sin registro fiscal. Completa tu perfil para recibir cupones.'
+                }, status=status.HTTP_200_OK)
 
             # Obtener cupones del cliente (solo activos y con disponibilidad)
             qs = (
@@ -287,13 +312,16 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
                 .filter(cliente=cliente, activo=True, cantidad_disponible__gt=0)
                 .select_related('cupon')
             )
+            logger.info(f'[CUPONES] Cliente ID={cliente.id}, cupones encontrados (antes de filtro vencimiento)={len(qs)}')
 
             # Filtrar cupones no vencidos
             hoy = timezone.now().date()
             qs = [obj for obj in qs if obj.cupon.fecha_vencimiento is None or obj.cupon.fecha_vencimiento >= hoy]
+            logger.info(f'[CUPONES] Cupones después de filtro vencimiento={len(qs)}')
 
             # Calcular total de cupones disponibles
             total_cupones = sum(obj.cantidad_disponible for obj in qs)
+            logger.info(f'[CUPONES] Total cupones disponibles={total_cupones}')
 
             serializer = self.get_serializer(qs, many=True)
 
