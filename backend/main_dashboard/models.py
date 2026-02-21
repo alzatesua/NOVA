@@ -999,9 +999,16 @@ class Cupon(models.Model):
 
 
 class ClienteCupon(models.Model):
-    """Relación entre un cliente y un cupón asignado."""
-    cliente = models.ForeignKey(
-        Cliente, on_delete=models.CASCADE, related_name='cupones_asignados'
+    """
+    Relación entre un ClienteTienda (usuario e-commerce) y un cupón asignado.
+    El cliente_fiscal es opcional y se usa para reportes o integración con facturación.
+    """
+    cliente_tienda = models.ForeignKey(
+        'ClienteTienda', on_delete=models.CASCADE, related_name='cupones_asignados',
+        null=True, blank=True
+    )
+    cliente_fiscal = models.ForeignKey(
+        Cliente, on_delete=models.SET_NULL, null=True, blank=True, related_name='cupones_fiscales'
     )
     cupon = models.ForeignKey(
         Cupon, on_delete=models.CASCADE, related_name='clientes_asignados'
@@ -1015,10 +1022,12 @@ class ClienteCupon(models.Model):
         db_table = 'cliente_cupones'
         verbose_name = 'Cupón de Cliente'
         verbose_name_plural = 'Cupones de Clientes'
-        unique_together = ('cliente', 'cupon')
+        unique_together = (('cliente_tienda', 'cupon'),)
 
     def __str__(self):
-        return f'{self.cliente} - {self.cupon.nombre} (x{self.cantidad_disponible})'
+        if self.cliente_tienda:
+            return f'{self.cliente_tienda.email} - {self.cupon.nombre} (x{self.cantidad_disponible})'
+        return f'Cliente Fiscal - {self.cupon.nombre} (x{self.cantidad_disponible})'
 
 
 # =========================

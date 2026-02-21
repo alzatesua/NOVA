@@ -36,8 +36,20 @@ function getRandomColor() {
 }
 
 export default function Navbar({ rol: propRol, onViewChange, onLogout, currentView }) {
-  const adminButtons = ['dashboard', 'usuarios', 'sucursales', 'productos', 'configuracion', 'facturacion'];
-  const operarioButtons = ['entrada', 'productos', 'facturacion'];
+  const adminButtons = ['dashboard', 'usuarios', 'sucursales', 'productos', 'clientes', 'configuracion', 'facturacion'];
+  const operarioButtons = ['entrada', 'productos', 'clientes', 'facturacion'];
+
+  // Mapeo para mostrar nombres personalizados en los botones
+  const viewLabels = {
+    'dashboard': 'Dashboard',
+    'usuarios': 'Usuarios',
+    'sucursales': 'Sucursales',
+    'productos': 'Productos',
+    'clientes': 'Gestion clientes',
+    'configuracion': 'Configuracion',
+    'facturacion': 'Facturacion',
+    'entrada': 'Entrada'
+  };
 
   const { usuario, rol } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -88,7 +100,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
               currentView === view ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 pb-1 font-bold' : ''
             }`}
           >
-            {view.charAt(0).toUpperCase() + view.slice(1)}
+            {viewLabels[view] || (view.charAt(0).toUpperCase() + view.slice(1))}
           </button>
         ))}
       </div>

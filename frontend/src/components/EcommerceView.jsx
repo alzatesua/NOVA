@@ -1506,14 +1506,6 @@ export default function EcommerceView() {
                   <span>Infórmate</span>
                 </button>
 
-                <button
-                  onClick={() => setActiveSection('infórmate')}
-                  className={`nav-btn-futuristic ${activeSection === 'infórmate' ? 'active' : ''}`}
-                >
-                  <BookOpen size={18} strokeWidth={2} />
-                  <span>Infórmate</span>
-                </button>
-
                 {/* Dropdown de Categorías */}
                 {categories.length > 0 && (
                   <div style={{ position: 'relative', display: 'inline-block' }} ref={dropdownRef}>
@@ -2249,7 +2241,7 @@ export default function EcommerceView() {
                         <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-1">
                           <span style={{ color: COLORS.grisMedio }}>Stock:</span>
                           <span className="font-semibold text-center" style={{ color: COLORS.verdeOscuro }}>
-                            {selectedProduct.stock || 'Disponible'}
+                            {selectedProduct.stock !== undefined && selectedProduct.stock !== null ? `${selectedProduct.stock} unidades` : 'Consultar'}
                           </span>
                         </div>
                         <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-1">
@@ -2420,6 +2412,320 @@ export default function EcommerceView() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sección INFORMATE - Movilidad Eléctrica en Pereira y Risaralda */}
+      {activeSection === 'informate' && (
+        <div className="py-8 px-4">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-12">
+              <h1 className="text-4xl sm:text-5xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+                Movilidad Eléctrica en Pereira
+              </h1>
+              <p className="text-lg" style={{ color: COLORS.grisMedio }}>
+                Todo lo que necesitas saber sobre transporte eléctrico en Risaralda
+              </p>
+            </div>
+
+            {/* Sección 1: ¿Qué es la Movilidad Eléctrica? */}
+            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: COLORS.blanco }}>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+                ⚡ ¿Qué es la Movilidad Eléctrica?
+              </h2>
+              <p className="mb-4" style={{ color: COLORS.grisOscuro }}>
+                La movilidad eléctrica es el uso de vehículos propulsados por energía eléctrica como alternativa a los combustibles fósiles. En Pereira y Risaralda, esto incluye:
+              </p>
+              <ul className="space-y-2 ml-6" style={{ color: COLORS.grisOscuro }}>
+                <li>• <strong>Motos Eléctricas:</strong> Vehículos de dos ruedas 100% eléctricos</li>
+                <li>• <strong>Bisimotos:</strong> Bicicletas eléctricas con pedaleo asistido</li>
+                <li>• <strong>VEs (Vehículos Eléctricos):</strong> Automóviles y camiones eléctricos</li>
+                <li>• <strong>Electromovilidad:</strong> Toda la infraestructura y ecosistema de transporte eléctrico</li>
+              </ul>
+            </div>
+
+            {/* Sección 2: Requisitos Legales en Colombia */}
+            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: COLORS.beigeCrema }}>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+                📋 Requisitos Legales en Colombia
+              </h2>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Motos Eléctricas */}
+                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.blanco }}>
+                  <h3 className="text-xl font-bold mb-3" style={{ color: COLORS.verdePrincipal }}>
+                    🛵 Motos Eléctricas
+                  </h3>
+                  <ul className="space-y-2 text-sm" style={{ color: COLORS.grisOscuro }}>
+                    <li>✓ Licencia de conducción válida (categoría A2 para motos {'>'} 50cc)</li>
+                    <li>✓ SOAT obligatorio (puedes obtenerlo en línea)</li>
+                    <li>✓ Tecnomecánica anual</li>
+                    <li>✓ Seguro obligatorio</li>
+                    <li>✓ Registro en RUNT (Registro Nacional de Tránsito)</li>
+                    <li>✓ Tarjeta de propiedad</li>
+                    <li>✓ <strong>NO requieren placas</strong> si son menores de 50cc (Bisimotos)</li>
+                  </ul>
+                </div>
+
+                {/* Bisimotos */}
+                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.blanco }}>
+                  <h3 className="text-xl font-bold mb-3" style={{ color: COLORS.verdePrincipal }}>
+                    🚴 Bisimotos (Bicicletas Eléctricas)
+                  </h3>
+                  <ul className="space-y-2 text-sm" style={{ color: COLORS.grisOscuro }}>
+                    <li>✓ <strong>NO requieren licencia</strong> de conducción</li>
+                    <li>✓ <strong>NO requieren SOAT</strong></li>
+                    <li>✓ <strong>NO requieren placa</strong></li>
+                    <li>✓ Motor máximo 500W</li>
+                    <li>✓ Velocidad máxima 25 km/h</li>
+                    <li>✓ Uso obligatorio de casco</li>
+                    <li>✓ Deben circular por ciclovías o carriles exclusivos</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Sección 3: Beneficios de la Movilidad Eléctrica */}
+            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: COLORS.verdeClaro }}>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+                🌱 Beneficios de la Movilidad Eléctrica
+              </h2>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="p-4 rounded-xl bg-white">
+                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdePrincipal }}>💰 Económico</h4>
+                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
+                    Ahorra hasta 80% en combustible y 60% en mantenimiento
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-white">
+                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdePrincipal }}>🌍 Ecológico</h4>
+                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
+                    0% de emisiones directas de CO2 y contaminación acústica
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-white">
+                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdePrincipal }}>⚡ Eficiente</h4>
+                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
+                    90% de eficiencia energética vs 20% de motores de combustión
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-white">
+                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdePrincipal }}>🔇 Silencioso</h4>
+                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
+                    Reduce la contaminación acústica en la ciudad
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-white">
+                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdePrincipal }}>🏃 Rápido</h4>
+                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
+                    Torque instantáneo y aceleración superior
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-white">
+                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdePrincipal }}>🔧 Fácil Mantenimiento</h4>
+                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
+                    Menos partes móviles, menos mantenimiento
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Sección 4: Recomendaciones */}
+            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: COLORS.blanco }}>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+                💡 Recomendaciones antes de Comprar
+              </h2>
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
+                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>1. Define tu Uso</h4>
+                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
+                    Considera la distancia diaria que recorres. Para viajes cortos (&lt;30km) un visimoto es ideal. Para mayores distancias, una moto eléctrica es mejor opción.
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
+                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>2. Verifica la Autonomía</h4>
+                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
+                    Asegúrate de que la autonomía real del vehículo cubra tus necesidades diarias. Considera factores como pendientes y peso del conductor.
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
+                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>3. Investiga la Infraestructura de Carga</h4>
+                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
+                    Verifica puntos de carga cercanos en Pereira. La mayoría se pueden cargar en casa con tomacorriente estándar.
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
+                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>4. Compara Marcas y Modelos</h4>
+                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
+                    Investiga reputación de la marca, garantía, disponibilidad de repuestos y servicio técnico en Pereira.
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
+                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>5. Calcula el ROI</h4>
+                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
+                    Aunque la inversión inicial es mayor, el ahorro en combustible y mantenimiento hace que se pague en 2-3 años.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Sección 5: Enlaces Oficiales */}
+            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: COLORS.verdePrincipal }}>
+              <h2 className="text-2xl font-bold mb-4 text-white">
+                🔗 Enlaces Oficiales y Recursos
+              </h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Ministerio de Transporte */}
+                <a
+                  href="https://www.mintransporte.gov.co/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 rounded-xl bg-white hover:bg-gray-100 transition-all flex items-center space-x-4"
+                >
+                  <div className="w-16 h-16 flex-shrink-0 flex items-center justify-center rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
+                    <img
+                      src="https://www.mintransporte.gov.co/sites/default/files/logo_mintransporte_0.png"
+                      alt="Ministerio de Transporte"
+                      className="w-14 h-14 object-contain"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<span class="text-3xl">🚛</span>';
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-1" style={{ color: COLORS.verdeOscuro }}>Ministerio de Transporte</h4>
+                    <p className="text-sm" style={{ color: COLORS.grisMedio }}>
+                      Normativa y regulación de vehículos eléctricos en Colombia
+                    </p>
+                  </div>
+                </a>
+
+                {/* Ministerio de Ambiente */}
+                <a
+                  href="https://www.minambiente.gov.co/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 rounded-xl bg-white hover:bg-gray-100 transition-all flex items-center space-x-4"
+                >
+                  <div className="w-16 h-16 flex-shrink-0 flex items-center justify-center rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
+                    <img
+                      src="https://www.minambiente.gov.co/wp-content/uploads/2021/03/Logo-MinAmbiente-Vertical-1.png"
+                      alt="Ministerio de Ambiente"
+                      className="w-14 h-14 object-contain"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<span class="text-3xl">🌿</span>';
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-1" style={{ color: COLORS.verdeOscuro }}>Ministerio de Ambiente</h4>
+                    <p className="text-sm" style={{ color: COLORS.grisMedio }}>
+                      Políticas de movilidad sostenible y electromovilidad
+                    </p>
+                  </div>
+                </a>
+
+                {/* Alcaldía de Pereira */}
+                <a
+                  href="https://www.pereira.gov.co/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 rounded-xl bg-white hover:bg-gray-100 transition-all flex items-center space-x-4"
+                >
+                  <div className="w-16 h-16 flex-shrink-0 flex items-center justify-center rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
+                    <img
+                      src="https://www.pereira.gov.co/sites/default/files/escudo-pereira.png"
+                      alt="Alcaldía de Pereira"
+                      className="w-14 h-14 object-contain"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<span class="text-3xl">🏛️</span>';
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-1" style={{ color: COLORS.verdeOscuro }}>Alcaldía de Pereira</h4>
+                    <p className="text-sm" style={{ color: COLORS.grisMedio }}>
+                      Información sobre movilidad y proyectos locales
+                    </p>
+                  </div>
+                </a>
+
+                {/* RUNT */}
+                <a
+                  href="https://www.runt.com.co/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 rounded-xl bg-white hover:bg-gray-100 transition-all flex items-center space-x-4"
+                >
+                  <div className="w-16 h-16 flex-shrink-0 flex items-center justify-center rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
+                    <img
+                      src="https://www.runt.com.co/contenido/contenido_/images/logo-runt.png"
+                      alt="RUNT"
+                      className="w-14 h-14 object-contain"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<span class="text-3xl">📋</span>';
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-1" style={{ color: COLORS.verdeOscuro }}>RUNT - Registro Nacional</h4>
+                    <p className="text-sm" style={{ color: COLORS.grisMedio }}>
+                      Consulta y trámites de vehículos y licencias
+                    </p>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            {/* Sección 6: Incentivos y Beneficios Tributarios */}
+            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: COLORS.blanco }}>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+                🎁 Incentivos y Beneficios en Colombia
+              </h2>
+              <ul className="space-y-3" style={{ color: COLORS.grisOscuro }}>
+                <li className="p-3 rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
+                  <strong>Exento de IVA:</strong> Los vehículos eléctricos están exentos del Impuesto al Valor Agregado (Ley 1819 de 2016)
+                </li>
+                <li className="p-3 rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
+                  <strong>Exento de Importación:</strong> 0% de arancel para importación de vehículos eléctricos (hasta 2027)
+                </li>
+                <li className="p-3 rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
+                  <strong>Descuento en Tecnomecánica:</strong> Hasta 50% de descuento en algunos municipios
+                </li>
+                <li className="p-3 rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
+                  <strong>Exento de Pico y Placa:</strong> Los vehículos 100% eléctricos están exentos en Bogotá y otras ciudades
+                </li>
+                <li className="p-3 rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
+                  <strong>Parqueaderos Gratuitos:</strong> En muchos centros comerciales y zonas públicas
+                </li>
+              </ul>
+            </div>
+
+            {/* Call to Action */}
+            <div className="text-center p-8 rounded-2xl shadow-lg" style={{ backgroundColor: COLORS.acentoNaranja }}>
+              <h2 className="text-2xl font-bold mb-4 text-white">
+                ¿Listo para dar el salto a la movilidad eléctrica?
+              </h2>
+              <p className="mb-6 text-white">
+                Explora nuestra tienda de vehículos eléctricos y Bisimotos en Pereira
+              </p>
+              <button
+                onClick={() => setActiveSection('productos')}
+                className="px-8 py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all"
+                style={{
+                  backgroundColor: COLORS.verdePrincipal,
+                  color: 'white'
+                }}
+              >
+                Ver Productos Eléctricos
+              </button>
             </div>
           </div>
         </div>

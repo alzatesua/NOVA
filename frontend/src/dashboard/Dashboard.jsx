@@ -8,6 +8,7 @@ import NoticiasView from '../components/NoticiasView';
 import DashboardView from '../components/DashboardView';
 import SucursalesGrid from '../components/SucursalesGrid';
 import ConfiguracionView from '../components/ConfiguracionView';
+import ClientesView from '../components/ClientesView';
 import { useFetchUsers } from '../hooks/useFetchUsers';
 import { useFetchSucursales } from '../hooks/useFetchSucursales';
 import { useAuth } from '../hooks/useAuth';
@@ -131,6 +132,14 @@ export default function Dashboard() {
           <div className="relative w-full mb-8 p-8 rounded-3xl
             bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
             <ConfiguracionView />
+          </div>
+        )}
+
+        {/* VISTA DE GESTIÓN DE CLIENTES - CUPONES Y CLIENTES */}
+        {view === 'clientes' && (
+          <div className="relative w-full mb-8 p-8 rounded-3xl
+            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
+            <ClientesView />
           </div>
         )}
 

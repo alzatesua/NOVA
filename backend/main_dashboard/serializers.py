@@ -1001,19 +1001,32 @@ class CuponSerializer(serializers.ModelSerializer):
 
 
 class ClienteCuponSerializer(serializers.ModelSerializer):
+    # Campos personalizados que aceptan int u objeto
+    cliente_tienda_id = serializers.IntegerField(required=True, write_only=True)
+    cliente_fiscal_id = serializers.IntegerField(required=False, allow_null=True, write_only=True)
+    cupon_id = serializers.IntegerField(required=True, write_only=True)
+
     cupon_detalle = CuponSerializer(source='cupon', read_only=True)
-    cliente_nombre = serializers.SerializerMethodField()
+    cliente_tienda_email = serializers.SerializerMethodField()
+    cliente_fiscal_nombre = serializers.SerializerMethodField()
 
     class Meta:
         model = ClienteCupon
         fields = [
-            'id', 'cliente', 'cliente_nombre', 'cupon', 'cupon_detalle',
-            'activo', 'cantidad_disponible', 'fecha_uso', 'creado_en'
+            'id', 'cliente_tienda', 'cliente_tienda_id', 'cliente_tienda_email',
+            'cliente_fiscal', 'cliente_fiscal_id', 'cliente_fiscal_nombre',
+            'cupon', 'cupon_id', 'cupon_detalle', 'activo', 'cantidad_disponible',
+            'fecha_uso', 'creado_en'
         ]
-        read_only_fields = ['id', 'creado_en']
+        read_only_fields = ['id', 'creado_en', 'cliente_tienda', 'cliente_fiscal', 'cupon']
 
-    def get_cliente_nombre(self, obj):
-        c = obj.cliente
+    def get_cliente_tienda_email(self, obj):
+        return obj.cliente_tienda.email if obj.cliente_tienda else ''
+
+    def get_cliente_fiscal_nombre(self, obj):
+        if not obj.cliente_fiscal:
+            return ''
+        c = obj.cliente_fiscal
         if c.tipo_persona == 'JUR':
             return c.razon_social or ''
         partes = filter(None, [c.primer_nombre, c.segundo_nombre, c.apellidos])

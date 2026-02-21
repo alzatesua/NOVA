@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
 from django.db import transaction
+from django.conf import settings
 
 from .models import Cupon, ClienteCupon, Cliente
 from .serializers import CuponSerializer, ClienteCuponSerializer
@@ -89,11 +90,11 @@ class CuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
 # ============================================================
 class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
     """
-    Gestiona la asignación de cupones a clientes y su uso.
+    Gestiona la asignación de cupones a ClienteTienda y su uso.
 
     Acciones adicionales:
     - POST /{id}/usar/  -> Usa un cupón (descuenta 1 de cantidad_disponible)
-    - GET  /cliente/{cliente_id}/  -> Lista cupones de un cliente
+    - GET  /cliente/{cliente_tienda_id}/  -> Lista cupones de un cliente
     """
     serializer_class = ClienteCuponSerializer
 
@@ -101,7 +102,7 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
         alias = self._resolve_alias(self.request)
         return (
             ClienteCupon.objects.using(alias)
-            .select_related('cliente', 'cupon')
+            .select_related('cliente_tienda', 'cliente_fiscal', 'cupon')
             .order_by('-creado_en')
         )
 
@@ -110,7 +111,7 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             alias = self._resolve_alias(request)
             qs = (
                 ClienteCupon.objects.using(alias)
-                .select_related('cliente', 'cupon')
+                .select_related('cliente_tienda', 'cliente_fiscal', 'cupon')
                 .order_by('-creado_en')
             )
             serializer = self.get_serializer(qs, many=True)
@@ -119,23 +120,82 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             return Response({'detail': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
     def create(self, request, *args, **kwargs):
-        """Asigna uno o varios cupones a un cliente."""
+        """
+        Asigna uno o varios cupones a un ClienteTienda.
+
+        Body esperado:
+        {
+            "subdominio": "tienda-abc",    // Requerido: identifica la tienda/BD
+            "usuario": "admin",              // Requerido: usuario de autenticación
+            "token": "xxx",                  // Requerido: token de autenticación
+            "cliente_tienda_id": 15,        // Requerido: ID del ClienteTienda (usuario e-commerce)
+            "cupon_id": 1,                   // Requerido: ID del cupón
+            "activo": true,                  // Opcional (default: true)
+            "cantidad_disponible": 1         // Opcional (default: 1)
+        }
+
+        O también puedes enviar subdominio, usuario y token por query params:
+        POST /api/cupones/cliente-cupones/?subdominio=tienda-abc&usuario=admin&token=xxx
+        """
+        from .models import ClienteTienda
+        from nova.utils.db import conectar_db_tienda
+
         try:
             alias = self._resolve_alias(request)
+
+            # Conectar a la BD de la tienda dinámicamente
+            subdom = request.data.get('subdominio') or request.query_params.get('subdominio')
+            if not subdom:
+                host = request.get_host().split(':')[0]
+                subdom = host.split('.')[0].lower()
+
+            dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).select_related('tienda').first()
+            if not dominio_obj or not dominio_obj.tienda:
+                return Response(
+                    {'detail': 'Dominio no válido.'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
+            tienda = dominio_obj.tienda
+            alias = str(tienda.id)
+            conectar_db_tienda(alias, tienda)
+
+            # Validar que cliente_tienda_id venga en la petición
+            if not request.data.get('cliente_tienda_id'):
+                return Response(
+                    {'detail': 'El campo cliente_tienda_id es requerido.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
-            cliente_id = serializer.validated_data['cliente'].id
-            cupon_id = serializer.validated_data['cupon'].id
+            # Obtener IDs de los campos _id
+            cliente_tienda_id = serializer.validated_data['cliente_tienda_id']
+            cupon_id = serializer.validated_data['cupon_id']
 
-            # Verificar que el cliente y el cupón existen en el tenant
-            cliente = Cliente.objects.using(alias).get(pk=cliente_id)
+            logger.info(f'[CUPONES] Buscando ClienteTienda ID={cliente_tienda_id} en alias={alias}')
+            logger.info(f'[CUPONES] DB name: {settings.DATABASES.get(alias, {}).get("NAME", "NOT_FOUND")}')
+
+            # Verificar que el ClienteTienda y el cupón existen en el tenant
+            cliente_tienda = ClienteTienda.objects.using(alias).get(pk=cliente_tienda_id)
             cupon = Cupon.objects.using(alias).get(pk=cupon_id)
 
+            logger.info(f'[CUPONES] ClienteTienda encontrado: {cliente_tienda.email}')
+
+            # Obtener el cliente_fiscal si existe
+            cliente_fiscal = None
+            if cliente_tienda.cliente_id:
+                try:
+                    cliente_fiscal = Cliente.objects.using(alias).get(pk=cliente_tienda.cliente_id)
+                except Cliente.DoesNotExist:
+                    pass
+
             obj, creado = ClienteCupon.objects.using(alias).get_or_create(
-                cliente=cliente,
+                cliente_tienda=cliente_tienda,
                 cupon=cupon,
                 defaults={
+                    'cliente_fiscal': cliente_fiscal,
                     'activo': serializer.validated_data.get('activo', True),
                     'cantidad_disponible': serializer.validated_data.get('cantidad_disponible', 1),
                 }
@@ -145,13 +205,16 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
                 cantidad_extra = serializer.validated_data.get('cantidad_disponible', 1)
                 obj.cantidad_disponible += cantidad_extra
                 obj.activo = True
+                # Actualizar cliente_fiscal si ahora existe y antes no
+                if cliente_fiscal and not obj.cliente_fiscal:
+                    obj.cliente_fiscal = cliente_fiscal
                 obj.save(using=alias)
 
             return Response(
                 self.get_serializer(obj).data,
                 status=status.HTTP_201_CREATED if creado else status.HTTP_200_OK
             )
-        except (Cliente.DoesNotExist, Cupon.DoesNotExist) as e:
+        except (ClienteTienda.DoesNotExist, Cupon.DoesNotExist) as e:
             return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             logger.error(f'Error asignando cupón: {e}')
@@ -201,10 +264,10 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             logger.error(f'Error usando cupón: {e}')
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['get'], url_path='cliente/(?P<cliente_id>[^/.]+)')
-    def por_cliente(self, request, cliente_id=None):
+    @action(detail=False, methods=['get'], url_path='cliente/(?P<cliente_tienda_id>[^/.]+)')
+    def por_cliente(self, request, cliente_tienda_id=None):
         """
-        Lista todos los cupones asignados a un cliente específico.
+        Lista todos los cupones asignados a un ClienteTienda específico.
         Acepta ?solo_activos=true para filtrar solo cupones vigentes.
         """
         try:
@@ -213,8 +276,8 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
 
             qs = (
                 ClienteCupon.objects.using(alias)
-                .filter(cliente_id=cliente_id)
-                .select_related('cupon')
+                .filter(cliente_tienda_id=cliente_tienda_id)
+                .select_related('cupon', 'cliente_fiscal')
             )
             if solo_activos:
                 qs = qs.filter(activo=True, cantidad_disponible__gt=0)
@@ -227,10 +290,10 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
     @action(detail=False, methods=['get', 'post'], url_path='mis-cupones')
     def mis_cupones(self, request):
         """
-        Lista los cupones del cliente por correo (API pública).
+        Lista los cupones del ClienteTienda por correo (API pública).
 
         Acepta parámetros en query string o en el body:
-        - correo: Correo del cliente (requerido)
+        - correo: Correo del ClienteTienda (requerido)
         - subdominio: Subdominio de la tienda (requerido)
 
         Retorna:
@@ -272,47 +335,26 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             from nova.utils.db import conectar_db_tienda
             conectar_db_tienda(alias, tienda)
 
-            # Buscar cliente por correo (Cliente fiscal)
-            cliente = Cliente.objects.using(alias).filter(correo__iexact=correo).first()
-            logger.info(f'[CUPONES] Buscando Cliente fiscal para correo={correo}, encontrado={cliente is not None}')
+            # Buscar ClienteTienda por correo (usuario e-commerce)
+            from .models import ClienteTienda
+            cliente_tienda = ClienteTienda.objects.using(alias).filter(email__iexact=correo).first()
+            logger.info(f'[CUPONES] Buscando ClienteTienda para correo={correo}, encontrado={cliente_tienda is not None}')
 
-            # Si no se encuentra Cliente fiscal, buscar ClienteTienda (usuario e-commerce)
-            cliente_tienda = None
-            if not cliente:
-                from .models import ClienteTienda
-                cliente_tienda = ClienteTienda.objects.using(alias).filter(email__iexact=correo).first()
-                logger.info(f'[CUPONES] Buscando ClienteTienda para correo={correo}, encontrado={cliente_tienda is not None}')
+            if not cliente_tienda:
+                # No existe ningún usuario e-commerce con ese correo
+                logger.warning(f'[CUPONES] No se encontró ningún ClienteTienda con correo={correo}')
+                return Response(
+                    {'detail': 'No se encontró un cliente con ese correo.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
 
-                if not cliente_tienda:
-                    # No existe ningún usuario (ni fiscal ni e-commerce) con ese correo
-                    logger.warning(f'[CUPONES] No se encontró ningún cliente con correo={correo}')
-                    return Response(
-                        {'detail': 'No se encontró un cliente con ese correo.'},
-                        status=status.HTTP_404_NOT_FOUND
-                    )
-
-                # Usar el Cliente fiscal asociado al ClienteTienda (puede ser None)
-                cliente = cliente_tienda.cliente
-                logger.info(f'[CUPONES] Cliente fiscal asociado al ClienteTienda: {cliente is not None}')
-
-            # Si no hay Cliente fiscal (ni directo ni asociado al ClienteTienda), retornar vacío
-            if not cliente:
-                logger.info(f'[CUPONES] Usuario existe pero sin registro fiscal, retornando vacío')
-                return Response({
-                    'cliente_id': cliente_tienda.id if cliente_tienda else None,
-                    'cliente_nombre': correo,
-                    'cupones': [],
-                    'total_cupones': 0,
-                    'mensaje': 'Usuario encontrado pero sin registro fiscal. Completa tu perfil para recibir cupones.'
-                }, status=status.HTTP_200_OK)
-
-            # Obtener cupones del cliente (solo activos y con disponibilidad)
+            # Obtener cupones del cliente_tienda (solo activos y con disponibilidad)
             qs = (
                 ClienteCupon.objects.using(alias)
-                .filter(cliente=cliente, activo=True, cantidad_disponible__gt=0)
-                .select_related('cupon')
+                .filter(cliente_tienda=cliente_tienda, activo=True, cantidad_disponible__gt=0)
+                .select_related('cupon', 'cliente_fiscal')
             )
-            logger.info(f'[CUPONES] Cliente ID={cliente.id}, cupones encontrados (antes de filtro vencimiento)={len(qs)}')
+            logger.info(f'[CUPONES] ClienteTienda ID={cliente_tienda.id}, cupones encontrados (antes de filtro vencimiento)={len(qs)}')
 
             # Filtrar cupones no vencidos
             hoy = timezone.now().date()
@@ -325,9 +367,23 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
 
             serializer = self.get_serializer(qs, many=True)
 
+            # Obtener nombre del cliente (fiscal si existe, sino email del tienda)
+            cliente_nombre = correo
+            if cliente_tienda.cliente_id:
+                try:
+                    cliente_fiscal = Cliente.objects.using(alias).get(pk=cliente_tienda.cliente_id)
+                    if cliente_fiscal.tipo_persona == 'JUR':
+                        cliente_nombre = cliente_fiscal.razon_social or correo
+                    else:
+                        partes = filter(None, [cliente_fiscal.primer_nombre, cliente_fiscal.segundo_nombre, cliente_fiscal.apellidos])
+                        cliente_nombre = ' '.join(partes) or correo
+                except Cliente.DoesNotExist:
+                    pass
+
             return Response({
-                'cliente_id': cliente.id,
-                'cliente_nombre': f"{cliente.primer_nombre or ''} {cliente.apellidos or ''}".strip() or cliente.razon_social or 'Cliente',
+                'cliente_tienda_id': cliente_tienda.id,
+                'cliente_id': cliente_tienda.cliente_id,
+                'cliente_nombre': cliente_nombre,
                 'cupones': serializer.data,
                 'total_cupones': total_cupones
             }, status=status.HTTP_200_OK)
