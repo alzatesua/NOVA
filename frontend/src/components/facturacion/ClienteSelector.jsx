@@ -1,13 +1,107 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { MagnifyingGlassIcon, UserPlusIcon, XMarkIcon, BuildingOfficeIcon, UserIcon } from '@heroicons/react/24/outline';
-import { buscarCliente, crearCliente } from '../../services/api';
+import { MagnifyingGlassIcon, UserPlusIcon, XMarkIcon, BuildingOfficeIcon, UserIcon, ExclamationTriangleIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { buscarCliente, crearCliente, fetchCiudades } from '../../services/api';
 import { showToast } from '../../utils/toast';
+import Select from 'react-select';
+
+// Componente: Selector de Ciudad con Búsqueda
+function CiudadSelector({ value, onChange, token, label = "Ciudad" }) {
+  const [ciudades, setCiudades] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+
+  const cargarCiudades = useCallback(async (search = '') => {
+    if (search.length < 2 && search !== '') return;
+
+    setLoading(true);
+    try {
+      const data = await fetchCiudades(token);
+      let ciudadesData = [];
+      if (Array.isArray(data)) {
+        ciudadesData = data;
+      } else if (data && typeof data === 'object') {
+        ciudadesData = data.cities || data.ciudades || data.results || [];
+      }
+
+      const normalizadas = ciudadesData.map(c => ({
+        nombre: c.nombre || c.name || c.ciudad || '',
+        ...c
+      })).filter(c => c.nombre);
+
+      const filtradas = search
+        ? normalizadas.filter(c =>
+            c.nombre.toLowerCase().includes(search.toLowerCase())
+          )
+        : normalizadas;
+
+      setCiudades(filtradas.slice(0, 50));
+    } catch (err) {
+      console.error('Error cargando ciudades:', err);
+      setCiudades([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => cargarCiudades(inputValue), 300);
+    return () => clearTimeout(timer);
+  }, [inputValue, cargarCiudades]);
+
+  const opciones = ciudades.map(c => ({
+    value: c.nombre,
+    label: c.nombre
+  })).filter(c => c.value && c.label);
+
+  const valorActual = value ? { value, label: value } : null;
+
+  return (
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">{label}</label>
+      <Select
+        value={valorActual}
+        onChange={(opcion) => onChange(opcion ? opcion.value : '')}
+        options={opciones}
+        inputValue={inputValue}
+        onInputChange={setInputValue}
+        isLoading={loading}
+        isClearable
+        placeholder="Selecciona una ciudad..."
+        noOptionsMessage={() => inputValue.length > 0 && inputValue.length < 2 ? 'Escribe al menos 2 caracteres' : 'Escribe para buscar...'}
+        loadingMessage={() => 'Buscando...'}
+        className="react-select-container"
+        classNamePrefix="react-select"
+        components={{
+          DropdownIndicator: () => (
+            <div className="p-2 text-gray-400">
+              <ChevronDownIcon className="h-5 w-5" />
+            </div>
+          ),
+          IndicatorSeparator: () => null,
+        }}
+      />
+    </div>
+  );
+}
 
 // Modal separado que se renderiza fuera del formulario padre
-function CrearClienteModal({ show, onClose, onCrear }) {
+function CrearClienteModal({ show, onClose, onCrear, token }) {
   const [tipoPersona, setTipoPersona] = useState('NAT');
   const [loading, setLoading] = useState(false);
+  const [errores, setErrores] = useState({});
+  const [formData, setFormData] = useState({
+    tipo_documento: '',
+    numero_documento: '',
+    primer_nombre: '',
+    segundo_nombre: '',
+    apellidos: '',
+    razon_social: '',
+    correo: '',
+    telefono: '',
+    direccion: '',
+    ciudad: ''
+  });
 
   if (!show) return null;
 
@@ -15,25 +109,35 @@ function CrearClienteModal({ show, onClose, onCrear }) {
     e.preventDefault();
     e.stopPropagation();
 
-    const formData = new FormData(e.target);
-    const tipo = formData.get('tipo_persona');
+    // Limpiar errores
+    setErrores({});
+
+    // Validar datos
+    const erroresValidacion = validarDatos(formData, tipoPersona);
+    if (Object.keys(erroresValidacion).length > 0) {
+      setErrores(erroresValidacion);
+      const primerError = Object.values(erroresValidacion)[0];
+      showToast('error', primerError);
+      return;
+    }
 
     // Construir datos según tipo de persona
     const datos = {
-      tipo_persona: tipo,
-      tipo_documento: formData.get('tipo_documento'),
-      numero_documento: formData.get('numero_documento'),
-      correo: formData.get('correo'),
-      telefono: formData.get('telefono'),
-      direccion: formData.get('direccion'),
+      tipo_persona: tipoPersona,
+      tipo_documento: formData.tipo_documento,
+      numero_documento: formData.numero_documento,
+      correo: formData.correo,
+      telefono: formData.telefono,
+      direccion: formData.direccion,
+      ciudad: formData.ciudad
     };
 
-    if (tipo === 'NAT') {
-      datos.primer_nombre = formData.get('primer_nombre');
-      datos.segundo_nombre = formData.get('segundo_nombre') || null;
-      datos.apellidos = formData.get('apellidos');
+    if (tipoPersona === 'NAT') {
+      datos.primer_nombre = formData.primer_nombre;
+      datos.segundo_nombre = formData.segundo_nombre || null;
+      datos.apellidos = formData.apellidos;
     } else {
-      datos.razon_social = formData.get('razon_social');
+      datos.razon_social = formData.razon_social;
       datos.primer_nombre = null;
       datos.segundo_nombre = null;
       datos.apellidos = null;
@@ -44,6 +148,85 @@ function CrearClienteModal({ show, onClose, onCrear }) {
       await onCrear(datos);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Función de validación
+  const validarDatos = (datos, tipo) => {
+    const errores = {};
+
+    if (tipo === 'NAT') {
+      if (!datos.primer_nombre?.trim()) errores.primer_nombre = 'El primer nombre es obligatorio';
+      if (!datos.apellidos?.trim()) errores.apellidos = 'Los apellidos son obligatorios';
+    } else {
+      if (!datos.razon_social?.trim()) errores.razon_social = 'La razón social es obligatoria';
+    }
+
+    if (!datos.tipo_documento) errores.tipo_documento = 'Selecciona el tipo de documento';
+    if (!datos.numero_documento?.trim()) {
+      errores.numero_documento = 'El número de documento es obligatorio';
+    } else if (datos.numero_documento.length < 5) {
+      errores.numero_documento = 'Debe tener al menos 5 caracteres';
+    }
+
+    if (!datos.correo?.trim()) {
+      errores.correo = 'El correo es obligatorio';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(datos.correo)) {
+        errores.correo = 'Email no válido. Ejemplo: cliente@ejemplo.com';
+      }
+    }
+
+    if (!datos.telefono?.trim()) {
+      errores.telefono = 'El teléfono es obligatorio';
+    } else if (datos.telefono.length < 7) {
+      errores.telefono = 'Debe tener al menos 7 dígitos';
+    }
+
+    return errores;
+  };
+
+  // Función para obtener mensajes de error amigables
+  const obtenerMensajeErrorAmigable = (err) => {
+    const msg = err.message || '';
+
+    if (msg.includes('Ya existe un cliente con este número de documento') ||
+        msg.includes('numero_documento') || msg.includes('unique')) {
+      return '⚠️ Este número de documento ya está registrado. Verifica los datos.';
+    }
+
+    if (msg.includes('required') || msg.includes('This field is required')) {
+      return '📝 Por favor completa todos los campos obligatorios';
+    }
+
+    if (msg.includes('email') || msg.includes('Enter a valid email')) {
+      return '📧 El correo electrónico no es válido';
+    }
+
+    if (msg.includes('TOKEN') || msg.includes('token') || msg.includes('Usuario no encontrado')) {
+      return '🔐 Tu sesión ha expirado. Recarga la página';
+    }
+
+    if (msg.includes('SESSION_EXPIRED') || msg.includes('fetch') || msg.includes('Network')) {
+      return '🌐 Error de conexión. Verifica tu internet';
+    }
+
+    return msg || 'Error al guardar el cliente. Intenta nuevamente.';
+  };
+
+  // Función auxiliar para clases de input con error
+  const clasesInput = (campo) => {
+    const tieneError = errores[campo];
+    return `w-full px-4 py-2.5 ${tieneError ? 'pr-10 border-red-500 bg-red-50' : 'border-gray-300'} border rounded-xl focus:outline-none focus:ring-2 ${tieneError ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-blue-500 focus:border-transparent'} transition-all`;
+  };
+
+  // Update form data handler
+  const updateField = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error for this field when user starts typing
+    if (errores[field]) {
+      setErrores(prev => ({ ...prev, [field]: null }));
     }
   };
 
@@ -77,14 +260,14 @@ function CrearClienteModal({ show, onClose, onCrear }) {
         </div>
 
         {/* Body */}
-        <form onSubmit={handleCrearCliente} className="p-6 space-y-5">
+        <form onSubmit={handleCrearCliente} className="p-6 space-y-4">
           {/* Tipo de Persona */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Tipo de Persona</label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setTipoPersona('NAT')}
+                onClick={() => { setTipoPersona('NAT'); setErrores({}); }}
                 className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
                   tipoPersona === 'NAT'
                     ? 'border-blue-500 bg-blue-50 text-blue-700'
@@ -96,7 +279,7 @@ function CrearClienteModal({ show, onClose, onCrear }) {
               </button>
               <button
                 type="button"
-                onClick={() => setTipoPersona('JUR')}
+                onClick={() => { setTipoPersona('JUR'); setErrores({}); }}
                 className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
                   tipoPersona === 'JUR'
                     ? 'border-blue-500 bg-blue-50 text-blue-700'
@@ -107,7 +290,6 @@ function CrearClienteModal({ show, onClose, onCrear }) {
                 <span className="font-medium">Jurídica</span>
               </button>
             </div>
-            <input type="hidden" name="tipo_persona" value={tipoPersona} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -115,8 +297,9 @@ function CrearClienteModal({ show, onClose, onCrear }) {
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Tipo Documento</label>
               <select
-                name="tipo_documento"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                value={formData.tipo_documento}
+                onChange={(e) => updateField('tipo_documento', e.target.value)}
+                className={clasesInput('tipo_documento')}
                 required
               >
                 <option value="">Seleccionar...</option>
@@ -124,19 +307,26 @@ function CrearClienteModal({ show, onClose, onCrear }) {
                 <option value="NIT">NIT</option>
                 <option value="CE">Cédula Extranjería</option>
                 <option value="TI">Tarjeta Identidad</option>
+                <option value="PP">Pasaporte</option>
               </select>
+              {errores.tipo_documento && <p className="mt-1 text-xs text-red-600">{errores.tipo_documento}</p>}
             </div>
 
             {/* Número Documento */}
-            <div>
+            <div className="relative">
               <label className="block text-sm font-semibold text-gray-700 mb-2">Número</label>
               <input
                 type="text"
-                name="numero_documento"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                value={formData.numero_documento}
+                onChange={(e) => updateField('numero_documento', e.target.value)}
+                className={clasesInput('numero_documento')}
                 placeholder="12345678"
                 required
               />
+              {errores.numero_documento && (
+                <ExclamationTriangleIcon className="absolute right-3 top-9 h-5 w-5 text-red-500 pointer-events-none" />
+              )}
+              {errores.numero_documento && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{errores.numero_documento}</p>}
             </div>
           </div>
 
@@ -147,18 +337,21 @@ function CrearClienteModal({ show, onClose, onCrear }) {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Primer Nombre *</label>
                   <input
                     type="text"
-                    name="primer_nombre"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    value={formData.primer_nombre}
+                    onChange={(e) => updateField('primer_nombre', e.target.value)}
+                    className={clasesInput('primer_nombre')}
                     placeholder="Juan"
                     required
                   />
+                  {errores.primer_nombre && <p className="mt-1 text-xs text-red-600">{errores.primer_nombre}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Segundo Nombre</label>
                   <input
                     type="text"
-                    name="segundo_nombre"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    value={formData.segundo_nombre}
+                    onChange={(e) => updateField('segundo_nombre', e.target.value)}
+                    className={clasesInput('segundo_nombre')}
                     placeholder="Carlos"
                   />
                 </div>
@@ -167,11 +360,13 @@ function CrearClienteModal({ show, onClose, onCrear }) {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Apellidos *</label>
                 <input
                   type="text"
-                  name="apellidos"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  value={formData.apellidos}
+                  onChange={(e) => updateField('apellidos', e.target.value)}
+                  className={clasesInput('apellidos')}
                   placeholder="Pérez García"
                   required
                 />
+                {errores.apellidos && <p className="mt-1 text-xs text-red-600">{errores.apellidos}</p>}
               </div>
             </div>
           ) : (
@@ -179,40 +374,64 @@ function CrearClienteModal({ show, onClose, onCrear }) {
               <label className="block text-sm font-semibold text-gray-700 mb-2">Razón Social *</label>
               <input
                 type="text"
-                name="razon_social"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                value={formData.razon_social}
+                onChange={(e) => updateField('razon_social', e.target.value)}
+                className={clasesInput('razon_social')}
                 placeholder="Mi Empresa SAS"
                 required
               />
+              {errores.razon_social && <p className="mt-1 text-xs text-red-600">{errores.razon_social}</p>}
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="relative">
               <label className="block text-sm font-semibold text-gray-700 mb-2">Teléfono</label>
               <input
                 type="tel"
-                name="telefono"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                value={formData.telefono}
+                onChange={(e) => updateField('telefono', e.target.value)}
+                className={clasesInput('telefono')}
                 placeholder="300 123 4567"
+                required
               />
+              {errores.telefono && (
+                <ExclamationTriangleIcon className="absolute right-3 top-9 h-5 w-5 text-red-500 pointer-events-none" />
+              )}
+              {errores.telefono && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{errores.telefono}</p>}
             </div>
-            <div>
+            <div className="relative">
               <label className="block text-sm font-semibold text-gray-700 mb-2">Correo</label>
               <input
                 type="email"
-                name="correo"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                value={formData.correo}
+                onChange={(e) => updateField('correo', e.target.value)}
+                className={clasesInput('correo')}
                 placeholder="correo@ejemplo.com"
+                required
               />
+              {errores.correo && (
+                <ExclamationTriangleIcon className="absolute right-3 top-9 h-5 w-5 text-red-500 pointer-events-none" />
+              )}
+              {errores.correo && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{errores.correo}</p>}
             </div>
+          </div>
+
+          <div>
+            <CiudadSelector
+              value={formData.ciudad}
+              onChange={(value) => updateField('ciudad', value)}
+              token={token}
+              label="Ciudad"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Dirección</label>
             <input
               type="text"
-              name="direccion"
+              value={formData.direccion}
+              onChange={(e) => updateField('direccion', e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               placeholder="Calle 123 #45-67"
             />
@@ -222,7 +441,7 @@ function CrearClienteModal({ show, onClose, onCrear }) {
           <div className="flex gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => { onClose(); setErrores(); setFormData({ tipo_documento: '', numero_documento: '', primer_nombre: '', segundo_nombre: '', apellidos: '', razon_social: '', correo: '', telefono: '', direccion: '', ciudad: '' }); }}
               disabled={loading}
               className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -287,14 +506,9 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
             usuario,
             subdominio
           });
-          
-          console.log('Response completa:', response);
-          console.log('Clientes encontrados:', response.clientes || response);
-          
+
           // Intentar ambas estructuras de respuesta
           const clientesEncontrados = response.clientes || response || [];
-          
-          console.log('Setting searchResults con:', clientesEncontrados);
           setSearchResults(clientesEncontrados);
         } catch (error) {
           console.error('Error buscando cliente:', error);
@@ -335,8 +549,36 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
       setShowCreateForm(false);
       showToast('success', 'Cliente creado correctamente');
     } catch (error) {
-      showToast('error', error.message || 'Error al crear cliente');
+      const mensajeError = obtenerMensajeError(error);
+      showToast('error', mensajeError);
     }
+  };
+
+  const obtenerMensajeError = (err) => {
+    const msg = err.message || '';
+
+    if (msg.includes('Ya existe un cliente con este número de documento') ||
+        msg.includes('numero_documento') || msg.includes('unique')) {
+      return 'Este número de documento ya está registrado';
+    }
+
+    if (msg.includes('required') || msg.includes('This field is required')) {
+      return 'Completa todos los campos obligatorios';
+    }
+
+    if (msg.includes('email') || msg.includes('Enter a valid email')) {
+      return 'El correo electrónico no es válido';
+    }
+
+    if (msg.includes('TOKEN') || msg.includes('token') || msg.includes('Usuario no encontrado')) {
+      return 'Tu sesión ha expirado. Recarga la página';
+    }
+
+    if (msg.includes('SESSION_EXPIRED') || msg.includes('fetch') || msg.includes('Network')) {
+      return 'Error de conexión. Verifica tu internet';
+    }
+
+    return msg || 'Error al crear el cliente. Intenta nuevamente.';
   };
 
   // Calcular posición del dropdown
@@ -405,8 +647,6 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
             style={getDropdownPosition()}
           >
             {(() => {
-              console.log('Renderizando dropdown - loading:', loading, 'searchResults.length:', searchResults.length, 'searchResults:', searchResults);
-              
               if (loading && searchResults.length === 0) {
                 return (
                   <div className="p-4 text-center">
@@ -488,6 +728,7 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
         show={showCreateForm}
         onClose={() => setShowCreateForm(false)}
         onCrear={handleCrearCliente}
+        token={tokenUsuario}
       />
     </>
   );

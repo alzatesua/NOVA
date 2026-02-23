@@ -128,12 +128,97 @@ class ClienteViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         alias = self._resolve_alias(self.request)
-        return Cliente.objects.using(alias).all().order_by('nombre')
+        return Cliente.objects.using(alias).all().order_by('primer_nombre', 'apellidos', 'razon_social')
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
-        ctx['db_alias'] = self._resolve_alias(self.request)
+        try:
+            # Resolver alias sin requerir autenticación completa
+            # El token se validará por separado si es necesario
+            ctx['db_alias'] = self._resolve_alias(self.request, require_auth=False)
+        except Exception:
+            # Si falla, usar default
+            ctx['db_alias'] = 'default'
         return ctx
+
+    def get_object(self):
+        """Obtiene el cliente usando el alias de base de datos correcto"""
+        obj = super().get_object()
+        # No necesitamos hacer nada especial aquí porque el queryset
+        # ya usa el alias correcto desde get_queryset()
+        return obj
+
+    def create(self, request, *args, **kwargs):
+        """Crear un nuevo cliente"""
+        try:
+            # Para crear clientes, solo necesitamos el subdominio, no validamos el token
+            alias = self._resolve_alias(request, require_auth=False)
+
+            logger.info(f"ClienteViewSet.create - alias: {alias}")
+            logger.info(f"ClienteViewSet.create - request.data keys: {request.data.keys()}")
+
+            # Eliminar campos de autenticación del request.data antes de pasar al serializer
+            data = request.data.copy()
+            for key in ['usuario', 'token', 'subdominio']:
+                data.pop(key, None)
+
+            logger.info(f"ClienteViewSet.create - data despues de pop: {data.keys()}")
+
+            # Pasar el db_alias en el contexto del serializer
+            serializer = self.get_serializer(data=data)
+            serializer.context['db_alias'] = alias
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        except ValueError as e:
+            # Error de validación de token/credenciales
+            logger.error(f"Error creando cliente (ValueError): {str(e)}")
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        except Exception as e:
+            logger.error(f"Error creando cliente: {str(e)}", exc_info=True)
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def perform_create(self, serializer):
+        """Guarda el cliente usando el alias correcto"""
+        serializer.save()
+
+    def update(self, request, *args, **kwargs):
+        """Actualiza un cliente existente"""
+        try:
+            alias = self._resolve_alias(request)
+            partial = kwargs.pop('partial', False)
+            instance = self.get_object()
+
+            # Eliminar campos de autenticación del request.data
+            data = request.data.copy()
+            for key in ['usuario', 'token', 'subdominio']:
+                data.pop(key, None)
+
+            serializer = self.get_serializer(instance, data=data, partial=partial)
+            # Pasar el db_alias en el contexto
+            serializer.context['db_alias'] = alias
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def partial_update(self, request, *args, **kwargs):
+        """Actualización parcial de un cliente"""
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
 
     @action(detail=False, methods=['post'])
     def buscar(self, request):

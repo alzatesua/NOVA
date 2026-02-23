@@ -111,7 +111,18 @@ async function post(endpoint, body, token, skipRefresh = false) {
       responseBody: json
     });
 
-    const msg = json?.mensaje || json?.detail || res.statusText;
+    // Extraer mensaje de error de diferentes formatos
+    let msg = json?.mensaje || json?.detail || res.statusText;
+
+    // Si es un error de validación de Django REST Framework
+    if (json && typeof json === 'object') {
+      // Buscar errores de campos específicos
+      const firstFieldError = Object.keys(json).find(key => Array.isArray(json[key]) && json[key].length > 0);
+      if (firstFieldError && json[firstFieldError][0]) {
+        msg = json[firstFieldError][0];
+      }
+    }
+
     throw { message: msg, details: json };
   }
 
@@ -859,6 +870,37 @@ export function crearCliente({ token, usuario, subdominio, datos }) {
     token,
     subdominio,
     ...datos
+  }, token);
+}
+
+// Editar cliente (PATCH - actualización parcial)
+export function editarCliente({ clienteId, token, usuario, subdominio, datos }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post(`api/facturacion/clientes/${clienteId}/`, {
+    usuario,
+    token,
+    subdominio,
+    ...datos
+  }, token);
+}
+
+// Obtener un cliente por ID
+export function obtenerCliente({ clienteId, token, usuario, subdominio }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post(`api/facturacion/clientes/${clienteId}/`, {
+    usuario,
+    token,
+    subdominio
+  }, token);
+}
+
+// Listar todos los clientes
+export function listarClientes({ token, usuario, subdominio }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/clientes/', {
+    usuario,
+    token,
+    subdominio
   }, token);
 }
 

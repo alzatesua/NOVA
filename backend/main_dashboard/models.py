@@ -592,7 +592,7 @@ class Cliente(models.Model):
 
     # Comunes
     tipo_documento = models.CharField(max_length=3, choices=TIPO_DOCUMENTO_CHOICES, blank=True, null=True)
-    numero_documento = models.CharField(max_length=50, blank=True, null=True, db_index=True)
+    numero_documento = models.CharField(max_length=50, blank=True, null=True, db_index=True, unique=True)
     correo = models.EmailField(blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     direccion = models.CharField(max_length=255, blank=True, null=True)

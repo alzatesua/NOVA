@@ -261,3 +261,304 @@
     color-adjust: exact !important;
   }
 }
+
+/* ========================================
+   REACT SELECT
+   ======================================== */
+.react-select-container {
+  position: relative;
+  z-index: 9999;
+}
+
+.react-select__control {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: none !important;
+  background-color: var(--bg-elevated) !important;
+  transition: border-color 150ms, box-shadow 150ms;
+  min-height: 48px !important;
+}
+
+.react-select__control:hover {
+  border-color: var(--border-color-hover) !important;
+}
+
+.react-select__control:focus-within {
+  border-color: var(--border-color-focus) !important;
+  box-shadow: 0 0 0 3px var(--focus-ring) !important;
+}
+
+.react-select__value-container {
+  padding: 0.375rem 0.75rem !important;
+}
+
+.react-select__single-value {
+  color: var(--text-primary) !important;
+}
+
+.react-select__placeholder {
+  color: var(--text-muted) !important;
+}
+
+.react-select__input {
+  color: var(--text-primary) !important;
+}
+
+.react-select__menu {
+  position: absolute !important;
+  z-index: 9999 !important;
+  background-color: rgb(255, 255, 255) !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 0.25rem !important;
+}
+
+/* Modo oscuro para el menú */
+.dark .react-select__menu {
+  background-color: rgb(30, 41, 59) !important;
+  border-color: #475569 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
+}
+
+.react-select__menu-list {
+  padding: 0.25rem !important;
+  background-color: transparent !important;
+}
+
+.react-select__option {
+  background-color: transparent !important;
+  color: rgb(15, 23, 42) !important;
+  padding: 0.5rem 0.75rem !important;
+  cursor: pointer;
+}
+
+.dark .react-select__option {
+  color: rgb(241, 245, 249) !important;
+}
+
+.react-select__option:hover {
+  background-color: rgb(241, 245, 249) !important;
+}
+
+.dark .react-select__option:hover {
+  background-color: rgb(51, 65, 85) !important;
+}
+
+.react-select__option--is-focused {
+  background-color: rgb(241, 245, 249) !important;
+}
+
+.dark .react-select__option--is-focused {
+  background-color: rgb(51, 65, 85) !important;
+}
+
+.react-select__option--is-selected {
+  background-color: rgb(37, 99, 235) !important;
+  color: rgb(255, 255, 255) !important;
+}
+
+.react-select__dropdown-indicator {
+  padding: 0.5rem !important;
+}
+
+.react-select__indicator-separator {
+  display: none;
+}
+
+/* Scrollbar personalizado para react-select */
+.react-select__menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.react-select__menu::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 3px;
+}
+
+.react-select__menu::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.react-select__menu::-webkit-scrollbar-thumb:hover {
+  background: var(--border-color-hover);
+}
+
+/* ========================================
+   SELECT NATIVO
+   ======================================== */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+.dark select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+
+select option {
+  background-color: rgb(255, 255, 255);
+  color: rgb(15, 23, 42);
+}
+
+.dark select option {
+  background-color: rgb(30, 41, 59) !important;
+  color: rgb(241, 245, 249) !important;
+}
+
+.dark select option:hover {
+  background-color: rgb(51, 65, 85) !important;
+}
+
+.dark select option:checked {
+  background-color: rgb(37, 99, 235) !important;
+  color: rgb(255, 255, 255) !important;
+}
+
+/* ========================================
+   INPUTS Y TEXTAREA
+   ======================================== */
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: rgb(148, 163 184);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-primary);
+  -webkit-box-shadow: 0 0 0px 1000px var(--bg-elevated) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark textarea:-webkit-autofill,
+.dark textarea:-webkit-autofill:hover,
+.dark textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: rgb(241, 245, 249);
+  -webkit-box-shadow: 0 0 0px 1000px rgb(30, 41, 59) inset;
+}
+
+/* Asegurar que los inputs y selects respeten el modo oscuro */
+.dark input,
+.dark select,
+.dark textarea {
+  color-scheme: dark;
+}
+
+/* Forzar que el menú de react-select respete el modo oscuro dentro de modales */
+.dark .react-select__menu {
+  background-color: rgb(30, 41, 59) !important;
+  border-color: rgb(71, 85, 105) !important;
+}
+
+.dark .react-select__option {
+  color: rgb(241, 245, 249) !important;
+}
+
+.dark .react-select__option:hover,
+.dark .react-select__option--is-focused {
+  background-color: rgb(51, 65, 85) !important;
+}
+
+.dark .react-select__single-value {
+  color: rgb(241, 245, 249) !important;
+}
+
+.dark .react-select__placeholder {
+  color: rgb(148, 163, 184) !important;
+}
+
+.dark .react-select__input {
+  color: rgb(241, 245, 249) !important;
+}
+
+.dark .react-select__dropdown-indicator,
+.dark .react-select__clear-indicator {
+  color: rgb(148, 163, 184) !important;
+}
+
+.dark .react-select__dropdown-indicator:hover,
+.dark .react-select__clear-indicator:hover {
+  color: rgb(203, 213, 225) !important;
+}
+
+/* ========================================
+   MODOS OSCURO FORZADO (cuando document tiene clase dark)
+   ======================================== */
+
+/* Detectar modo oscuro por atributo en el documento */
+body.dark .react-select__menu,
+html.dark .react-select__menu,
+:root:has(.dark) .react-select__menu,
+[class*="dark"] .react-select__menu {
+  background-color: rgb(30, 41, 59) !important;
+  border-color: rgb(71, 85, 105) !important;
+}
+
+body.dark .react-select__option,
+html.dark .react-select__option,
+:root:has(.dark) .react-select__option,
+[class*="dark"] .react-select__option {
+  color: rgb(241, 245, 249) !important;
+}
+
+body.dark .react-select__option:hover,
+html.dark .react-select__option:hover,
+body.dark .react-select__option--is-focused,
+html.dark .react-select__option--is-focused,
+:root:has(.dark) .react-select__option:hover,
+:root:has(.dark) .react-select__option--is-focused,
+[class*="dark"] .react-select__option:hover,
+[class*="dark"] .react-select__option--is-focused {
+  background-color: rgb(51, 65, 85) !important;
+}
+
+/* Select nativo - forzar modo oscuro globalmente */
+@media (prefers-color-scheme: dark) {
+  select option {
+    background-color: rgb(30, 41, 59) !important;
+    color: rgb(241, 245, 249) !important;
+  }
+}
+
+/* Si el body o html tiene clase dark */
+body.dark select option,
+html.dark select option,
+body.dark select option:hover,
+html.dark select option:hover,
+body.dark select option:checked,
+html.dark select option:checked {
+  background-color: rgb(30, 41, 59) !important;
+  color: rgb(241, 245, 249) !important;
+}
+
+/* Select nativo en modo hover */
+body.dark select option:hover,
+html.dark select option:hover {
+  background-color: rgb(51, 65, 85) !important;
+}
+
+/* Select nativo en modo checked */
+body.dark select option:checked,
+html.dark select option:checked {
+  background-color: rgb(37, 99, 235) !important;
+  color: rgb(255, 255, 255) !important;
+}

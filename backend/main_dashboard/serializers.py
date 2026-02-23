@@ -518,6 +518,32 @@ class ClienteSerializer(DbAliasModelSerializer):
     def get_nombre_completo(self, obj):
         return obj.nombre_completo
 
+    def validate_numero_documento(self, value):
+        """Valida que el número de documento no exista para otro cliente"""
+        # Si está vacío, permitir (puede ser opcional)
+        if not value or not value.strip():
+            return value
+
+        # Obtener el alias de la base de datos del contexto
+        db_alias = self.context.get('db_alias')
+
+        # Obtener la instancia actual (para ediciones)
+        instance = self.instance
+
+        # Buscar si existe otro cliente con este documento
+        from .models import Cliente
+        queryset = Cliente.objects.using(db_alias) if db_alias else Cliente.objects
+
+        existing = queryset.filter(numero_documento=value.strip()).first()
+
+        # Si existe y no es la misma instancia (edición)
+        if existing and (not instance or existing.pk != instance.pk):
+            raise serializers.ValidationError(
+                'Ya existe un cliente con este número de documento.'
+            )
+
+        return value.strip()
+
 
 class FormaPagoSerializer(DbAliasModelSerializer):
     """Serializer para Forma de Pago (solo lectura para POS)"""
