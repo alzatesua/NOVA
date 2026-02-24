@@ -41,6 +41,12 @@ async function post(endpoint, body, token, skipRefresh = false) {
   let { res, json } = await _postRaw(endpoint, body, token);
   console.log(`Response ${res.status}:`, json);
 
+  // Si la petición fue exitosa, guardar nuevo_token si está presente en la respuesta
+  if (res.ok && json && json.nuevo_token) {
+    console.log('✅ Nuevo token recibido, guardando en localStorage...');
+    localStorage.setItem('token_usuario', json.nuevo_token);
+  }
+
   // Si la petición falló con 401 y NO estamos saltando el refresh (para evitar recursión)
   // Y NO es un endpoint de login/refresh (no tiene sentido refrescar en esos casos)
   if (!res.ok && res.status === 401 && !skipRefresh) {
@@ -74,6 +80,11 @@ async function post(endpoint, body, token, skipRefresh = false) {
             const retryResult = await _postRaw(endpoint, body, newAccessToken);
             if (retryResult.res.ok) {
               console.log(`✅ Reintento exitoso después de refresh`);
+              // Guardar nuevo_token si está presente en la respuesta del reintento
+              if (retryResult.json && retryResult.json.nuevo_token) {
+                console.log('✅ Nuevo token recibido en reintento, guardando en localStorage...');
+                localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
+              }
               return retryResult.json;
             }
             // Si el reintento falló, continuar con el error normal
@@ -133,6 +144,12 @@ async function get(endpoint, token, skipRefresh = false) {
   // Primer intento
   let { res, json } = await _getRaw(endpoint, token);
 
+  // Si la petición fue exitosa, guardar nuevo_token si está presente en la respuesta
+  if (res.ok && json && json.nuevo_token) {
+    console.log('✅ Nuevo token recibido (GET), guardando en localStorage...');
+    localStorage.setItem('token_usuario', json.nuevo_token);
+  }
+
   // Si la petición falló con 401 y NO estamos saltando el refresh (para evitar recursión)
   // Y NO es un endpoint de login/refresh (no tiene sentido refrescar en esos casos)
   if (!res.ok && res.status === 401 && !skipRefresh) {
@@ -166,6 +183,11 @@ async function get(endpoint, token, skipRefresh = false) {
             const retryResult = await _getRaw(endpoint, newAccessToken);
             if (retryResult.res.ok) {
               console.log(`✅ Reintento exitoso después de refresh (GET)`);
+              // Guardar nuevo_token si está presente en la respuesta del reintento
+              if (retryResult.json && retryResult.json.nuevo_token) {
+                console.log('✅ Nuevo token recibido en reintento (GET), guardando en localStorage...');
+                localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
+              }
               return retryResult.json;
             }
             // Si el reintento falló, continuar con el error normal

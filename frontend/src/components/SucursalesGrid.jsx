@@ -495,7 +495,7 @@ export default function SucursalesGrid() {
           {filteredSucursales.map((suc) => (
             <div
               key={suc.id}
-              className="bg-white dark:!bg-slate-900 rounded-xl shadow p-4 flex flex-col h-full cursor-pointer hover:shadow-xl hover:shadow-blue-500/20 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-300 ease-out border border-slate-200 dark:!border-blue-500 hover:border-blue-400 dark:hover:!border-blue-400 group"
+              className="bg-white dark:!bg-slate-950/50 dark:!backdrop-blur-sm rounded-xl shadow p-4 flex flex-col h-full cursor-pointer hover:shadow-xl hover:shadow-blue-500/20 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-300 ease-out border border-slate-200 dark:!border-blue-500 hover:border-blue-400 dark:hover:!border-blue-400 group"
             >
               {/* Header de la tarjeta */}
               <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:!border-slate-800">

@@ -298,7 +298,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
   };
 
   return (
-    <section className="space-y-4 max-w-7xl mx-auto px-6">
+    <section className="space-y-4 max-w-7xl mx-auto px-6 flex flex-col items-center justify-center">
       {/* Cabecera con búsqueda y filtros */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <input

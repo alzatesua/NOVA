@@ -29,23 +29,23 @@ function Modal({ isOpen, onClose, title, subtitle, icon: Icon, iconColor = 'from
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white dark:!bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-shrink-0">
+        <div className="p-6 border-b border-slate-200 dark:!border-slate-700 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className={`p-2 bg-gradient-to-br ${iconColor} rounded-lg`}>
-              <Icon className="h-5 w-5 text-white" />
+              <Icon className="h-5 w-5 text-white dark:!text-white" />
             </div>
             <div>
-              <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{title}</h4>
-              {subtitle && <p className="text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>}
+              <h4 className="text-lg font-semibold text-slate-900 dark:!text-slate-100">{title}</h4>
+              {subtitle && <p className="text-sm text-slate-500 dark:!text-slate-400">{subtitle}</p>}
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-100 dark:!hover:bg-slate-800 rounded-lg transition-colors"
           >
-            <XMarkIcon className="h-5 w-5 text-slate-400" />
+            <XMarkIcon className="h-5 w-5 text-slate-400 dark:!text-slate-400" />
           </button>
         </div>
 
@@ -56,7 +56,7 @@ function Modal({ isOpen, onClose, title, subtitle, icon: Icon, iconColor = 'from
 
         {/* Footer */}
         {footer && (
-          <div className="p-6 border-t border-slate-200 dark:border-slate-700 flex-shrink-0">
+          <div className="p-6 border-t border-slate-200 dark:!border-slate-700 flex-shrink-0">
             {footer}
           </div>
         )}
@@ -67,14 +67,14 @@ function Modal({ isOpen, onClose, title, subtitle, icon: Icon, iconColor = 'from
 
 function StatCard({ title, value, icon: Icon, color, bgColor }) {
   return (
-    <div className={`relative overflow-hidden rounded-2xl p-5 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 ${bgColor} transition-all hover:shadow-md`}>
+    <div className={`relative overflow-hidden rounded-2xl p-5 shadow-sm ring-1 ring-slate-200 dark:!ring-slate-700 ${bgColor} transition-all hover:shadow-md`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{title}</p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{value}</p>
+          <p className="text-sm font-medium text-slate-600 dark:!text-slate-400">{title}</p>
+          <p className="text-2xl font-bold text-slate-900 dark:!text-slate-100 mt-1">{value}</p>
         </div>
         <div className={`p-3 bg-gradient-to-br ${color} rounded-xl shadow-sm`}>
-          <Icon className="h-5 w-5 text-white" />
+          <Icon className="h-5 w-5 text-white dark:!text-white" />
         </div>
       </div>
     </div>
@@ -84,11 +84,11 @@ function StatCard({ title, value, icon: Icon, color, bgColor }) {
 function EmptyState({ icon: Icon, title, subtitle }) {
   return (
     <div className="text-center py-14">
-      <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full mb-4">
-        <Icon className="h-8 w-8 text-slate-400" />
+      <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-100 dark:!bg-slate-800 rounded-full mb-4">
+        <Icon className="h-8 w-8 text-slate-400 dark:!text-slate-400" />
       </div>
-      <p className="text-slate-600 dark:text-slate-300 font-medium">{title}</p>
-      {subtitle && <p className="text-sm text-slate-400 mt-1">{subtitle}</p>}
+      <p className="text-slate-600 dark:!text-slate-300 font-medium">{title}</p>
+      {subtitle && <p className="text-sm text-slate-400 dark:!text-slate-400 mt-1">{subtitle}</p>}
     </div>
   );
 }
@@ -97,7 +97,7 @@ function LoadingSpinner({ color = 'blue', text = 'Cargando...' }) {
   return (
     <div className="text-center py-12">
       <div className={`inline-block animate-spin rounded-full h-9 w-9 border-4 border-${color}-600 border-t-transparent`}></div>
-      <p className="mt-3 text-slate-500 dark:text-slate-400 font-medium">{text}</p>
+      <p className="mt-3 text-slate-500 dark:!text-slate-400 font-medium">{text}</p>
     </div>
   );
 }
@@ -119,7 +119,7 @@ function CuponesClienteModal({ cliente, onClose }) {
       icon={UserIcon}
       iconColor="from-purple-500 to-purple-600"
       footer={
-        <button onClick={onClose} className="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-medium transition-all">
+        <button onClick={onClose} className="w-full py-3 bg-slate-100 dark:!bg-slate-800 hover:bg-slate-200 dark:!hover:bg-slate-700 text-slate-700 dark:!text-slate-200 rounded-xl font-medium transition-all">
           Cerrar
         </button>
       }
@@ -134,7 +134,7 @@ function CuponesClienteModal({ cliente, onClose }) {
                     <TicketIcon className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900 dark:text-slate-100">{cc.cupon?.codigo}</p>
+                    <p className="font-semibold text-slate-900 dark:!text-slate-100">{cc.cupon?.codigo}</p>
                     <p className="text-sm text-slate-500">{cc.cupon?.descripcion}</p>
                   </div>
                 </div>
@@ -173,7 +173,7 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Buscar por nombre, cédula o RUC..."
-              className="w-full pl-12 pr-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              className="w-full pl-12 pr-4 py-3 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
             />
           </div>
           <button
@@ -189,36 +189,36 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
         {loading ? (
           <LoadingSpinner color="purple" text="Buscando clientes..." />
         ) : clientes.length > 0 ? (
-          <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+          <div className="border border-slate-200 dark:!border-slate-700 rounded-xl overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800/50">
+              <thead className="bg-slate-50 dark:!bg-slate-800/50">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-300">Cliente</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-300">Documento</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-300">Tipo</th>
-                  <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-300">Acciones</th>
+                  <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:!text-slate-300">Cliente</th>
+                  <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:!text-slate-300">Documento</th>
+                  <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:!text-slate-300">Tipo</th>
+                  <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:!text-slate-300">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-100 dark:!divide-slate-800">
                 {clientes.map((cliente) => (
                   <tr
                     key={cliente.id}
-                    className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer"
+                    className="hover:bg-slate-50 dark:!hover:bg-slate-800/30 transition-colors cursor-pointer"
                     onClick={() => onEditarCliente(cliente)}
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center space-x-2">
                         <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                          <UserIcon className="h-4 w-4 text-white" />
+                          <UserIcon className="h-4 w-4 text-white dark:!text-white" />
                         </div>
-                        <p className="font-medium text-slate-900 dark:text-slate-100 truncate max-w-[140px]">
+                        <p className="font-medium text-slate-900 dark:!text-slate-100 truncate max-w-[140px]">
                           {cliente.tipo_persona === 'JUR' ? cliente.razon_social : `${cliente.primer_nombre || ''} ${cliente.apellidos || ''}`}
                         </p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{cliente.numero_documento}</td>
+                    <td className="px-4 py-3 text-slate-600 dark:!text-slate-400">{cliente.numero_documento}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${cliente.tipo_persona === 'JUR' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'}`}>
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${cliente.tipo_persona === 'JUR' ? 'bg-blue-100 text-blue-800 dark:!bg-blue-900/30 dark:!text-blue-300' : 'bg-purple-100 text-purple-800 dark:!bg-purple-900/30 dark:!text-purple-300'}`}>
                         {cliente.tipo_persona === 'JUR' ? 'Jurídica' : 'Natural'}
                       </span>
                     </td>
@@ -229,7 +229,7 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
                             e.stopPropagation();
                             onEditarCliente(cliente);
                           }}
-                          className="inline-flex items-center space-x-1 px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-medium transition-colors"
+                          className="inline-flex items-center space-x-1 px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 dark:!bg-indigo-900/30 dark:!hover:bg-indigo-900/50 text-indigo-700 dark:!text-indigo-300 rounded-lg text-xs font-medium transition-colors"
                         >
                           <PencilIcon className="h-3.5 w-3.5" />
                           <span>Editar</span>
@@ -239,7 +239,7 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
                             e.stopPropagation();
                             onVerCupones(cliente);
                           }}
-                          className="inline-flex items-center space-x-1 px-3 py-1.5 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-lg text-xs font-medium transition-colors"
+                          className="inline-flex items-center space-x-1 px-3 py-1.5 bg-purple-100 hover:bg-purple-200 dark:!bg-purple-900/30 dark:!hover:bg-purple-900/50 text-purple-700 dark:!text-purple-300 rounded-lg text-xs font-medium transition-colors"
                         >
                           <TicketIcon className="h-3.5 w-3.5" />
                           <span>Ver Cupones</span>
@@ -275,7 +275,7 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
       <form onSubmit={onSubmit} className="space-y-5">
         {/* Buscador de cliente */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Buscar Cliente</label>
+          <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Buscar Cliente</label>
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             <input
@@ -283,7 +283,7 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Buscar por nombre, cédula o RUC..."
-              className="w-full pl-12 pr-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full pl-12 pr-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
         </div>
@@ -304,7 +304,7 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
                     <UserIcon className="h-4 w-4 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-900 dark:text-slate-100 truncate">
+                    <p className="font-medium text-slate-900 dark:!text-slate-100 truncate">
                       {cliente.tipo_persona === 'JUR' ? cliente.razon_social : `${cliente.primer_nombre || ''} ${cliente.apellidos || ''}`}
                     </p>
                     <p className="text-sm text-slate-500">{cliente.numero_documento}</p>
@@ -320,11 +320,11 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
 
         {/* Seleccionar cupón */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Seleccionar Cupón</label>
+          <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Seleccionar Cupón</label>
           <select
             value={selectedCupon || ''}
             onChange={(e) => onSelectCupon(Number(e.target.value))}
-            className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             required
           >
             <option value="">-- Selecciona un cupón --</option>
@@ -338,13 +338,13 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
 
         {/* Cantidad */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Cantidad a Asignar</label>
+          <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Cantidad a Asignar</label>
           <input
             type="number"
             min="1"
             value={cantidad}
             onChange={(e) => onCantidadChange(Number(e.target.value))}
-            className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             required
           />
         </div>
@@ -354,7 +354,7 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
           <button
             type="button"
             onClick={onClose}
-            className="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold transition-all"
+            className="py-3 bg-slate-100 dark:!bg-slate-800 hover:bg-slate-200 dark:!hover:bg-slate-700 text-slate-700 dark:!text-slate-200 rounded-xl font-semibold transition-all"
           >
             Cancelar
           </button>
@@ -429,7 +429,7 @@ function CiudadSelector({ value, onChange, token, label = "Ciudad" }) {
 
   return (
     <div>
-      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{label} *</label>
+      <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">{label} *</label>
       <Select
         value={valorActual}
         onChange={(opcion) => onChange(opcion ? opcion.value : '')}
@@ -445,7 +445,7 @@ function CiudadSelector({ value, onChange, token, label = "Ciudad" }) {
         classNamePrefix="react-select"
         components={{
           DropdownIndicator: () => (
-            <div className="p-2 text-slate-400 dark:text-slate-500">
+            <div className="p-2 text-slate-400 dark:!text-slate-500">
               <ChevronDownIcon className="h-5 w-5" />
             </div>
           ),
@@ -464,7 +464,7 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
   // Función auxiliar para clases de input con error
   const clasesInput = (campo) => {
     const tieneError = errores[campo];
-    return `w-full px-4 py-3 ${tieneError ? 'pr-10' : ''} border ${tieneError ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-slate-200 dark:border-slate-700'} rounded-xl ${tieneError ? 'text-red-900 dark:text-red-200' : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100'} focus:ring-2 ${tieneError ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-indigo-500 focus:border-transparent'} transition-all`;
+    return `w-full px-4 py-3 ${tieneError ? 'pr-10' : ''} border ${tieneError ? 'border-red-500 bg-red-50 dark:!bg-red-900/10' : 'border-slate-200 dark:!border-slate-700'} rounded-xl ${tieneError ? 'text-red-900 dark:!text-red-200' : 'bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100'} focus:ring-2 ${tieneError ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-indigo-500 focus:border-transparent'} transition-all`;
   };
 
   // Wrapper para input con mensaje de error
@@ -475,7 +475,7 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
         <ExclamationTriangleIcon className="absolute right-3 top-10 h-5 w-5 text-red-500 pointer-events-none" />
       )}
       {errores[campo] && (
-        <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+        <p className="mt-1 text-xs text-red-600 dark:!text-red-400 flex items-center gap-1">
           <ExclamationTriangleIcon className="h-3 w-3" />
           {errores[campo]}
         </p>
@@ -500,7 +500,7 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
         `}</style>
         {/* Tipo de persona */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Tipo de Persona *</label>
+          <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Tipo de Persona *</label>
           <select
             required
             value={cliente.tipo_persona}
@@ -510,14 +510,14 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
             <option value="NAT">Natural</option>
             <option value="JUR">Jurídica (Empresa)</option>
           </select>
-          {mostrarError('tipo_persona') && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{mostrarError('tipo_persona')}</p>}
+          {mostrarError('tipo_persona') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('tipo_persona')}</p>}
         </div>
 
         {cliente.tipo_persona === 'NAT' ? (
           // Persona Natural
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Primer Nombre *</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Primer Nombre *</label>
               <input
                 type="text"
                 required={cliente.tipo_persona === 'NAT'}
@@ -526,10 +526,10 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
                 placeholder="Juan"
                 className={clasesInput('primer_nombre')}
               />
-              {mostrarError('primer_nombre') && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{mostrarError('primer_nombre')}</p>}
+              {mostrarError('primer_nombre') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('primer_nombre')}</p>}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Segundo Nombre</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Segundo Nombre</label>
               <input
                 type="text"
                 value={cliente.segundo_nombre}
@@ -537,10 +537,10 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
                 placeholder="Carlos"
                 className={clasesInput('segundo_nombre')}
               />
-              {mostrarError('segundo_nombre') && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{mostrarError('segundo_nombre')}</p>}
+              {mostrarError('segundo_nombre') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('segundo_nombre')}</p>}
             </div>
             <div className="col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Apellidos *</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Apellidos *</label>
               <input
                 type="text"
                 required={cliente.tipo_persona === 'NAT'}
@@ -549,13 +549,13 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
                 placeholder="Pérez García"
                 className={clasesInput('apellidos')}
               />
-              {mostrarError('apellidos') && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{mostrarError('apellidos')}</p>}
+              {mostrarError('apellidos') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('apellidos')}</p>}
             </div>
           </div>
         ) : (
           // Persona Jurídica
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Razón Social *</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Razón Social *</label>
             <input
               type="text"
               required={cliente.tipo_persona === 'JUR'}
@@ -564,14 +564,14 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
               placeholder="Mi Empresa S.A."
               className={clasesInput('razon_social')}
             />
-            {mostrarError('razon_social') && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{mostrarError('razon_social')}</p>}
+            {mostrarError('razon_social') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('razon_social')}</p>}
           </div>
         )}
 
         {/* Tipo y número de documento */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Tipo Documento *</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Tipo Documento *</label>
             <select
               required
               value={cliente.tipo_documento}
@@ -584,10 +584,10 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
               <option value="TI">Tarjeta de Identidad</option>
               <option value="PP">Pasaporte</option>
             </select>
-            {mostrarError('tipo_documento') && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{mostrarError('tipo_documento')}</p>}
+            {mostrarError('tipo_documento') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('tipo_documento')}</p>}
           </div>
           <div className="relative">
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Número Documento *</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Número Documento *</label>
             <input
               type="text"
               required
@@ -599,14 +599,14 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
             {mostrarError('numero_documento') && (
               <ExclamationTriangleIcon className="absolute right-3 top-[2.4rem] h-5 w-5 text-red-500 pointer-events-none" />
             )}
-            {mostrarError('numero_documento') && <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{mostrarError('numero_documento')}</p>}
+            {mostrarError('numero_documento') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{mostrarError('numero_documento')}</p>}
           </div>
         </div>
 
         {/* Información de contacto */}
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2 relative">
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Correo Electrónico *</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Correo Electrónico *</label>
             <input
               type="email"
               required
@@ -618,10 +618,10 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
             {mostrarError('correo') && (
               <ExclamationTriangleIcon className="absolute right-3 top-[2.4rem] h-5 w-5 text-red-500 pointer-events-none" />
             )}
-            {mostrarError('correo') && <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{mostrarError('correo')}</p>}
+            {mostrarError('correo') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{mostrarError('correo')}</p>}
           </div>
           <div className="relative">
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Teléfono *</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Teléfono *</label>
             <input
               type="tel"
               required
@@ -633,7 +633,7 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
             {mostrarError('telefono') && (
               <ExclamationTriangleIcon className="absolute right-3 top-[2.4rem] h-5 w-5 text-red-500 pointer-events-none" />
             )}
-            {mostrarError('telefono') && <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{mostrarError('telefono')}</p>}
+            {mostrarError('telefono') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{mostrarError('telefono')}</p>}
           </div>
           <div className="col-span-2">
             <CiudadSelector
@@ -642,13 +642,13 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
               token={token}
               label="Ciudad"
             />
-            {mostrarError('ciudad') && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{mostrarError('ciudad')}</p>}
+            {mostrarError('ciudad') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('ciudad')}</p>}
           </div>
         </div>
 
         {/* Dirección */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Dirección</label>
+          <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Dirección</label>
           <input
             type="text"
             value={cliente.direccion}
@@ -656,7 +656,7 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
             placeholder="Calle 123 # 45-67"
             className={clasesInput('direccion')}
           />
-          {mostrarError('direccion') && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{mostrarError('direccion')}</p>}
+          {mostrarError('direccion') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('direccion')}</p>}
         </div>
 
         {/* Acciones */}
@@ -664,7 +664,7 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
           <button
             type="button"
             onClick={onClose}
-            className="py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold transition-all"
+            className="py-3 bg-slate-100 dark:!bg-slate-800 hover:bg-slate-200 dark:!hover:bg-slate-700 text-slate-700 dark:!text-slate-200 rounded-xl font-semibold transition-all"
           >
             Cancelar
           </button>
@@ -704,23 +704,23 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
       <form onSubmit={onSubmit} className="space-y-5">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Código *</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Código *</label>
             <input
               type="text"
               required
               value={cupon.codigo}
               onChange={(e) => onChange({ ...cupon, codigo: e.target.value.toUpperCase() })}
               placeholder="Ej: VERANO2024"
-              className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Tipo *</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Tipo *</label>
             <select
               required
               value={cupon.tipo}
               onChange={(e) => onChange({ ...cupon, tipo: e.target.value })}
-              className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
             >
               <option value="PORCENTAJE">Porcentaje</option>
               <option value="MONTO_FIJO">Monto Fijo</option>
@@ -729,20 +729,20 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Descripción</label>
+          <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Descripción</label>
           <input
             type="text"
             value={cupon.descripcion}
             onChange={(e) => onChange({ ...cupon, descripcion: e.target.value })}
             placeholder="Ej: Descuento de temporada"
-            className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           {cupon.tipo === 'PORCENTAJE' ? (
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Descuento (%) *</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Descuento (%) *</label>
               <div className="relative">
                 <input
                   type="number"
@@ -753,14 +753,14 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
                   value={cupon.porcentaje_descuento}
                   onChange={(e) => onChange({ ...cupon, porcentaje_descuento: e.target.value })}
                   placeholder="Ej: 10"
-                  className="w-full px-4 py-3 pr-10 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 pr-10 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
               </div>
             </div>
           ) : (
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Monto Fijo ($) *</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Monto Fijo ($) *</label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
                 <input
@@ -771,32 +771,32 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
                   value={cupon.monto_fijo}
                   onChange={(e) => onChange({ ...cupon, monto_fijo: e.target.value })}
                   placeholder="0.00"
-                  className="w-full pl-10 pr-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Vencimiento</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Vencimiento</label>
             <input
               type="date"
               value={cupon.fecha_vencimiento}
               onChange={(e) => onChange({ ...cupon, fecha_vencimiento: e.target.value })}
-              className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Cantidad Máxima de Usos (por cliente)</label>
+          <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">Cantidad Máxima de Usos (por cliente)</label>
           <input
             type="number"
             min="1"
             value={cupon.cantidad_maxima}
             onChange={(e) => onChange({ ...cupon, cantidad_maxima: e.target.value })}
             placeholder="Sin límite si está vacío"
-            className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
           />
         </div>
 
@@ -808,7 +808,7 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
             onChange={(e) => onChange({ ...cupon, activo: e.target.checked })}
             className="w-5 h-5 text-green-600 border-slate-300 rounded focus:ring-2 focus:ring-green-500"
           />
-          <label htmlFor="activo" className="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+          <label htmlFor="activo" className="text-sm font-medium text-slate-700 dark:!text-slate-300 cursor-pointer">
             Cupón activo (disponible para asignar)
           </label>
         </div>
@@ -817,7 +817,7 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
           <button
             type="button"
             onClick={onClose}
-            className="py-3.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold transition-all"
+            className="py-3.5 bg-slate-100 dark:!bg-slate-800 hover:bg-slate-200 dark:!hover:bg-slate-700 text-slate-700 dark:!text-slate-200 rounded-xl font-semibold transition-all"
           >
             Cancelar
           </button>
@@ -1270,8 +1270,8 @@ export default function ClientesView() {
           <SparklesIcon className="h-6 w-6 text-white" />
         </div>
         <div>
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Gestión de Clientes</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Administra cupones y clientes</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:!text-slate-100">Gestión de Clientes</h3>
+          <p className="text-sm text-slate-500 dark:!text-slate-400">Administra cupones y clientes</p>
         </div>
       </div>
 
@@ -1291,7 +1291,7 @@ export default function ClientesView() {
         </button>
         <button
           onClick={() => setModalGestion(true)}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-purple-300 transition-all duration-200"
+          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-white dark:!bg-slate-900 text-slate-600 dark:!text-slate-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 ring-1 ring-slate-200 dark:!ring-slate-700 hover:ring-purple-300 transition-all duration-200"
         >
           <UserIcon className="h-4 w-4" />
           <span>Gestión Clientes</span>
@@ -1299,7 +1299,7 @@ export default function ClientesView() {
 
         <button
           onClick={() => setModalAsignar(true)}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-blue-300 transition-all duration-200"
+          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-white dark:!bg-slate-900 text-slate-600 dark:!text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 ring-1 ring-slate-200 dark:!ring-slate-700 hover:ring-blue-300 transition-all duration-200"
         >
           <GiftIcon className="h-4 w-4" />
           <span>Asignar Cupón</span>
@@ -1315,15 +1315,15 @@ export default function ClientesView() {
       </div>
 
       {/* Tabla de asignaciones */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm ring-1 ring-slate-200 dark:!ring-slate-700 overflow-hidden">
         <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg">
               <GiftIcon className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Cupones Asignados</h4>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Gestiona las asignaciones activas</p>
+              <h4 className="text-lg font-semibold text-slate-900 dark:!text-slate-100">Cupones Asignados</h4>
+              <p className="text-sm text-slate-500 dark:!text-slate-400">Gestiona las asignaciones activas</p>
             </div>
           </div>
           <button
@@ -1344,11 +1344,11 @@ export default function ClientesView() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800/50">
                 <tr>
-                  <th className="px-6 py-4 text-left font-semibold text-slate-700 dark:text-slate-300">Cliente</th>
-                  <th className="px-6 py-4 text-left font-semibold text-slate-700 dark:text-slate-300">Cupón</th>
-                  <th className="px-6 py-4 text-left font-semibold text-slate-700 dark:text-slate-300">Disponibles</th>
-                  <th className="px-6 py-4 text-left font-semibold text-slate-700 dark:text-slate-300">Estado</th>
-                  <th className="px-6 py-4 text-right font-semibold text-slate-700 dark:text-slate-300">Acciones</th>
+                  <th className="px-6 py-4 text-left font-semibold text-slate-700 dark:!text-slate-300">Cliente</th>
+                  <th className="px-6 py-4 text-left font-semibold text-slate-700 dark:!text-slate-300">Cupón</th>
+                  <th className="px-6 py-4 text-left font-semibold text-slate-700 dark:!text-slate-300">Disponibles</th>
+                  <th className="px-6 py-4 text-left font-semibold text-slate-700 dark:!text-slate-300">Estado</th>
+                  <th className="px-6 py-4 text-right font-semibold text-slate-700 dark:!text-slate-300">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -1359,7 +1359,7 @@ export default function ClientesView() {
                         <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
                           <UserIcon className="h-5 w-5 text-white" />
                         </div>
-                        <p className="font-medium text-slate-900 dark:text-slate-100">
+                        <p className="font-medium text-slate-900 dark:!text-slate-100">
                           {cc.cliente_tienda?.email || 'N/A'}
                         </p>
                       </div>
@@ -1367,7 +1367,7 @@ export default function ClientesView() {
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
                         <TagIcon className="h-4 w-4 text-blue-500" />
-                        <span className="font-medium text-slate-900 dark:text-slate-100">{cc.cupon?.codigo || 'N/A'}</span>
+                        <span className="font-medium text-slate-900 dark:!text-slate-100">{cc.cupon?.codigo || 'N/A'}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
