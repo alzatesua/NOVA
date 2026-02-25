@@ -233,14 +233,14 @@ function AsignacionesTable({ loading, clienteCupones, onRefresh, onUsarCupon }) 
                       <UserIcon className="h-5 w-5 text-white" />
                     </div>
                     <p className="font-medium text-slate-900 dark:!text-white">
-                      {cc.cliente_tienda?.email || 'N/A'}
+                      {cc.cliente_tienda_email || 'N/A'}
                     </p>
                   </div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center space-x-2">
                     <TagIcon className="h-4 w-4 text-blue-500" />
-                    <span className="font-medium text-slate-900 dark:!text-white">{cc.cupon?.codigo || 'N/A'}</span>
+                    <span className="font-medium text-slate-900 dark:!text-white">{cc.cupon_detalle?.nombre || 'N/A'}</span>
                   </div>
                 </td>
                 <td className="px-6 py-4">
@@ -311,8 +311,8 @@ function CuponesClienteModal({ cliente, onClose }) {
                     <TicketIcon className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <p className="font-semibold dark:!text-white">{cc.cupon?.codigo}</p>
-                    <p className="text-sm dark:!text-slate-300">{cc.cupon?.descripcion}</p>
+                    <p className="font-semibold dark:!text-white">{cc.cupon_detalle?.nombre || 'N/A'}</p>
+                    <p className="text-sm dark:!text-slate-300">{cc.cupon_detalle?.tipo === 'PCT' ? `${cc.cupon_detalle.valor}% descuento` : `$${cc.cupon_detalle.valor} de descuento`}</p>
                   </div>
                 </div>
                 <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${cc.activo ? 'bg-green-100 text-green-800 dark:!bg-green-900/30 dark:!text-green-300' : 'bg-red-100 text-red-800 dark:!bg-red-900/30 dark:!text-red-300'}`}>
@@ -526,9 +526,9 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium dark:!text-white truncate">
-                      {cliente.tipo_persona === 'JUR' ? cliente.razon_social : `${cliente.primer_nombre || ''} ${cliente.apellidos || ''}`}
+                      {cliente.email || cliente.nombre || 'Cliente'}
                     </p>
-                    <p className="text-sm dark:!text-slate-300">{cliente.numero_documento}</p>
+                    <p className="text-sm dark:!text-slate-300">ID: {cliente.id}</p>
                   </div>
                   {selectedCliente === cliente.id && <CheckIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />}
                 </div>
@@ -551,7 +551,7 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
             <option value="">-- Selecciona un cupón --</option>
             {cupones.map((cupon) => (
               <option key={cupon.id} value={cupon.id}>
-                {cupon.codigo} — {cupon.descripcion} ({cupon.tipo === 'PORCENTAJE' ? `${cupon.porcentaje_descuento}%` : `$${cupon.monto_fijo}`})
+                {cupon.nombre} ({cupon.tipo === 'PCT' ? `${cupon.valor}% descuento` : `$${cupon.valor} de descuento`})
               </option>
             ))}
           </select>
@@ -1121,19 +1121,25 @@ export default function ClientesView() {
   const [modalCrearEditarCliente, setModalCrearEditarCliente] = useState(false);
   const [clienteParaCupones, setClienteParaCupones] = useState(null);
 
+  // Estados para cupones
+  const [creandoCupon, setCreandoCupon] = useState(false);
+  const [asignandoCupon, setAsignandoCupon] = useState(false);
+  const [erroresCupon, setErroresCupon] = useState({});
+
   // ── API ──────────────────────────────────────
 
   const fetchClientes = useCallback(async (query = '') => {
     setLoadingClientes(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/facturacion/clientes/buscar/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario, token: tokenUsuario, subdominio, query: query || ' ' })
+      // Usar el endpoint de clientes tienda (e-commerce) en lugar de clientes fiscales
+      const queryParam = query ? `?query=${encodeURIComponent(query)}` : '';
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/cupones/clientes-tienda/${queryParam}&usuario=${usuario}&token=${tokenUsuario}&subdominio=${subdominio}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
       });
       if (!res.ok) throw new Error();
       const data = await res.json();
-      setClientes(Array.isArray(data) ? data : []);
+      setClientes(Array.isArray(data.clientes_tienda) ? data.clientes_tienda : []);
     } catch {
       setClientes([]);
     } finally {
@@ -1144,7 +1150,7 @@ export default function ClientesView() {
   const fetchCupones = useCallback(async () => {
     setLoadingCupones(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/cupones/cupones/?activos=true&usuario=${usuario}&token=${tokenUsuario}&subdominio=${subdominio}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/cupones/?activos=true&usuario=${usuario}&token=${tokenUsuario}&subdominio=${subdominio}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setCupones(data.cupones || []);
@@ -1182,27 +1188,68 @@ export default function ClientesView() {
 
   const handleCrearCupon = async (e) => {
     e.preventDefault();
+
+    // Validar antes de enviar
+    const errores = validarCupon(nuevoCupon);
+    if (Object.keys(errores).length > 0) {
+      const primerError = Object.values(errores)[0];
+      showToast('error', primerError);
+      setErroresCupon(errores);
+      return;
+    }
+
+    setErroresCupon({});
+    setCreandoCupon(true);
+
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/cupones/cupones/`, {
+      // Mapear campos de frontend a backend
+      const payload = {
+        nombre: nuevoCupon.codigo, // Frontend 'codigo' -> Backend 'nombre'
+        tipo: nuevoCupon.tipo === 'PORCENTAJE' ? 'PCT' : 'VAL', // Enum mapping
+        valor: nuevoCupon.tipo === 'PORCENTAJE'
+          ? parseFloat(nuevoCupon.porcentaje_descuento)
+          : parseFloat(nuevoCupon.monto_fijo), // Both use 'valor'
+        activo: nuevoCupon.activo,
+        fecha_vencimiento: nuevoCupon.fecha_vencimiento || null,
+        usuario,
+        token: tokenUsuario,
+        subdominio
+      };
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/cupones/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...nuevoCupon, usuario, token: tokenUsuario, subdominio })
+        body: JSON.stringify(payload)
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.detail || 'Error al crear cupón');
-      }
+
+      const data = await res.json();
+      if (!res.ok) throw { message: data.detail || 'Error al crear cupón', details: data };
+
       await fetchCupones();
       setModalCrearCupon(false);
       setNuevoCupon(CUPON_VACIO);
+      showToast('success', `Cupón "${nuevoCupon.codigo}" creado exitosamente`);
     } catch (err) {
-      alert(err.message);
+      const mensajeError = obtenerMensajeErrorCupon(err, 'crear');
+      showToast('error', mensajeError);
+    } finally {
+      setCreandoCupon(false);
     }
   };
 
   const handleAsignarCupon = async (e) => {
     e.preventDefault();
-    if (!selectedCliente || !selectedCupon) return;
+
+    // Validar
+    const errores = validarAsignacionCupon(selectedCliente, selectedCupon, cantidadAsignar);
+    if (Object.keys(errores).length > 0) {
+      const primerError = Object.values(errores)[0];
+      showToast('error', primerError);
+      return;
+    }
+
+    setAsignandoCupon(true);
+
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/cupones/cliente-cupones/`, {
         method: 'POST',
@@ -1217,18 +1264,22 @@ export default function ClientesView() {
           subdominio
         })
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.detail || 'Error al asignar cupón');
-      }
+
+      const data = await res.json();
+      if (!res.ok) throw { message: data.detail || 'Error al asignar cupón', details: data };
+
       await fetchClienteCupones();
       setModalAsignar(false);
       setSelectedCliente(null);
       setSelectedCupon(null);
       setCantidadAsignar(1);
       setSearchAsignar('');
+      showToast('success', `${cantidadAsignar} cupón(es) asignado(s) exitosamente`);
     } catch (err) {
-      alert(err.message);
+      const mensajeError = obtenerMensajeErrorCupon(err, 'asignar');
+      showToast('error', mensajeError);
+    } finally {
+      setAsignandoCupon(false);
     }
   };
 
@@ -1356,6 +1407,102 @@ export default function ClientesView() {
     }
 
     return errores;
+  };
+
+  // Validar datos del cupón antes de enviar
+  const validarCupon = (cupon) => {
+    const errores = {};
+
+    // Validar código
+    if (!cupon.codigo?.trim()) {
+      errores.codigo = 'El código es obligatorio';
+    } else if (cupon.codigo.length < 3) {
+      errores.codigo = 'El código debe tener al menos 3 caracteres';
+    } else if (!/^[A-Z0-9_-]+$/.test(cupon.codigo)) {
+      errores.codigo = 'Solo letras, números, guiones y guiones bajos';
+    }
+
+    // Validar tipo
+    if (!cupon.tipo || !['PORCENTAJE', 'MONTO_FIJO'].includes(cupon.tipo)) {
+      errores.tipo = 'Selecciona el tipo de descuento';
+    }
+
+    // Validar valor según tipo
+    if (cupon.tipo === 'PORCENTAJE') {
+      if (!cupon.porcentaje_descuento && cupon.porcentaje_descuento !== 0) {
+        errores.porcentaje_descuento = 'El descuento es obligatorio';
+      } else {
+        const val = parseFloat(cupon.porcentaje_descuento);
+        if (isNaN(val) || val < 0.01 || val > 100) {
+          errores.porcentaje_descuento = 'Debe estar entre 0.01 y 100%';
+        }
+      }
+    } else if (cupon.tipo === 'MONTO_FIJO') {
+      if (!cupon.monto_fijo && cupon.monto_fijo !== 0) {
+        errores.monto_fijo = 'El monto es obligatorio';
+      } else {
+        const val = parseFloat(cupon.monto_fijo);
+        if (isNaN(val) || val < 0.01 || val > 999999.99) {
+          errores.monto_fijo = 'Monto inválido (0.01 - 999999.99)';
+        }
+      }
+    }
+
+    // Validar fecha futura
+    if (cupon.fecha_vencimiento) {
+      const fecha = new Date(cupon.fecha_vencimiento);
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      if (fecha <= hoy) {
+        errores.fecha_vencimiento = 'La fecha debe ser futura';
+      }
+    }
+
+    return errores;
+  };
+
+  const validarAsignacionCupon = (selectedCliente, selectedCupon, cantidad) => {
+    const errores = {};
+    if (!selectedCliente) errores.cliente = 'Selecciona un cliente de la lista';
+    if (!selectedCupon) errores.cupon = 'Selecciona un cupón';
+    if (!cantidad || cantidad < 1 || cantidad > 999) {
+      errores.cantidad = 'Cantidad entre 1 y 999';
+    }
+    return errores;
+  };
+
+  const obtenerMensajeErrorCupon = (err, contexto = 'general') => {
+    const msg = err?.message || err?.detail || '';
+    const details = err?.details;
+
+    // Errores específicos de cupones
+    if (msg.includes('duplicate') || msg.includes('unique') || msg.includes('Ya existe')) {
+      return 'Ya existe un cupón con ese código. Usa un código diferente.';
+    }
+    if (msg.includes('cliente_tienda_id') || msg.includes('ClienteTienda')) {
+      return 'El cliente seleccionado no es válido. Intenta buscar nuevamente.';
+    }
+    if (msg.includes('cupon_id') || msg.includes('Cupón')) {
+      return 'El cupón seleccionado no es válido. Intenta nuevamente.';
+    }
+    if (msg.includes('vencido') || msg.includes('vencimiento')) {
+      return 'El cupón ha vencido y no puede ser asignado.';
+    }
+    if (msg.includes('TOKEN') || msg.includes('Usuario no encontrado')) {
+      return 'Tu sesión ha expirado. Recarga la página.';
+    }
+    if (msg.includes('SESSION_EXPIRED') || msg.includes('fetch') || msg.includes('Network')) {
+      return 'Error de conexión. Verifica tu internet.';
+    }
+    if (msg.includes('500') || msg.includes('Internal Server Error')) {
+      return 'Error del servidor. Intenta en unos minutos.';
+    }
+
+    // Contexto específico
+    if (contexto === 'crear') return msg || 'Error al crear el cupón. Verifica los datos.';
+    if (contexto === 'asignar') return msg || 'Error al asignar el cupón. Intenta nuevamente.';
+
+    return msg || 'Ha ocurrido un error inesperado.';
   };
 
   // Función para obtener mensajes de error amigables

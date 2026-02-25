@@ -592,7 +592,9 @@ class Cliente(models.Model):
 
     # Comunes
     tipo_documento = models.CharField(max_length=3, choices=TIPO_DOCUMENTO_CHOICES, blank=True, null=True)
-    numero_documento = models.CharField(max_length=50, blank=True, null=True, db_index=True, unique=True)
+    # NOTA: unique=True removido para permitir validación personalizada en serializer
+    # que excluya la instancia actual durante ediciones
+    numero_documento = models.CharField(max_length=50, blank=True, null=True, db_index=True)
     correo = models.EmailField(blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     direccion = models.CharField(max_length=255, blank=True, null=True)
@@ -997,6 +999,33 @@ class Cupon(models.Model):
         sufijo = '%' if self.tipo == 'PCT' else ''
         return f'{self.nombre} ({self.valor}{sufijo})'
 
+    def clean(self):
+        from django.utils import timezone
+        errors = {}
+
+        # Validar nombre
+        if not self.nombre or not self.nombre.strip():
+            errors['nombre'] = 'El nombre del cupón es requerido.'
+
+        # Validar valor positivo
+        if self.valor is not None and self.valor <= 0:
+            errors['valor'] = 'El valor del cupón debe ser mayor que cero.'
+
+        # Validar valor según tipo
+        if self.tipo == 'PCT':
+            if self.valor is not None and (self.valor < 0 or self.valor > 100):
+                errors['valor'] = 'Para cupones de porcentaje, el valor debe estar entre 0 y 100.'
+        elif self.tipo == 'VAL':
+            if self.valor is not None and self.valor > 999999.99:
+                errors['valor'] = 'El valor fijo no puede exceder 999,999.99.'
+
+        # Validar fecha futura
+        if self.fecha_vencimiento and self.fecha_vencimiento < timezone.now().date():
+            errors['fecha_vencimiento'] = 'La fecha de vencimiento debe ser futura.'
+
+        if errors:
+            raise ValidationError(errors)
+
 
 class ClienteCupon(models.Model):
     """
@@ -1028,6 +1057,30 @@ class ClienteCupon(models.Model):
         if self.cliente_tienda:
             return f'{self.cliente_tienda.email} - {self.cupon.nombre} (x{self.cantidad_disponible})'
         return f'Cliente Fiscal - {self.cupon.nombre} (x{self.cantidad_disponible})'
+
+    def clean(self):
+        from django.utils import timezone
+        errors = {}
+
+        # Validar cantidad_disponible no negativa
+        if self.cantidad_disponible is not None and self.cantidad_disponible < 0:
+            errors['cantidad_disponible'] = 'La cantidad disponible no puede ser negativa.'
+
+        # Al menos un cliente debe estar especificado (para asignaciones nuevas)
+        if not self.cliente_tienda_id and not self.cliente_fiscal_id:
+            errors['cliente_tienda'] = 'Debe especificar al menos un cliente (tienda o fiscal).'
+
+        # Validar que el cupón esté activo
+        if self.cupon_id and hasattr(self.cupon, 'activo') and not self.cupon.activo:
+            errors['cupon'] = 'No se pueden asignar cupones inactivos.'
+
+        # Validar que el cupón no esté vencido
+        if self.cupon_id and hasattr(self.cupon, 'fecha_vencimiento') and self.cupon.fecha_vencimiento:
+            if self.cupon.fecha_vencimiento < timezone.now().date():
+                errors['cupon'] = 'No se pueden asignar cupones vencidos.'
+
+        if errors:
+            raise ValidationError(errors)
 
 
 # =========================

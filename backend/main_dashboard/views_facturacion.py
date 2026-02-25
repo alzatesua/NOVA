@@ -196,13 +196,19 @@ class ClienteViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             partial = kwargs.pop('partial', False)
             instance = self.get_object()
 
+            # Asegurar que la instancia viene del queryset con el alias correcto
+            # Volver a obtener la instancia explícitamente con el alias
+            from .models import Cliente
+            instance = Cliente.objects.using(alias).get(pk=instance.pk)
+
             # Eliminar campos de autenticación del request.data
             data = request.data.copy()
-            for key in ['usuario', 'token', 'subdominio']:
+            for key in ['usuario', 'token', 'subdominio', 'exclude_id']:
                 data.pop(key, None)
 
+            # Crear serializer con el contexto correcto desde el inicio
             serializer = self.get_serializer(instance, data=data, partial=partial)
-            # Pasar el db_alias en el contexto
+            # Pasar el db_alias en el contexto ANTES de validar
             serializer.context['db_alias'] = alias
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -210,6 +216,8 @@ class ClienteViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return Response(
                 {'detail': str(e)},
                 status=status.HTTP_400_BAD_REQUEST

@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(xxd:*)"
+      "Bash(xxd:*)",
+      "Bash(zgrep -o \"\\\\.dark.*bg-gray-800\" dist/assets/*.css.gz)",
+      "Bash(git checkout frontend/src/services/api.js)"
     ]
   }
 }

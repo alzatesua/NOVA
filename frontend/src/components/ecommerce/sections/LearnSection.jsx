@@ -12,10 +12,16 @@ export default function LearnSection({ activeSection, darkMode = false }) {
     return null;
   }
 
-  const bgColor = darkMode ? DARK_COLORS.background : COLORS.verdeClaro;
-  const cardBg = darkMode ? DARK_COLORS.cardBackground : COLORS.blanco;
-  const textColor = darkMode ? DARK_COLORS.textSecondary : COLORS.grisOscuro;
-  const headingColor = darkMode ? DARK_COLORS.textPrimary : COLORS.verdeOscuro;
+  // Detect dark mode from DOM for better accuracy
+  const isDarkMode = darkMode || document.documentElement.classList.contains('dark');
+
+  const bgColor = isDarkMode ? '#0a0f1a' : COLORS.verdeClaro;
+  const cardBg = isDarkMode ? '#1a2332' : COLORS.blanco;
+  const textColor = isDarkMode ? '#ffffff' : COLORS.grisOscuro;
+  const headingColor = isDarkMode ? '#ffffff' : COLORS.verdeOscuro;
+  const subCardBg = isDarkMode ? '#252f3f' : COLORS.beigeCrema;
+  const subHeadingColor = isDarkMode ? '#ffffff' : COLORS.verdeOscuro;
+  const lightBg = isDarkMode ? '#2a3545' : COLORS.grisClaro;
 
   return (
     <div className="py-8 sm:py-12 px-2 sm:px-4" style={{ backgroundColor: bgColor }}>
@@ -27,7 +33,7 @@ export default function LearnSection({ activeSection, darkMode = false }) {
 
         {/* Introducción */}
         <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: cardBg }}>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4" style={{ color: COLORS.verdePrincipal }}>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4" style={{ color: isDarkMode ? '#4ade80' : COLORS.verdePrincipal }}>
             ¿Qué necesitas saber?
           </h2>
           <p className="text-base sm:text-lg leading-relaxed" style={{ color: textColor }}>
@@ -37,12 +43,12 @@ export default function LearnSection({ activeSection, darkMode = false }) {
 
         {/* Clasificación de Vehículos */}
         <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: cardBg }}>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: COLORS.verdePrincipal }}>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: isDarkMode ? '#4ade80' : COLORS.verdePrincipal }}>
             🛵 Clasificación de Vehículos Eléctricos
           </h2>
           <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-            <div className="p-4 sm:p-5 rounded-xl" style={{ backgroundColor: COLORS.beigeCrema }}>
-              <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: COLORS.verdeOscuro }}>
+            <div className="p-4 sm:p-5 rounded-xl" style={{ backgroundColor: subCardBg }}>
+              <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: subHeadingColor }}>
                 Bicicletas Eléctricas
               </h3>
               <ul className="space-y-2 text-sm sm:text-base" style={{ color: textColor }}>
@@ -55,8 +61,8 @@ export default function LearnSection({ activeSection, darkMode = false }) {
               </ul>
             </div>
 
-            <div className="p-4 sm:p-5 rounded-xl" style={{ backgroundColor: COLORS.beigeCrema }}>
-              <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: COLORS.verdeOscuro }}>
+            <div className="p-4 sm:p-5 rounded-xl" style={{ backgroundColor: subCardBg }}>
+              <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: subHeadingColor }}>
                 Motocicletas Eléctricas
               </h3>
               <ul className="space-y-2 text-sm sm:text-base" style={{ color: textColor }}>
@@ -69,8 +75,8 @@ export default function LearnSection({ activeSection, darkMode = false }) {
               </ul>
             </div>
 
-            <div className="p-4 sm:p-5 rounded-xl" style={{ backgroundColor: COLORS.beigeCrema }}>
-              <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: COLORS.verdeOscuro }}>
+            <div className="p-4 sm:p-5 rounded-xl" style={{ backgroundColor: subCardBg }}>
+              <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: subHeadingColor }}>
                 Scooters Eléctricos
               </h3>
               <ul className="space-y-2 text-sm sm:text-base" style={{ color: textColor }}>
@@ -83,8 +89,8 @@ export default function LearnSection({ activeSection, darkMode = false }) {
               </ul>
             </div>
 
-            <div className="p-4 sm:p-5 rounded-xl" style={{ backgroundColor: COLORS.beigeCrema }}>
-              <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: COLORS.verdeOscuro }}>
+            <div className="p-4 sm:p-5 rounded-xl" style={{ backgroundColor: subCardBg }}>
+              <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ color: subHeadingColor }}>
                 Monopatines Eléctricos
               </h3>
               <ul className="space-y-2 text-sm sm:text-base" style={{ color: textColor }}>
@@ -101,12 +107,12 @@ export default function LearnSection({ activeSection, darkMode = false }) {
 
         {/* Requisitos Legales */}
         <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: cardBg }}>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: COLORS.verdePrincipal }}>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: isDarkMode ? '#4ade80' : COLORS.verdePrincipal }}>
             📋 Documentos y Requisitos
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+              <h3 className="text-xl font-bold mb-4" style={{ color: subHeadingColor }}>
                 Para Vehículos con Matrícula
               </h3>
               <ul className="space-y-3 text-sm sm:text-base" style={{ color: textColor }}>
@@ -134,7 +140,7 @@ export default function LearnSection({ activeSection, darkMode = false }) {
             </div>
 
             <div>
-              <h3 className="text-xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+              <h3 className="text-xl font-bold mb-4" style={{ color: subHeadingColor }}>
                 Documentos del Vehículo
               </h3>
               <ul className="space-y-3 text-sm sm:text-base" style={{ color: textColor }}>
@@ -164,14 +170,14 @@ export default function LearnSection({ activeSection, darkMode = false }) {
         </div>
 
         {/* Beneficios */}
-        <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: COLORS.verdeMenta + '30' }}>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: COLORS.verdePrincipal }}>
+        <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: isDarkMode ? '#1e3a5f' : COLORS.verdeMenta + '30' }}>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: isDarkMode ? '#4ade80' : COLORS.verdePrincipal }}>
             🎁 Beneficios de Vehículos Eléctricos en Colombia
           </h2>
           <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
             <div className="text-center p-4">
               <div className="text-4xl sm:text-5xl mb-3">💰</div>
-              <h3 className="text-lg font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>
+              <h3 className="text-lg font-bold mb-2" style={{ color: subHeadingColor }}>
                 Exento de IVA
               </h3>
               <p className="text-sm" style={{ color: textColor }}>
@@ -180,7 +186,7 @@ export default function LearnSection({ activeSection, darkMode = false }) {
             </div>
             <div className="text-center p-4">
               <div className="text-4xl sm:text-5xl mb-3">🅿️</div>
-              <h3 className="text-lg font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>
+              <h3 className="text-lg font-bold mb-2" style={{ color: subHeadingColor }}>
                 Pico y Placa Flexibilizado
               </h3>
               <p className="text-sm" style={{ color: textColor }}>
@@ -189,7 +195,7 @@ export default function LearnSection({ activeSection, darkMode = false }) {
             </div>
             <div className="text-center p-4">
               <div className="text-4xl sm:text-5xl mb-3">🌿</div>
-              <h3 className="text-lg font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>
+              <h3 className="text-lg font-bold mb-2" style={{ color: subHeadingColor }}>
                 Tarifas Reducidas
               </h3>
               <p className="text-sm" style={{ color: textColor }}>
@@ -198,7 +204,7 @@ export default function LearnSection({ activeSection, darkMode = false }) {
             </div>
             <div className="text-center p-4">
               <div className="text-4xl sm:text-5xl mb-3">🅿️</div>
-              <h3 className="text-lg font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>
+              <h3 className="text-lg font-bold mb-2" style={{ color: subHeadingColor }}>
                 Parquederos Gratuitos
               </h3>
               <p className="text-sm" style={{ color: textColor }}>
@@ -207,7 +213,7 @@ export default function LearnSection({ activeSection, darkMode = false }) {
             </div>
             <div className="text-center p-4">
               <div className="text-4xl sm:text-5xl mb-3">🔋</div>
-              <h3 className="text-lg font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>
+              <h3 className="text-lg font-bold mb-2" style={{ color: subHeadingColor }}>
                 Puntos de Carga
               </h3>
               <p className="text-sm" style={{ color: textColor }}>
@@ -216,7 +222,7 @@ export default function LearnSection({ activeSection, darkMode = false }) {
             </div>
             <div className="text-center p-4">
               <div className="text-4xl sm:text-5xl mb-3">📜</div>
-              <h3 className="text-lg font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>
+              <h3 className="text-lg font-bold mb-2" style={{ color: subHeadingColor }}>
                 Prioridad en Semáforos
               </h3>
               <p className="text-sm" style={{ color: textColor }}>
@@ -228,41 +234,41 @@ export default function LearnSection({ activeSection, darkMode = false }) {
 
         {/* Normativa de Tránsito */}
         <div className="rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8" style={{ backgroundColor: cardBg }}>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: COLORS.verdePrincipal }}>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: isDarkMode ? '#4ade80' : COLORS.verdePrincipal }}>
             🚦 Normas de Circulación
           </h2>
           <div className="space-y-4">
-            <div className="flex items-start space-x-3 p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
+            <div className="flex items-start space-x-3 p-4 rounded-xl" style={{ backgroundColor: lightBg }}>
               <span className="text-3xl">🚴</span>
               <div>
-                <h3 className="font-bold text-lg mb-1" style={{ color: COLORS.verdeOscuro }}>Ciclovías</h3>
+                <h3 className="font-bold text-lg mb-1" style={{ color: subHeadingColor }}>Ciclovías</h3>
                 <p className="text-sm sm:text-base" style={{ color: textColor }}>
                   Las bicicletas eléctricas pueden usar las ciclovías. Los scooters deben usar las vías principales según su clasificación.
                 </p>
               </div>
             </div>
-            <div className="flex items-start space-x-3 p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
+            <div className="flex items-start space-x-3 p-4 rounded-xl" style={{ backgroundColor: lightBg }}>
               <span className="text-3xl">🛣️</span>
               <div>
-                <h3 className="font-bold text-lg mb-1" style={{ color: COLORS.verdeOscuro }}>Vías Principales</h3>
+                <h3 className="font-bold text-lg mb-1" style={{ color: subHeadingColor }}>Vías Principales</h3>
                 <p className="text-sm sm:text-base" style={{ color: textColor }}>
                   Los vehículos que requieren matrícula deben circular por el carril de motos o el extremo derecho de la vía.
                 </p>
               </div>
             </div>
-            <div className="flex items-start space-x-3 p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
+            <div className="flex items-start space-x-3 p-4 rounded-xl" style={{ backgroundColor: lightBg }}>
               <span className="text-3xl">👕</span>
               <div>
-                <h3 className="font-bold text-lg mb-1" style={{ color: COLORS.verdeOscuro }}>Elementos de Seguridad</h3>
+                <h3 className="font-bold text-lg mb-1" style={{ color: subHeadingColor }}>Elementos de Seguridad</h3>
                 <p className="text-sm sm:text-base" style={{ color: textColor }}>
                   Casco obligatorio para todos los vehículos de dos ruedas. Chaleco reflectivo recomendado para circulación nocturna.
                 </p>
               </div>
             </div>
-            <div className="flex items-start space-x-3 p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
+            <div className="flex items-start space-x-3 p-4 rounded-xl" style={{ backgroundColor: lightBg }}>
               <span className="text-3xl">📱</span>
               <div>
-                <h3 className="font-bold text-lg mb-1" style={{ color: COLORS.verdeOscuro }}>Uso de Celular</h3>
+                <h3 className="font-bold text-lg mb-1" style={{ color: subHeadingColor }}>Uso de Celular</h3>
                 <p className="text-sm sm:text-base" style={{ color: textColor }}>
                   Prohibido el uso de auriculares o manipular dispositivos móviles mientras se conduce.
                 </p>
@@ -322,8 +328,8 @@ export default function LearnSection({ activeSection, darkMode = false }) {
 
         {/* Nota Importante */}
         <div className="mt-8 p-4 sm:p-6 rounded-xl"
-             style={{ backgroundColor: COLORS.acentoNaranja + '20', borderLeft: `4px solid ${COLORS.acentoNaranja}` }}>
-          <p className="text-sm sm:text-base" style={{ color: textColor }}>
+             style={{ backgroundColor: isDarkMode ? '#3d2a1f' : COLORS.acentoNaranja + '20', borderLeft: `4px solid ${COLORS.acentoNaranja}` }}>
+          <p className="text-sm sm:text-base" style={{ color: isDarkMode ? '#fed7aa' : textColor }}>
             <strong>⚠️ Nota Importante:</strong> La normativa puede variar según el municipio. Te recomendamos verificar con las autoridades locales de tránsito para obtener información actualizada de tu ciudad. Esta información es referencial y puede estar sujeta a cambios.
           </p>
         </div>

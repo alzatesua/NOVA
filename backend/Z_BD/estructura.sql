@@ -380,40 +380,57 @@ COMMENT ON TABLE facturacion_forma_pago IS 'Formas de pago por defecto del siste
 
 
 -- Tabla de cupones (maestro)
-CREATE TABLE cupones (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS cupones (
+    id BIGSERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     tipo VARCHAR(3) NOT NULL DEFAULT 'PCT',
-    valor DECIMAL(10, 2) NOT NULL,
+    valor NUMERIC(10, 2) NOT NULL,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
     fecha_vencimiento DATE NULL,
     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_cupones_tipo CHECK (tipo IN ('PCT', 'VAL')),
+    CONSTRAINT chk_cupones_valor CHECK (valor > 0)
 );
 
 -- Tabla de asignaciones de cupones a clientes
-CREATE TABLE cliente_cupones (
-    id SERIAL PRIMARY KEY,
-    cliente_id INTEGER NOT NULL,
-    cupon_id INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS cliente_cupones (
+    id BIGSERIAL PRIMARY KEY,
+    cliente_tienda_id BIGINT,
+    cliente_fiscal_id BIGINT,
+    cupon_id BIGINT NOT NULL,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
     cantidad_disponible INTEGER NOT NULL DEFAULT 1,
     fecha_uso TIMESTAMP NULL,
     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (cliente_id, cupon_id),
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
-    FOREIGN KEY (cupon_id) REFERENCES cupones(id) ON DELETE CASCADE
+    CONSTRAINT chk_cupones_cantidad CHECK (cantidad_disponible >= 0),
+    CONSTRAINT uq_cliente_cupon_tienda UNIQUE (cliente_tienda_id, cupon_id),
+    CONSTRAINT fk_cliente_cupones_clientetienda
+        FOREIGN KEY (cliente_tienda_id)
+        REFERENCES clientes_tienda(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_cliente_cupones_cliente_fiscal
+        FOREIGN KEY (cliente_fiscal_id)
+        REFERENCES facturacion_cliente(id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_cliente_cupones_cupon
+        FOREIGN KEY (cupon_id)
+        REFERENCES cupones(id)
+        ON DELETE CASCADE
 );
 
--- Índices recomendados para mejor rendimiento
-CREATE INDEX idx_cliente_cupones_cliente ON cliente_cupones(cliente_id);
-CREATE INDEX idx_cliente_cupones_cupon ON cliente_cupones(cupon_id);
-CREATE INDEX idx_cupones_activos ON cupones(activo);
-CREATE INDEX idx_cupones_vencimiento ON cupones(fecha_vencimiento);
+-- Índices para rendimiento
+CREATE INDEX IF NOT EXISTS idx_cliente_cupones_cliente_tienda ON cliente_cupones(cliente_tienda_id);
+CREATE INDEX IF NOT EXISTS idx_cliente_cupones_cliente_fiscal ON cliente_cupones(cliente_fiscal_id);
+CREATE INDEX IF NOT EXISTS idx_cliente_cupones_cupon ON cliente_cupones(cupon_id);
+CREATE INDEX IF NOT EXISTS idx_cliente_cupones_activos ON cliente_cupones(cliente_tienda_id, activo, cantidad_disponible);
+CREATE INDEX IF NOT EXISTS idx_cupones_activos ON cupones(activo);
+CREATE INDEX IF NOT EXISTS idx_cupones_vencimiento ON cupones(fecha_vencimiento);
+CREATE INDEX IF NOT EXISTS idx_cupones_actualizado_en ON cupones(actualizado_en);
 
 -- Comentario sobre las tablas
 COMMENT ON TABLE cupones IS 'Cupones de descuento: porcentaje (PCT) o valor fijo (VAL)';
-COMMENT ON TABLE cliente_cupones IS 'Asignación de cupones a clientes con control de cantidad disponible';
+COMMENT ON TABLE cliente_cupones IS 'Asignación de cupones a ClienteTienda con control de cantidad disponible';
 
 -- ============================================================
 -- TABLA DE CONTACTOS RECIBIDOS DESDE EL FORMULARIO WEB

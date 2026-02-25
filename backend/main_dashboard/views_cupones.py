@@ -8,8 +8,9 @@ from rest_framework.response import Response
 from django.utils import timezone
 from django.db import transaction
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
-from .models import Cupon, ClienteCupon, Cliente
+from .models import Cupon, ClienteCupon, Cliente, ClienteTienda
 from .serializers import CuponSerializer, ClienteCuponSerializer
 from .views_facturacion import FacturacionTenantMixin
 from nova.models import Dominios
@@ -41,9 +42,13 @@ class CuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             qs = Cupon.objects.using(alias).all().order_by('-creado_en')
             if solo_activos:
                 qs = qs.filter(activo=True)
+
+            logger.info(f'[CUPONES] Listando cupones: alias={alias}, activos={solo_activos}, count={qs.count()}')
+
             serializer = self.get_serializer(qs, many=True)
             return Response({'cupones': serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
+            logger.error(f'[CUPONES] Error listando: {e}')
             return Response({'detail': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
     def create(self, request, *args, **kwargs):
@@ -51,10 +56,24 @@ class CuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             alias = self._resolve_alias(request)
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            cupon = serializer.save()
-            # Guardar en la BD del tenant
+
+            logger.info(f'[CUPONES] Creando cupón: alias={alias}, data={serializer.validated_data}')
+
+            # Crear el objeto sin guardar en BD todavía
+            cupon = Cupon(**serializer.validated_data)
+            # Validar a nivel modelo (llama a clean())
+            cupon.full_clean()
+            # Ahora guardar en la BD del tenant
             cupon.save(using=alias)
+
+            logger.info(f'[CUPONES] Cupón creado: id={cupon.id}, nombre={cupon.nombre}')
+
             return Response(self.get_serializer(cupon).data, status=status.HTTP_201_CREATED)
+        except ValidationError as e:
+            # Convertir Django ValidationError a formato DRF
+            logger.error(f'[CUPONES] ValidationError: {e}')
+            error_dict = e.message_dict if hasattr(e, 'message_dict') else {'detail': str(e)}
+            return Response(error_dict, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f'Error creando cupón: {e}')
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -65,11 +84,22 @@ class CuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             instance = Cupon.objects.using(alias).get(pk=kwargs['pk'])
             serializer = self.get_serializer(instance, data=request.data, partial=kwargs.get('partial', False))
             serializer.is_valid(raise_exception=True)
-            cupon = serializer.save()
-            cupon.save(using=alias)
-            return Response(self.get_serializer(cupon).data)
+
+            # Actualizar los campos de la instancia
+            for attr, value in serializer.validated_data.items():
+                setattr(instance, attr, value)
+
+            # Validar a nivel modelo
+            instance.full_clean()
+            # Guardar en la BD del tenant
+            instance.save(using=alias)
+
+            return Response(self.get_serializer(instance).data)
         except Cupon.DoesNotExist:
             return Response({'detail': 'Cupón no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        except ValidationError as e:
+            error_dict = e.message_dict if hasattr(e, 'message_dict') else {'detail': str(e)}
+            return Response(error_dict, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -82,6 +112,34 @@ class CuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
         except Cupon.DoesNotExist:
             return Response({'detail': 'Cupón no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'], url_path='clientes-tienda')
+    def listar_clientes_tienda(self, request):
+        """
+        Lista los ClienteTienda (usuarios e-commerce) para asignar cupones.
+        Acepta ?query= para filtrar por email.
+        """
+        try:
+            alias = self._resolve_alias(request)
+            query = request.query_params.get('query', '').strip()
+
+            qs = ClienteTienda.objects.using(alias).filter(rol='cliente')
+            if query:
+                qs = qs.filter(email__icontains=query)
+
+            qs = qs.order_by('-creado_en')[:50]  # Limitar a 50 resultados
+
+            clientes_data = [{
+                'id': c.id,
+                'email': c.email,
+                'nombre': c.email,  # Por ahora usamos email como nombre
+                'cliente_fiscal_id': c.cliente_id,
+            } for c in qs]
+
+            return Response({'clientes_tienda': clientes_data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f'[CUPONES] Error listando clientes tienda: {e}')
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -173,49 +231,91 @@ class ClienteCuponViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             # Obtener IDs de los campos _id
             cliente_tienda_id = serializer.validated_data['cliente_tienda_id']
             cupon_id = serializer.validated_data['cupon_id']
+            cantidad = serializer.validated_data.get('cantidad_disponible', 1)
 
-            logger.info(f'[CUPONES] Buscando ClienteTienda ID={cliente_tienda_id} en alias={alias}')
-            logger.info(f'[CUPONES] DB name: {settings.DATABASES.get(alias, {}).get("NAME", "NOT_FOUND")}')
+            logger.info(f'[CUPONES] Asignando cupón {cupon_id} al cliente {cliente_tienda_id}')
 
-            # Verificar que el ClienteTienda y el cupón existen en el tenant
-            cliente_tienda = ClienteTienda.objects.using(alias).get(pk=cliente_tienda_id)
-            cupon = Cupon.objects.using(alias).get(pk=cupon_id)
-
-            logger.info(f'[CUPONES] ClienteTienda encontrado: {cliente_tienda.email}')
-
-            # Obtener el cliente_fiscal si existe
-            cliente_fiscal = None
-            if cliente_tienda.cliente_id:
+            # Transacción atómica para toda la operación
+            with transaction.atomic(using=alias):
+                # Verificar que el ClienteTienda existe
                 try:
-                    cliente_fiscal = Cliente.objects.using(alias).get(pk=cliente_tienda.cliente_id)
-                except Cliente.DoesNotExist:
-                    pass
+                    cliente_tienda = ClienteTienda.objects.using(alias).get(pk=cliente_tienda_id)
+                except ClienteTienda.DoesNotExist:
+                    return Response(
+                        {'detail': f'Cliente con ID {cliente_tienda_id} no encontrado.'},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
 
-            obj, creado = ClienteCupon.objects.using(alias).get_or_create(
-                cliente_tienda=cliente_tienda,
-                cupon=cupon,
-                defaults={
-                    'cliente_fiscal': cliente_fiscal,
-                    'activo': serializer.validated_data.get('activo', True),
-                    'cantidad_disponible': serializer.validated_data.get('cantidad_disponible', 1),
-                }
-            )
-            if not creado:
-                # Si ya existe, sumar la cantidad
-                cantidad_extra = serializer.validated_data.get('cantidad_disponible', 1)
-                obj.cantidad_disponible += cantidad_extra
-                obj.activo = True
-                # Actualizar cliente_fiscal si ahora existe y antes no
-                if cliente_fiscal and not obj.cliente_fiscal:
-                    obj.cliente_fiscal = cliente_fiscal
-                obj.save(using=alias)
+                # Verificar que el cupón existe y está activo
+                try:
+                    cupon = Cupon.objects.using(alias).get(pk=cupon_id)
+                except Cupon.DoesNotExist:
+                    return Response(
+                        {'detail': f'Cupón con ID {cupon_id} no encontrado.'},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+
+                # Validaciones del cupón
+                if not cupon.activo:
+                    return Response(
+                        {'detail': 'No se pueden asignar cupones inactivos.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                if cupon.fecha_vencimiento and cupon.fecha_vencimiento < timezone.now().date():
+                    return Response(
+                        {'detail': 'No se pueden asignar cupones vencidos.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                # Obtener el cliente_fiscal si existe
+                cliente_fiscal = None
+                if cliente_tienda.cliente_id:
+                    try:
+                        cliente_fiscal = Cliente.objects.using(alias).get(pk=cliente_tienda.cliente_id)
+                    except Cliente.DoesNotExist:
+                        pass
+
+                # Crear o actualizar la asignación
+                obj, creado = ClienteCupon.objects.using(alias).get_or_create(
+                    cliente_tienda=cliente_tienda,
+                    cupon=cupon,
+                    defaults={
+                        'cliente_fiscal': cliente_fiscal,
+                        'activo': serializer.validated_data.get('activo', True),
+                        'cantidad_disponible': cantidad,
+                    }
+                )
+
+                if not creado:
+                    # Si ya existe, sumar la cantidad
+                    obj.cantidad_disponible += cantidad
+                    obj.activo = True
+                    # Actualizar cliente_fiscal si ahora existe y antes no
+                    if cliente_fiscal and not obj.cliente_fiscal:
+                        obj.cliente_fiscal = cliente_fiscal
+                    # Validar a nivel modelo antes de guardar
+                    obj.full_clean()
+                    obj.save(using=alias)
+                else:
+                    # Objeto recién creado, validar también
+                    obj.full_clean()
+                    obj.save(using=alias)
+
+                logger.info(
+                    f'[CUPONES] Cupón asignado exitosamente. '
+                    f'Creado: {creado}, Cantidad total: {obj.cantidad_disponible}'
+                )
 
             return Response(
                 self.get_serializer(obj).data,
                 status=status.HTTP_201_CREATED if creado else status.HTTP_200_OK
             )
-        except (ClienteTienda.DoesNotExist, Cupon.DoesNotExist) as e:
-            return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
+
+        except ValidationError as e:
+            logger.error(f'Error de validación: {e}')
+            error_dict = e.message_dict if hasattr(e, 'message_dict') else {'detail': str(e)}
+            return Response(error_dict, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f'Error asignando cupón: {e}')
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

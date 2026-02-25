@@ -128,7 +128,11 @@ def crear_db(db_nombre, db_password, db_usuario, usuario_data):
             'facturacion_factura_detalle',
             'facturacion_pago',
             'facturacion_forma_pago',
-            'facturacion_config'
+            'facturacion_config',
+            # E-commerce and coupons
+            'clientes_tienda',
+            'cupones',
+            'cliente_cupones'
         ]
         tablas_faltantes = []
         for tabla in tablas_criticas:

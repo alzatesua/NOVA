@@ -8,6 +8,7 @@ cupon_detail = CuponViewSet.as_view({
     'get': 'retrieve', 'put': 'update',
     'patch': 'partial_update', 'delete': 'destroy'
 })
+cupon_clientes_tienda = CuponViewSet.as_view({'get': 'listar_clientes_tienda'})
 
 # --- ClienteCupones ---
 cliente_cupon_list   = ClienteCuponViewSet.as_view({'get': 'list', 'post': 'create'})
@@ -24,6 +25,7 @@ urlpatterns = [
     # Cupones maestro
     path('', cupon_list, name='cupon_list'),
     path('<int:pk>/', cupon_detail, name='cupon_detail'),
+    path('clientes-tienda/', cupon_clientes_tienda, name='cupon_clientes_tienda'),
 
     # Asignaciones cliente-cupón
     path('cliente-cupones/', cliente_cupon_list, name='cliente_cupon_list'),

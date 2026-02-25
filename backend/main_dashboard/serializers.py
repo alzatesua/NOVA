@@ -530,18 +530,27 @@ class ClienteSerializer(DbAliasModelSerializer):
         # Obtener la instancia actual (para ediciones)
         instance = self.instance
 
+        # Logging para debug
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f'[VALIDAR_DOC] value={value.strip()}, db_alias={db_alias}, instance={instance}, instance.pk={instance.pk if instance else None}')
+
         # Buscar si existe otro cliente con este documento
         from .models import Cliente
         queryset = Cliente.objects.using(db_alias) if db_alias else Cliente.objects
 
         existing = queryset.filter(numero_documento=value.strip()).first()
 
+        logger.info(f'[VALIDAR_DOC] existing={existing}, existing.pk={existing.pk if existing else None}')
+
         # Si existe y no es la misma instancia (edición)
         if existing and (not instance or existing.pk != instance.pk):
+            logger.warning(f'[VALIDAR_DOC] Documento duplicado detectado')
             raise serializers.ValidationError(
                 'Ya existe un cliente con este número de documento.'
             )
 
+        logger.info(f'[VALIDAR_DOC] Validación exitosa, mismo cliente o documento único')
         return value.strip()
 
 
@@ -1025,6 +1034,63 @@ class CuponSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'creado_en', 'actualizado_en']
 
+    def validate_nombre(self, value):
+        """Valida que el nombre no esté vacío y tenga longitud mínima"""
+        if not value or not value.strip():
+            raise serializers.ValidationError('El nombre del cupón es requerido.')
+        if len(value.strip()) < 3:
+            raise serializers.ValidationError('El nombre debe tener al menos 3 caracteres.')
+        return value.strip()
+
+    def validate_valor(self, value):
+        """Valida el valor según el tipo de cupón"""
+        if value is None:
+            raise serializers.ValidationError('El valor del cupón es requerido.')
+
+        if value <= 0:
+            raise serializers.ValidationError('El valor del cupón debe ser mayor que cero.')
+
+        # Get tipo from initial data if this is a create operation
+        tipo = self.initial_data.get('tipo') if hasattr(self, 'initial_data') else None
+
+        if tipo == 'PCT' and value > 100:
+            raise serializers.ValidationError(
+                'Para cupones de porcentaje, el valor no puede exceder 100%.'
+            )
+
+        if value > 999999.99:
+            raise serializers.ValidationError(
+                'El valor no puede exceder 999,999.99.'
+            )
+
+        return value
+
+    def validate_fecha_vencimiento(self, value):
+        """Valida que la fecha de vencimiento sea futura"""
+        from django.utils import timezone
+        if value and value < timezone.now().date():
+            raise serializers.ValidationError(
+                'La fecha de vencimiento debe ser una fecha futura.'
+            )
+        return value
+
+    def validate(self, attrs):
+        """Validación cruzada de campos"""
+        tipo = attrs.get('tipo')
+        valor = attrs.get('valor')
+
+        if tipo == 'PCT' and valor and valor > 100:
+            raise serializers.ValidationError({
+                'valor': 'Para cupones de porcentaje, el valor debe estar entre 0 y 100.'
+            })
+
+        if tipo == 'VAL' and valor and valor > 999999.99:
+            raise serializers.ValidationError({
+                'valor': 'El valor fijo no puede exceder 999,999.99.'
+            })
+
+        return attrs
+
 
 class ClienteCuponSerializer(serializers.ModelSerializer):
     # Campos personalizados que aceptan int u objeto
@@ -1045,6 +1111,36 @@ class ClienteCuponSerializer(serializers.ModelSerializer):
             'fecha_uso', 'creado_en'
         ]
         read_only_fields = ['id', 'creado_en', 'cliente_tienda', 'cliente_fiscal', 'cupon']
+
+    def validate_cantidad_disponible(self, value):
+        """Valida que la cantidad disponible sea positiva"""
+        if value is not None and value < 0:
+            raise serializers.ValidationError(
+                'La cantidad disponible no puede ser negativa.'
+            )
+        if value is not None and value == 0:
+            raise serializers.ValidationError(
+                'La cantidad disponible debe ser al menos 1 al asignar un cupón.'
+            )
+        return value
+
+    def validate(self, attrs):
+        """Validación cruzada de campos"""
+        from django.utils import timezone
+
+        cupon_id = attrs.get('cupon_id')
+
+        # Nota: La validación completa del cupón se hace en la vista
+        # donde tenemos acceso al alias de la base de datos
+        # Aquí solo validamos la lógica de negocio que no requiere BD
+
+        cantidad = attrs.get('cantidad_disponible')
+        if cantidad is not None and cantidad < 1:
+            raise serializers.ValidationError({
+                'cantidad_disponible': 'La cantidad debe ser al menos 1.'
+            })
+
+        return attrs
 
     def get_cliente_tienda_email(self, obj):
         return obj.cliente_tienda.email if obj.cliente_tienda else ''

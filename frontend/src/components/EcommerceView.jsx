@@ -1989,13 +1989,13 @@ export default function EcommerceView() {
                     }}
                     className="category-card p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:scale-105"
                     style={{
-                      backgroundColor: COLORS.blanco,
-                      border: `2px solid ${COLORS.verdeMenta}`,
+                      backgroundColor: darkMode ? DARK_COLORS.cardBackground : COLORS.blanco,
+                      border: `2px solid ${darkMode ? DARK_COLORS.borderColor : COLORS.verdeMenta}`,
                       animationDelay: `${index * 0.15}s`
                     }}
                   >
                     <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">{getCategoryEmoji(category)}</div>
-                    <h3 className="font-semibold text-sm sm:text-base" style={{ color: COLORS.verdeOscuro }}>{category}</h3>
+                    <h3 className="font-semibold text-sm sm:text-base" style={{ color: darkMode ? DARK_COLORS.textPrimary : COLORS.verdeOscuro }}>{category}</h3>
                   </button>
                 ))}
               </div>
@@ -2062,11 +2062,11 @@ export default function EcommerceView() {
                   className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold whitespace-nowrap transition-all ${
                     activeCategory === null
                       ? 'text-white shadow-lg'
-                      : 'bg-white hover:shadow-md'
+                      : 'hover:shadow-md'
                   }`}
                   style={{
-                    backgroundColor: activeCategory === null ? COLORS.verdePrincipal : COLORS.blanco,
-                    color: activeCategory === null ? COLORS.blanco : COLORS.verdePrincipal,
+                    backgroundColor: activeCategory === null ? COLORS.verdePrincipal : (darkMode ? DARK_COLORS.cardBackground : COLORS.blanco),
+                    color: activeCategory === null ? COLORS.blanco : (darkMode ? DARK_COLORS.textPrimary : COLORS.verdePrincipal),
                     fontSize: '13px'
                   }}
                 >
@@ -2079,11 +2079,11 @@ export default function EcommerceView() {
                     className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold whitespace-nowrap transition-all ${
                       activeCategory === category
                         ? 'text-white shadow-lg'
-                        : 'bg-white hover:shadow-md'
+                        : 'hover:shadow-md'
                     }`}
                     style={{
-                      backgroundColor: activeCategory === category ? COLORS.verdePrincipal : COLORS.blanco,
-                      color: activeCategory === category ? COLORS.blanco : COLORS.verdePrincipal,
+                      backgroundColor: activeCategory === category ? COLORS.verdePrincipal : (darkMode ? DARK_COLORS.cardBackground : COLORS.blanco),
+                      color: activeCategory === category ? COLORS.blanco : (darkMode ? DARK_COLORS.textPrimary : COLORS.verdePrincipal),
                       fontSize: '13px'
                     }}
                   >
@@ -2099,7 +2099,7 @@ export default function EcommerceView() {
                 <div
                   key={product.id}
                   className="rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all transform hover:scale-105 cursor-pointer"
-                  style={{ backgroundColor: COLORS.blanco }}
+                  style={{ backgroundColor: darkMode ? DARK_COLORS.cardBackground : COLORS.blanco }}
                   onClick={() => {
                     setSelectedProduct(product);
                     setShowProductModal(true);
@@ -2107,7 +2107,7 @@ export default function EcommerceView() {
                 >
                   <div
                     className="w-full aspect-square flex items-center justify-center"
-                    style={{ backgroundColor: COLORS.grisClaro }}
+                    style={{ backgroundColor: darkMode ? DARK_COLORS.inputBackground : COLORS.grisClaro }}
                   >
                     {product.imagen ? (
                       <img src={product.imagen} alt={product.nombre} className="w-full h-full object-cover" />
@@ -2121,10 +2121,10 @@ export default function EcommerceView() {
                         {product.categoria_nombre}
                       </span>
                     )}
-                    <h3 className="font-bold text-xs sm:text-sm md:text-base mb-1 sm:mb-2 line-clamp-2" style={{ color: COLORS.verdeOscuro }}>
+                    <h3 className="font-bold text-xs sm:text-sm md:text-base mb-1 sm:mb-2 line-clamp-2" style={{ color: darkMode ? DARK_COLORS.textPrimary : COLORS.verdeOscuro }}>
                       {product.nombre}
                     </h3>
-                    <p className="text-[10px] sm:text-xs md:text-sm mb-2 sm:mb-3 line-clamp-1 sm:line-clamp-2" style={{ color: COLORS.grisMedio }}>
+                    <p className="text-[10px] sm:text-xs md:text-sm mb-2 sm:mb-3 line-clamp-1 sm:line-clamp-2" style={{ color: darkMode ? DARK_COLORS.textSecondary : COLORS.grisMedio }}>
                       {product.descripcion}
                     </p>
                     <p className="text-lg sm:text-xl md:text-2xl font-bold" style={{ color: COLORS.verdePrincipal }}>
@@ -2173,16 +2173,16 @@ export default function EcommerceView() {
               style={{ paddingTop: '60px' }}
             />
 
-            <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-4 overflow-hidden modal-content-custom" style={{ maxHeight: 'calc(100vh - 100px)' }}>
+            <div className="relative bg-white dark:!bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-4 overflow-hidden modal-content-custom" style={{ maxHeight: 'calc(100vh - 100px)' }}>
               {/* Header */}
-              <div className="sticky top-0 bg-white dark:bg-gray-800 border-b dark:border-gray-700 p-3 sm:p-4 md:p-6 z-10">
+              <div className="sticky top-0 bg-white dark:!bg-gray-800 border-b dark:!border-gray-700 p-3 sm:p-4 md:p-6 z-10">
                 <div className="flex items-center justify-between gap-2 sm:gap-4">
                   <h2 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold" style={{ color: COLORS.verdeOscuro }}>
                     {selectedProduct.nombre}
                   </h2>
                   <button
                     onClick={() => setShowProductModal(false)}
-                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-shrink-0"
+                    className="text-gray-400 hover:text-gray-600 dark:hover:!text-gray-300 transition-colors flex-shrink-0"
                   >
                     <svg className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2421,27 +2421,27 @@ export default function EcommerceView() {
 
       {/* Sección INFORMATE - Movilidad Eléctrica en Pereira y Risaralda */}
       {activeSection === 'informate' && (
-        <div className="py-8 px-4">
+        <div className="py-8 px-4" style={{ backgroundColor: darkMode ? '#0a0f1a' : 'transparent' }}>
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="text-center mb-12">
-              <h1 className="text-4xl sm:text-5xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+              <h1 className="text-4xl sm:text-5xl font-bold mb-4" style={{ color: darkMode ? '#ffffff' : COLORS.verdeOscuro }}>
                 Movilidad Eléctrica en Pereira
               </h1>
-              <p className="text-lg" style={{ color: COLORS.grisMedio }}>
+              <p className="text-lg" style={{ color: darkMode ? '#e2e8f0' : COLORS.grisMedio }}>
                 Todo lo que necesitas saber sobre transporte eléctrico en Risaralda
               </p>
             </div>
 
             {/* Sección 1: ¿Qué es la Movilidad Eléctrica? */}
-            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: COLORS.blanco }}>
-              <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: darkMode ? '#1a2332' : COLORS.blanco }}>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: darkMode ? '#4ade80' : COLORS.verdeOscuro }}>
                 ⚡ ¿Qué es la Movilidad Eléctrica?
               </h2>
-              <p className="mb-4" style={{ color: COLORS.grisOscuro }}>
+              <p className="mb-4" style={{ color: darkMode ? '#ffffff' : COLORS.grisOscuro }}>
                 La movilidad eléctrica es el uso de vehículos propulsados por energía eléctrica como alternativa a los combustibles fósiles. En Pereira y Risaralda, esto incluye:
               </p>
-              <ul className="space-y-2 ml-6" style={{ color: COLORS.grisOscuro }}>
+              <ul className="space-y-2 ml-6" style={{ color: darkMode ? '#ffffff' : COLORS.grisOscuro }}>
                 <li>• <strong>Motos Eléctricas:</strong> Vehículos de dos ruedas 100% eléctricos</li>
                 <li>• <strong>Bisimotos:</strong> Bicicletas eléctricas con pedaleo asistido</li>
                 <li>• <strong>VEs (Vehículos Eléctricos):</strong> Automóviles y camiones eléctricos</li>
@@ -2450,15 +2450,15 @@ export default function EcommerceView() {
             </div>
 
             {/* Sección 2: Requisitos Legales en Colombia */}
-            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: COLORS.beigeCrema }}>
-              <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: darkMode ? '#252f3f' : COLORS.beigeCrema }}>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: darkMode ? '#4ade80' : COLORS.verdeOscuro }}>
                 📋 Requisitos Legales en Colombia
               </h2>
 
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Motos Eléctricas */}
-                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.blanco }}>
-                  <h3 className="text-xl font-bold mb-3" style={{ color: COLORS.verdePrincipal }}>
+                <div className="p-4 rounded-xl" style={{ backgroundColor: darkMode ? '#1a2332' : COLORS.blanco }}>
+                  <h3 className="text-xl font-bold mb-3" style={{ color: darkMode ? '#4ade80' : COLORS.verdePrincipal }}>
                     🛵 Motos Eléctricas
                   </h3>
                   <ul className="space-y-2 text-sm" style={{ color: COLORS.grisOscuro }}>
@@ -2742,12 +2742,12 @@ export default function EcommerceView() {
               onClick={() => setShowCart(false)}
             />
 
-            <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <div className="relative bg-white dark:!bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
               {/* Header */}
-              <div className="sticky top-0 bg-white dark:bg-gray-800 border-b dark:border-gray-700 p-6 z-10">
+              <div className="sticky top-0 bg-white dark:!bg-gray-800 border-b dark:!border-gray-700 p-6 z-10">
                 <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-bold" style={{ color: COLORS.verdeOscuro }}>🛒 Tu Carrito</h2>
-                  <button onClick={() => setShowCart(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  <button onClick={() => setShowCart(false)} className="text-gray-400 hover:text-gray-600 dark:hover:!text-gray-300">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -2818,7 +2818,7 @@ export default function EcommerceView() {
 
               {/* Footer */}
               {cart.length > 0 && (
-                <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t dark:border-gray-700 p-6 space-y-4">
+                <div className="sticky bottom-0 bg-white dark:!bg-gray-800 border-t dark:!border-gray-700 p-6 space-y-4">
                   <div className="flex items-center justify-between text-2xl font-bold">
                     <span style={{ color: COLORS.verdeOscuro }}>Total:</span>
                     <span style={{ color: COLORS.verdePrincipal }}>${cartTotal.toFixed(2)}</span>
@@ -3029,7 +3029,7 @@ export default function EcommerceView() {
                   setShowAuthModal(false);
                   resetAuthForm();
                 }}
-                className="w-full py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                className="w-full py-2 text-sm text-gray-500 dark:!text-gray-400 hover:text-gray-700 dark:hover:!text-gray-300"
               >
                 Cancelar
               </button>
@@ -3041,7 +3041,7 @@ export default function EcommerceView() {
       {/* ==================== MODAL DE CUPÓN GANADO ==================== */}
       {showCouponModal && earnedCoupon && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden text-center">
+          <div className="bg-white dark:!bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden text-center">
             {/* Header con confeti */}
             <div className="p-8 relative overflow-hidden" style={{ backgroundColor: 'linear-gradient(135deg, #FFA726 0%, #FF6F00 100%)' }}>
               <div className="text-6xl mb-4 animate-bounce">🎉</div>
@@ -3125,7 +3125,7 @@ export default function EcommerceView() {
       {/* ==================== MODAL DE MIS CUPONES ==================== */}
       {showCouponModal && !earnedCoupon && coupons.length > 0 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden">
+          <div className="bg-white dark:!bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden">
             {/* Header */}
             <div className="p-6 text-center" style={{ backgroundColor: COLORS.verdePrincipal }}>
               <div className="text-4xl mb-2">🎁</div>
