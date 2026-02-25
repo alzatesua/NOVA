@@ -131,14 +131,16 @@ export default function EcommerceView() {
     }
   }, [showUserDropdown]);
 
-  // Efecto para modo oscuro - guardar preferencia y aplicar clase al body
+  // Efecto para modo oscuro - guardar preferencia y aplicar clase al html y body
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
     if (darkMode) {
+      document.documentElement.classList.add('dark');
       document.body.classList.add('dark-mode');
       document.body.style.backgroundColor = DARK_COLORS.background;
       document.body.style.color = DARK_COLORS.textPrimary;
     } else {
+      document.documentElement.classList.remove('dark');
       document.body.classList.remove('dark-mode');
       document.body.style.backgroundColor = COLORS.blanco;
       document.body.style.color = COLORS.negro;

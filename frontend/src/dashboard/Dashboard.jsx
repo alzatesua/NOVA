@@ -82,7 +82,7 @@ export default function Dashboard() {
         {view === 'usuarios' && (
           <div className="relative w-full mb-8 p-8 rounded-3xl
             bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
-            <section className="w-full max-w-4xl">
+            <section className="w-full">
               <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-slate-100">Gestión de Usuarios</h3>
               <UsersView users={usersData} onCreated={reloadUsers} />
             </section>

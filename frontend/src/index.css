@@ -317,7 +317,17 @@
 }
 
 /* Modo oscuro para el menú */
-.dark .react-select__menu {
+.dark .react-select__menu,
+html.dark .react-select__menu,
+body.dark .react-select__menu {
+  background-color: rgb(30, 41, 59) !important;
+  border-color: #475569 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Modo oscuro para el menú cuando está dentro de un modal con z-index alto */
+.dark [style*="z-index"] .react-select__menu,
+html.dark [style*="z-index"] .react-select__menu {
   background-color: rgb(30, 41, 59) !important;
   border-color: #475569 !important;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
@@ -561,4 +571,134 @@ body.dark select option:checked,
 html.dark select option:checked {
   background-color: rgb(37, 99, 235) !important;
   color: rgb(255, 255, 255) !important;
+}
+
+/* ========================================
+   MODALES EN MODO OSCURO - FORZAR FONDOS
+   ======================================== */
+
+/* Forzar modo oscuro en todos los elementos dentro de modales */
+.dark [style*="z-index"],
+html.dark [style*="z-index"] {
+  background-color: rgb(30, 41, 59) !important;
+  color: rgb(241, 245, 249) !important;
+}
+
+.dark [style*="z-index"] *,
+html.dark [style*="z-index"] * {
+  background-color: transparent !important;
+}
+
+.dark [style*="z-index"] .bg-white,
+html.dark [style*="z-index"] .bg-white {
+  background-color: rgb(30, 41, 59) !important;
+}
+
+.dark [style*="z-index"] .bg-slate-50,
+html.dark [style*="z-index"] .bg-slate-50 {
+  background-color: rgb(30, 41, 59) !important;
+}
+
+.dark [style*="z-index"] .bg-slate-100,
+html.dark [style*="z-index"] .bg-slate-100 {
+  background-color: rgb(30, 41, 59) !important;
+}
+
+.dark [style*="z-index"] table,
+html.dark [style*="z-index"] table {
+  background-color: rgb(30, 41, 59) !important;
+}
+
+.dark [style*="z-index"] thead,
+html.dark [style*="z-index"] thead {
+  background-color: rgb(30, 41, 59) !important;
+}
+
+.dark [style*="z-index"] tbody,
+html.dark [style*="z-index"] tbody {
+  background-color: rgb(30, 41, 59) !important;
+}
+
+.dark [style*="z-index"] tr,
+html.dark [style*="z-index"] tr {
+  background-color: transparent !important;
+}
+
+.dark [style*="z-index"] td,
+html.dark [style*="z-index"] td {
+  background-color: transparent !important;
+  color: rgb(241, 245, 249) !important;
+}
+
+.dark [style*="z-index"] th,
+html.dark [style*="z-index"] th {
+  background-color: transparent !important;
+  color: rgb(241, 245, 249) !important;
+}
+
+.dark [style*="z-index"] input,
+html.dark [style*="z-index"] input,
+.dark [style*="z-index"] select,
+html.dark [style*="z-index"] select,
+.dark [style*="z-index"] textarea,
+html.dark [style*="z-index"] textarea {
+  background-color: rgb(30, 41, 59) !important;
+  color: rgb(241, 245, 249) !important;
+  border-color: rgb(71, 85, 105) !important;
+}
+
+.dark [style*="z-index"] input::placeholder,
+html.dark [style*="z-index"] input::placeholder {
+  color: rgb(148, 163, 184) !important;
+}
+
+.dark [style*="z-index"] .text-slate-900,
+.html.dark [style*="z-index"] .text-slate-900 {
+  color: rgb(241, 245, 249) !important;
+}
+
+.dark [style*="z-index"] .text-slate-600,
+.html.dark [style*="z-index"] .text-slate-600 {
+  color: rgb(203, 213, 225) !important;
+}
+
+.dark [style*="z-index"] .text-slate-500,
+.html.dark [style*="z-index"] .text-slate-500 {
+  color: rgb(148, 163, 184) !important;
+}
+
+.dark [style*="z-index"] .text-slate-400,
+.html.dark [style*="z-index"] .text-slate-400 {
+  color: rgb(148, 163, 184) !important;
+}
+
+.dark [style*="z-index"] .text-slate-700,
+.html.dark [style*="z-index"] .text-slate-700 {
+  color: rgb(241, 245, 249) !important;
+}
+
+.dark [style*="z-index"] .font-medium,
+.html.dark [style*="z-index"] .font-medium {
+  color: rgb(241, 245, 249) !important;
+}
+
+.dark [style*="z-index"] .font-semibold,
+.html.dark [style*="z-index"] .font-semibold {
+  color: rgb(241, 245, 249) !important;
+}
+/* Forzar colores de texto en modo oscuro para StatCard */
+.dark .text-slate-900 {
+  color: #ffffff !important;
+}
+
+.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+.dark h3, .dark h4 {
+  color: #ffffff !important;
+}
+
+.dark p {
+  color: #e2e8f0 !important;
 }

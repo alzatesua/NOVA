@@ -298,37 +298,37 @@ export default function UsersView({ users: initialUsers, onCreated }) {
   };
 
   return (
-    <section className="space-y-4 max-w-7xl mx-auto px-6 flex flex-col items-center justify-center">
+    <section className="space-y-6 w-full px-6 py-4">
       {/* Cabecera con búsqueda y filtros */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mb-6 max-w-7xl mx-auto">
         <input
           type="text"
           placeholder="Buscar usuarios..."
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
-          className="w-full md:w-64 px-4 py-2 rounded-full border border-slate-300 dark:!border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:!bg-slate-800 dark:!text-slate-100 dark:!placeholder-slate-400 transition-colors"
+          className="w-full lg:w-80 px-4 py-2 rounded-full border border-slate-300 dark:!border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:!bg-slate-800 dark:!text-slate-100 dark:!placeholder-slate-400 transition-colors"
         />
 
-        <div className="flex gap-2 whitespace-nowrap">
-          {['Todos', 'Activo', 'Inactivo'].map(label => (
-            <button
-              key={label}
-              onClick={() => setQuickFilter(label.toLowerCase())}
-              className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                quickFilter === label.toLowerCase()
-                  ? 'bg-blue-600 dark:bg-blue-500 text-white'
-                  : 'bg-slate-200 dark:!bg-slate-800 text-slate-700 dark:!text-slate-300 hover:bg-slate-300 dark:hover:!bg-slate-700'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex gap-2 whitespace-nowrap">
+            {['Todos', 'Activo', 'Inactivo'].map(label => (
+              <button
+                key={label}
+                onClick={() => setQuickFilter(label.toLowerCase())}
+                className={`px-4 py-1.5 rounded-full text-sm transition-colors ${
+                  quickFilter === label.toLowerCase()
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                    : 'bg-slate-200 dark:!bg-slate-800 text-slate-700 dark:!text-slate-300 hover:bg-slate-300 dark:hover:!bg-slate-700'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-        <div>
           <button
             onClick={toggleCreateForm}
-            className="flex items-center bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 text-white px-4 py-2 rounded-lg shadow-md hover:opacity-90 transition-opacity text-sm font-medium"
+            className="flex items-center bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 text-white px-5 py-2.5 rounded-lg shadow-md hover:opacity-90 transition-opacity text-sm font-medium"
           >
             {showCreateForm ? 'Cancelar' : 'Nuevo Usuario'}
           </button>
@@ -339,10 +339,10 @@ export default function UsersView({ users: initialUsers, onCreated }) {
       {showCreateForm && (
         <form
           onSubmit={handleSubmitNewUser}
-          className="bg-white dark:!bg-slate-900 p-6 rounded-lg shadow-md border border-slate-200 dark:!border-slate-800 space-y-4 mb-6 transition-colors"
+          className="bg-white dark:!bg-slate-900 p-6 rounded-lg shadow-md border border-slate-200 dark:!border-slate-800 space-y-4 mb-6 transition-colors max-w-7xl mx-auto"
         >
           <h4 className="text-lg font-medium text-slate-900 dark:!text-slate-100">Crear Nuevo Usuario</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <input
               name="usuario"
               placeholder="Usuario"
@@ -435,9 +435,9 @@ export default function UsersView({ users: initialUsers, onCreated }) {
 
       {/* Vista tarjetas o tabla */}
       {viewMode === 'card' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-7xl mx-auto">
           {filteredUsers.length === 0 && !loading && (
-            <p className="col-span-full text-center text-slate-500 dark:!text-slate-400">No se encontraron usuarios.</p>
+            <p className="col-span-full text-center text-slate-500 dark:!text-slate-400 py-8">No se encontraron usuarios.</p>
           )}
 
           {filteredUsers.map(u => {
@@ -448,7 +448,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
             return (
               <div
                 key={u.id_login_usuario}
-                className="bg-white dark:!bg-slate-900 rounded-2xl shadow-md p-5 border border-slate-100 dark:!border-blue-500 flex flex-col break-words hover:shadow-xl hover:shadow-blue-500/20 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-300 ease-out group"
+                className="bg-white dark:!bg-slate-900 rounded-2xl shadow-md p-6 border border-slate-200 dark:!border-slate-700 flex flex-col break-words hover:shadow-xl hover:shadow-blue-500/20 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-300 ease-out group w-full min-h-[280px]"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h5

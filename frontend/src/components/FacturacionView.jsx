@@ -156,7 +156,7 @@ export default function FacturacionView() {
     <div className="w-full max-w-7xl mx-auto px-4">
       {/* Header */}
       <div className="mb-4">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+        <h2 className="text-xl font-bold text-slate-800 dark:!text-slate-100">
           Sistema de Facturación
         </h2>
       </div>
@@ -164,7 +164,7 @@ export default function FacturacionView() {
       {/* Contenido */}
       <div className="space-y-4">
             {/* Indicador de pasos - Wizard horizontal compacto */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-md p-3 border border-slate-200 dark:border-slate-800">
+            <div className="bg-white dark:!bg-slate-900 rounded-xl shadow-md p-3 border border-slate-200 dark:!border-slate-800">
               <div className="flex items-center justify-between">
                 {pasos.map((paso, index) => {
                   const esActivo = pasoActual === paso.numero;
@@ -188,7 +188,7 @@ export default function FacturacionView() {
                               ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/50 scale-105'
                               : estaCompletado || yaVisitado
                               ? 'bg-sky-400 text-white cursor-pointer hover:scale-105'
-                              : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                              : 'bg-slate-200 dark:!bg-slate-700 text-slate-500 dark:!text-slate-400'
                             }
                             ${!puedeIrAPaso(paso.numero) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                           `}
@@ -199,7 +199,7 @@ export default function FacturacionView() {
                             <span>{paso.numero}</span>
                           )}
                         </button>
-                        <p className={`text-xs font-medium mt-1 ${esActivo ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>
+                        <p className={`text-xs font-medium mt-1 ${esActivo ? 'text-blue-600 dark:!text-blue-400' : 'text-slate-600 dark:!text-slate-400'}`}>
                           {paso.titulo}
                         </p>
                       </div>
@@ -209,7 +209,7 @@ export default function FacturacionView() {
                           h-0.5 flex-1 mx-1 rounded-full transition-all duration-200 mt-[-12px]
                           ${yaVisitado || estaCompletado
                             ? 'bg-sky-400'
-                            : 'bg-slate-200 dark:bg-slate-700'
+                            : 'bg-slate-200 dark:!bg-slate-700'
                           }
                         `} />
                       )}
@@ -224,9 +224,9 @@ export default function FacturacionView() {
               {/* Paso 1: Configuración de Sucursal y Bodega */}
               {pasoActual === 1 && (
                 <div className="lg:col-span-3">
-                  <div className="bg-white dark:bg-slate-900 rounded-xl shadow-md p-5 border border-slate-200 dark:border-slate-800">
+                  <div className="bg-white dark:!bg-slate-900 rounded-xl shadow-md p-5 border border-slate-200 dark:!border-slate-800">
                     <div className="mb-4">
-                      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                      <h3 className="text-lg font-bold text-slate-800 dark:!text-slate-100">
                         Configuración Inicial
                       </h3>
                     </div>
@@ -235,7 +235,7 @@ export default function FacturacionView() {
                       {/* Sucursal */}
                       {rol === 'admin' && (
                         <div>
-                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                          <label className="block text-xs font-semibold text-slate-700 dark:!text-slate-300 mb-2">
                             Sucursal
                           </label>
                           <div className="relative">
@@ -247,10 +247,10 @@ export default function FacturacionView() {
                                 setBodegaSeleccionada(null);
                               }}
                               className="w-full px-4 py-2.5 pl-3 pr-10 text-sm font-medium
-                                border-2 border-slate-200 dark:border-slate-700
+                                border-2 border-slate-200 dark:!border-slate-700
                                 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                                bg-white dark:bg-slate-800
-                                text-slate-900 dark:text-slate-100
+                                bg-white dark:!bg-slate-800
+                                text-slate-900 dark:!text-slate-100
                                 appearance-none cursor-pointer
                                 transition-all duration-200
                                 hover:border-slate-300 dark:hover:border-slate-600
@@ -264,7 +264,7 @@ export default function FacturacionView() {
                               ))}
                             </select>
                             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                              <ChevronDownIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+                              <ChevronDownIcon className="h-5 w-5 text-slate-400 dark:!text-slate-500" />
                             </div>
                           </div>
                         </div>
@@ -272,7 +272,7 @@ export default function FacturacionView() {
 
                       {/* Bodega */}
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                        <label className="block text-xs font-semibold text-slate-700 dark:!text-slate-300 mb-2">
                           Bodega de Venta
                         </label>
                         <div className="relative">
@@ -280,10 +280,10 @@ export default function FacturacionView() {
                             value={bodegaSeleccionada || ''}
                             onChange={(e) => setBodegaSeleccionada(parseInt(e.target.value))}
                             className="w-full px-4 py-2.5 pl-3 pr-10 text-sm font-medium
-                              border-2 border-slate-200 dark:border-slate-700
+                              border-2 border-slate-200 dark:!border-slate-700
                               rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                              bg-white dark:bg-slate-800
-                              text-slate-900 dark:text-slate-100
+                              bg-white dark:!bg-slate-800
+                              text-slate-900 dark:!text-slate-100
                               appearance-none cursor-pointer
                               transition-all duration-200
                               hover:border-slate-300 dark:hover:border-slate-600
@@ -305,7 +305,7 @@ export default function FacturacionView() {
                               ))}
                           </select>
                           <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <ChevronDownIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+                            <ChevronDownIcon className="h-5 w-5 text-slate-400 dark:!text-slate-500" />
                           </div>
                         </div>
                       </div>
@@ -330,7 +330,7 @@ export default function FacturacionView() {
               {pasoActual === 2 && bodegaSeleccionada && (
                 <div className="lg:col-span-3">
                   <div className="max-w-5xl mx-auto">
-                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-md border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <div className="bg-white dark:!bg-slate-900 rounded-xl shadow-md border border-slate-200 dark:!border-slate-800 overflow-hidden">
                       <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3">
                         <h3 className="text-base font-bold text-white">
                           Nueva Factura
@@ -347,7 +347,7 @@ export default function FacturacionView() {
 
                     {/* Resumen de última venta (si existe) - Abajo del formulario */}
                     {ultimaFactura && (
-                      <div className="mt-4 bg-white dark:bg-slate-900 rounded-xl shadow-md border border-slate-200 dark:border-slate-800 overflow-hidden">
+                      <div className="mt-4 bg-white dark:!bg-slate-900 rounded-xl shadow-md border border-slate-200 dark:!border-slate-800 overflow-hidden">
                         <div className="bg-gradient-to-r from-sky-400 to-cyan-400 px-4 py-2 flex justify-between items-center">
                           <div>
                             <h3 className="text-sm font-bold text-white">Última Venta Completada</h3>
@@ -368,19 +368,19 @@ export default function FacturacionView() {
                             </button>
                           </div>
                         </div>
-                        <div className="p-3 bg-slate-50 dark:bg-slate-800">
+                        <div className="p-3 bg-slate-50 dark:!bg-slate-800">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-xs text-slate-600 dark:text-slate-400">Factura #{ultimaFactura.numero_factura}</p>
-                              <p className="text-base font-bold text-slate-900 dark:text-slate-100">
+                              <p className="text-xs text-slate-600 dark:!text-slate-400">Factura #{ultimaFactura.numero_factura}</p>
+                              <p className="text-base font-bold text-slate-900 dark:!text-slate-100">
                                 ${parseFloat(ultimaFactura.total).toFixed(2)}
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-xs text-slate-600 dark:text-slate-400">
+                              <p className="text-xs text-slate-600 dark:!text-slate-400">
                                 {ultimaFactura.detalles?.length || 0} {ultimaFactura.detalles?.length === 1 ? 'producto' : 'productos'}
                               </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-500">
+                              <p className="text-xs text-slate-500 dark:!text-slate-500">
                                 {ultimaFactura.cliente_nombre || 'Consumidor Final'}
                               </p>
                             </div>
@@ -395,7 +395,7 @@ export default function FacturacionView() {
               {/* Paso 3: Ticket final */}
               {pasoActual === 3 && ultimaFactura && (
                 <div className="lg:col-span-3">
-                  <div className="bg-white dark:bg-slate-900 rounded-xl shadow-md border border-slate-200 dark:border-slate-800 overflow-hidden">
+                  <div className="bg-white dark:!bg-slate-900 rounded-xl shadow-md border border-slate-200 dark:!border-slate-800 overflow-hidden">
                     <div className="bg-gradient-to-r from-sky-400 to-cyan-400 px-5 py-3">
                       <div className="flex items-center gap-3">
                         <CheckCircleIcon className="h-8 w-8 text-white" />
@@ -439,7 +439,7 @@ export default function FacturacionView() {
               <div className="flex justify-between">
                 <button
                   onClick={() => setPasoActual(pasoActual - 1)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-sm bg-slate-200 dark:!bg-slate-700 text-slate-700 dark:!text-slate-200 font-semibold rounded-lg hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors"
                 >
                   <ArrowLeftIcon className="h-4 w-4" />
                   Volver
