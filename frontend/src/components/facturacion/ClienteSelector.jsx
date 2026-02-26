@@ -6,7 +6,7 @@ import { showToast } from '../../utils/toast';
 import Select from 'react-select';
 
 // Componente: Selector de Ciudad con Búsqueda
-function CiudadSelector({ value, onChange, token, label = "Ciudad" }) {
+function CiudadSelector({ value, onChange, token, label = "Ciudad", isDarkMode = false }) {
   const [ciudades, setCiudades] = useState([]);
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -58,7 +58,7 @@ function CiudadSelector({ value, onChange, token, label = "Ciudad" }) {
 
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">{label}</label>
+      <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{label}</label>
       <Select
         value={valorActual}
         onChange={(opcion) => onChange(opcion ? opcion.value : '')}
@@ -74,7 +74,7 @@ function CiudadSelector({ value, onChange, token, label = "Ciudad" }) {
         classNamePrefix="react-select"
         components={{
           DropdownIndicator: () => (
-            <div className="p-2 text-gray-400">
+            <div className={`p-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
               <ChevronDownIcon className="h-5 w-5" />
             </div>
           ),
@@ -90,6 +90,7 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
   const [tipoPersona, setTipoPersona] = useState('NAT');
   const [loading, setLoading] = useState(false);
   const [errores, setErrores] = useState({});
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [formData, setFormData] = useState({
     tipo_documento: '',
     numero_documento: '',
@@ -102,6 +103,30 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
     direccion: '',
     ciudad: ''
   });
+
+  // Detectar modo oscuro
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const isDark = document.documentElement.classList.contains('dark') ||
+                     document.body.classList.contains('dark');
+      setIsDarkMode(isDark);
+    };
+
+    checkDarkMode();
+
+    // Escuchar cambios en el atributo class del elemento html
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   if (!show) return null;
 
@@ -218,7 +243,13 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
   // Función auxiliar para clases de input con error
   const clasesInput = (campo) => {
     const tieneError = errores[campo];
-    return `w-full px-4 py-2.5 ${tieneError ? 'pr-10 border-red-500 bg-red-50' : 'border-gray-300'} border rounded-xl focus:outline-none focus:ring-2 ${tieneError ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-blue-500 focus:border-transparent'} transition-all`;
+    const baseClasses = 'w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 transition-all';
+
+    if (tieneError) {
+      return `${baseClasses} pr-10 border-red-500 bg-red-50 ${isDarkMode ? 'dark:bg-red-900/20' : ''} focus:ring-red-500 focus:border-red-500`;
+    }
+
+    return `${baseClasses} ${isDarkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white text-gray-900'} focus:ring-blue-500 focus:border-transparent`;
   };
 
   // Update form data handler
@@ -232,7 +263,7 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
 
   return createPortal(
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto`}>
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 rounded-t-2xl">
           <div className="flex justify-between items-center">
@@ -263,15 +294,19 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
         <form onSubmit={handleCrearCliente} className="p-6 space-y-4">
           {/* Tipo de Persona */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Tipo de Persona</label>
+            <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Tipo de Persona</label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => { setTipoPersona('NAT'); setErrores({}); }}
                 className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
                   tipoPersona === 'NAT'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                    ? isDarkMode
+                      ? 'border-blue-500 bg-blue-900/30 text-blue-300'
+                      : 'border-blue-500 bg-blue-50 text-blue-700'
+                    : isDarkMode
+                      ? 'border-gray-600 hover:border-gray-500 text-gray-400'
+                      : 'border-gray-200 hover:border-gray-300 text-gray-600'
                 }`}
               >
                 <UserIcon className="h-5 w-5" />
@@ -282,8 +317,12 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
                 onClick={() => { setTipoPersona('JUR'); setErrores({}); }}
                 className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
                   tipoPersona === 'JUR'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                    ? isDarkMode
+                      ? 'border-blue-500 bg-blue-900/30 text-blue-300'
+                      : 'border-blue-500 bg-blue-50 text-blue-700'
+                    : isDarkMode
+                      ? 'border-gray-600 hover:border-gray-500 text-gray-400'
+                      : 'border-gray-200 hover:border-gray-300 text-gray-600'
                 }`}
               >
                 <BuildingOfficeIcon className="h-5 w-5" />
@@ -295,7 +334,7 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
           <div className="grid grid-cols-2 gap-4">
             {/* Tipo Documento */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Tipo Documento</label>
+              <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Tipo Documento</label>
               <select
                 value={formData.tipo_documento}
                 onChange={(e) => updateField('tipo_documento', e.target.value)}
@@ -309,12 +348,12 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
                 <option value="TI">Tarjeta Identidad</option>
                 <option value="PP">Pasaporte</option>
               </select>
-              {errores.tipo_documento && <p className="mt-1 text-xs text-red-600">{errores.tipo_documento}</p>}
+              {errores.tipo_documento && <p className={`mt-1 text-xs flex items-center gap-1 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>{errores.tipo_documento}</p>}
             </div>
 
             {/* Número Documento */}
             <div className="relative">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Número</label>
+              <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Número</label>
               <input
                 type="text"
                 value={formData.numero_documento}
@@ -326,7 +365,7 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
               {errores.numero_documento && (
                 <ExclamationTriangleIcon className="absolute right-3 top-9 h-5 w-5 text-red-500 pointer-events-none" />
               )}
-              {errores.numero_documento && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{errores.numero_documento}</p>}
+              {errores.numero_documento && <p className={`mt-1 text-xs flex items-center gap-1 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}><ExclamationTriangleIcon className="h-3 w-3" />{errores.numero_documento}</p>}
             </div>
           </div>
 
@@ -334,7 +373,7 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
             <div className="space-y-4 animate-fadeIn">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Primer Nombre *</label>
+                  <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Primer Nombre *</label>
                   <input
                     type="text"
                     value={formData.primer_nombre}
@@ -343,10 +382,10 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
                     placeholder="Juan"
                     required
                   />
-                  {errores.primer_nombre && <p className="mt-1 text-xs text-red-600">{errores.primer_nombre}</p>}
+                  {errores.primer_nombre && <p className={`mt-1 text-xs ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>{errores.primer_nombre}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Segundo Nombre</label>
+                  <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Segundo Nombre</label>
                   <input
                     type="text"
                     value={formData.segundo_nombre}
@@ -357,7 +396,7 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Apellidos *</label>
+                <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Apellidos *</label>
                 <input
                   type="text"
                   value={formData.apellidos}
@@ -366,12 +405,12 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
                   placeholder="Pérez García"
                   required
                 />
-                {errores.apellidos && <p className="mt-1 text-xs text-red-600">{errores.apellidos}</p>}
+                {errores.apellidos && <p className={`mt-1 text-xs ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>{errores.apellidos}</p>}
               </div>
             </div>
           ) : (
             <div className="animate-fadeIn">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Razón Social *</label>
+              <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Razón Social *</label>
               <input
                 type="text"
                 value={formData.razon_social}
@@ -380,13 +419,13 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
                 placeholder="Mi Empresa SAS"
                 required
               />
-              {errores.razon_social && <p className="mt-1 text-xs text-red-600">{errores.razon_social}</p>}
+              {errores.razon_social && <p className={`mt-1 text-xs ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>{errores.razon_social}</p>}
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="relative">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Teléfono</label>
+              <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Teléfono</label>
               <input
                 type="tel"
                 value={formData.telefono}
@@ -398,10 +437,10 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
               {errores.telefono && (
                 <ExclamationTriangleIcon className="absolute right-3 top-9 h-5 w-5 text-red-500 pointer-events-none" />
               )}
-              {errores.telefono && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{errores.telefono}</p>}
+              {errores.telefono && <p className={`mt-1 text-xs flex items-center gap-1 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}><ExclamationTriangleIcon className="h-3 w-3" />{errores.telefono}</p>}
             </div>
             <div className="relative">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Correo</label>
+              <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Correo</label>
               <input
                 type="email"
                 value={formData.correo}
@@ -413,7 +452,7 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
               {errores.correo && (
                 <ExclamationTriangleIcon className="absolute right-3 top-9 h-5 w-5 text-red-500 pointer-events-none" />
               )}
-              {errores.correo && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{errores.correo}</p>}
+              {errores.correo && <p className={`mt-1 text-xs flex items-center gap-1 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}><ExclamationTriangleIcon className="h-3 w-3" />{errores.correo}</p>}
             </div>
           </div>
 
@@ -423,27 +462,28 @@ function CrearClienteModal({ show, onClose, onCrear, token }) {
               onChange={(value) => updateField('ciudad', value)}
               token={token}
               label="Ciudad"
+              isDarkMode={isDarkMode}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Dirección</label>
+            <label className={`block text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Dirección</label>
             <input
               type="text"
               value={formData.direccion}
               onChange={(e) => updateField('direccion', e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className={`w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${isDarkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white text-gray-900'}`}
               placeholder="Calle 123 #45-67"
             />
           </div>
 
           {/* Footer */}
-          <div className="flex gap-3 pt-4 border-t border-gray-200">
+          <div className={`flex gap-3 pt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
             <button
               type="button"
               onClick={() => { onClose(); setErrores(); setFormData({ tipo_documento: '', numero_documento: '', primer_nombre: '', segundo_nombre: '', apellidos: '', razon_social: '', correo: '', telefono: '', direccion: '', ciudad: '' }); }}
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`flex-1 px-6 py-3 font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
             >
               Cancelar
             </button>
@@ -468,12 +508,36 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
 
   const tokenUsuario = localStorage.getItem('token_usuario');
   const usuario = localStorage.getItem('usuario');
   const subdominio = window.location.hostname.split('.')[0];
+
+  // Detectar modo oscuro
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const isDark = document.documentElement.classList.contains('dark') ||
+                     document.body.classList.contains('dark');
+      setIsDarkMode(isDark);
+    };
+
+    checkDarkMode();
+
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Cerrar dropdown al hacer clic fuera
   useEffect(() => {
@@ -598,7 +662,7 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
   return (
     <>
       <div className="space-y-3">
-        <label className="block text-sm font-semibold text-gray-700">Cliente</label>
+        <label className={`block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Cliente</label>
 
         {/* Buscador */}
         <div className="relative group">
@@ -614,15 +678,15 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
               setSearchQuery(valor);
             }}
             placeholder="Buscar por documento o nombre..."
-            className="w-full pl-12 pr-24 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
+            className={`w-full pl-12 pr-24 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${isDarkMode ? 'border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-500' : 'border-gray-200 bg-white text-gray-900 placeholder-gray-400'}`}
           />
-          <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+          <MagnifyingGlassIcon className={`absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'} group-focus-within:text-blue-500 transition-colors`} />
 
           {cliente && (
             <button
               type="button"
               onClick={handleClearCliente}
-              className="absolute right-12 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
+              className={`absolute right-12 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all ${isDarkMode ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
               title="Limpiar cliente"
             >
               <XMarkIcon className="h-5 w-5" />
@@ -643,7 +707,7 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
         {showDropdown && createPortal(
           <div
             ref={dropdownRef}
-            className="bg-white border-2 border-gray-200 rounded-xl shadow-2xl overflow-y-auto z-[9999]"
+            className={`${isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'} border-2 rounded-xl shadow-2xl overflow-y-auto z-[9999]`}
             style={getDropdownPosition()}
           >
             {(() => {
@@ -651,23 +715,23 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
                 return (
                   <div className="p-4 text-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="text-sm text-gray-500 mt-2">Buscando...</p>
+                    <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Buscando...</p>
                   </div>
                 );
               }
-              
+
               if (searchResults.length > 0) {
                 return (
-                  <div className="divide-y divide-gray-100">
+                  <div className={`divide-y ${isDarkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
                     {searchResults.map((c) => (
                       <button
                         key={c.id}
                         type="button"
                         onClick={() => handleSelectCliente(c)}
-                        className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors first:rounded-t-xl last:rounded-b-xl"
+                        className={`w-full text-left px-4 py-3 transition-colors first:rounded-t-xl last:rounded-b-xl ${isDarkMode ? 'hover:bg-blue-900/20' : 'hover:bg-blue-50'}`}
                       >
-                        <p className="font-semibold text-gray-900">{c.nombre_completo}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className={`font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{c.nombre_completo}</p>
+                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                           {c.tipo_documento}: {c.numero_documento}
                         </p>
                       </button>
@@ -675,16 +739,16 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
                   </div>
                 );
               }
-              
+
               if (searchQuery.length >= 2) {
                 return (
-                  <div className="p-4 text-center text-gray-500">
+                  <div className={`p-4 text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                     <p className="text-sm">No se encontraron clientes</p>
                     <p className="text-xs mt-1">Intenta con otro término de búsqueda</p>
                   </div>
                 );
               }
-              
+
               return null;
             })()}
           </div>,
@@ -693,27 +757,27 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
 
         {/* Cliente seleccionado */}
         {cliente && !searchQuery && (
-          <div className="mt-2 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border-2 border-blue-200">
+          <div className={`mt-2 p-4 rounded-xl border-2 ${isDarkMode ? 'bg-gradient-to-r from-blue-900/30 to-blue-800/30 border-blue-700' : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200'}`}>
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <p className="font-bold text-gray-900 text-lg">{cliente.nombre_completo}</p>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className={`font-bold text-lg ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{cliente.nombre_completo}</p>
+                <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   <span className="inline-flex items-center gap-1">
                     <span className="font-semibold">{cliente.tipo_documento}:</span>
                     <span>{cliente.numero_documento}</span>
                   </span>
                 </p>
                 {cliente.correo && (
-                  <p className="text-sm text-gray-600">{cliente.correo}</p>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{cliente.correo}</p>
                 )}
                 {cliente.telefono && (
-                  <p className="text-sm text-gray-600">{cliente.telefono}</p>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{cliente.telefono}</p>
                 )}
               </div>
               <button
                 type="button"
                 onClick={handleClearCliente}
-                className="p-2 text-blue-600 hover:bg-blue-200 rounded-lg transition-colors"
+                className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'text-blue-400 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-200'}`}
                 title="Cambiar cliente"
               >
                 <XMarkIcon className="h-5 w-5" />

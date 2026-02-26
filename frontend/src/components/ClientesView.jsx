@@ -24,7 +24,7 @@ import Select from 'react-select';
 // Componentes reutilizables de UI
 // ─────────────────────────────────────────────
 
-function Modal({ isOpen, onClose, title, subtitle, icon: Icon, iconColor = 'from-blue-500 to-blue-600', children, footer }) {
+function Modal({ isOpen, onClose, title, subtitle, icon: Icon, iconColor = 'from-[rgb(37,99,235)] to-[rgb(29,78,216)]', children, footer }) {
   if (!isOpen) return null;
 
   // Check if dark mode is active
@@ -192,7 +192,7 @@ function AsignacionesTable({ loading, clienteCupones, onRefresh, onUsarCupon }) 
       {/* Header */}
       <div className="p-6 flex items-center justify-between border-b border-slate-200 dark:!border-slate-700 bg-white dark:!bg-slate-900">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg">
+          <div className="p-2 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-lg">
             <GiftIcon className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -202,7 +202,7 @@ function AsignacionesTable({ loading, clienteCupones, onRefresh, onUsarCupon }) 
         </div>
         <button
           onClick={onRefresh}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all shadow-sm hover:shadow-md"
+          className="flex items-center space-x-2 px-4 py-2 bg-[rgb(37,99,235)] hover:bg-[rgb(29,78,216)] text-white rounded-xl font-medium transition-all shadow-sm hover:shadow-md"
         >
           <ArrowPathIcon className="h-4 w-4" />
           <span>Actualizar</span>
@@ -229,7 +229,7 @@ function AsignacionesTable({ loading, clienteCupones, onRefresh, onUsarCupon }) 
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-full flex items-center justify-center flex-shrink-0">
                       <UserIcon className="h-5 w-5 text-white" />
                     </div>
                     <p className="font-medium text-slate-900 dark:!text-white">
@@ -244,7 +244,7 @@ function AsignacionesTable({ loading, clienteCupones, onRefresh, onUsarCupon }) 
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 dark:!bg-blue-900 text-blue-800 dark:!text-blue-200">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-[rgb(37,99,235)]/20 dark:!bg-[rgb(37,99,235)]/30 text-[rgb(37,99,235)] dark:!text-[rgb(96,165,250)]">
                     {cc.cantidad_disponible}
                   </span>
                 </td>
@@ -262,7 +262,7 @@ function AsignacionesTable({ loading, clienteCupones, onRefresh, onUsarCupon }) 
                   {cc.activo && cc.cantidad_disponible > 0 && (
                     <button
                       onClick={() => onUsarCupon(cc.id)}
-                      className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl text-xs font-medium transition-all shadow-sm hover:shadow-md"
+                      className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] text-white rounded-xl text-xs font-medium transition-all shadow-sm hover:shadow-md"
                     >
                       <SparklesIcon className="h-4 w-4" />
                       <span>Usar Cupón</span>
@@ -294,7 +294,7 @@ function CuponesClienteModal({ cliente, onClose }) {
       title={cliente?.tipo_persona === 'JUR' ? cliente?.razon_social : `${cliente?.primer_nombre || ''} ${cliente?.apellidos || ''}`}
       subtitle="Cupones asignados a este cliente"
       icon={UserIcon}
-      iconColor="from-purple-500 to-purple-600"
+      iconColor="from-[rgb(37,99,235)] to-[rgb(29,78,216)]"
       footer={
         <button onClick={onClose} className="w-full py-3 bg-slate-100 dark:!bg-slate-800 hover:bg-slate-200 dark:hover:!bg-slate-700 text-slate-700 dark:!text-white rounded-xl font-medium transition-all">
           Cerrar
@@ -307,7 +307,7 @@ function CuponesClienteModal({ cliente, onClose }) {
             <div key={cc.id} className="p-4 bg-slate-50 dark:!bg-slate-800 rounded-xl border border-slate-200 dark:!border-slate-700">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
+                  <div className="p-2 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-lg">
                     <TicketIcon className="h-4 w-4 text-white" />
                   </div>
                   <div>
@@ -341,7 +341,7 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
       title="Gestión de Clientes"
       subtitle="Busca, crea y edita clientes"
       icon={UserIcon}
-      iconColor="from-purple-500 to-purple-600"
+      iconColor="from-[rgb(37,99,235)] to-[rgb(29,78,216)]"
     >
       <div
         className="space-y-5"
@@ -362,12 +362,12 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
                 backgroundColor: isDarkMode ? '#2a2a2a' : '#ffffff',
                 color: isDarkMode ? '#f5f5f5' : '#0f172a'
               }}
-              className="w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all"
+              className="w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-[rgb(37,99,235)] focus:outline-none transition-all"
             />
           </div>
           <button
             onClick={onNuevoCliente}
-            className="flex items-center space-x-2 px-5 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl font-medium transition-all shadow-sm hover:shadow-md flex-shrink-0"
+            className="flex items-center space-x-2 px-5 py-3 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl font-medium transition-all shadow-sm hover:shadow-md flex-shrink-0"
           >
             <PlusIcon className="h-5 w-5" />
             <span>Nuevo</span>
@@ -407,7 +407,7 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <div className="w-8 h-8 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-full flex items-center justify-center flex-shrink-0">
                           <UserIcon className="h-4 w-4 text-white" />
                         </div>
                         <p className="font-medium truncate max-w-[140px]" style={{ color: isDarkMode ? '#f5f5f5 !important' : '#0f172a' }}>
@@ -491,7 +491,7 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
       title="Asignar Cupón a Cliente"
       subtitle="Selecciona un cliente y un cupón"
       icon={GiftIcon}
-      iconColor="from-blue-500 to-blue-600"
+      iconColor="from-[rgb(37,99,235)] to-[rgb(29,78,216)]"
     >
       <form onSubmit={onSubmit} className="space-y-5">
         {/* Buscador de cliente */}
@@ -518,10 +518,10 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
               <div
                 key={cliente.id}
                 onClick={() => onSelectCliente(cliente.id)}
-                className={`p-4 cursor-pointer transition-all border-b border-slate-100 dark:!border-slate-800 last:border-b-0 ${selectedCliente === cliente.id ? 'bg-blue-50 dark:!bg-blue-900/20 border-l-4 border-l-blue-600' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30 border-l-4 border-l-transparent'}`}
+                className={`p-4 cursor-pointer transition-all border-b border-slate-100 dark:!border-slate-800 last:border-b-0 ${selectedCliente === cliente.id ? 'bg-[rgb(37,99,235)]/10 dark:!bg-[rgb(37,99,235)]/20 border-l-4 border-l-[rgb(37,99,235)]' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30 border-l-4 border-l-transparent'}`}
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-9 h-9 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-full flex items-center justify-center flex-shrink-0">
                     <UserIcon className="h-4 w-4 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -582,7 +582,7 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
           <button
             type="submit"
             disabled={!selectedCliente || !selectedCupon}
-            className="py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-slate-300 disabled:to-slate-400 dark:disabled:!from-slate-700 dark:disabled:!to-slate-800 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
+            className="py-3 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] disabled:from-slate-300 disabled:to-slate-400 dark:disabled:!from-slate-700 dark:disabled:!to-slate-800 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
           >
             <GiftIcon className="h-5 w-5" />
             <span>Asignar</span>
@@ -711,7 +711,7 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
       title={esEdicion ? 'Editar Cliente' : 'Nuevo Cliente'}
       subtitle={esEdicion ? 'Modifica los datos del cliente' : 'Completa los datos del nuevo cliente'}
       icon={UserIcon}
-      iconColor="from-indigo-500 to-indigo-600"
+      iconColor="from-[rgb(37,99,235)] to-[rgb(29,78,216)]"
     >
       <form onSubmit={onSubmit} className="space-y-4">
         <style>{`
@@ -891,7 +891,7 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
           </button>
           <button
             type="submit"
-            className="py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
+            className="py-3 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
           >
             {esEdicion ? (
               <>
@@ -1044,7 +1044,7 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
           </button>
           <button
             type="submit"
-            className="py-3.5 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
+            className="py-3.5 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
           >
             <PlusIcon className="h-5 w-5" />
             <span>Crear Cupón</span>
@@ -1624,9 +1624,9 @@ export default function ClientesView() {
   // ── Render ───────────────────────────────────
 
   const stats = [
-    { title: 'Total Cupones', value: cupones.length, icon: TicketIcon, color: 'from-blue-500 to-blue-600', bgColor: 'bg-blue-50 dark:!bg-blue-900/20' },
-    { title: 'Asignaciones Activas', value: clienteCupones.filter(cc => cc.activo).length, icon: GiftIcon, color: 'from-green-500 to-green-600', bgColor: 'bg-green-50 dark:!bg-green-900/20' },
-    { title: 'Total Asignaciones', value: clienteCupones.length, icon: UserIcon, color: 'from-purple-500 to-purple-600', bgColor: 'bg-purple-50 dark:!bg-purple-900/20' }
+    { title: 'Total Cupones', value: cupones.length, icon: TicketIcon, color: 'from-[rgb(37,99,235)] to-[rgb(29,78,216)]', bgColor: 'bg-[rgb(37,99,235)]/10 dark:!bg-[rgb(37,99,235)]/20' },
+    { title: 'Asignaciones Activas', value: clienteCupones.filter(cc => cc.activo).length, icon: GiftIcon, color: 'from-[rgb(37,99,235)] to-[rgb(29,78,216)]', bgColor: 'bg-[rgb(37,99,235)]/10 dark:!bg-[rgb(37,99,235)]/20' },
+    { title: 'Total Asignaciones', value: clienteCupones.length, icon: UserIcon, color: 'from-[rgb(37,99,235)] to-[rgb(29,78,216)]', bgColor: 'bg-[rgb(37,99,235)]/10 dark:!bg-[rgb(37,99,235)]/20' }
   ];
 
   return (
@@ -1634,7 +1634,7 @@ export default function ClientesView() {
 
       {/* Header */}
       <div className="flex items-center space-x-3">
-        <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+        <div className="p-3 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-xl shadow-lg">
           <SparklesIcon className="h-6 w-6 text-white" />
         </div>
         <div>
@@ -1652,14 +1652,14 @@ export default function ClientesView() {
       <div className="flex flex-wrap gap-3">
         <button
           onClick={handleNuevoCliente}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-sm hover:shadow-md hover:from-indigo-600 hover:to-indigo-700 transition-all duration-200"
+          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] text-white shadow-sm hover:shadow-md hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] transition-all duration-200"
         >
           <PlusIcon className="h-4 w-4" />
           <span>Nuevo Cliente</span>
         </button>
         <button
           onClick={() => setModalGestion(true)}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-white dark:!bg-slate-800 dark:!text-white text-slate-600 hover:bg-purple-50 dark:hover:!bg-purple-900/30 hover:text-purple-700 dark:hover:!text-purple-300 ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-purple-300 transition-all duration-200"
+          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-white dark:!bg-slate-800 dark:!text-white text-slate-600 hover:bg-[rgb(37,99,235)]/10 dark:hover:!bg-[rgb(37,99,235)]/30 hover:text-[rgb(37,99,235)] dark:hover:!text-[rgb(96,165,250)] ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-[rgb(37,99,235)] transition-all duration-200"
         >
           <UserIcon className="h-4 w-4" />
           <span>Gestión Clientes</span>
@@ -1667,7 +1667,7 @@ export default function ClientesView() {
 
         <button
           onClick={() => setModalAsignar(true)}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-white dark:!bg-slate-800 dark:!text-white text-slate-600 hover:bg-blue-50 dark:hover:!bg-blue-900/30 hover:text-blue-700 dark:hover:!text-blue-300 ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-blue-300 transition-all duration-200"
+          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-white dark:!bg-slate-800 dark:!text-white text-slate-600 hover:bg-[rgb(37,99,235)]/10 dark:hover:!bg-[rgb(37,99,235)]/30 hover:text-[rgb(37,99,235)] dark:hover:!text-[rgb(96,165,250)] ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-[rgb(37,99,235)] transition-all duration-200"
         >
           <GiftIcon className="h-4 w-4" />
           <span>Asignar Cupón</span>
@@ -1675,7 +1675,7 @@ export default function ClientesView() {
 
         <button
           onClick={() => setModalCrearCupon(true)}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-gradient-to-r from-green-500 to-green-600 text-white shadow-sm hover:shadow-md hover:from-green-600 hover:to-green-700 transition-all duration-200"
+          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] text-white shadow-sm hover:shadow-md hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] transition-all duration-200"
         >
           <PlusIcon className="h-4 w-4" />
           <span>Crear Cupón</span>

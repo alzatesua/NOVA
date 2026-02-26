@@ -24,6 +24,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
   const [productos, setProductos] = useState([]);
   const [formasPago, setFormasPago] = useState([]);
   const [pagos, setPagos] = useState([{ forma_pago: null, monto: '', referencia: '' }]);
+  const [observaciones, setObservaciones] = useState('');
   const [loading, setLoading] = useState(false);
 
   const tokenUsuario = localStorage.getItem('token_usuario');

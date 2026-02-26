@@ -58,7 +58,19 @@ export default function Dashboard() {
     reloadProducts();
   }, []);
 
-  const [view, setView] = useState(rol === 'admin' ? 'dashboard' : 'entrada');
+  // Vista inicial: intentar restaurar desde localStorage, si no existe usar valor por defecto
+  const getInitialView = () => {
+    const savedView = localStorage.getItem('currentView');
+    if (savedView) return savedView;
+    return rol === 'admin' ? 'dashboard' : 'entrada';
+  };
+
+  const [view, setView] = useState(getInitialView());
+
+  // Guardar vista actual en localStorage cuando cambie
+  useEffect(() => {
+    localStorage.setItem('currentView', view);
+  }, [view]);
 
   
 
@@ -128,12 +140,7 @@ export default function Dashboard() {
         )}
 
         {/* VISTA DE CONFIGURACIÓN - SIN PROPS, USA DATOS INTERNOS */}
-        {view === 'configuracion' && (
-          <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
-            <ConfiguracionView />
-          </div>
-        )}
+        {view === 'configuracion' && <ConfiguracionView />}
 
         {/* VISTA DE GESTIÓN DE CLIENTES - CUPONES Y CLIENTES */}
         {view === 'clientes' && (

@@ -22,6 +22,7 @@ import {
   obtenerProductosPorBodega
 } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
 import { showToast } from '../utils/toast';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -31,6 +32,7 @@ import {
   ChevronDownIcon,
   TruckIcon,
   ArrowUpTrayIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/solid';
 import Modal from '../components/Modal';
 
@@ -41,6 +43,8 @@ export default function ProductsView({
   onCreated
 }) {
   const { rol, tokenUsuario, subdominio, logout } = useAuth();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const usuario = localStorage.getItem('usuario');
 
   // ——— Estados búsqueda & filtros ———
@@ -223,6 +227,18 @@ export default function ProductsView({
     showToast('Mostrando productos de todas tus bodegas', 'info');
   }, []);
 
+  // Limpiar todos los filtros
+  const limpiarFiltros = useCallback(() => {
+    setSearchTerm('');
+    setQuickFilter('todos');
+    setCategoryFilter('');
+    setPriceMin('');
+    setPriceMax('');
+    setDateFilter('');
+    setShowAdvancedFilters(false);
+    showToast('Filtros limpiados', 'info');
+  }, []);
+
   // ——— Filtrado ———
   const filteredProducts = useMemo(() => {
     let productosBase = [];
@@ -255,23 +271,22 @@ export default function ProductsView({
       if (
         searchTerm &&
         !p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+        !p.sku?.toLowerCase().includes(searchTerm.toLowerCase())
       ) return false;
 
-      // Usar stock_total para productos combinados o disponible_bodega para una bodega específica
-      const stock = bodegaSeleccionada ? p.disponible_bodega : p.stock_total;
+      // Usar stock_total para productos combinados o disponible para una bodega específica
+      const stock = bodegaSeleccionada ? (p.disponible ?? p.disponible_bodega ?? 0) : (p.stock_total ?? p.stock ?? 0);
       if (quickFilter === 'disponible' && stock <= 0) return false;
       if (quickFilter === 'agotados' && stock > 0) return false;
       if (quickFilter === 'destacados' && !p.is_featured) return false;
 
       // Categoria - puede ser objeto o id numérico
       const categoriaId = p.categoria?.id || p.id_categoria;
-      if (categoryFilter && categoriaId !== Number(categoryFilter))
-        return false;
+      if (categoryFilter && categoriaId !== Number(categoryFilter)) return false;
 
       if (priceMin !== '' && parseFloat(p.precio) < parseFloat(priceMin)) return false;
       if (priceMax !== '' && parseFloat(p.precio) > parseFloat(priceMax)) return false;
-      if (dateFilter && new Date(p.creado_en) < new Date(dateFilter))
+      if (dateFilter && p.creado_en && new Date(p.creado_en) < new Date(dateFilter))
         return false;
       return true;
     });
@@ -312,7 +327,7 @@ export default function ProductsView({
   const [editStates, setEditStates] = useState({});
   const [showCreateForm, setShowCreateForm] = useState(false);
 
-  // ——— Estados “Nuevo Producto” ———
+  // ——— Estados "Nuevo Producto" ———
   const [newProducts, setNewProducts] = useState([
     {
       nombre: '',
@@ -333,7 +348,7 @@ export default function ProductsView({
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  // ——— Handlers “Nuevo Producto” ———
+  // ——— Handlers "Nuevo Producto" ———
  const handleNewFieldChange = useCallback((index, e) => {
   const { name, value } = e.target;
   setNewProducts(prev => {
@@ -766,57 +781,206 @@ export default function ProductsView({
     cargarBodegas();
   }, [rol, tokenUsuario, usuario, subdominio]);
 
+  // ── Tema tokens ──────────────────────────────────────────────
+  const T = isDark ? {
+    navBg: 'linear-gradient(135deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)',
+    inputBg: '#0d1f3c',
+    inputBorder: 'rgba(14,165,233,0.25)',
+    inputColor: '#e2e8f0',
+    inputPlaceholder: '#64748b',
+    inputFocus: '0 0 0 2px rgba(14,165,233,0.4)',
+    chipBg: 'rgba(14,165,233,0.08)',
+    chipBorder: 'rgba(14,165,233,0.2)',
+    chipColor: '#94a3b8',
+    chipActiveBg: 'linear-gradient(90deg, #0ea5e9, #38bdf8)',
+    chipActiveColor: '#fff',
+    chipHoverBg: 'rgba(14,165,233,0.15)',
+    btnPrimaryBg: 'linear-gradient(90deg, #0ea5e9, #38bdf8)',
+    btnPrimaryColor: '#fff',
+    btnPrimaryHover: 'linear-gradient(90deg, #38bdf8, #7dd3fc)',
+    btnPrimaryShadow: '0 4px 14px rgba(14,165,233,0.35)',
+    btnSecondaryBg: 'rgba(14,165,233,0.08)',
+    btnSecondaryColor: '#38bdf8',
+    btnSecondaryBorder: 'rgba(14,165,233,0.2)',
+    btnSecondaryHover: 'rgba(14,165,233,0.15)',
+    panelBg: '#0d1f3c',
+    panelBorder: 'rgba(14,165,233,0.18)',
+    panelShadow: '0 8px 24px rgba(14,165,233,0.12), 0 1px 0 rgba(14,165,233,0.2)',
+    bannerBg: 'rgba(251,191,36,0.08)',
+    bannerBorder: 'rgba(251,191,36,0.3)',
+    bannerText: '#fde68a',
+    bannerAccent: '#fbbf24',
+    textPrimary: '#e2e8f0',
+    textSecondary: '#94a3b8',
+    divider: 'rgba(14,165,233,0.12)',
+  } : {
+    navBg: 'linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 50%, #f0f7ff 100%)',
+    inputBg: '#ffffff',
+    inputBorder: 'rgba(14,165,233,0.35)',
+    inputColor: '#1e293b',
+    inputPlaceholder: '#64748b',
+    inputFocus: '0 0 0 2px rgba(14,165,233,0.3)',
+    chipBg: 'rgba(14,165,233,0.08)',
+    chipBorder: 'rgba(14,165,233,0.25)',
+    chipColor: '#475569',
+    chipActiveBg: 'linear-gradient(90deg, #0284c7, #0ea5e9)',
+    chipActiveColor: '#fff',
+    chipHoverBg: 'rgba(14,165,233,0.12)',
+    btnPrimaryBg: 'linear-gradient(90deg, #0284c7, #0ea5e9)',
+    btnPrimaryColor: '#fff',
+    btnPrimaryHover: 'linear-gradient(90deg, #0ea5e9, #38bdf8)',
+    btnPrimaryShadow: '0 4px 14px rgba(14,165,233,0.3)',
+    btnSecondaryBg: 'rgba(255,255,255,0.8)',
+    btnSecondaryColor: '#0284c7',
+    btnSecondaryBorder: 'rgba(14,165,233,0.35)',
+    btnSecondaryHover: 'rgba(255,255,255,1)',
+    panelBg: '#ffffff',
+    panelBorder: 'rgba(14,165,233,0.25)',
+    panelShadow: '0 8px 20px rgba(14,165,233,0.12), 0 1px 0 rgba(14,165,233,0.2)',
+    bannerBg: 'rgba(254,243,199,0.8)',
+    bannerBorder: 'rgba(251,191,36,0.4)',
+    bannerText: '#92400e',
+    bannerAccent: '#d97706',
+    textPrimary: '#0c4a6e',
+    textSecondary: '#475569',
+    divider: 'rgba(14,165,233,0.15)',
+  };
+
   return (
-    <section className="space-y-1">
-      {/* ——— Cabecera: search + filtros rápidos + “Nuevo” ——— */}
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mb-6">
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');
+
+        .productos-root { font-family: 'Sora', sans-serif; }
+
+        @media (max-width: 768px) {
+          .productos-header { flex-direction: column !important; align-items: stretch !important; }
+          .productos-search-container { flex-direction: column !important; width: 100% !important; }
+          .productos-chips { flex-wrap: wrap !important; justify-content: center !important; }
+          .productos-buttons { flex-direction: column !important; width: 100% !important; }
+          .productos-buttons button { width: 100% !important; justify-content: center !important; }
+          .productos-filters-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 480px) {
+          .productos-chips button { padding: 6px 12px !important; font-size: 12px !important; }
+        }
+      `}</style>
+      <section className="productos-root space-y-1">
+      {/* ——— Cabecera: search + filtros rápidos + "Nuevo" ——— */}
+      <div className="productos-header" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
         {/* Búsqueda + chips rápidos */}
-        <div className="flex flex-1 items-center gap-4 w-full lg:w-auto">
-          <div className="relative flex-1 lg:flex-none">
+        <div className="productos-search-container" style={{ display: 'flex', flex: 1, alignItems: 'center', gap: '16px', width: '100%' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
             <input
               type="text"
               placeholder="Buscar productos…"
-              className="w-full border border-slate-300 dark:!border-slate-700 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:!bg-slate-800 dark:!text-slate-100 dark:!placeholder-slate-400 transition-colors duration-200"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                border: `1px solid ${T.inputBorder}`,
+                borderRadius: '24px',
+                padding: '10px 16px 10px 40px',
+                fontSize: '14px',
+                background: T.inputBg,
+                color: T.inputColor,
+                outline: 'none',
+                transition: 'all 0.2s',
+              }}
+              onFocus={e => e.currentTarget.style.boxShadow = T.inputFocus}
+              onBlur={e => e.currentTarget.style.boxShadow = 'none'}
             />
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
+            <MagnifyingGlassIcon style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', height: '20px', width: '20px', color: T.inputPlaceholder }} />
           </div>
-          <div className="flex items-center gap-2 overflow-x-auto">
-            {['Todos', 'Disponible', 'Agotados', 'Destacados'].map(label => (
-              <button
-                key={label}
-                onClick={() => setQuickFilter(label.toLowerCase())}
-                className={`whitespace-nowrap px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
-                  quickFilter === label.toLowerCase()
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-slate-100 dark:!bg-slate-800 text-slate-700 dark:!text-slate-300 hover:bg-slate-200 dark:hover:!bg-slate-700'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+          <div className="productos-chips" style={{ display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto' }}>
+            {['Todos', 'Disponible', 'Agotados', 'Destacados'].map(label => {
+              const isActive = quickFilter === label.toLowerCase();
+              return (
+                <button
+                  key={label}
+                  onClick={() => setQuickFilter(label.toLowerCase())}
+                  style={{
+                    whitespace: 'nowrap',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    border: isActive ? 'none' : `1px solid ${T.chipBorder}`,
+                    background: isActive ? T.chipActiveBg : T.chipBg,
+                    color: isActive ? T.chipActiveColor : T.chipColor,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = T.chipHoverBg; }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = T.chipBg; }}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Filtros avanzados + nuevo */}
-        <div className="flex items-center gap-4 w-full lg:w-auto">
+        <div className="productos-buttons" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <button
             onClick={() => setShowAdvancedFilters(f => !f)}
-            className="flex items-center text-sm font-medium text-blue-600 hover:underline"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '4px',
+              fontSize: '13px', fontWeight: 500,
+              color: T.btnSecondaryColor,
+              background: 'transparent',
+              border: 'none', cursor: 'pointer',
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = isDark ? '#7dd3fc' : '#0284c7'}
+            onMouseLeave={e => e.currentTarget.style.color = T.btnSecondaryColor}
           >
             Filtros avanzados
             <ChevronDownIcon
-              className={`h-4 w-4 ml-1 transition-transform ${
-                showAdvancedFilters ? 'rotate-180' : 'rotate-0'
-              }`}
+              style={{ height: '16px', width: '16px', transition: 'transform 0.2s', transform: showAdvancedFilters ? 'rotate(180deg)' : 'rotate(0)' }}
             />
           </button>
+          {/* Botón para limpiar filtros */}
+          {(searchTerm || quickFilter !== 'todos' || categoryFilter || priceMin || priceMax || dateFilter) && (
+            <button
+              onClick={limpiarFiltros}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                fontSize: '13px', fontWeight: 500,
+                color: isDark ? '#f87171' : '#dc2626',
+                background: T.btnSecondaryBg,
+                border: `1px solid ${isDark ? 'rgba(248,113,113,0.3)' : 'rgba(220,38,38,0.3)'}`,
+                padding: '8px 14px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(248,113,113,0.15)' : 'rgba(220,38,38,0.08)'}
+              onMouseLeave={e => e.currentTarget.style.background = T.btnSecondaryBg}
+              title="Limpiar todos los filtros"
+            >
+              <XMarkIcon style={{ height: '16px', width: '16px' }} />
+              Limpiar
+            </button>
+          )}
           <button
             onClick={() => setShowCreateForm(f => !f)}
-            className="flex items-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-lg shadow-md hover:opacity-90 transition-opacity text-sm font-medium"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              background: T.btnPrimaryBg,
+              color: T.btnPrimaryColor,
+              padding: '10px 20px',
+              borderRadius: '10px',
+              boxShadow: T.btnPrimaryShadow,
+              border: 'none', cursor: 'pointer',
+              fontSize: '13px', fontWeight: 600,
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = T.btnPrimaryHover}
+            onMouseLeave={e => e.currentTarget.style.background = T.btnPrimaryBg}
           >
-            <PlusIcon className="h-5 w-5 mr-2" />
+            <PlusIcon style={{ height: '20px', width: '20px' }} />
             {showCreateForm ? 'Cancelar' : 'Nuevo Producto'}
           </button>
 
@@ -824,10 +988,23 @@ export default function ProductsView({
           <button
             onClick={cambiarBodega}
             disabled={isLoadingBodegas || bodegas.length === 0}
-            className="flex items-center bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg shadow-md hover:opacity-90 transition-opacity text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              background: isDark ? '#d97706' : '#f59e0b',
+              color: '#fff',
+              padding: '10px 20px',
+              borderRadius: '10px',
+              boxShadow: '0 4px 14px rgba(245,158,11,0.35)',
+              border: 'none', cursor: 'pointer',
+              fontSize: '13px', fontWeight: 600,
+              transition: 'all 0.2s',
+              opacity: (isLoadingBodegas || bodegas.length === 0) ? 0.5 : 1,
+            }}
+            onMouseEnter={e => { if (!(isLoadingBodegas || bodegas.length === 0)) e.currentTarget.style.background = isDark ? '#b45309' : '#d97706'; }}
+            onMouseLeave={e => { if (!(isLoadingBodegas || bodegas.length === 0)) e.currentTarget.style.background = isDark ? '#d97706' : '#f59e0b'; }}
             title="Cambiar bodega"
           >
-            <TruckIcon className="h-5 w-5 mr-2" />
+            <TruckIcon style={{ height: '20px', width: '20px' }} />
             {bodegaSeleccionada
               ? `Bodega: ${bodegas.find(b => b.id === bodegaSeleccionada)?.nombre || 'Seleccionada'}`
               : 'Seleccionar Bodega'
@@ -839,21 +1016,38 @@ export default function ProductsView({
 
       {/* ——— Banner indicador de filtro por bodega ——— */}
       {bodegaSeleccionada && (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-r-lg mb-6 flex items-center justify-between">
-          <div className="flex items-center">
-            <TruckIcon className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-3" />
+        <div style={{
+          background: T.bannerBg,
+          borderLeft: `4px solid ${T.bannerAccent}`,
+          padding: '16px 20px',
+          borderRadius: '0 12px 12px 0',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <TruckIcon style={{ height: '20px', width: '20px', color: T.bannerAccent, marginRight: '12px' }} />
             <div>
-              <p className="font-medium text-amber-900 dark:text-amber-100">
+              <p style={{ fontWeight: 600, color: T.bannerText, fontSize: '14px', margin: 0 }}>
                 Filtrando por bodega: {bodegas.find(b => b.id === bodegaSeleccionada)?.nombre || 'Seleccionada'}
               </p>
-              <p className="text-sm text-amber-700 dark:text-amber-300">
+              <p style={{ fontSize: '13px', color: T.bannerText, opacity: 0.8, margin: '4px 0 0 0' }}>
                 Mostrando {productosPorBodega[bodegaSeleccionada]?.length || 0} productos de esta bodega
               </p>
             </div>
           </div>
           <button
             onClick={limpiarFiltroBodega}
-            className="text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 font-medium text-sm"
+            style={{
+              color: T.bannerText,
+              background: 'transparent',
+              border: 'none', cursor: 'pointer',
+              fontWeight: 600, fontSize: '13px',
+              transition: 'opacity 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
           >
             Limpiar filtro
           </button>
@@ -862,39 +1056,80 @@ export default function ProductsView({
 
       {/* ——— Panel Filtros Avanzados ——— */}
       {showAdvancedFilters && (
-        <div className="bg-white dark:!bg-slate-900 p-4 rounded-lg shadow border border-slate-200 dark:!border-slate-800 mb-6 transition-colors duration-200">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div style={{
+          background: T.panelBg,
+          padding: '20px',
+          borderRadius: '12px',
+          boxShadow: T.panelShadow,
+          border: `1px solid ${T.panelBorder}`,
+          marginBottom: '24px',
+        }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
             <select
-              className="border border-slate-300 dark:!border-slate-700 rounded px-3 py-2 text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
               value={categoryFilter}
               onChange={e => setCategoryFilter(e.target.value)}
+              style={{
+                width: '100%',
+                border: `1px solid ${T.inputBorder}`,
+                borderRadius: '8px',
+                padding: '10px 12px',
+                fontSize: '14px',
+                background: T.inputBg,
+                color: T.inputColor,
+                cursor: 'pointer',
+              }}
             >
               <option value="">Todas las categorías</option>
-              <option value="1">Categoría 1</option>
-              <option value="2">Categoría 2</option>
+              {categorias.map(cat => (
+                <option key={cat.id_categoria} value={cat.id_categoria}>{cat.nombre}</option>
+              ))}
             </select>
-            <div className="flex items-center space-x-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <input
                 type="number"
                 placeholder="Precio min"
-                className="w-full border border-slate-300 dark:!border-slate-700 rounded px-3 py-2 text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
                 value={priceMin}
                 onChange={e => setPriceMin(e.target.value)}
+                style={{
+                  flex: 1,
+                  border: `1px solid ${T.inputBorder}`,
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  fontSize: '14px',
+                  background: T.inputBg,
+                  color: T.inputColor,
+                }}
               />
-              <span className="text-slate-500 dark:!text-slate-400">–</span>
+              <span style={{ color: T.textSecondary }}>–</span>
               <input
                 type="number"
                 placeholder="Precio max"
-                className="w-full border border-slate-300 dark:!border-slate-700 rounded px-3 py-2 text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
                 value={priceMax}
                 onChange={e => setPriceMax(e.target.value)}
+                style={{
+                  flex: 1,
+                  border: `1px solid ${T.inputBorder}`,
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  fontSize: '14px',
+                  background: T.inputBg,
+                  color: T.inputColor,
+                }}
               />
             </div>
             <input
               type="date"
-              className="border border-slate-300 dark:!border-slate-700 rounded px-3 py-2 text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 transition-colors duration-200"
               value={dateFilter}
               onChange={e => setDateFilter(e.target.value)}
+              style={{
+                width: '100%',
+                border: `1px solid ${T.inputBorder}`,
+                borderRadius: '8px',
+                padding: '10px 12px',
+                fontSize: '14px',
+                background: T.inputBg,
+                color: T.inputColor,
+              }}
             />
           </div>
         </div>
@@ -1504,5 +1739,6 @@ export default function ProductsView({
         <ProductsTable products={filteredProducts} loading={loading} />
       )}
     </section>
+    </>
   );
 }

@@ -1,32 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';  // Importa tu hook correctamente
+import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
-import { BellIcon, MoonIcon, SunIcon } from '@heroicons/react/24/outline';
+import { MoonIcon, SunIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 function InfoSucursal() {
-  const [nombreSucursal, setNombreSucursal] = useState('');
-  const [idSucursal, setIdSucursal] = useState('');
-
-  useEffect(() => {
-    const nombre = localStorage.getItem('nombre_sucursal');
-    const id = localStorage.getItem('id_sucursal');
-
-    setNombreSucursal(nombre || '');
-    setIdSucursal(id || '');
-  }, []);
-
-  return (
-    <div className="p-2 bg-slate-100 dark:!bg-slate-800 rounded-md shadow-sm text-xs text-slate-600 dark:!text-slate-300 transition-colors duration-200">
-      {/*<h2 className="text-sm font-semibold mb-1">Información de la sucursal</h2>
-      <div className="space-y-0.5 leading-tight">
-        <p><strong className="font-medium">Nombre:</strong> {nombreSucursal}</p>
-        <p><strong className="font-medium">ID:</strong> {idSucursal}</p>
-      </div>*/}
-    </div>
-
-  );
+  return <div />;
 }
-
 
 function getRandomColor() {
   const randomHue = () => Math.floor(Math.random() * 360);
@@ -39,199 +18,443 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
   const adminButtons = ['dashboard', 'usuarios', 'sucursales', 'productos', 'clientes', 'configuracion', 'facturacion'];
   const operarioButtons = ['entrada', 'productos', 'clientes', 'facturacion'];
 
-  // Mapeo para mostrar nombres personalizados en los botones
   const viewLabels = {
-    'dashboard': 'Dashboard',
-    'usuarios': 'Usuarios',
-    'sucursales': 'Sucursales',
-    'productos': 'Productos',
-    'clientes': 'Gestion clientes',
-    'configuracion': 'Configuracion',
-    'facturacion': 'Facturacion',
-    'entrada': 'Entrada'
+    dashboard: 'Dashboard',
+    usuarios: 'Usuarios',
+    sucursales: 'Sucursales',
+    productos: 'Productos',
+    clientes: 'Gestion clientes',
+    configuracion: 'Configuracion',
+    facturacion: 'Facturacion',
+    entrada: 'Entrada',
   };
 
   const { usuario, rol } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
   const list = rol === 'admin' ? adminButtons : operarioButtons;
 
   const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const profileRef = useRef(null);
+  const mobileRef = useRef(null);
   const [avatarBg, setAvatarBg] = useState('');
 
-  const [notifOpen, setNotifOpen] = useState(false);
-  const notifRef = useRef(null);
-
-  // Ejemplo estático de notificaciones, puedes reemplazarlo con datos reales
-  const notifications = [
-    { id: 1, message: 'Nuevo usuario registrado', time: '2 min ago' },
-    { id: 2, message: 'Producto agregado', time: '10 min ago' },
-    { id: 3, message: 'Sucursal actualizada', time: '1 hr ago' },
-  ];
-
-  // Cerrar menús al hacer clic afuera
   useEffect(() => {
     function handleClickOutside(event) {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setProfileOpen(false);
-      }
-      if (notifRef.current && !notifRef.current.contains(event.target)) {
-        setNotifOpen(false);
-      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) setProfileOpen(false);
+      if (mobileRef.current && !mobileRef.current.contains(event.target)) setMobileOpen(false);
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    setAvatarBg(getRandomColor());
-  }, []);
+  useEffect(() => { setAvatarBg(getRandomColor()); }, []);
+
+  // ── Tema tokens ──────────────────────────────────────────────
+  const T = isDark ? {
+    navBg: 'linear-gradient(135deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)',
+    navShadow: '0 4px 24px rgba(14,165,233,0.08), 0 1px 0 rgba(14,165,233,0.15)',
+    navBorder: 'rgba(14,165,233,0.18)',
+    logoBg: 'linear-gradient(90deg, #0ea5e9, #38bdf8)',
+    textDefault: '#94a3b8',
+    textHover: '#bae6fd',
+    textActive: '#0ea5e9',
+    activeBg: 'linear-gradient(180deg, rgba(14,165,233,0.1) 0%, rgba(14,165,233,0.03) 100%)',
+    hoverBg: 'rgba(14,165,233,0.06)',
+    lineGradient: 'linear-gradient(90deg, transparent, #0ea5e9, transparent)',
+    lineGlow: '0 0 8px rgba(14,165,233,0.7)',
+    avatarBorder: 'rgba(14,165,233,0.45)',
+    avatarGlow: '0 0 14px rgba(14,165,233,0.3)',
+    userNameColor: '#e2e8f0',
+    rolColor: '#0ea5e9',
+    dropBg: '#0d1f3c',
+    dropBorder: 'rgba(14,165,233,0.2)',
+    dropShadow: '0 20px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(14,165,233,0.1)',
+    dropItemColor: '#cbd5e1',
+    dropItemHoverBg: 'rgba(14,165,233,0.09)',
+    mobileBg: '#0a1628',
+    mobileBorder: 'rgba(14,165,233,0.15)',
+    mobileItemActive: 'rgba(14,165,233,0.12)',
+    mobileItemHover: 'rgba(14,165,233,0.06)',
+    hamColor: '#94a3b8',
+    divider: 'rgba(14,165,233,0.12)',
+  } : {
+    navBg: 'linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 50%, #f0f7ff 100%)',
+    navShadow: '0 4px 20px rgba(14,165,233,0.12), 0 1px 0 rgba(14,165,233,0.2)',
+    navBorder: 'rgba(14,165,233,0.25)',
+    logoBg: 'linear-gradient(90deg, #0284c7, #0ea5e9)',
+    textDefault: '#475569',
+    textHover: '#0284c7',
+    textActive: '#0284c7',
+    activeBg: 'linear-gradient(180deg, rgba(14,165,233,0.08) 0%, rgba(14,165,233,0.02) 100%)',
+    hoverBg: 'rgba(14,165,233,0.07)',
+    lineGradient: 'linear-gradient(90deg, transparent, #0284c7, transparent)',
+    lineGlow: '0 0 6px rgba(2,132,199,0.5)',
+    avatarBorder: 'rgba(2,132,199,0.4)',
+    avatarGlow: '0 0 12px rgba(2,132,199,0.2)',
+    userNameColor: '#1e293b',
+    rolColor: '#0284c7',
+    dropBg: '#ffffff',
+    dropBorder: 'rgba(14,165,233,0.2)',
+    dropShadow: '0 20px 40px rgba(14,165,233,0.15), 0 1px 0 rgba(14,165,233,0.1)',
+    dropItemColor: '#334155',
+    dropItemHoverBg: 'rgba(14,165,233,0.07)',
+    mobileBg: '#f0f7ff',
+    mobileBorder: 'rgba(14,165,233,0.2)',
+    mobileItemActive: 'rgba(14,165,233,0.1)',
+    mobileItemHover: 'rgba(14,165,233,0.05)',
+    hamColor: '#475569',
+    divider: 'rgba(14,165,233,0.15)',
+  };
 
   return (
-  <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 shadow-md px-6 py-3.5 flex justify-between items-center border-b border-slate-300 dark:!border-slate-700 transition-colors duration-200">
-      <span className="text-blue-600 dark:text-blue-400 font-bold text-xl cursor-pointer select-none transition-colors duration-200">Logo</span>
-      <InfoSucursal />
-      <div className="hidden md:flex space-x-8 text-slate-700 dark:!text-slate-200 font-semibold tracking-wide">
-        {list.map(view => (
-          <button
-            key={view}
-            onClick={() => onViewChange(view)}
-            className={`hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 ${
-              currentView === view ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 pb-1 font-bold' : ''
-            }`}
-          >
-            {viewLabels[view] || (view.charAt(0).toUpperCase() + view.slice(1))}
-          </button>
-        ))}
-      </div>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');
 
-      <div className="flex items-center space-x-6">
-        {/* Notificaciones */}
-        <div className="relative" ref={notifRef}>
-          <button
-            onClick={() => setNotifOpen(prev => !prev)}
-            className="relative p-2.5 rounded-full bg-slate-100 dark:!bg-slate-800 shadow-sm hover:shadow-md hover:bg-slate-200 dark:hover:!bg-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-            aria-haspopup="true"
-            aria-expanded={notifOpen}
-            aria-label="Notificaciones"
-          >
-            <BellIcon className="h-5 w-5 text-slate-600 dark:!text-slate-300" />
+        .navbar-root { font-family: 'Sora', sans-serif; }
 
-            {notifications.length > 0 && (
-              <span
-                className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none
-                  text-white bg-red-600 rounded-full shadow-lg select-none"
-              >
-                {notifications.length}
-              </span>
-            )}
-          </button>
+        @keyframes fadeSlideDown {
+          from { opacity: 0; transform: translateY(-8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .anim-fade { animation: fadeSlideDown 0.18s ease forwards; }
 
+        @keyframes slideDown {
+          from { opacity: 0; max-height: 0; }
+          to   { opacity: 1; max-height: 600px; }
+        }
+        .anim-mobile { animation: slideDown 0.25s ease forwards; overflow: hidden; }
 
-          {notifOpen && (
-            <div
-              className="absolute right-0 mt-2 w-80 max-h-80 overflow-auto bg-white dark:!bg-slate-800 rounded-xl shadow-lg ring-1 ring-slate-200 dark:ring-slate-700
-                focus:outline-none z-50 origin-top-right animate-fadeIn"
-              role="menu"
-              aria-orientation="vertical"
-              aria-labelledby="notifications-menu"
-            >
-              <div className="px-6 py-3 border-b border-slate-200 dark:!border-slate-700 font-semibold text-slate-800 dark:!text-slate-100 text-lg">
-                Mis notificaciones
-              </div>
-              {notifications.length === 0 ? (
-                <div className="px-6 py-4 text-slate-500 dark:!text-slate-400 text-center italic">No hay notificaciones.</div>
-              ) : (
-                notifications.map(({ id, message, time }) => (
-                  <div
-                    key={id}
-                    className="px-6 py-3 border-b border-slate-100 dark:!border-slate-700 hover:bg-blue-50 dark:hover:!bg-slate-700 cursor-pointer transition-colors duration-150"
-                    role="menuitem"
-                    tabIndex={0}
-                  >
-                    <p className="text-slate-800 dark:!text-slate-100 font-medium">{message}</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{time}</p>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
+        .nav-btn {
+          position: relative; border: none; cursor: pointer;
+          transition: color 0.2s, background 0.2s;
+          white-space: nowrap;
+        }
+        .nav-btn:focus-visible { outline: 2px solid #0ea5e9; outline-offset: 2px; border-radius: 4px; }
 
-        {/* Perfil */}
-        <div className="relative" ref={profileRef}>
-          <button
-            onClick={() => setProfileOpen(prev => !prev)}
-            className="flex items-center space-x-3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 rounded-full"
-            aria-haspopup="true"
-            aria-expanded={profileOpen}
-            aria-label="Menú de perfil"
-          >
-            <div
-              className="h-10 w-10 rounded-full flex items-center justify-center text-white font-semibold shadow-md select-none border-2 border-white dark:!border-slate-700"
-              style={{ background: avatarBg }}
-            >
-              {usuario ? usuario.charAt(0).toUpperCase() : 'U'}
-            </div>
-            <span className="hidden md:block text-slate-700 dark:!text-slate-200 font-semibold select-none tracking-wide">{usuario || 'Usuario'}</span>
-            <svg
-              className={`w-4 h-4 text-slate-500 dark:!text-slate-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+        .profile-btn { border: none; background: transparent; cursor: pointer; transition: opacity 0.2s; }
+        .profile-btn:hover { opacity: 0.85; }
+        .profile-btn:focus-visible { outline: 2px solid #0ea5e9; outline-offset: 2px; border-radius: 99px; }
 
-          {profileOpen && (
-            <div
-              className="absolute right-0 mt-2 w-64 bg-white dark:!bg-slate-800 rounded-xl shadow-lg ring-1 ring-slate-200 dark:ring-slate-700
-                focus:outline-none z-50 origin-top-right animate-fadeIn"
-              role="menu"
-              aria-orientation="vertical"
-              aria-labelledby="user-menu"
-            >
-              <div className="px-6 py-4 border-b border-slate-200 dark:!border-slate-700">
-                <p className="text-slate-900 dark:!text-slate-100 font-semibold truncate">{usuario}</p>
-                <p className="text-slate-400 dark:text-slate-500 text-xs mt-1 uppercase tracking-wide">{rol}</p>
-              </div>
+        .ham-btn {
+          border: none; cursor: pointer; border-radius: 8px; padding: 6px;
+          transition: background 0.2s;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .ham-btn:focus-visible { outline: 2px solid #0ea5e9; outline-offset: 2px; }
+
+        .drop-item {
+          width: 100%; text-align: left; border: none; cursor: pointer;
+          transition: background 0.15s, color 0.15s;
+          font-family: 'Sora', sans-serif;
+          display: flex; align-items: center; justify-content: space-between;
+        }
+        .drop-item:focus-visible { outline: 2px solid #0ea5e9; outline-offset: -2px; }
+      `}</style>
+
+      {/* ── NAVBAR ─────────────────────────────────────────────── */}
+      <nav
+        className="navbar-root fixed top-0 left-0 right-0 z-50"
+        style={{
+          background: T.navBg,
+          boxShadow: T.navShadow,
+          borderBottom: `1px solid ${T.navBorder}`,
+          height: '68px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 24px',
+        }}
+      >
+        {/* Logo */}
+        <span
+          style={{
+            background: T.logoBg,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            fontWeight: 800,
+            fontSize: '20px',
+            letterSpacing: '-0.5px',
+            cursor: 'pointer',
+            userSelect: 'none',
+            flexShrink: 0,
+          }}
+        >
+          ◈ Logo
+        </span>
+
+        <InfoSucursal />
+
+        {/* Desktop nav */}
+        <div
+          className="navbar-desktop"
+          style={{
+            display: 'flex',
+            alignItems: 'stretch',
+            height: '68px',
+            gap: '2px',
+          }}
+        >
+          {list.map(view => {
+            const isActive = currentView === view;
+            return (
               <button
-                onClick={toggleTheme}
-                className="w-full text-left px-6 py-3 flex items-center justify-between hover:bg-slate-100 dark:hover:!bg-slate-700 transition-colors duration-150 text-slate-700 dark:!text-slate-200"
-                role="menuitem"
+                key={view}
+                className="nav-btn"
+                onClick={() => onViewChange(view)}
+                style={{
+                  height: '68px',
+                  padding: '0 20px',
+                  fontSize: '14px',
+                  fontWeight: isActive ? 700 : 500,
+                  letterSpacing: '0.02em',
+                  color: isActive ? T.textActive : T.textDefault,
+                  background: isActive ? T.activeBg : 'transparent',
+                }}
+                onMouseEnter={e => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = T.textHover;
+                    e.currentTarget.style.background = T.hoverBg;
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = T.textDefault;
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
               >
-                <span className="font-semibold">{theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>
-                {theme === 'dark' ? (
-                  <SunIcon className="h-5 w-5 text-amber-400" />
-                ) : (
-                  <MoonIcon className="h-5 w-5 text-slate-600 dark:!text-slate-400" />
+                {viewLabels[view] || view.charAt(0).toUpperCase() + view.slice(1)}
+                {isActive && (
+                  <span style={{
+                    position: 'absolute', bottom: 0, left: '10px', right: '10px',
+                    height: '2px',
+                    background: T.lineGradient,
+                    boxShadow: T.lineGlow,
+                    borderRadius: '2px 2px 0 0',
+                  }} />
                 )}
               </button>
-              <button
-                onClick={onLogout}
-                className="w-full text-left px-6 py-3 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white transition-colors duration-150 rounded-b-xl font-semibold text-slate-700 dark:!text-slate-200"
-                role="menuitem"
-              >
-                Cerrar Sesión
-              </button>
-            </div>
-          )}
+            );
+          })}
         </div>
-      </div>
 
+        {/* Right side */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+
+          {/* Profile — desktop */}
+          <div className="navbar-profile-desktop" ref={profileRef} style={{ position: 'relative' }}>
+            <button
+              className="profile-btn"
+              onClick={() => setProfileOpen(p => !p)}
+              style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+              aria-haspopup="true"
+              aria-expanded={profileOpen}
+            >
+              <div style={{
+                height: '38px', width: '38px', borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff', fontWeight: 700, fontSize: '15px',
+                background: avatarBg,
+                border: `2px solid ${T.avatarBorder}`,
+                boxShadow: T.avatarGlow,
+                flexShrink: 0,
+              }}>
+                {usuario ? usuario.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <p style={{ color: T.userNameColor, fontWeight: 600, fontSize: '13px', lineHeight: 1.2, margin: 0 }}>
+                  {usuario || 'Usuario'}
+                </p>
+                <p style={{ color: T.rolColor, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                  {rol}
+                </p>
+              </div>
+              <svg
+                style={{ width: 14, height: 14, color: T.rolColor, transition: 'transform 0.2s', transform: profileOpen ? 'rotate(180deg)' : 'none', flexShrink: 0 }}
+                fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {profileOpen && (
+              <div className="anim-fade" style={{
+                position: 'absolute', right: 0, top: 'calc(100% + 10px)',
+                width: '220px',
+                background: T.dropBg,
+                border: `1px solid ${T.dropBorder}`,
+                borderRadius: '14px',
+                boxShadow: T.dropShadow,
+                overflow: 'hidden',
+                zIndex: 100,
+              }}>
+                <div style={{ padding: '14px 18px', borderBottom: `1px solid ${T.divider}` }}>
+                  <p style={{ color: T.userNameColor, fontWeight: 700, fontSize: '14px', margin: 0 }}>{usuario}</p>
+                  <p style={{ color: T.rolColor, fontSize: '11px', marginTop: '3px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>{rol}</p>
+                </div>
+                <button
+                  className="drop-item"
+                  onClick={toggleTheme}
+                  style={{ padding: '13px 18px', color: T.dropItemColor, fontSize: '13px', fontWeight: 500, background: 'transparent', borderBottom: `1px solid ${T.divider}` }}
+                  onMouseEnter={e => e.currentTarget.style.background = T.dropItemHoverBg}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <span>{isDark ? 'Modo Claro' : 'Modo Oscuro'}</span>
+                  {isDark
+                    ? <SunIcon style={{ height: 17, width: 17, color: '#fbbf24' }} />
+                    : <MoonIcon style={{ height: 17, width: 17, color: T.rolColor }} />
+                  }
+                </button>
+                <button
+                  className="drop-item"
+                  onClick={onLogout}
+                  style={{ padding: '13px 18px', color: '#f87171', fontSize: '13px', fontWeight: 600, background: 'transparent' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.1)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  Cerrar Sesión
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Hamburger — mobile only */}
+          <button
+            className="ham-btn navbar-ham"
+            onClick={() => setMobileOpen(p => !p)}
+            style={{ background: T.hoverBg }}
+            onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(14,165,233,0.15)' : 'rgba(14,165,233,0.12)'}
+            onMouseLeave={e => e.currentTarget.style.background = T.hoverBg}
+            aria-label="Menú"
+          >
+            {mobileOpen
+              ? <XMarkIcon style={{ width: 22, height: 22, color: T.hamColor }} />
+              : <Bars3Icon style={{ width: 22, height: 22, color: T.hamColor }} />
+            }
+          </button>
+        </div>
+      </nav>
+
+      {/* ── MOBILE MENU ────────────────────────────────────────── */}
+      {mobileOpen && (
+        <div
+          ref={mobileRef}
+          className="anim-mobile navbar-mobile-menu"
+          style={{
+            position: 'fixed',
+            top: '68px',
+            left: 0,
+            right: 0,
+            zIndex: 49,
+            background: T.mobileBg,
+            borderBottom: `1px solid ${T.mobileBorder}`,
+            boxShadow: isDark
+              ? '0 8px 32px rgba(0,0,0,0.4)'
+              : '0 8px 24px rgba(14,165,233,0.12)',
+            padding: '8px 0 12px',
+          }}
+        >
+          {/* Nav items */}
+          {list.map(view => {
+            const isActive = currentView === view;
+            return (
+              <button
+                key={view}
+                onClick={() => { onViewChange(view); setMobileOpen(false); }}
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '13px 24px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontFamily: "'Sora', sans-serif",
+                  fontSize: '14px',
+                  fontWeight: isActive ? 700 : 500,
+                  color: isActive ? T.textActive : T.textDefault,
+                  background: isActive ? T.mobileItemActive : 'transparent',
+                  borderLeft: isActive ? `3px solid ${T.textActive}` : '3px solid transparent',
+                  transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = T.mobileItemHover; }}
+                onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+              >
+                {viewLabels[view] || view.charAt(0).toUpperCase() + view.slice(1)}
+              </button>
+            );
+          })}
+
+          {/* Divider */}
+          <div style={{ margin: '10px 24px', height: '1px', background: T.divider }} />
+
+          {/* User info + actions */}
+          <div style={{ padding: '4px 24px 8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              height: '40px', width: '40px', borderRadius: '50%', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#fff', fontWeight: 700, fontSize: '16px',
+              background: avatarBg,
+              border: `2px solid ${T.avatarBorder}`,
+              boxShadow: T.avatarGlow,
+            }}>
+              {usuario ? usuario.charAt(0).toUpperCase() : 'U'}
+            </div>
+            <div>
+              <p style={{ color: T.userNameColor, fontWeight: 600, fontSize: '14px', margin: 0 }}>{usuario || 'Usuario'}</p>
+              <p style={{ color: T.rolColor, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>{rol}</p>
+            </div>
+          </div>
+
+          <button
+            onClick={toggleTheme}
+            style={{
+              width: '100%', textAlign: 'left', padding: '12px 24px',
+              border: 'none', cursor: 'pointer', background: 'transparent',
+              fontFamily: "'Sora', sans-serif", fontSize: '14px', fontWeight: 500,
+              color: T.dropItemColor,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = T.mobileItemHover}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <span>{isDark ? 'Modo Claro' : 'Modo Oscuro'}</span>
+            {isDark
+              ? <SunIcon style={{ height: 18, width: 18, color: '#fbbf24' }} />
+              : <MoonIcon style={{ height: 18, width: 18, color: T.rolColor }} />
+            }
+          </button>
+
+          <button
+            onClick={onLogout}
+            style={{
+              width: '100%', textAlign: 'left', padding: '12px 24px',
+              border: 'none', cursor: 'pointer', background: 'transparent',
+              fontFamily: "'Sora', sans-serif", fontSize: '14px', fontWeight: 600,
+              color: '#f87171', transition: 'background 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.08)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            Cerrar Sesión
+          </button>
+        </div>
+      )}
+
+      {/* ── RESPONSIVE CSS ─────────────────────────────────────── */}
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-5px); }
-          to { opacity: 1; transform: translateY(0); }
+        @media (max-width: 768px) {
+          .navbar-desktop { display: none !important; }
+          .navbar-profile-desktop { display: none !important; }
+          .navbar-ham { display: flex !important; }
         }
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease forwards;
+        @media (min-width: 769px) {
+          .navbar-ham { display: none !important; }
+          .navbar-mobile-menu { display: none !important; }
         }
       `}</style>
-  </nav>
-
+    </>
   );
 }

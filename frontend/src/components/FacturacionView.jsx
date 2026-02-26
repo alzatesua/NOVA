@@ -156,9 +156,8 @@ export default function FacturacionView() {
     <div className="w-full max-w-7xl mx-auto px-4">
       {/* Header */}
       <div className="mb-4">
-        <h2 className="text-xl font-bold text-slate-800 dark:!text-slate-100">
-          Sistema de Facturación
-        </h2>
+          <h2 className="text-2xl font-bold text-slate-800 dark:!text-slate-100 transition-colors duration-200">Sistema de Facturación</h2>
+          <p className="text-slate-500 dark:!text-slate-400 text-sm transition-colors duration-200">Factura ordenadamente tus ventas</p>
       </div>
 
       {/* Contenido */}

@@ -1,9 +1,6 @@
-/**
- * DashboardView - Componente principal del dashboard de analytics
- * Muestra KPIs, gráficas y métricas importantes del negocio
- */
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
 import {
   fetchKPIsGenerales,
   fetchTendenciaVentas,
@@ -15,33 +12,70 @@ import StatCard from './dashboard/StatCard';
 import TrendChart from './dashboard/TrendChart';
 import TopProductsTable from './dashboard/TopProductsTable';
 
-// Iconos SVG
+// ── Iconos ──────────────────────────────────────────────────────
 const MoneyIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: 22, height: 22 }}>
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
-
 const ShoppingCartIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: 22, height: 22 }}>
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
   </svg>
 );
-
 const PackageIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: 22, height: 22 }}>
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
   </svg>
 );
-
 const InventoryIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: 22, height: 22 }}>
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
   </svg>
 );
+const StoreIcon = () => (
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: 28, height: 28 }}>
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+  </svg>
+);
+const AlertIcon = () => (
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: 20, height: 20 }}>
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+  </svg>
+);
+const CopyIcon = () => (
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: 16, height: 16 }}>
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+  </svg>
+);
+const ExternalIcon = () => (
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: 16, height: 16 }}>
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+  </svg>
+);
+
+// ── Skeleton loader ──────────────────────────────────────────────
+const Skeleton = ({ width = '100%', height = 20, radius = 8, style = {} }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  return (
+    <div style={{
+      width, height, borderRadius: radius,
+      background: isDark
+        ? 'linear-gradient(90deg, #1e3a5f 25%, #1e4976 50%, #1e3a5f 75%)'
+        : 'linear-gradient(90deg, #dbeafe 25%, #bfdbfe 50%, #dbeafe 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'shimmer 1.5s infinite',
+      ...style
+    }} />
+  );
+};
 
 export default function DashboardView() {
   const { usuario, tokenUsuario, subdominio } = useAuth();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const authData = { usuario, tokenUsuario, subdominio };
 
   const [loading, setLoading] = useState(true);
@@ -50,17 +84,14 @@ export default function DashboardView() {
   const [topProductos, setTopProductos] = useState([]);
   const [inventario, setInventario] = useState(null);
   const [comparativa, setComparativa] = useState(null);
-
   const [dias, setDias] = useState(30);
+  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, [dias]);
+  useEffect(() => { loadDashboardData(); }, [dias]);
 
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      // Cargar datos en paralelo
       const [kpisData, tendenciaData, topData, inventarioData, comparativaData] =
         await Promise.all([
           fetchKPIsGenerales(authData, { dias }),
@@ -69,7 +100,6 @@ export default function DashboardView() {
           fetchInventarioResumen(authData),
           fetchComparativaPeriodos(authData, { dias_actual: dias, dias_anterior: dias }),
         ]);
-
       setKpis(kpisData);
       setTendencia(tendenciaData || []);
       setTopProductos(topData || []);
@@ -77,12 +107,7 @@ export default function DashboardView() {
       setComparativa(comparativaData);
     } catch (error) {
       console.error('Error al cargar datos del dashboard:', error);
-      // Setear valores por defecto en caso de error
-      setKpis({
-        ventas: { total_ventas: 0, cantidad_facturas: 0 },
-        inventario: { total_productos: 0, total_unidades: 0 },
-        alertas: { productos_stock_bajo: 0 },
-      });
+      setKpis({ ventas: { total_ventas: 0, cantidad_facturas: 0 }, inventario: { total_productos: 0, total_unidades: 0 }, alertas: { productos_stock_bajo: 0 } });
     } finally {
       setLoading(false);
     }
@@ -90,135 +115,334 @@ export default function DashboardView() {
 
   const formatCurrency = (value) => {
     if (!value) return '$0';
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
   };
-
   const formatNumber = (value) => {
     if (!value) return '0';
     return new Intl.NumberFormat('es-CO').format(value);
   };
 
+  const handleCopy = () => {
+    const url = `${window.location.origin}/tienda`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  // ── Tema tokens ──────────────────────────────────────────────
+  const T = isDark ? {
+    pageBg: 'transparent',
+    sectionTitle: '#94a3b8',
+    labelColor: '#94a3b8',
+    selectBg: '#0d1f3c',
+    selectBorder: 'rgba(14,165,233,0.25)',
+    selectColor: '#e2e8f0',
+    selectFocus: '0 0 0 2px rgba(14,165,233,0.4)',
+    storeBg: 'linear-gradient(135deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)',
+    storeBorder: 'rgba(14,165,233,0.18)',
+    storeShadow: '0 8px 24px rgba(14,165,233,0.12), 0 1px 0 rgba(14,165,233,0.2)',
+    storeIconBg: 'rgba(14,165,233,0.15)',
+    storeIconColor: '#38bdf8',
+    storeTitleColor: '#e2e8f0',
+    storeSubColor: '#94a3b8',
+    storeUrlBg: 'rgba(14,165,233,0.08)',
+    storeUrlBorder: 'rgba(14,165,233,0.2)',
+    storeUrlColor: '#38bdf8',
+    btnPrimaryBg: 'linear-gradient(90deg, #0ea5e9, #38bdf8)',
+    btnPrimaryColor: '#fff',
+    btnPrimaryHover: 'linear-gradient(90deg, #38bdf8, #7dd3fc)',
+    btnPrimaryShadow: '0 4px 14px rgba(14,165,233,0.35)',
+    btnSecondaryBg: 'rgba(14,165,233,0.08)',
+    btnSecondaryColor: '#38bdf8',
+    btnSecondaryBorder: 'rgba(14,165,233,0.2)',
+    btnSecondaryHover: 'rgba(14,165,233,0.15)',
+    alertBg: 'rgba(251,191,36,0.08)',
+    alertBorder: 'rgba(251,191,36,0.3)',
+    alertIconColor: '#fbbf24',
+    alertTextColor: '#fde68a',
+    alertAccent: '#fbbf24',
+    divider: 'rgba(14,165,233,0.12)',
+  } : {
+    pageBg: 'transparent',
+    sectionTitle: '#64748b',
+    labelColor: '#475569',
+    selectBg: '#ffffff',
+    selectBorder: 'rgba(14,165,233,0.35)',
+    selectColor: '#1e293b',
+    selectFocus: '0 0 0 2px rgba(14,165,233,0.3)',
+    storeBg: 'linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 50%, #f0f7ff 100%)',
+    storeBorder: 'rgba(14,165,233,0.25)',
+    storeShadow: '0 8px 20px rgba(14,165,233,0.12), 0 1px 0 rgba(14,165,233,0.2)',
+    storeIconBg: 'rgba(14,165,233,0.12)',
+    storeIconColor: '#0284c7',
+    storeTitleColor: '#0c4a6e',
+    storeSubColor: '#475569',
+    storeUrlBg: 'rgba(255,255,255,0.8)',
+    storeUrlBorder: 'rgba(14,165,233,0.25)',
+    storeUrlColor: '#0284c7',
+    btnPrimaryBg: 'linear-gradient(90deg, #0284c7, #0ea5e9)',
+    btnPrimaryColor: '#fff',
+    btnPrimaryHover: 'linear-gradient(90deg, #0ea5e9, #38bdf8)',
+    btnPrimaryShadow: '0 4px 14px rgba(14,165,233,0.3)',
+    btnSecondaryBg: 'rgba(255,255,255,0.8)',
+    btnSecondaryColor: '#0284c7',
+    btnSecondaryBorder: 'rgba(14,165,233,0.35)',
+    btnSecondaryHover: 'rgba(255,255,255,1)',
+    alertBg: 'rgba(254,243,199,0.8)',
+    alertBorder: 'rgba(251,191,36,0.4)',
+    alertIconColor: '#d97706',
+    alertTextColor: '#92400e',
+    alertAccent: '#d97706',
+    divider: 'rgba(14,165,233,0.15)',
+  };
+
+  const periodOptions = [
+    { value: 7,  label: 'Últimos 7 días' },
+    { value: 15, label: 'Últimos 15 días' },
+    { value: 30, label: 'Últimos 30 días' },
+    { value: 60, label: 'Últimos 60 días' },
+    { value: 90, label: 'Últimos 90 días' },
+  ];
+
   return (
-    <div className="space-y-6 mt-8">
-      {/* Header con selector de período */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-700 dark:!text-slate-300">Período:</label>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');
+
+        .dash-root { font-family: 'Sora', sans-serif; }
+
+        @keyframes shimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .dash-fade { animation: fadeUp 0.35s ease forwards; }
+        .dash-fade-1 { animation: fadeUp 0.35s 0.05s ease both; }
+        .dash-fade-2 { animation: fadeUp 0.35s 0.1s  ease both; }
+        .dash-fade-3 { animation: fadeUp 0.35s 0.15s ease both; }
+        .dash-fade-4 { animation: fadeUp 0.35s 0.2s  ease both; }
+
+        .store-btn {
+          display: inline-flex; align-items: center; gap: 7px;
+          padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;
+          font-family: 'Sora', sans-serif; border: none; cursor: pointer;
+          transition: all 0.2s ease; text-decoration: none; white-space: nowrap;
+        }
+        .store-btn:focus-visible { outline: 2px solid #0ea5e9; outline-offset: 2px; }
+
+        .period-select {
+          appearance: none; padding: 9px 36px 9px 14px; border-radius: 10px;
+          font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 500;
+          cursor: pointer; transition: all 0.2s ease;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%230ea5e9' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+          background-repeat: no-repeat; background-position: right 10px center; background-size: 16px;
+        }
+        .period-select:focus { outline: none; }
+
+        @media (max-width: 640px) {
+          .store-card { padding: 20px !important; }
+          .store-card-inner { flex-direction: column !important; gap: 16px !important; align-items: flex-start !important; }
+          .store-btn-group { flex-direction: row !important; width: 100% !important; }
+          .store-btn { flex: 1; justify-content: center; padding: 10px 16px !important; font-size: 12px !important; }
+          .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+        }
+        @media (max-width: 400px) {
+          .store-card { padding: 16px !important; }
+          .store-card-inner { padding: 4px !important; }
+          .store-btn-group { flex-direction: column !important; width: 100% !important; }
+          .store-btn { width: 100% !important; }
+          .kpi-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+
+      <div className="dash-root" style={{ paddingTop: '16px' }}>
+
+        {/* ── Header / Período ──────────────────────────── */}
+        <div className="dash-fade" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+          <label style={{ fontSize: '13px', fontWeight: 600, color: T.labelColor, letterSpacing: '0.02em' }}>
+            Período:
+          </label>
           <select
             value={dias}
-            onChange={(e) => setDias(Number(e.target.value))}
-            className="px-3 py-2 border border-slate-300 dark:!border-slate-700 rounded-lg text-sm bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+            onChange={e => setDias(Number(e.target.value))}
+            className="period-select"
+            style={{
+              background: T.selectBg,
+              border: `1px solid ${T.selectBorder}`,
+              color: T.selectColor,
+            }}
+            onFocus={e => e.currentTarget.style.boxShadow = T.selectFocus}
+            onBlur={e => e.currentTarget.style.boxShadow = 'none'}
           >
-            <option value={7}>Últimos 7 días</option>
-            <option value={15}>Últimos 15 días</option>
-            <option value={30}>Últimos 30 días</option>
-            <option value={60}>Últimos 60 días</option>
-            <option value={90}>Últimos 90 días</option>
+            {periodOptions.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
           </select>
         </div>
-      </div>
 
-      {/* Tarjeta de acceso a la Tienda E-commerce */}
-      <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 rounded-xl shadow-lg p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              <h3 className="text-2xl font-bold">Mi Tienda Online</h3>
+        {/* ── Tienda E-commerce ─────────────────────────── */}
+        <div
+          className="dash-fade-1 store-card"
+          style={{
+            background: T.storeBg,
+            border: `1px solid ${T.storeBorder}`,
+            borderRadius: '16px',
+            boxShadow: T.storeShadow,
+            padding: '24px 28px',
+            marginBottom: '24px',
+          }}
+        >
+          <div className="store-card-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px' }}>
+            {/* Info */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', flex: 1, minWidth: 0 }}>
+              <div style={{
+                width: 52, height: 52, borderRadius: '12px', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: T.storeIconBg,
+                color: T.storeIconColor,
+                border: `1px solid ${T.storeBorder}`,
+              }}>
+                <StoreIcon />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <h3 style={{ color: T.storeTitleColor, fontWeight: 800, fontSize: '18px', margin: '0 0 4px 0', letterSpacing: '-0.3px' }}>
+                  Mi Tienda Online
+                </h3>
+                <p style={{ color: T.storeSubColor, fontSize: '13px', margin: '0 0 12px 0', fontWeight: 500 }}>
+                  Accede a tu tienda e-commerce y comparte la URL con tus clientes
+                </p>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  background: T.storeUrlBg,
+                  border: `1px solid ${T.storeUrlBorder}`,
+                  borderRadius: '8px', padding: '7px 14px',
+                  maxWidth: '100%', overflow: 'hidden',
+                }}>
+                  <span style={{ fontFamily: 'monospace', fontSize: '13px', color: T.storeUrlColor, fontWeight: 600, letterSpacing: '0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {window.location.origin}/tienda
+                  </span>
+                </div>
+              </div>
             </div>
-            <p className="text-emerald-100 text-sm mb-4">
-              Accede a tu tienda e-commerce para ver cómo la ven tus clientes
-            </p>
-            <div className="text-sm bg-emerald-900 bg-opacity-30 dark:bg-opacity-50 rounded-lg p-3 inline-block">
-              <span className="font-mono">{window.location.origin}/tienda</span>
+
+            {/* Botones */}
+            <div className="store-btn-group" style={{ display: 'flex', flexDirection: 'column', gap: '10px', flexShrink: 0 }}>
+              <a
+                href="/tienda"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="store-btn"
+                style={{ background: T.btnPrimaryBg, color: T.btnPrimaryColor, boxShadow: T.btnPrimaryShadow }}
+                onMouseEnter={e => e.currentTarget.style.background = T.btnPrimaryHover}
+                onMouseLeave={e => e.currentTarget.style.background = T.btnPrimaryBg}
+              >
+                <ExternalIcon /> Ver Tienda
+              </a>
+              <button
+                onClick={handleCopy}
+                className="store-btn"
+                style={{
+                  background: T.btnSecondaryBg,
+                  color: T.btnSecondaryColor,
+                  border: `1px solid ${T.btnSecondaryBorder}`,
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = T.btnSecondaryHover}
+                onMouseLeave={e => e.currentTarget.style.background = T.btnSecondaryBg}
+              >
+                <CopyIcon />
+                {copied ? '¡Copiado!' : 'Copiar URL'}
+              </button>
             </div>
-          </div>
-          <div className="flex flex-col gap-2 ml-4">
-            <a
-              href="/tienda"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 bg-white dark:!bg-slate-800 text-emerald-600 dark:text-emerald-400 rounded-lg font-semibold hover:bg-emerald-50 dark:hover:!bg-slate-700 transition-colors shadow-md text-center"
-            >
-              Ver Tienda
-            </a>
-            <button
-              onClick={() => {
-                const url = `${window.location.origin}/tienda`;
-                navigator.clipboard.writeText(url).then(() => {
-                  alert('URL copiada:\n' + url);
-                });
-              }}
-              className="px-6 py-3 bg-emerald-700 dark:bg-emerald-800 text-white rounded-lg font-semibold hover:bg-emerald-800 dark:hover:bg-emerald-900 transition-colors text-center"
-            >
-              Copiar URL
-            </button>
           </div>
         </div>
-      </div>
 
-      {/* Tarjetas de KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Ventas Totales"
-          value={formatCurrency(kpis?.ventas?.total_ventas)}
-          icon={<MoneyIcon />}
-          color="blue"
-          trend={comparativa?.variacion?.ventas_porcentual}
-          trendUp={comparativa?.variacion?.ventas_porcentual >= 0}
-          loading={loading}
-        />
-        <StatCard
-          title="Facturas"
-          value={formatNumber(kpis?.ventas?.cantidad_facturas)}
-          icon={<ShoppingCartIcon />}
-          color="green"
-          trend={comparativa?.variacion?.facturas_porcentual}
-          trendUp={comparativa?.variacion?.facturas_porcentual >= 0}
-          loading={loading}
-        />
-        <StatCard
-          title="Productos"
-          value={formatNumber(inventario?.total_productos)}
-          icon={<PackageIcon />}
-          color="purple"
-          loading={loading}
-        />
-        <StatCard
-          title="Unidades en Stock"
-          value={formatNumber(inventario?.total_unidades)}
-          icon={<InventoryIcon />}
-          color="orange"
-          loading={loading}
-        />
-      </div>
+        {/* ── KPIs ─────────────────────────────────────────── */}
+        <div
+          className="kpi-grid dash-fade-2"
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}
+        >
+          <StatCard
+            title="Ventas Totales"
+            value={formatCurrency(kpis?.ventas?.total_ventas)}
+            icon={<MoneyIcon />}
+            color="blue"
+            trend={comparativa?.variacion?.ventas_porcentual}
+            trendUp={comparativa?.variacion?.ventas_porcentual >= 0}
+            loading={loading}
+          />
+          <StatCard
+            title="Facturas"
+            value={formatNumber(kpis?.ventas?.cantidad_facturas)}
+            icon={<ShoppingCartIcon />}
+            color="green"
+            trend={comparativa?.variacion?.facturas_porcentual}
+            trendUp={comparativa?.variacion?.facturas_porcentual >= 0}
+            loading={loading}
+          />
+          <StatCard
+            title="Productos"
+            value={formatNumber(inventario?.total_productos)}
+            icon={<PackageIcon />}
+            color="purple"
+            loading={loading}
+          />
+          <StatCard
+            title="Unidades en Stock"
+            value={formatNumber(inventario?.total_unidades)}
+            icon={<InventoryIcon />}
+            color="orange"
+            loading={loading}
+          />
+        </div>
 
-      {/* Gráfico de tendencia */}
-      <TrendChart data={tendencia} loading={loading} />
+        {/* ── Gráfico de tendencia ───────────────────────── */}
+        <div className="dash-fade-3" style={{ marginBottom: '24px' }}>
+          <TrendChart data={tendencia} loading={loading} />
+        </div>
 
-      {/* Tabla de top productos */}
-      <TopProductsTable products={topProductos} loading={loading} />
+        {/* ── Top Productos ──────────────────────────────── */}
+        <div className="dash-fade-4" style={{ marginBottom: '24px' }}>
+          <TopProductsTable products={topProductos} loading={loading} />
+        </div>
 
-      {/* Alertas */}
-      {kpis?.alertas?.productos_stock_bajo > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
-          <div className="flex items-center">
-            <svg className="w-6 h-6 text-amber-600 dark:text-amber-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <p className="text-amber-800 dark:!text-amber-200">
-              <span className="font-semibold">Alerta:</span> Tienes {kpis.alertas.productos_stock_bajo} productos con stock bajo
+        {/* ── Alerta stock bajo ──────────────────────────── */}
+        {kpis?.alertas?.productos_stock_bajo > 0 && (
+          <div
+            className="dash-fade"
+            style={{
+              background: T.alertBg,
+              border: `1px solid ${T.alertBorder}`,
+              borderRadius: '12px',
+              padding: '14px 18px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}
+          >
+            <div style={{
+              width: 36, height: 36, borderRadius: '8px', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: isDark ? 'rgba(251,191,36,0.12)' : 'rgba(251,191,36,0.15)',
+              color: T.alertIconColor,
+            }}>
+              <AlertIcon />
+            </div>
+            <p style={{ color: T.alertTextColor, fontSize: '14px', margin: 0, fontWeight: 500 }}>
+              <span style={{ fontWeight: 700, color: T.alertAccent }}>Atención: </span>
+              Tienes{' '}
+              <span style={{ fontWeight: 700, color: T.alertAccent }}>
+                {kpis.alertas.productos_stock_bajo} productos
+              </span>{' '}
+              con stock bajo. Revisa tu inventario pronto.
             </p>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+
+      </div>
+    </>
   );
 }
