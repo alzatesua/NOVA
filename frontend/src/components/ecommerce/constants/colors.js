@@ -15,15 +15,15 @@ export const COLORS = {
   acentoTurquesa: '#26A69A',      // Turquoise para detalles
 };
 
-// Colores para modo oscuro
+// Colores para modo oscuro - Paleta Azul Navy (#121830)
 export const DARK_COLORS = {
-  background: '#1a1a1a',
-  cardBackground: '#2d2d2d',
-  textPrimary: '#ffffff',
-  textSecondary: '#b0b0b0',
-  borderColor: '#404040',
-  navbarBackground: '#212121',
-  inputBackground: '#3d3d3d',
+  background: '#121830',        // Azul navy oscuro principal
+  cardBackground: '#1a2050',    // Azul navy medio
+  textPrimary: '#ffffff',       // Blanco para textos principales
+  textSecondary: '#c0c8f0',     // Azul grisáceo claro
+  borderColor: '#2a3060',       // Azul navy para bordes
+  navbarBackground: '#162040',  // Azul navy para navbar
+  inputBackground: '#222855',   // Azul navy claro para inputs
 };
 
 // Emojis por categoría

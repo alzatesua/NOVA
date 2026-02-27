@@ -1152,7 +1152,7 @@ export default function EcommerceView() {
             height: 100% !important;
             object-fit: cover !important;
             z-index: 0 !important;
-            background-color: #1a1a1a !important;
+            background-color: #121830 !important;
           }
 
           .contact-overlay {
@@ -1354,7 +1354,7 @@ export default function EcommerceView() {
 
             /* Navbar en modo oscuro */
             .navbar {
-              background: linear-gradient(135deg, #1a1a1a99, #2d2d2dCC) !important;
+              background: linear-gradient(135deg, #12183099, #1a2050CC) !important;
             }
 
             /* Main container */
@@ -1423,10 +1423,39 @@ export default function EcommerceView() {
               color: ${DARK_COLORS.textSecondary} !important;
             }
 
-            /* Footer en modo oscuro */
-            footer {
+            /* Footer en modo oscuro - excluir footer con video */
+            footer:not(.ecommerce-video-footer) {
               background-color: ${DARK_COLORS.navbarBackground} !important;
               color: ${DARK_COLORS.textPrimary} !important;
+            }
+
+            /* Footer con video - COMPLETAMENTE TRANSPARENTE */
+            footer.ecommerce-video-footer {
+              background-color: transparent !important;
+              background-image: none !important;
+              background: none !important;
+              color: ${DARK_COLORS.textPrimary} !important;
+            }
+
+            /* Todo dentro del footer con video debe ser transparente */
+            footer.ecommerce-video-footer > div {
+              background-color: transparent !important;
+              background-image: none !important;
+            }
+
+            /* Asegurar que el video del footer sea visible */
+            footer.ecommerce-video-footer video {
+              display: block !important;
+              visibility: visible !important;
+              opacity: 1 !important;
+              position: absolute !important;
+              top: 0 !important;
+              left: 0 !important;
+              width: 100% !important;
+              height: 100% !important;
+              object-fit: cover !important;
+              z-index: 0 !important;
+              background: transparent !important;
             }
 
             /* Animaciones y efectos */
@@ -1434,6 +1463,38 @@ export default function EcommerceView() {
               opacity: 0.9;
             }
           ` : ''}
+        `}
+      </style>
+
+      {/* Estilos adicionales para el footer con video - SIEMPRE visibles */}
+      <style>
+        {`
+          /* Footer con video - SIEMPRE TRANSPARENTE sin importar el modo */
+          footer.ecommerce-video-footer {
+            background-color: transparent !important;
+            background-image: none !important;
+            background: transparent !important;
+          }
+
+          footer.ecommerce-video-footer > div {
+            background-color: transparent !important;
+            background-image: none !important;
+          }
+
+          /* Video del footer - SIEMPRE VISIBLE */
+          footer.ecommerce-video-footer video {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            z-index: 0 !important;
+            background: transparent !important;
+          }
         `}
       </style>
 
@@ -2449,128 +2510,275 @@ export default function EcommerceView() {
               </ul>
             </div>
 
-            {/* Sección 2: Requisitos Legales en Colombia */}
-            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: darkMode ? '#252f3f' : COLORS.beigeCrema }}>
-              <h2 className="text-2xl font-bold mb-4" style={{ color: darkMode ? '#4ade80' : COLORS.verdeOscuro }}>
+            {/* Sección 2: Requisitos Legales en Colombia - Diseño Moderno */}
+            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{
+              backgroundColor: darkMode ? DARK_COLORS.cardBackground : COLORS.blanco,
+              border: `2px solid ${darkMode ? DARK_COLORS.borderColor : COLORS.verdeMenta}`
+            }}>
+              <h2 className="text-2xl font-bold mb-6" style={{ color: darkMode ? '#22c55e' : COLORS.verdeOscuro }}>
                 📋 Requisitos Legales en Colombia
               </h2>
 
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Motos Eléctricas */}
-                <div className="p-4 rounded-xl" style={{ backgroundColor: darkMode ? '#1a2332' : COLORS.blanco }}>
-                  <h3 className="text-xl font-bold mb-3" style={{ color: darkMode ? '#4ade80' : COLORS.verdePrincipal }}>
-                    🛵 Motos Eléctricas
-                  </h3>
-                  <ul className="space-y-2 text-sm" style={{ color: COLORS.grisOscuro }}>
-                    <li>✓ Licencia de conducción válida (categoría A2 para motos {'>'} 50cc)</li>
-                    <li>✓ SOAT obligatorio (puedes obtenerlo en línea)</li>
-                    <li>✓ Tecnomecánica anual</li>
-                    <li>✓ Seguro obligatorio</li>
-                    <li>✓ Registro en RUNT (Registro Nacional de Tránsito)</li>
-                    <li>✓ Tarjeta de propiedad</li>
-                    <li>✓ <strong>NO requieren placas</strong> si son menores de 50cc (Bisimotos)</li>
+                <div className="p-5 rounded-xl transition-all hover:scale-102" style={{
+                  backgroundColor: darkMode ? DARK_COLORS.inputBackground : COLORS.grisClaro,
+                  border: `1px solid ${darkMode ? 'rgba(34, 197, 94, 0.3)' : COLORS.verdeMenta}`
+                }}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div style={{
+                      width: '50px',
+                      height: '50px',
+                      borderRadius: '12px',
+                      backgroundColor: darkMode ? 'rgba(34, 197, 94, 0.2)' : `${COLORS.verdePrincipal}20`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.75rem'
+                    }}>🛵</div>
+                    <h3 className="text-xl font-bold" style={{ color: darkMode ? DARK_COLORS.textPrimary : COLORS.verdePrincipal }}>
+                      Motos Eléctricas
+                    </h3>
+                  </div>
+                  <ul className="space-y-2 text-sm" style={{ color: darkMode ? DARK_COLORS.textSecondary : COLORS.grisOscuro }}>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#22c55e' : COLORS.verdePrincipal }}>✓</span>
+                      <span>Licencia de conducción válida (categoría A2 para motos {'>'} 50cc)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#22c55e' : COLORS.verdePrincipal }}>✓</span>
+                      <span>SOAT obligatorio (puedes obtenerlo en línea)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#22c55e' : COLORS.verdePrincipal }}>✓</span>
+                      <span>Tecnomecánica anual</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#22c55e' : COLORS.verdePrincipal }}>✓</span>
+                      <span>Seguro obligatorio</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#22c55e' : COLORS.verdePrincipal }}>✓</span>
+                      <span>Registro en RUNT (Registro Nacional de Tránsito)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#22c55e' : COLORS.verdePrincipal }}>✓</span>
+                      <span>Tarjeta de propiedad</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#22c55e' : COLORS.verdePrincipal }}>✓</span>
+                      <span><strong style={{ color: darkMode ? '#22c55e' : COLORS.verdePrincipal }}>NO requieren placas</strong> si son menores de 50cc</span>
+                    </li>
                   </ul>
                 </div>
 
                 {/* Bisimotos */}
-                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.blanco }}>
-                  <h3 className="text-xl font-bold mb-3" style={{ color: COLORS.verdePrincipal }}>
-                    🚴 Bisimotos (Bicicletas Eléctricas)
-                  </h3>
-                  <ul className="space-y-2 text-sm" style={{ color: COLORS.grisOscuro }}>
-                    <li>✓ <strong>NO requieren licencia</strong> de conducción</li>
-                    <li>✓ <strong>NO requieren SOAT</strong></li>
-                    <li>✓ <strong>NO requieren placa</strong></li>
-                    <li>✓ Motor máximo 500W</li>
-                    <li>✓ Velocidad máxima 25 km/h</li>
-                    <li>✓ Uso obligatorio de casco</li>
-                    <li>✓ Deben circular por ciclovías o carriles exclusivos</li>
+                <div className="p-5 rounded-xl transition-all hover:scale-102" style={{
+                  backgroundColor: darkMode ? DARK_COLORS.inputBackground : COLORS.grisClaro,
+                  border: `1px solid ${darkMode ? 'rgba(59, 130, 246, 0.3)' : COLORS.verdeMenta}`
+                }}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div style={{
+                      width: '50px',
+                      height: '50px',
+                      borderRadius: '12px',
+                      backgroundColor: darkMode ? 'rgba(59, 130, 246, 0.2)' : `${COLORS.verdePrincipal}20`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.75rem'
+                    }}>🚴</div>
+                    <h3 className="text-xl font-bold" style={{ color: darkMode ? DARK_COLORS.textPrimary : COLORS.verdePrincipal }}>
+                      Bisimotos (Bicicletas Eléctricas)
+                    </h3>
+                  </div>
+                  <ul className="space-y-2 text-sm" style={{ color: darkMode ? DARK_COLORS.textSecondary : COLORS.grisOscuro }}>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#3b82f6' : COLORS.verdePrincipal }}>✓</span>
+                      <span><strong style={{ color: darkMode ? '#3b82f6' : COLORS.verdePrincipal }}>NO requieren licencia</strong> de conducción</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#3b82f6' : COLORS.verdePrincipal }}>✓</span>
+                      <span><strong style={{ color: darkMode ? '#3b82f6' : COLORS.verdePrincipal }}>NO requieren SOAT</strong></span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#3b82f6' : COLORS.verdePrincipal }}>✓</span>
+                      <span><strong style={{ color: darkMode ? '#3b82f6' : COLORS.verdePrincipal }}>NO requieren placa</strong></span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#3b82f6' : COLORS.verdePrincipal }}>✓</span>
+                      <span>Motor máximo 500W</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#3b82f6' : COLORS.verdePrincipal }}>✓</span>
+                      <span>Velocidad máxima 25 km/h</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#3b82f6' : COLORS.verdePrincipal }}>✓</span>
+                      <span>Uso obligatorio de casco</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span style={{ color: darkMode ? '#3b82f6' : COLORS.verdePrincipal }}>✓</span>
+                      <span>Deben circular por ciclovías o carriles exclusivos</span>
+                    </li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            {/* Sección 3: Beneficios de la Movilidad Eléctrica */}
-            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: COLORS.verdeClaro }}>
-              <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+            {/* Sección 3: Beneficios de la Movilidad Eléctrica - Diseño Moderno */}
+            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{
+              backgroundColor: darkMode ? DARK_COLORS.cardBackground : COLORS.blanco,
+              border: `2px solid ${darkMode ? DARK_COLORS.borderColor : COLORS.verdeMenta}`
+            }}>
+              <h2 className="text-2xl font-bold mb-6" style={{ color: darkMode ? '#22c55e' : COLORS.verdeOscuro }}>
                 🌱 Beneficios de la Movilidad Eléctrica
               </h2>
               <div className="grid md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl bg-white">
-                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdePrincipal }}>💰 Económico</h4>
-                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
-                    Ahorra hasta 80% en combustible y 60% en mantenimiento
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl bg-white">
-                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdePrincipal }}>🌍 Ecológico</h4>
-                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
-                    0% de emisiones directas de CO2 y contaminación acústica
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl bg-white">
-                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdePrincipal }}>⚡ Eficiente</h4>
-                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
-                    90% de eficiencia energética vs 20% de motores de combustión
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl bg-white">
-                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdePrincipal }}>🔇 Silencioso</h4>
-                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
-                    Reduce la contaminación acústica en la ciudad
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl bg-white">
-                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdePrincipal }}>🏃 Rápido</h4>
-                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
-                    Torque instantáneo y aceleración superior
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl bg-white">
-                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdePrincipal }}>🔧 Fácil Mantenimiento</h4>
-                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
-                    Menos partes móviles, menos mantenimiento
-                  </p>
-                </div>
+                {[
+                  {
+                    icon: '💰',
+                    title: 'Económico',
+                    desc: 'Ahorra hasta 80% en combustible y 60% en mantenimiento',
+                    color: darkMode ? '#22c55e' : COLORS.verdePrincipal
+                  },
+                  {
+                    icon: '🌍',
+                    title: 'Ecológico',
+                    desc: '0% de emisiones directas de CO2 y contaminación acústica',
+                    color: darkMode ? '#3b82f6' : '#3b82f6'
+                  },
+                  {
+                    icon: '⚡',
+                    title: 'Eficiente',
+                    desc: '90% de eficiencia energética vs 20% de motores de combustión',
+                    color: darkMode ? '#f59e0b' : COLORS.acentoNaranja
+                  },
+                  {
+                    icon: '🔇',
+                    title: 'Silencioso',
+                    desc: 'Reduce la contaminación acústica en la ciudad',
+                    color: darkMode ? '#8b5cf6' : '#8b5cf6'
+                  },
+                  {
+                    icon: '🏃',
+                    title: 'Rápido',
+                    desc: 'Torque instantáneo y aceleración superior',
+                    color: darkMode ? '#ec4899' : '#ec4899'
+                  },
+                  {
+                    icon: '🔧',
+                    title: 'Fácil Mantenimiento',
+                    desc: 'Menos partes móviles, menos mantenimiento',
+                    color: darkMode ? '#14b8a6' : COLORS.acentoTurquesa
+                  }
+                ].map((item, idx) => (
+                  <div key={idx} className="p-4 rounded-xl transition-all hover:scale-102" style={{
+                    backgroundColor: darkMode ? DARK_COLORS.inputBackground : COLORS.grisClaro,
+                    border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : COLORS.verdeMenta}`
+                  }}>
+                    <div className="flex flex-col items-center text-center">
+                      <div style={{
+                        width: '55px',
+                        height: '55px',
+                        borderRadius: '14px',
+                        backgroundColor: `${item.color}25`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '2rem',
+                        marginBottom: '0.75rem'
+                      }}>
+                        {item.icon}
+                      </div>
+                      <h4 className="font-bold mb-2" style={{ color: darkMode ? DARK_COLORS.textPrimary : item.color }}>
+                        {item.title}
+                      </h4>
+                      <p className="text-sm" style={{ color: darkMode ? DARK_COLORS.textSecondary : COLORS.grisOscuro }}>
+                        {item.desc}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Sección 4: Recomendaciones */}
-            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: COLORS.blanco }}>
-              <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+            {/* Sección 4: Recomendaciones - Diseño Moderno */}
+            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{
+              backgroundColor: darkMode ? DARK_COLORS.cardBackground : COLORS.blanco,
+              border: `2px solid ${darkMode ? DARK_COLORS.borderColor : COLORS.verdeMenta}`
+            }}>
+              <h2 className="text-2xl font-bold mb-6" style={{ color: darkMode ? '#22c55e' : COLORS.verdeOscuro }}>
                 💡 Recomendaciones antes de Comprar
               </h2>
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
-                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>1. Define tu Uso</h4>
-                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
-                    Considera la distancia diaria que recorres. Para viajes cortos (&lt;30km) un visimoto es ideal. Para mayores distancias, una moto eléctrica es mejor opción.
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
-                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>2. Verifica la Autonomía</h4>
-                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
-                    Asegúrate de que la autonomía real del vehículo cubra tus necesidades diarias. Considera factores como pendientes y peso del conductor.
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
-                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>3. Investiga la Infraestructura de Carga</h4>
-                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
-                    Verifica puntos de carga cercanos en Pereira. La mayoría se pueden cargar en casa con tomacorriente estándar.
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
-                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>4. Compara Marcas y Modelos</h4>
-                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
-                    Investiga reputación de la marca, garantía, disponibilidad de repuestos y servicio técnico en Pereira.
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl" style={{ backgroundColor: COLORS.grisClaro }}>
-                  <h4 className="font-bold mb-2" style={{ color: COLORS.verdeOscuro }}>5. Calcula el ROI</h4>
-                  <p className="text-sm" style={{ color: COLORS.grisOscuro }}>
-                    Aunque la inversión inicial es mayor, el ahorro en combustible y mantenimiento hace que se pague en 2-3 años.
-                  </p>
-                </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                {[
+                  {
+                    icon: '🎯',
+                    title: '1. Define tu Uso',
+                    desc: 'Para viajes cortos (<30km) un visimoto es ideal. Para mayores distancias, una moto eléctrica es mejor opción.',
+                    color: darkMode ? '#22c55e' : COLORS.verdePrincipal
+                  },
+                  {
+                    icon: '🔋',
+                    title: '2. Verifica la Autonomía',
+                    desc: 'Asegúrate de que la autonomía real del vehículo cubra tus necesidades diarias. Considera pendientes y peso del conductor.',
+                    color: darkMode ? '#3b82f6' : '#3b82f6'
+                  },
+                  {
+                    icon: '🔌',
+                    title: '3. Infraestructura de Carga',
+                    desc: 'Verifica puntos de carga cercanos. La mayoría se pueden cargar en casa con tomacorriente estándar.',
+                    color: darkMode ? '#f59e0b' : COLORS.acentoNaranja
+                  },
+                  {
+                    icon: '🔍',
+                    title: '4. Compara Marcas',
+                    desc: 'Investiga reputación, garantía, disponibilidad de repuestos y servicio técnico en tu zona.',
+                    color: darkMode ? '#8b5cf6' : '#8b5cf6'
+                  },
+                  {
+                    icon: '💰',
+                    title: '5. Calcula el ROI',
+                    desc: 'El ahorro en combustible y mantenimiento hace que se pague en 2-3 años.',
+                    color: darkMode ? '#ec4899' : '#ec4899'
+                  },
+                  {
+                    icon: '⚡',
+                    title: '6. Prueba antes de Comprar',
+                    desc: 'Siempre prueba el vehículo antes de comprar. Verifica comodidad, manejo y respuesta del acelerador.',
+                    color: darkMode ? '#14b8a6' : COLORS.acentoTurquesa
+                  }
+                ].map((item, idx) => (
+                  <div key={idx} className="p-4 rounded-xl transition-all hover:scale-102" style={{
+                    backgroundColor: darkMode ? DARK_COLORS.inputBackground : COLORS.grisClaro,
+                    border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : COLORS.verdeMenta}`
+                  }}>
+                    <div className="flex items-start gap-3">
+                      <div style={{
+                        width: '45px',
+                        height: '45px',
+                        borderRadius: '12px',
+                        backgroundColor: `${item.color}20`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.5rem',
+                        flexShrink: 0
+                      }}>
+                        {item.icon}
+                      </div>
+                      <div>
+                        <h4 className="font-bold mb-2" style={{ color: darkMode ? DARK_COLORS.textPrimary : item.color }}>
+                          {item.title}
+                        </h4>
+                        <p className="text-sm leading-relaxed" style={{ color: darkMode ? DARK_COLORS.textSecondary : COLORS.grisOscuro }}>
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -2686,28 +2894,83 @@ export default function EcommerceView() {
               </div>
             </div>
 
-            {/* Sección 6: Incentivos y Beneficios Tributarios */}
-            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: COLORS.blanco }}>
-              <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.verdeOscuro }}>
+            {/* Sección 6: Incentivos y Beneficios Tributarios - Diseño Moderno */}
+            <div className="mb-12 p-6 rounded-2xl shadow-lg" style={{
+              backgroundColor: darkMode ? DARK_COLORS.cardBackground : COLORS.blanco,
+              border: `2px solid ${darkMode ? DARK_COLORS.borderColor : COLORS.verdeMenta}`
+            }}>
+              <h2 className="text-2xl font-bold mb-6" style={{ color: darkMode ? '#22c55e' : COLORS.verdeOscuro }}>
                 🎁 Incentivos y Beneficios en Colombia
               </h2>
-              <ul className="space-y-3" style={{ color: COLORS.grisOscuro }}>
-                <li className="p-3 rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
-                  <strong>Exento de IVA:</strong> Los vehículos eléctricos están exentos del Impuesto al Valor Agregado (Ley 1819 de 2016)
-                </li>
-                <li className="p-3 rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
-                  <strong>Exento de Importación:</strong> 0% de arancel para importación de vehículos eléctricos (hasta 2027)
-                </li>
-                <li className="p-3 rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
-                  <strong>Descuento en Tecnomecánica:</strong> Hasta 50% de descuento en algunos municipios
-                </li>
-                <li className="p-3 rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
-                  <strong>Exento de Pico y Placa:</strong> Los vehículos 100% eléctricos están exentos en Bogotá y otras ciudades
-                </li>
-                <li className="p-3 rounded-lg" style={{ backgroundColor: COLORS.grisClaro }}>
-                  <strong>Parqueaderos Gratuitos:</strong> En muchos centros comerciales y zonas públicas
-                </li>
-              </ul>
+              <div className="grid md:grid-cols-2 gap-4">
+                {[
+                  {
+                    icon: '💸',
+                    title: 'Exento de IVA',
+                    desc: 'Los vehículos eléctricos están exentos del Impuesto al Valor Agregado (Ley 1819 de 2016)',
+                    color: darkMode ? '#22c55e' : COLORS.verdePrincipal
+                  },
+                  {
+                    icon: '🚢',
+                    title: 'Exento de Importación',
+                    desc: '0% de arancel para importación de vehículos eléctricos (hasta 2027)',
+                    color: darkMode ? '#3b82f6' : '#3b82f6'
+                  },
+                  {
+                    icon: '🔧',
+                    title: 'Descuento en Tecnomecánica',
+                    desc: 'Hasta 50% de descuento en algunos municipios',
+                    color: darkMode ? '#f59e0b' : COLORS.acentoNaranja
+                  },
+                  {
+                    icon: '🚗',
+                    title: 'Exento de Pico y Placa',
+                    desc: 'Los vehículos 100% eléctricos están exentos en Bogotá y otras ciudades',
+                    color: darkMode ? '#8b5cf6' : '#8b5cf6'
+                  },
+                  {
+                    icon: '🅿️',
+                    title: 'Parqueaderos Gratuitos',
+                    desc: 'En muchos centros comerciales y zonas públicas',
+                    color: darkMode ? '#ec4899' : '#ec4899'
+                  },
+                  {
+                    icon: '🏷️',
+                    title: 'Impuesto de Rodamiento',
+                    desc: 'Tarifa reducida o exenta en la mayoría de municipios',
+                    color: darkMode ? '#14b8a6' : COLORS.acentoTurquesa
+                  }
+                ].map((item, idx) => (
+                  <div key={idx} className="p-4 rounded-xl transition-all hover:scale-102" style={{
+                    backgroundColor: darkMode ? DARK_COLORS.inputBackground : COLORS.grisClaro,
+                    border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : COLORS.verdeMenta}`
+                  }}>
+                    <div className="flex items-start gap-3">
+                      <div style={{
+                        width: '45px',
+                        height: '45px',
+                        borderRadius: '12px',
+                        backgroundColor: `${item.color}25`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.5rem',
+                        flexShrink: 0
+                      }}>
+                        {item.icon}
+                      </div>
+                      <div>
+                        <h4 className="font-bold mb-1" style={{ color: darkMode ? DARK_COLORS.textPrimary : item.color }}>
+                          {item.title}
+                        </h4>
+                        <p className="text-sm leading-relaxed" style={{ color: darkMode ? DARK_COLORS.textSecondary : COLORS.grisOscuro }}>
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Call to Action */}
@@ -2846,6 +3109,7 @@ export default function EcommerceView() {
         nombreTienda={nombreTienda}
         whatsappNumber={whatsappNumber}
         onNavigate={setActiveSection}
+        darkMode={darkMode}
       />
 
       {/* ==================== MODALES ==================== */}
