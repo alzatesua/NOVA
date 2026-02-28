@@ -3,7 +3,10 @@
     "allow": [
       "Bash(xxd:*)",
       "Bash(zgrep -o \"\\\\.dark.*bg-gray-800\" dist/assets/*.css.gz)",
-      "Bash(git checkout frontend/src/services/api.js)"
+      "Bash(git checkout frontend/src/services/api.js)",
+      "Bash(tr -cd '{}')",
+      "Bash(npx @babel/parser --plugins '*' /home/dagi/nova/frontend/src/components/EcommerceView.jsx)",
+      "Bash(git checkout src/components/EcommerceView.jsx)"
     ]
   }
 }

@@ -7,34 +7,40 @@ import { COLORS, DARK_COLORS } from '../constants/colors';
  * Muestra información de contacto y formulario funcional
  */
 export default function ContactSection({ activeSection, whatsappNumber = '+573000000000', darkMode = false }) {
-  // Estados del formulario
   const [formData, setFormData] = useState({
     nombre_completo: '',
     email: '',
     mensaje: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null); // 'success' | 'error' | null
+  const [submitStatus, setSubmitStatus] = useState(null);
 
-  // Solo renderizar si esta sección está activa
   if (activeSection !== 'contacto') {
     return null;
   }
 
-  const bgColor = darkMode ? DARK_COLORS.background : COLORS.grisClaro;
-  const cardBg = darkMode ? DARK_COLORS.cardBackground : 'rgba(255, 255, 255, 0.9)';
-  const textColor = darkMode ? DARK_COLORS.textPrimary : COLORS.grisOscuro;
+  // Colores para Información de Contacto - SIEMPRE modo claro
+  const contactCardBg = 'rgba(255, 255, 255, 0.9)';
+  const contactTextColor = COLORS.grisOscuro;
+  const contactHeadingColor = COLORS.verdePrincipal;
+  const contactSubheadingColor = COLORS.verdeOscuro;
 
-  // Función para obtener subdominio
+  // Colores para Formulario - según darkMode
+  const formCardBg = darkMode ? DARK_COLORS.cardBackground : 'rgba(255, 255, 255, 0.9)';
+  const formTextSecondary = darkMode ? DARK_COLORS.textSecondary : COLORS.grisOscuro;
+  const formHeadingColor = darkMode ? '#22c55e' : COLORS.verdePrincipal;
+  const formInputBg = darkMode ? DARK_COLORS.inputBackground : '#ffffff';
+  const formInputBorder = darkMode ? DARK_COLORS.borderColor : COLORS.verdeMenta;
+  const formTextColor = darkMode ? DARK_COLORS.textPrimary : COLORS.grisOscuro;
+
   const getSubdomain = () => {
     const host = window.location.hostname;
     if (host.includes('localhost') || host.includes('127.0.0.1')) {
-      return 'tu-subdominio-dev'; // Para desarrollo local
+      return 'tu-subdominio-dev';
     }
     return host.split('.')[0];
   };
 
-  // Manejar cambio de inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -43,7 +49,6 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
     }));
   };
 
-  // Enviar formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -63,7 +68,6 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
 
       if (response.ok) {
         setSubmitStatus('success');
-        // Resetear formulario
         setFormData({
           nombre_completo: '',
           email: '',
@@ -71,11 +75,9 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
         });
       } else {
         setSubmitStatus('error');
-        console.error('Error enviando formulario:', await response.json());
       }
     } catch (error) {
       setSubmitStatus('error');
-      console.error('Error de red:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -111,11 +113,11 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
           .animated-bg {
             background: linear-gradient(
               -45deg,
-              ${COLORS.verdePrincipal},
-              ${COLORS.verdeSecundario},
-              ${COLORS.verdeMenta},
-              ${COLORS.acentoTurquesa},
-              ${COLORS.verdeOscuro}
+              ${darkMode ? DARK_COLORS.background : COLORS.verdePrincipal},
+              ${darkMode ? DARK_COLORS.cardBackground : COLORS.verdeSecundario},
+              ${darkMode ? '#1e3a5f' : COLORS.verdeMenta},
+              ${darkMode ? '#22c55e' : COLORS.acentoTurquesa},
+              ${darkMode ? DARK_COLORS.navbarBackground : COLORS.verdeOscuro}
             );
             background-size: 400% 400%;
             animation: gradientShift 15s ease infinite;
@@ -208,33 +210,33 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
 
         <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
           <div className="rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 backdrop-blur-md"
-               style={{ backgroundColor: cardBg }}>
+               style={{ backgroundColor: contactCardBg }}>
             <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6"
-                style={{ color: COLORS.verdePrincipal }}>
+                style={{ color: contactHeadingColor }}>
               Información de Contacto
             </h2>
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <span className="text-xl sm:text-2xl">📍</span>
-                <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>Calle Principal #123, Ciudad</p>
+                <p className="text-sm sm:text-base" style={{ color: contactTextColor }}>Calle Principal #123, Ciudad</p>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <span className="text-xl sm:text-2xl">📞</span>
-                <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>Tel: {whatsappNumber}</p>
+                <p className="text-sm sm:text-base" style={{ color: contactTextColor }}>Tel: {whatsappNumber}</p>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <span className="text-xl sm:text-2xl">✉️</span>
-                <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>info@ecomotion.com</p>
+                <p className="text-sm sm:text-base" style={{ color: contactTextColor }}>info@ecomotion.com</p>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <span className="text-xl sm:text-2xl">⏰</span>
-                <p className="text-sm sm:text-base" style={{ color: COLORS.grisOscuro }}>Lun-Sáb: 9:00 AM - 7:00 PM</p>
+                <p className="text-sm sm:text-base" style={{ color: contactTextColor }}>Lun-Sáb: 9:00 AM - 7:00 PM</p>
               </div>
             </div>
 
             <div className="mt-6 sm:mt-8">
               <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4"
-                  style={{ color: COLORS.verdeOscuro }}>
+                  style={{ color: contactSubheadingColor }}>
                 Síguenos en Redes
               </h3>
               <div className="flex space-x-3 sm:space-x-4">
@@ -287,27 +289,27 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
           </div>
 
           <div className="rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 backdrop-blur-md"
-               style={{ backgroundColor: cardBg }}>
+               style={{ backgroundColor: formCardBg }}>
             <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6"
-                style={{ color: COLORS.verdePrincipal }}>
+                style={{ color: formHeadingColor }}>
               Envíanos un Mensaje
             </h2>
             <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
               {submitStatus === 'success' && (
-                <div className="p-3 rounded-lg" style={{ backgroundColor: '#d4edda', color: '#155724' }}>
+                <div className="p-3 rounded-lg" style={{ backgroundColor: darkMode ? 'rgba(34, 197, 94, 0.2)' : '#d4edda', color: darkMode ? '#4ade80' : '#155724' }}>
                   ¡Mensaje enviado exitosamente! Te contactaremos pronto.
                 </div>
               )}
 
               {submitStatus === 'error' && (
-                <div className="p-3 rounded-lg" style={{ backgroundColor: '#f8d7da', color: '#721c24' }}>
+                <div className="p-3 rounded-lg" style={{ backgroundColor: darkMode ? 'rgba(239, 68, 68, 0.2)' : '#f8d7da', color: darkMode ? '#f87171' : '#721c24' }}>
                   Error al enviar el mensaje. Por favor intenta nuevamente.
                 </div>
               )}
 
               <div>
                 <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2"
-                       style={{ color: COLORS.grisOscuro }}>
+                       style={{ color: formTextSecondary }}>
                   Nombre Completo
                 </label>
                 <input
@@ -317,14 +319,14 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
                   onChange={handleChange}
                   required
                   disabled={isSubmitting}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base bg-white disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ borderColor: COLORS.verdeMenta }}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ borderColor: formInputBorder, backgroundColor: formInputBg, color: formTextColor }}
                   placeholder="Tu nombre"
                 />
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2"
-                       style={{ color: COLORS.grisOscuro }}>
+                       style={{ color: formTextSecondary }}>
                   Correo Electrónico
                 </label>
                 <input
@@ -334,14 +336,14 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
                   onChange={handleChange}
                   required
                   disabled={isSubmitting}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base bg-white disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ borderColor: COLORS.verdeMenta }}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ borderColor: formInputBorder, backgroundColor: formInputBg, color: formTextColor }}
                   placeholder="tu@email.com"
                 />
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2"
-                       style={{ color: COLORS.grisOscuro }}>
+                       style={{ color: formTextSecondary }}>
                   Mensaje
                 </label>
                 <textarea
@@ -351,8 +353,8 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
                   required
                   disabled={isSubmitting}
                   rows="4"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base bg-white disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ borderColor: COLORS.verdeMenta }}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 focus:outline-none focus:ring-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ borderColor: formInputBorder, backgroundColor: formInputBg, color: formTextColor }}
                   placeholder="¿En qué podemos ayudarte?"
                 ></textarea>
               </div>
@@ -360,7 +362,7 @@ export default function ContactSection({ activeSection, whatsappNumber = '+57300
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-white shadow-lg hover:shadow-xl transition-all text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: COLORS.verdePrincipal }}
+                style={{ backgroundColor: formHeadingColor }}
               >
                 {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
               </button>

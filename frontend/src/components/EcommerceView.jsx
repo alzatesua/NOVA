@@ -152,6 +152,21 @@ export default function EcommerceView() {
     setDarkMode(!darkMode);
   };
 
+  // Función para cerrar el navbar en móvil
+  const closeNavbar = () => {
+    const collapseElement = document.getElementById('navbarSupportedContent');
+    if (collapseElement && collapseElement.classList.contains('show')) {
+      const bsCollapse = window.bootstrap?.Collapse?.getInstance(collapseElement);
+      if (bsCollapse) {
+        bsCollapse.hide();
+      } else {
+        collapseElement.classList.remove('show');
+        collapseElement.style.height = '';
+        collapseElement.style.overflow = '';
+      }
+    }
+  };
+
   // Cerrar dropdown cuando se cambia de sección o se hace clic fuera
   useEffect(() => {
     setIsDropdownOpen(false);
@@ -1530,7 +1545,7 @@ export default function EcommerceView() {
               {/* Botones de navegación - Todos en una línea */}
               <Nav className="d-flex justify-content-center align-items-center gap-2 gap-lg-3 flex-wrap flex-row">
                 <button
-                  onClick={() => setActiveSection('inicio')}
+                  onClick={() => { setActiveSection('inicio'); closeNavbar(); setIsDropdownOpen(false); }}
                   className={`nav-btn-futuristic ${activeSection === 'inicio' ? 'active' : ''}`}
                 >
                   <House size={18} strokeWidth={2} />
@@ -1538,7 +1553,7 @@ export default function EcommerceView() {
                 </button>
 
                 <button
-                  onClick={() => setActiveSection('nosotros')}
+                  onClick={() => { setActiveSection('nosotros'); closeNavbar(); setIsDropdownOpen(false); }}
                   className={`nav-btn-futuristic ${activeSection === 'nosotros' ? 'active' : ''}`}
                 >
                   <Users size={18} strokeWidth={2} />
@@ -1546,7 +1561,7 @@ export default function EcommerceView() {
                 </button>
 
                 <button
-                  onClick={() => setActiveSection('productos')}
+                  onClick={() => { setActiveSection('productos'); closeNavbar(); setIsDropdownOpen(false); }}
                   className={`nav-btn-futuristic ${activeSection === 'productos' ? 'active' : ''}`}
                 >
                   <ShoppingCart size={18} strokeWidth={2} />
@@ -1554,7 +1569,7 @@ export default function EcommerceView() {
                 </button>
 
                 <button
-                  onClick={() => setActiveSection('contacto')}
+                  onClick={() => { setActiveSection('contacto'); closeNavbar(); setIsDropdownOpen(false); }}
                   className={`nav-btn-futuristic ${activeSection === 'contacto' ? 'active' : ''}`}
                 >
                   <Phone size={18} strokeWidth={2} />
@@ -1562,7 +1577,7 @@ export default function EcommerceView() {
                 </button>
 
                 <button
-                  onClick={() => setActiveSection('informate')}
+                  onClick={() => { setActiveSection('informate'); closeNavbar(); setIsDropdownOpen(false); }}
                   className={`nav-btn-futuristic ${activeSection === 'informate' ? 'active' : ''}`}
                 >
                   <BookOpen size={18} strokeWidth={2} />
@@ -1600,7 +1615,7 @@ export default function EcommerceView() {
                         animation: 'fadeIn 0.2s ease-out'
                       }}>
                         <div
-                          onClick={() => { setActiveSection('productos'); setActiveCategory(null); setIsDropdownOpen(false); }}
+                          onClick={() => { setActiveSection('productos'); setActiveCategory(null); setIsDropdownOpen(false); closeNavbar(); }}
                           style={{
                             padding: '10px 15px',
                             color: '#E8F5E9',
@@ -1625,7 +1640,7 @@ export default function EcommerceView() {
                         {categories.map((category) => (
                           <div
                             key={category}
-                            onClick={() => { setActiveSection('productos'); setActiveCategory(category); setIsDropdownOpen(false); }}
+                            onClick={() => { setActiveSection('productos'); setActiveCategory(category); setIsDropdownOpen(false); closeNavbar(); }}
                             style={{
                               padding: '10px 15px',
                               color: '#E8F5E9',
