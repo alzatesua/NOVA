@@ -1126,17 +1126,30 @@ export function fetchFacturas({
   subdominio,
   fecha_inicio,
   fecha_fin,
-  estado
+  estado,
+  cliente,
+  numero_factura,
+  page = 1,
+  page_size = 30
 }) {
   token = token || localStorage.getItem('token_usuario');
-  return post('api/facturacion/facturas/', {
-    usuario,
-    token,
-    subdominio,
-    fecha_inicio,
-    fecha_fin,
-    estado
-  }, token);
+
+  // Construir query params
+  const params = new URLSearchParams();
+  if (usuario) params.append('usuario', usuario);
+  if (token) params.append('token', token);
+  if (subdominio) params.append('subdominio', subdominio);
+  if (fecha_inicio) params.append('fecha_inicio', fecha_inicio);
+  if (fecha_fin) params.append('fecha_fin', fecha_fin);
+  if (estado) params.append('estado', estado);
+  if (cliente) params.append('cliente', cliente);
+  if (numero_factura) params.append('numero_factura', numero_factura);
+  params.append('page', page);
+  params.append('page_size', page_size);
+
+  const url = `api/facturacion/facturas/?${params.toString()}`;
+
+  return get(url, token);
 }
 
 // ==================== AUTENTICACIÓN CLIENTES ECOMMERCE ====================

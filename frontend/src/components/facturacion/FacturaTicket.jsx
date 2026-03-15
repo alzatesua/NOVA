@@ -28,10 +28,10 @@ const Separador = ({ tipo = 'solid' }) => (
 
 const Fila = ({ label, valor, negrita = false }) => (
   <div className="flex justify-between items-baseline py-0.5">
-    <span className={`text-[10px] ${negrita ? 'font-bold text-gray-900' : 'text-gray-500'}`}>
+    <span className={`text-[11px] ${negrita ? 'font-bold text-gray-900' : 'text-gray-600'}`}>
       {label}
     </span>
-    <span className={`text-[10px] font-mono ${negrita ? 'font-bold text-gray-900' : 'font-medium text-gray-800'}`}>
+    <span className={`text-[11px] font-mono ${negrita ? 'font-bold text-gray-900' : 'font-semibold text-gray-800'}`}>
       {valor}
     </span>
   </div>
@@ -50,7 +50,7 @@ export default function FacturaTicket({ factura, formato = '80mm', empresaInfo =
   };
 
   const anchoClase = formato === '58mm' ? 'w-[220px]' : 'w-full max-w-[302px]';
-  const textoBase  = formato === '58mm' ? 'text-[9px]' : 'text-[10px]';
+  const textoBase  = formato === '58mm' ? 'text-[9px]' : 'text-[11px]';
 
   // Extraer información del cliente (soporta diferentes estructuras de respuesta del backend)
   const clienteNombre = factura?.cliente_nombre || factura?.cliente?.nombre_completo || '';
@@ -80,29 +80,29 @@ export default function FacturaTicket({ factura, formato = '80mm', empresaInfo =
   return (
     <div
       id="factura-ticket"
-      className={`${anchoClase} ${textoBase} bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden`}
+      className={`${anchoClase} ${textoBase} bg-white border border-gray-200 rounded-lg shadow-lg`}
       style={{ fontFamily: "'IBM Plex Mono', monospace" }}
     >
       {/* ── ENCABEZADO ── */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2 text-center">
-        <div className="flex items-center justify-center gap-1.5 mb-0.5">
-          <BuildingStorefrontIcon className="h-4 w-4 text-white" />
-          <h2 className="font-bold text-sm tracking-[2px] uppercase">{empresa.nombre}</h2>
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-3 text-center print:bg-blue-700" style={{ printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }}>
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <BuildingStorefrontIcon className="h-5 w-5 text-white" />
+          <h2 className="font-bold text-base tracking-[2px] uppercase">{empresa.nombre}</h2>
         </div>
-        <p className="text-blue-100 text-[8px] tracking-widest uppercase mb-1">{empresa.regimen}</p>
-        <p className="text-blue-50 text-[9px]">NIT: {empresa.nit}</p>
-        <p className="text-blue-50 text-[9px]">{empresa.direccion}</p>
-        <p className="text-blue-50 text-[9px]">{empresa.ciudad}</p>
-        <p className="text-blue-50 text-[9px]">Tel: {empresa.telefono}</p>
+        <p className="text-blue-100 text-[9px] tracking-widest uppercase mb-1 font-semibold">{empresa.regimen}</p>
+        <p className="text-white text-[10px] font-semibold">NIT: {empresa.nit}</p>
+        <p className="text-blue-50 text-[10px]">{empresa.direccion}</p>
+        <p className="text-blue-50 text-[10px]">{empresa.ciudad}</p>
+        <p className="text-blue-50 text-[10px]">Tel: {empresa.telefono}</p>
       </div>
 
       {/* ── TIPO DOCUMENTO ── */}
-      <div className="bg-sky-400 text-white text-center py-0.5 text-[9px] font-bold tracking-[2px]">
+      <div className="bg-sky-400 text-white text-center py-1 text-[10px] font-bold tracking-[2px] print:bg-sky-500" style={{ printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }}>
         FACTURA DE VENTA
       </div>
 
       {/* ── INFO FACTURA ── */}
-      <div className="px-3 pt-2 pb-1.5">
+      <div className="px-3 pt-3 pb-2">
         <Fila label="No. Factura:" valor={`#${factura.numero_factura || 'N/A'}`} negrita />
         <Fila label="Fecha:"       valor={fechaStr} />
         <Fila label="Hora:"        valor={horaStr} />
@@ -116,10 +116,10 @@ export default function FacturaTicket({ factura, formato = '80mm', empresaInfo =
         <>
           <Separador tipo="dashed" />
           <div className="px-3 pb-2">
-            <p className="text-[8px] font-bold tracking-widest text-gray-400 uppercase mb-0.5">Cliente</p>
-            <p className="font-bold text-gray-900 text-[11px]">{clienteNombre}</p>
+            <p className="text-[9px] font-bold tracking-widest text-gray-500 uppercase mb-1">Cliente</p>
+            <p className="font-bold text-gray-900 text-sm">{clienteNombre}</p>
             {clienteNit && (
-              <p className="text-[9px] text-gray-500">NIT/CC: {clienteNit}</p>
+              <p className="text-[10px] text-gray-600 font-medium">NIT/CC: {clienteNit}</p>
             )}
           </div>
         </>
@@ -127,13 +127,13 @@ export default function FacturaTicket({ factura, formato = '80mm', empresaInfo =
 
       {/* ── PRODUCTOS ── */}
       <Separador />
-      <div className="px-3 pb-1.5">
+      <div className="px-3 pb-2">
         {/* Cabecera tabla */}
-        <div className="grid grid-cols-[20px_1fr_56px] gap-1 border-b-2 border-gray-900 pb-0.5 mb-0.5">
+        <div className="grid grid-cols-[20px_1fr_56px] gap-1 border-b-2 border-gray-900 pb-1 mb-1">
           {['Ctd', 'Descripción', 'Total'].map((h, i) => (
             <span
               key={i}
-              className={`text-[8px] font-bold tracking-widest uppercase text-gray-900 ${i === 2 ? 'text-right' : ''}`}
+              className={`text-[9px] font-bold tracking-widest uppercase text-gray-900 ${i === 2 ? 'text-right' : ''}`}
             >
               {h}
             </span>
@@ -145,30 +145,30 @@ export default function FacturaTicket({ factura, formato = '80mm', empresaInfo =
           factura.detalles.map((det, i) => (
             <div
               key={i}
-              className="grid grid-cols-[20px_1fr_56px] gap-1 py-1 border-b border-dashed border-gray-200 last:border-b-0 items-start"
+              className="grid grid-cols-[20px_1fr_56px] gap-1 py-1.5 border-b border-dashed border-gray-300 last:border-b-0 items-start"
             >
-              <span className="font-bold text-gray-900">{det.cantidad}</span>
+              <span className="font-bold text-gray-900 text-sm">{det.cantidad}</span>
               <div>
-                <p className="font-semibold text-gray-900 leading-tight break-words text-[10px]">
+                <p className="font-bold text-gray-900 leading-tight break-words text-[11px]">
                   {det.producto_nombre}
                 </p>
                 {det.precio_unitario && (
-                  <p className="text-[8px] text-gray-400 mt-0.5">c/u {fmt(det.precio_unitario)}</p>
+                  <p className="text-[9px] text-gray-500 mt-0.5">c/u {fmt(det.precio_unitario)}</p>
                 )}
                 {det.producto_sku && (
-                  <p className="text-[8px] text-gray-400">SKU: {det.producto_sku}</p>
+                  <p className="text-[9px] text-gray-500">SKU: {det.producto_sku}</p>
                 )}
                 {det.producto_imei && (
-                  <p className="text-[8px] font-semibold text-gray-600">IMEI: {det.producto_imei}</p>
+                  <p className="text-[9px] font-semibold text-gray-700">IMEI: {det.producto_imei}</p>
                 )}
               </div>
-              <span className="text-right font-bold text-gray-900 whitespace-nowrap text-[10px]">
+              <span className="text-right font-bold text-gray-900 whitespace-nowrap text-sm">
                 {fmt(det.total)}
               </span>
             </div>
           ))
         ) : (
-          <p className="text-center text-gray-400 py-2 text-[10px]">Sin productos</p>
+          <p className="text-center text-gray-400 py-2 text-[11px]">Sin productos</p>
         )}
       </div>
 
@@ -182,15 +182,18 @@ export default function FacturaTicket({ factura, formato = '80mm', empresaInfo =
         )}
 
         {/* Total destacado — azul sólido, imprime perfecto en térmica */}
-        <div className="flex justify-between items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded px-2.5 py-1.5 my-1.5">
-          <span className="font-bold text-xs tracking-wide">TOTAL A PAGAR:</span>
-          <span className="font-bold text-sm">{fmt(total)}</span>
+        <div
+          className="flex justify-between items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded px-3 py-2 my-2 print:bg-blue-700"
+          style={{ printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }}
+        >
+          <span className="font-bold text-sm tracking-wide">TOTAL A PAGAR:</span>
+          <span className="font-bold text-base">{fmt(total)}</span>
         </div>
 
         {/* Formas de pago */}
         {factura.pagos && factura.pagos.length > 0 && (
-          <div className="mt-1.5">
-            <p className="text-[8px] font-bold tracking-widest text-gray-400 uppercase mb-0.5">
+          <div className="mt-2">
+            <p className="text-[9px] font-bold tracking-widest text-gray-500 uppercase mb-1">
               Forma de Pago
             </p>
             {factura.pagos.map((pago, i) => (
@@ -201,9 +204,9 @@ export default function FacturaTicket({ factura, formato = '80mm', empresaInfo =
 
         {/* Cambio */}
         {cambio > 0 && (
-          <div className="flex justify-between items-center bg-sky-50 rounded px-2.5 py-1 mt-1.5">
-            <span className="font-semibold text-sky-700 text-[10px]">Cambio:</span>
-            <span className="font-bold text-gray-900 text-xs">{fmt(cambio)}</span>
+          <div className="flex justify-between items-center bg-sky-50 rounded px-3 py-1.5 mt-2 print:bg-sky-100" style={{ printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }}>
+            <span className="font-semibold text-sky-700 text-[11px]">Cambio:</span>
+            <span className="font-bold text-gray-900 text-sm">{fmt(cambio)}</span>
           </div>
         )}
       </div>
@@ -213,10 +216,10 @@ export default function FacturaTicket({ factura, formato = '80mm', empresaInfo =
         <>
           <Separador tipo="dashed" />
           <div className="px-3 pb-2">
-            <p className="text-[8px] font-bold tracking-widest text-gray-400 uppercase mb-0.5">
+            <p className="text-[9px] font-bold tracking-widest text-gray-500 uppercase mb-1">
               Observaciones
             </p>
-            <p className="text-[9px] text-gray-600 italic leading-relaxed">
+            <p className="text-[10px] text-gray-700 italic leading-relaxed">
               {factura.observaciones}
             </p>
           </div>
@@ -225,21 +228,21 @@ export default function FacturaTicket({ factura, formato = '80mm', empresaInfo =
 
       {/* ── PIE DE PÁGINA ── */}
       <Separador />
-      <div className="px-3 pb-3 pt-1.5 text-center border-t-[2px] border-double border-gray-900">
-        <p className="font-bold text-gray-900 text-[11px] tracking-wide mb-0.5">
+      <div className="px-3 pb-3 pt-2 text-center border-t-[2px] border-double border-gray-900">
+        <p className="font-bold text-gray-900 text-sm tracking-wide mb-1">
           ¡GRACIAS POR SU COMPRA!
         </p>
-        <p className="text-[8px] text-gray-400 tracking-wide mb-0.5">
+        <p className="text-[9px] text-gray-500 tracking-wide mb-1">
           Conserve este comprobante de pago
         </p>
-        <p className="text-[8px] text-gray-400">{empresa.email}</p>
-        <p className="text-[7px] text-gray-300 mt-1">
+        <p className="text-[9px] text-gray-500">{empresa.email}</p>
+        <p className="text-[8px] text-gray-400 mt-1">
           {empresa.regimen} — No somos responsables del IVA
         </p>
       </div>
 
-      {/* ── BOTÓN IMPRIMIR — clase print:hidden para que no salga en papel ── */}
-      <div className="px-3 pb-3 print:hidden">
+      {/* ── BOTÓN IMPRIMIR — solo visible en pantalla ── */}
+      <div className="px-3 pb-3 no-print">
         <button
           onClick={() => window.print()}
           className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-[10px] tracking-widest py-2 rounded transition-colors"

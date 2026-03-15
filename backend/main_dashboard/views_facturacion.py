@@ -17,7 +17,7 @@ from .models import (
 )
 from .serializers import (
     ClienteSerializer, FormaPagoSerializer,
-    FacturaSerializer, FacturaCreateSerializer,
+    FacturaSerializer, FacturaCreateSerializer, FacturaListSerializer,
     ConfiguracionFacturaSerializer
 )
 from .models import Producto, Bodega, Existencia
@@ -297,19 +297,103 @@ class FacturaViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
         return (
             Factura.objects.using(alias)
             .select_related('cliente', 'vendedor', 'sucursal', 'bodega', 'anulada_por')
-            .prefetch_related('detalles', 'pagos')
             .order_by('-fecha_venta')
         )
 
     def get_serializer_class(self):
         if self.action == 'create':
             return FacturaCreateSerializer
+        elif self.action == 'list':
+            return FacturaListSerializer
         return FacturaSerializer
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
         ctx['db_alias'] = self._resolve_alias(self.request)
         return ctx
+
+    def list(self, request, *args, **kwargs):
+        """
+        Lista facturas con soporte para filtros opcionales y paginación.
+        Acepta GET y POST para compatibilidad con el frontend.
+
+        Filtros disponibles:
+        - estado: estado de la factura (PAG, ANU, BOR)
+        - fecha_inicio: fecha de inicio (YYYY-MM-DD)
+        - fecha_fin: fecha de fin (YYYY-MM-DD)
+        - cliente: nombre o documento del cliente
+        - numero_factura: número de factura (parcial o completo)
+        - page: número de página (default: 1)
+        - page_size: cantidad de items por página (default: 20)
+        """
+        try:
+            alias = self._resolve_alias(request)
+            queryset = self.get_queryset()
+
+            # Filtros opcionales desde body o query params
+            estado = request.data.get('estado') or request.query_params.get('estado')
+            fecha_inicio = request.data.get('fecha_inicio') or request.query_params.get('fecha_inicio')
+            fecha_fin = request.data.get('fecha_fin') or request.query_params.get('fecha_fin')
+            cliente = request.data.get('cliente') or request.query_params.get('cliente')
+            numero_factura = request.data.get('numero_factura') or request.query_params.get('numero_factura')
+
+            # Aplicar filtros
+            if estado:
+                queryset = queryset.filter(estado=estado)
+
+            if fecha_inicio:
+                queryset = queryset.filter(fecha_venta__gte=fecha_inicio)
+
+            if fecha_fin:
+                queryset = queryset.filter(fecha_venta__lte=fecha_fin)
+
+            if cliente:
+                from django.db.models import Q
+                queryset = queryset.filter(
+                    Q(cliente__primer_nombre__icontains=cliente) |
+                    Q(cliente__segundo_nombre__icontains=cliente) |
+                    Q(cliente__apellidos__icontains=cliente) |
+                    Q(cliente__razon_social__icontains=cliente) |
+                    Q(cliente__numero_documento__icontains=cliente)
+                )
+
+            if numero_factura:
+                queryset = queryset.filter(numero_factura__icontains=numero_factura)
+
+            # Paginación manual
+            from django.core.paginator import Paginator
+            page = int(request.data.get('page') or request.query_params.get('page', 1))
+            page_size = int(request.data.get('page_size') or request.query_params.get('page_size', 30))
+
+            # Limitar page_size a máximo 100 para evitar problemas
+            page_size = min(page_size, 100)
+
+            logger.info(f"Paginacion: page={page}, page_size={page_size}, queryset.count={queryset.count()}")
+
+            paginator = Paginator(queryset, page_size)
+            page_obj = paginator.get_page(page)
+
+            logger.info(f"Page object: {len(page_obj)} items, total pages: {paginator.num_pages}")
+
+            # Usar el serializer simplificado para el listado
+            serializer = FacturaListSerializer(page_obj, many=True)
+
+            return Response({
+                'datos': serializer.data,
+                'total': paginator.count,
+                'page': page,
+                'page_size': page_size,
+                'total_pages': paginator.num_pages,
+                'has_next': page_obj.has_next(),
+                'has_previous': page_obj.has_previous()
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"Error listando facturas: {str(e)}")
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
     def create(self, request, *args, **kwargs):
         """Crear una nueva factura POS"""

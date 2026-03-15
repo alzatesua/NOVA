@@ -224,41 +224,166 @@
    ======================================== */
 @media print {
 
-  /* 1. Tamaño de papel = rollo 80mm, alto automático */
+  /* 1. Configuración de página para impresora térmica 80mm */
   @page {
     margin: 0;
     size: 80mm auto;
   }
 
-  /* 2. Oculta todo */
+  /* 2. Oculta todo el contenido excepto el ticket */
   body * {
     visibility: hidden;
   }
 
-  /* 3. Muestra solo el ticket */
-  #factura-ticket,
-  #factura-ticket * {
-    visibility: visible;
+  /* 3. Contenedor principal para centrar el ticket */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    padding-top: 10mm !important;
+    width: 100% !important;
+    height: 100vh !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
   }
 
-  /* 4. Ocupa todo el ancho del papel, sin márgenes */
-  /* Después — centrado */
-  #factura-ticket {
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80mm;
+  /* 4. Muestra y centra el ticket */
+  #factura-ticket,
+  #factura-ticket > div {
+    visibility: visible !important;
+    position: relative !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    min-width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
+    overflow: visible !important;
+    background: white !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
   }
-  /* 5. Fuerza impresión de fondos negros (encabezado, total) */
-  #factura-ticket .bg-gray-900,
-  #factura-ticket .bg-gray-700 {
+
+  /* 5. Muestra todo el contenido del ticket */
+  #factura-ticket * {
+    visibility: visible !important;
+  }
+
+  /* 6. Mantiene los layouts correctos dentro del ticket */
+  #factura-ticket .grid {
+    display: grid !important;
+  }
+
+  #factura-ticket .flex {
+    display: flex !important;
+  }
+
+  #factura-ticket > div {
+    display: block !important;
+  }
+
+  /* 7. Oculta botones y elementos no imprimibles */
+  #factura-ticket button,
+  #factura-ticket .no-print {
+    display: none !important;
+  }
+
+  /* 8. Fuerza impresión de colores de fondo */
+  * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
+  }
+
+  /* 9. Colores sólidos para gradientes al imprimir */
+  #factura-ticket .bg-gradient-to-r,
+  #factura-ticket .from-blue-600,
+  #factura-ticket .print\:bg-blue-700 {
+    background: #1e40af !important;
+  }
+
+  #factura-ticket .bg-sky-400,
+  #factura-ticket .print\:bg-sky-500 {
+    background: #0284c7 !important;
+  }
+
+  #factura-ticket .bg-sky-50,
+  #factura-ticket .print\:bg-sky-100 {
+    background: #e0f2fe !important;
+  }
+
+  /* 10. Bordes negros para mejor contraste */
+  #factura-ticket .border-b,
+  #factura-ticket .border-t,
+  #factura-ticket .border-gray-900,
+  #factura-ticket .border-gray-300,
+  #factura-ticket .border-gray-200 {
+    border-color: #000 !important;
+  }
+
+  /* 11. Asegura contraste de texto */
+  #factura-ticket {
+    color: #000 !important;
+  }
+
+  #factura-ticket .text-white,
+  #factura-ticket .text-blue-50,
+  #factura-ticket .text-blue-100 {
+    color: #fff !important;
+  }
+
+  #factura-ticket .text-gray-900 {
+    color: #000 !important;
+  }
+
+  #factura-ticket .text-gray-800 {
+    color: #1f2937 !important;
+  }
+
+  #factura-ticket .text-gray-700 {
+    color: #374151 !important;
+  }
+
+  #factura-ticket .text-gray-600 {
+    color: #4b5563 !important;
+  }
+
+  #factura-ticket .text-gray-500 {
+    color: #6b7280 !important;
+  }
+
+  #factura-ticket .text-gray-400 {
+    color: #9ca3af !important;
+  }
+
+  #factura-ticket .text-sky-700 {
+    color: #0369a1 !important;
+  }
+
+  /* 12. Asegura que no haya elementos flotantes o posicionados incorrectamente */
+  #factura-ticket span,
+  #factura-ticket p,
+  #factura-ticket div {
+    float: none !important;
+    clear: none !important;
+    position: static !important;
+    overflow: visible !important;
+  }
+
+  /* 12.1 Asegura que los contenedores internos no corten contenido */
+  #factura-ticket > div > div {
+    overflow: visible !important;
+  }
+
+  /* 13. HTML y Body setup */
+  html {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
   }
 }
 

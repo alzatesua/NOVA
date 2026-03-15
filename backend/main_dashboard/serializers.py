@@ -618,6 +618,30 @@ class FacturaSerializer(DbAliasModelSerializer):
         return 'Consumidor Final'
 
 
+class FacturaListSerializer(DbAliasModelSerializer):
+    """Serializer simplificado para listar facturas (sin detalles anidados)"""
+    cliente_nombre = serializers.SerializerMethodField()
+    vendedor_nombre = serializers.CharField(source='vendedor.username', read_only=True, allow_null=True)
+    sucursal_nombre = serializers.CharField(source='sucursal.nombre', read_only=True)
+    bodega_nombre = serializers.CharField(source='bodega.nombre', read_only=True)
+
+    class Meta:
+        model = Factura
+        fields = [
+            'id', 'numero_factura', 'estado', 'cliente', 'cliente_nombre',
+            'vendedor', 'vendedor_nombre', 'sucursal', 'sucursal_nombre',
+            'bodega', 'bodega_nombre', 'fecha_venta', 'fecha_anulacion',
+            'subtotal', 'total_descuento', 'total_iva', 'total',
+            'total_pagado', 'cambio', 'observaciones',
+            'motivo_anulacion', 'anulada_por'
+        ]
+
+    def get_cliente_nombre(self, obj):
+        if obj.cliente:
+            return obj.cliente.nombre_completo
+        return 'Consumidor Final'
+
+
 class FacturaDetalleInlineSerializer(DbAliasModelSerializer):
     """Serializer para crear detalles desde FacturaCreateSerializer"""
     # Hacer los campos derivados opcionales
