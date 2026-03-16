@@ -402,6 +402,15 @@ class FacturaViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             logger.info(f"FacturaViewSet.create() - alias: {alias}")
             logger.info(f"request.data keys: {request.data.keys()}")
 
+            # Buscar usuario AL INICIO, antes de crear la factura
+            from django.apps import apps
+            LoginUsuario = apps.get_model('nova', 'LoginUsuario')
+            usuario_str = request.data.get('usuario')
+            usuario_obj = LoginUsuario.objects.using(alias).filter(
+                usuario=usuario_str
+            ).first() if usuario_str else None
+            logger.info(f"Usuario resuelto al inicio: {usuario_obj.usuario if usuario_obj else 'None'}")
+
             # Log valores específicos para debug
             logger.info(f"total_iva valor: {request.data.get('total_iva')} (tipo: {type(request.data.get('total_iva')).__name__})")
             detalles = request.data.get('detalles', [])
@@ -417,6 +426,70 @@ class FacturaViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             factura = serializer.save()
             logger.info(f"Factura guardada con ID: {factura.id}")
 
+            # Si la factura está pagada, registrar movimientos automáticos en caja
+            if factura.estado == 'PAG' and factura.pagos.exists():
+                from .models import MovimientoCaja
+
+                # Mapeo de formas de pago de facturación a caja
+                metodos_pago_map = {
+                    'EFE': 'efectivo',
+                    'TDC': 'tarjeta',
+                    'TDE': 'tarjeta',
+                    'TRF': 'transferencia',
+                    'CDP': 'nequi',
+                }
+
+                # Usar usuario_obj ya resuelto al inicio
+                # Si no se encontró por nombre, intentar usar el vendedor de la factura
+                usuario_movimiento = usuario_obj or factura.vendedor
+
+                if not usuario_movimiento:
+                    logger.warning(f"No se pudo determinar el usuario para el movimiento de caja de la factura #{factura.numero_factura}")
+
+                logger.info(f"Usuario para movimientos de caja: {usuario_movimiento.usuario if usuario_movimiento else 'None'}")
+
+                for pago in factura.pagos.using(alias).all():
+                    metodo_caja = metodos_pago_map.get(
+                        pago.forma_pago.codigo,
+                        'otro'
+                    )
+
+                    # Crear movimiento de caja automático
+                    MovimientoCaja.objects.using(alias).create(
+                        usuario=usuario_movimiento,
+                        tipo='entrada',
+                        categoria='venta',
+                        monto=pago.monto,
+                        metodo_pago=metodo_caja,
+                        descripcion=f'Venta Factura #{factura.numero_factura}',
+                        factura=factura,
+                        sucursal=factura.sucursal,  
+                        fecha=timezone.now().date(),
+                        fecha_hora=timezone.now()
+                    )
+                    logger.info(f"Movimiento de caja creado: Factura #{factura.numero_factura}, monto: {pago.monto}, método: {metodo_caja}, usuario: {usuario_movimiento.usuario if usuario_movimiento else 'None'}")
+
+            # Actualizar fecha_ultimo_pago del cliente SOLO cuando es factura de contado
+            if factura.cliente and factura.tipo_factura == 'contado':
+                hoy = timezone.now().date()
+                factura.cliente.fecha_ultimo_pago = hoy
+
+                # Recalcular días de mora
+                if factura.cliente.fecha_ultimo_pago:
+                    delta = hoy - factura.cliente.fecha_ultimo_pago
+                    factura.cliente.dias_mora = delta.days
+
+                # Si tiene menos de 30 días de mora, quitarlo de mora
+                if factura.cliente.dias_mora < 30:
+                    factura.cliente.en_mora = False
+
+                factura.cliente.save(using=alias, update_fields=['fecha_ultimo_pago', 'dias_mora', 'en_mora'])
+                logger.info(f"Cliente {factura.cliente.id} actualizado tras pago (factura contado): fecha_ultimo_pago={factura.cliente.fecha_ultimo_pago}, dias_mora={factura.cliente.dias_mora}, en_mora={factura.cliente.en_mora}")
+
+            # Si es crédito, registrar que la factura aumenta la deuda del cliente
+            if factura.cliente and factura.tipo_factura == 'credito':
+                logger.info(f"Factura #{factura.numero_factura} de crédito creada para cliente {factura.cliente.id}. Deuda será calculada por el método calcular_deuda_total()")
+
             # Retornar la factura completa con detalles y pagos
             response_serializer = FacturaSerializer(factura)
             return Response(
@@ -430,6 +503,7 @@ class FacturaViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
                 {'error': 'Datos inválidos', 'detalle': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
 
     @action(detail=False, methods=['post'], url_path='productos-pos')
     def productos_pos(self, request):

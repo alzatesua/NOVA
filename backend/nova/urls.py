@@ -30,6 +30,9 @@ urlpatterns = [
     path('api/', include('main_dashboard.urls')),  # Incluir rutas de productos e-commerce
     path('api/', include('main_dashboard.urls_traslados')),
     path('api/facturacion/', include('main_dashboard.urls_facturacion')),
+    path('api/facturacion/clientes-mora/', include('main_dashboard.urls_mora')),  # Control de mora y lista negra
+    path('api/facturacion/abonos/', include('main_dashboard.urls_abonos')),  # Gestión de abonos
+    path('api/caja/', include('main_dashboard.urls_caja')),  # Control de caja y cuadre
     path('api/cupones/', include('main_dashboard.urls_cupones')),
     path('api/auth/', include('main_dashboard.urls_auth')),  # Autenticación e-commerce
     path('api/contacto/', include('main_dashboard.urls_contacto')),  # Formulario de contacto

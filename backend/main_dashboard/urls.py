@@ -21,6 +21,7 @@ from .views import (
     crear_medida,
     buscar_en_tabla,
     ProductoExistenciasView,  # ← Cambiar de ViewSet a View
+    listar_sucursales,
     # Facturación (las rutas están en urls_facturacion.py)
     # buscar_cliente,
     # crear_cliente,
@@ -62,6 +63,9 @@ urlpatterns = [
 
     # API Productos E-commerce (Multi-tenant por subdominio)
     path('productos/list/', ProductoView.as_view(), name='productos_ecommerce_list'),
+
+    # Sucursales
+    path('sucursales/list/', listar_sucursales, name='listar_sucursales'),
 
     # NOTA: Las rutas de facturación están en urls_facturacion.py
     # y se incluyen en nova/urls.py con el prefijo 'api/facturacion/'

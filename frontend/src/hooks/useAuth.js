@@ -10,6 +10,7 @@ export function useAuth() {
   const usuario = localStorage.getItem('usuario');
   const tienda = localStorage.getItem('tienda');
   const subdominio = window.location.hostname.split('.')[0];
+  const idSucursal = localStorage.getItem('id_sucursal');
 
   useEffect(() => {
     // Verificar autenticación
@@ -32,6 +33,8 @@ export function useAuth() {
     usuario,
     tienda,
     subdominio,
+    idSucursal: idSucursal ? parseInt(idSucursal) : null,
+    isAdmin: rol === 'admin',
     logout,
   };
 }

@@ -2588,3 +2588,97 @@ class ProductoExistenciasView(TenantMixin, APIView):
             "sucursal": user.id_sucursal_default.nombre if user.id_sucursal_default and user.rol != 'admin' else None,
             "data": data
         }, status=status.HTTP_200_OK)
+
+
+# ============================================================
+#                 Endpoint para listar Sucursales
+# ============================================================
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def listar_sucursales(request):
+    """
+    Lista todas las sucursales disponibles para el usuario autenticado.
+    Los admin ven todas las sucursales, los usuarios no-admin solo ven la suya.
+    """
+    try:
+        # Obtener credenciales desde query params
+        usuario = request.query_params.get('usuario')
+        token = request.query_params.get('token')
+        subdominio = request.query_params.get('subdominio')
+
+        if not all([usuario, token, subdominio]):
+            return Response({
+                'success': False,
+                'message': 'Se requieren usuario, token y subdominio'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Conectar a la base de datos del tenant
+        from nova.utils.db import conectar_db_tienda
+        from nova.models import Dominios
+
+        # Obtener tenant por subdominio
+        dominio_obj = Dominios.objects.filter(dominio__icontains=subdominio).select_related('tienda').first()
+        if not dominio_obj:
+            return Response({
+                'success': False,
+                'message': 'Dominio no válido'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        tienda = dominio_obj.tienda
+        alias = str(tienda.id)
+        conectar_db_tienda(alias, tienda)
+
+        # Validar usuario
+        LoginUsuario = apps.get_model('nova', 'LoginUsuario')
+        user = LoginUsuario.objects.using(alias).filter(usuario=usuario).first()
+        if not user:
+            return Response({
+                'success': False,
+                'message': 'Usuario no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Validar token
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        except (ExpiredSignatureError, InvalidTokenError):
+            return Response({
+                'success': False,
+                'message': 'Token inválido o expirado'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        if payload.get("usuario") != usuario or user.token != token:
+            return Response({
+                'success': False,
+                'message': 'Token no coincide'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Obtener sucursales según el rol
+        if user.rol == 'admin':
+            # Admin ve todas las sucursales
+            sucursales = Sucursales.objects.using(alias).all().order_by('nombre')
+        else:
+            # No-admin solo ve su sucursal asignada
+            if user.id_sucursal_default:
+                sucursales = Sucursales.objects.using(alias).filter(
+                    id=user.id_sucursal_default_id
+                )
+            else:
+                sucursales = Sucursales.objects.using(alias).none()
+
+        # Serializar
+        serializer = SucursalSerializer(sucursales, many=True)
+
+        return Response({
+            'success': True,
+            'data': serializer.data,
+            'es_admin': user.rol == 'admin',
+            'sucursal_asignada': user.id_sucursal_default_id if user.id_sucursal_default else None
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error en listar_sucursales: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

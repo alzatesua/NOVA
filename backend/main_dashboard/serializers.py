@@ -3,7 +3,8 @@ from .models import (
     Sucursales, Categoria, Marca, Iva, Producto, Descuento, TipoMedida,
     Bodega, Existencia, Traslado, TrasladoLinea,
     Cliente, FormaPago, Factura, FacturaDetalle, Pago, ConfiguracionFactura,
-    Cupon, ClienteCupon, ClienteTienda, Contacto
+    Cupon, ClienteCupon, ClienteTienda, Contacto,
+    MovimientoCaja, ArqueoCaja
 )
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
@@ -594,13 +595,16 @@ class FacturaSerializer(DbAliasModelSerializer):
     vendedor_nombre = serializers.CharField(source='vendedor.username', read_only=True, allow_null=True)
     sucursal_nombre = serializers.CharField(source='sucursal.nombre', read_only=True)
     bodega_nombre = serializers.CharField(source='bodega.nombre', read_only=True)
+    tipo_factura_display = serializers.CharField(source='get_tipo_factura_display', read_only=True)
     detalles = FacturaDetalleSerializer(many=True, read_only=True)
     pagos = PagoSerializer(many=True, read_only=True)
 
     class Meta:
         model = Factura
         fields = [
-            'id', 'numero_factura', 'estado', 'cliente', 'cliente_nombre',
+            'id', 'numero_factura', 'estado', 'tipo_factura', 'tipo_factura_display',
+            'dia_pago', 'cuotas',
+            'cliente', 'cliente_nombre',
             'vendedor', 'vendedor_nombre', 'sucursal', 'sucursal_nombre',
             'bodega', 'bodega_nombre', 'fecha_venta', 'fecha_anulacion',
             'subtotal', 'total_descuento', 'total_iva', 'total',
@@ -624,11 +628,13 @@ class FacturaListSerializer(DbAliasModelSerializer):
     vendedor_nombre = serializers.CharField(source='vendedor.username', read_only=True, allow_null=True)
     sucursal_nombre = serializers.CharField(source='sucursal.nombre', read_only=True)
     bodega_nombre = serializers.CharField(source='bodega.nombre', read_only=True)
+    tipo_factura_display = serializers.CharField(source='get_tipo_factura_display', read_only=True)
 
     class Meta:
         model = Factura
         fields = [
-            'id', 'numero_factura', 'estado', 'cliente', 'cliente_nombre',
+            'id', 'numero_factura', 'estado', 'tipo_factura', 'tipo_factura_display',
+            'cliente', 'cliente_nombre',
             'vendedor', 'vendedor_nombre', 'sucursal', 'sucursal_nombre',
             'bodega', 'bodega_nombre', 'fecha_venta', 'fecha_anulacion',
             'subtotal', 'total_descuento', 'total_iva', 'total',
@@ -747,12 +753,13 @@ class FacturaCreateSerializer(DbAliasModelSerializer):
     4. Confirmación de reserva (mover de reservado a cantidad real)
     """
     detalles = FacturaDetalleInlineSerializer(many=True)
-    pagos = PagoInlineSerializer(many=True)
+    pagos = PagoInlineSerializer(many=True, required=False)
 
     class Meta:
         model = Factura
         fields = [
-            'cliente', 'vendedor', 'sucursal', 'bodega',
+            'cliente', 'vendedor', 'sucursal', 'bodega', 'tipo_factura',
+            'dia_pago', 'cuotas',
             'subtotal', 'total_descuento', 'total_iva', 'total',
             'total_pagado', 'cambio', 'observaciones',
             'detalles', 'pagos'
@@ -762,6 +769,7 @@ class FacturaCreateSerializer(DbAliasModelSerializer):
             'vendedor': {'required': False, 'allow_null': True},
             'sucursal': {'required': True},
             'bodega': {'required': True},
+            'tipo_factura': {'default': 'contado'},
         }
 
     def to_internal_value(self, data):
@@ -878,6 +886,31 @@ class FacturaCreateSerializer(DbAliasModelSerializer):
                 f'Valor esperado: {esperado}'
             )
 
+        # Validaciones según tipo de factura
+        tipo_factura = attrs.get('tipo_factura', 'contado')
+
+        if tipo_factura == 'contado':
+            # Para contado, verificar que haya pagos
+            pagos = attrs.get('pagos', [])
+            if not pagos or len(pagos) == 0:
+                raise serializers.ValidationError(
+                    'Para facturas de contado, debe especificar al menos un método de pago.'
+                )
+        elif tipo_factura == 'credito':
+            # Para crédito, verificar que haya dia_pago y cuotas
+            dia_pago = attrs.get('dia_pago')
+            cuotas = attrs.get('cuotas')
+
+            if not dia_pago or dia_pago < 1 or dia_pago > 31:
+                raise serializers.ValidationError(
+                    'Para facturas de crédito, debe especificar un día de pago válido (1-31).'
+                )
+
+            if not cuotas or cuotas < 1:
+                raise serializers.ValidationError(
+                    'Para facturas de crédito, debe especificar el número de cuotas.'
+                )
+
         return attrs
 
     def create(self, validated_data):
@@ -909,7 +942,8 @@ class FacturaCreateSerializer(DbAliasModelSerializer):
                     numero = f"FACT-{timezone.now().strftime('%Y%m%d%H%M%S')}"
 
                 validated_data['numero_factura'] = numero
-                validated_data['estado'] = 'PAG'
+                tipo_factura = validated_data.get('tipo_factura', 'contado')
+                validated_data['estado'] = 'PAG' if tipo_factura == 'contado' else 'BOR'
 
                 logger.info(f"Número de factura generado: {numero}")
 
@@ -917,6 +951,9 @@ class FacturaCreateSerializer(DbAliasModelSerializer):
                 factura_data = {
                     'numero_factura': validated_data['numero_factura'],
                     'estado': validated_data['estado'],
+                    'tipo_factura': validated_data.get('tipo_factura', 'contado'),  # ← agregar
+                    'dia_pago': validated_data.get('dia_pago'),                     # ← agregar
+                    'cuotas': validated_data.get('cuotas'),                         # ← agregar
                     'cliente': validated_data.get('cliente'),
                     'vendedor': validated_data.get('vendedor'),
                     'sucursal': validated_data['sucursal'],
@@ -1495,3 +1532,159 @@ class ContactoCreateSerializer(DbAliasModelSerializer):
         if len(mensaje_limpio) > 5000:
             raise serializers.ValidationError('El mensaje no puede exceder 5000 caracteres')
         return mensaje_limpio
+
+
+# =========================
+# CAJA SERIALIZERS
+# =========================
+
+
+class MovimientoCajaSerializer(DbAliasModelSerializer):
+    usuario_nombre = serializers.CharField(source='usuario.usuario', read_only=True)
+    usuario_email = serializers.CharField(source='usuario.correo_usuario', read_only=True)
+    sucursal_nombre = serializers.CharField(source='sucursal.nombre', read_only=True)
+
+    class Meta:
+        model = MovimientoCaja
+        fields = [
+            'id', 'tipo', 'categoria', 'monto', 'metodo_pago',
+            'descripcion', 'factura', 'fecha_hora', 'fecha',
+            'usuario_nombre', 'usuario_email', 'sucursal', 'sucursal_nombre'
+        ]
+        read_only_fields = ['id', 'fecha_hora', 'fecha']
+
+class MovimientoCajaCreateSerializer(DbAliasModelSerializer):
+    class Meta:
+        model = MovimientoCaja
+        fields = [
+            'tipo', 'categoria', 'monto', 'metodo_pago',
+            'descripcion', 'factura', 'sucursal'
+        ]
+        extra_kwargs = {
+            'tipo': {'required': True},
+            'categoria': {'required': True},
+            'monto': {'required': True, 'min_value': 0},
+            'metodo_pago': {'required': False, 'default': 'efectivo'},
+            'descripcion': {'required': True},
+            'factura': {'required': False, 'allow_null': True},
+            'sucursal': {'required': False, 'allow_null': True},
+        }
+
+    def validate(self, attrs):
+        from decimal import Decimal
+
+        if 'monto' in attrs and attrs['monto'] is not None:
+            if not isinstance(attrs['monto'], Decimal):
+                attrs['monto'] = Decimal(str(attrs['monto']))
+
+        tipo = attrs.get('tipo')
+        categoria = attrs.get('categoria')
+
+        if tipo == 'entrada':
+            categorias_validas = [c[0] for c in MovimientoCaja.CATEGORIA_ENTRADA_CHOICES]
+            if categoria not in categorias_validas:
+                raise serializers.ValidationError({
+                    'categoria': f'Categoría inválida para entrada. Opciones válidas: {categorias_validas}'
+                })
+        elif tipo == 'salida':
+            categorias_validas = [c[0] for c in MovimientoCaja.CATEGORIA_SALIDA_CHOICES]
+            if categoria not in categorias_validas:
+                raise serializers.ValidationError({
+                    'categoria': f'Categoría inválida para salida. Opciones válidas: {categorias_validas}'
+                })
+
+        return attrs
+
+    def create(self, validated_data):
+        from django.utils import timezone
+
+        alias = self.context.get('db_alias', 'default')
+        validated_data['fecha'] = timezone.now().date()
+
+        usuario = self.context.get('usuario')
+        request = self.context.get('request')
+
+        # ── Resolver sucursal ──────────────────────────────────
+        if not validated_data.get('sucursal'):
+            id_sucursal = request.data.get('id_sucursal') if request else None
+            if id_sucursal:
+                from .models import Sucursales
+                try:
+                    validated_data['sucursal'] = Sucursales.objects.using(alias).get(id=id_sucursal)
+                except Sucursales.DoesNotExist:
+                    pass
+
+        # Fallback: sucursal del usuario logueado
+        if not validated_data.get('sucursal') and usuario and usuario.id_sucursal_default:
+            validated_data['sucursal'] = usuario.id_sucursal_default
+
+        if usuario:
+            validated_data['usuario'] = usuario
+
+        return super().create(validated_data)
+
+class ArqueoCajaSerializer(DbAliasModelSerializer):
+    """Serializer para ArqueoCaja"""
+    usuario_nombre = serializers.CharField(source='usuario.nombre', read_only=True)
+    usuario_email = serializers.CharField(source='usuario.email', read_only=True)
+    sucursal_nombre = serializers.CharField(source='sucursal.nombre', read_only=True)
+
+    class Meta:
+        model = ArqueoCaja
+        fields = [
+            'id', 'fecha', 'fecha_hora_registro',
+            'saldo_inicial', 'total_entradas', 'total_salidas',
+            'saldo_esperado', 'monto_contado', 'diferencia',
+            'observaciones', 'usuario_nombre', 'usuario_email', 'sucursal', 'sucursal_nombre'
+        ]
+        read_only_fields = [
+            'id', 'fecha_hora_registro', 'diferencia'
+        ]
+
+
+class ArqueoCajaCreateSerializer(DbAliasModelSerializer):
+    """Serializer para crear arqueos de caja"""
+    class Meta:
+        model = ArqueoCaja
+        fields = [
+            'fecha', 'saldo_inicial', 'total_entradas',
+            'total_salidas', 'saldo_esperado', 'monto_contado',
+            'observaciones', 'sucursal'
+        ]
+        extra_kwargs = {
+            'fecha': {'required': True},
+            'monto_contado': {'required': True},
+            'sucursal': {'required': False, 'allow_null': True},
+        }
+
+    def validate(self, attrs):
+        from decimal import Decimal
+
+        # Convertir campos monetarios a Decimal si vienen como float
+        campos_monetarios = ['saldo_inicial', 'total_entradas', 'total_salidas',
+                           'saldo_esperado', 'monto_contado']
+        for campo in campos_monetarios:
+            if campo in attrs and attrs[campo] is not None:
+                if not isinstance(attrs[campo], Decimal):
+                    attrs[campo] = Decimal(str(attrs[campo]))
+
+        # Calcular diferencia
+        monto_contado = attrs.get('monto_contado', Decimal('0'))
+        saldo_esperado = attrs.get('saldo_esperado', Decimal('0'))
+        attrs['diferencia'] = monto_contado - saldo_esperado
+
+        return attrs
+
+    def create(self, validated_data):
+        # Obtener usuario del contexto
+        request = self.context.get('request')
+        usuario = None
+        if request and hasattr(request, 'usuario'):
+            usuario = request.usuario
+            validated_data['usuario'] = usuario
+
+        # Asignar sucursal del usuario si no se proporcionó una
+        if usuario and ('sucursal' not in validated_data or not validated_data['sucursal']):
+            validated_data['sucursal'] = usuario.id_sucursal_default
+
+        return super().create(validated_data)

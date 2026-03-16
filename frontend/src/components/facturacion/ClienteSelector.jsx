@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { MagnifyingGlassIcon, UserPlusIcon, XMarkIcon, BuildingOfficeIcon, UserIcon, ExclamationTriangleIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import { buscarCliente, crearCliente, fetchCiudades } from '../../services/api';
+import { MagnifyingGlassIcon, UserPlusIcon, XMarkIcon, BuildingOfficeIcon, UserIcon, ExclamationTriangleIcon, ChevronDownIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { buscarCliente, crearCliente, fetchCiudades, verificarMoraCliente } from '../../services/api';
 import { showToast } from '../../utils/toast';
 import Select from 'react-select';
 
@@ -509,6 +509,8 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [clienteMora, setClienteMora] = useState(null); // Información de mora del cliente
+  const [verificandoMora, setVerificandoMora] = useState(false);
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
 
@@ -589,11 +591,41 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const handleSelectCliente = (clienteSeleccionado) => {
+  const handleSelectCliente = async (clienteSeleccionado) => {
     onClienteChange(clienteSeleccionado);
     setSearchQuery('');
     setSearchResults([]);
     setShowDropdown(false);
+
+    // Verificar si el cliente está en mora
+    await verificarEstadoMora(clienteSeleccionado.id);
+  };
+
+  // Función para verificar el estado de mora del cliente
+  const verificarEstadoMora = async (clienteId) => {
+    if (!clienteId) return;
+
+    setVerificandoMora(true);
+    try {
+      const response = await verificarMoraCliente({
+        token: tokenUsuario,
+        usuario,
+        subdominio,
+        cliente_id: clienteId
+      });
+
+      if (response.success && response.data.en_mora) {
+        setClienteMora(response.data);
+        showToast('warning', response.data.mensaje_advertencia || 'Cliente en mora - Verificar antes de continuar');
+      } else {
+        setClienteMora(null);
+      }
+    } catch (error) {
+      console.error('Error verificando mora:', error);
+      // No mostramos error al usuario, solo log
+    } finally {
+      setVerificandoMora(false);
+    }
   };
 
   const handleClearCliente = () => {
@@ -757,33 +789,62 @@ export default function ClienteSelector({ cliente, onClienteChange }) {
 
         {/* Cliente seleccionado */}
         {cliente && !searchQuery && (
-          <div className={`mt-2 p-4 rounded-xl border-2 ${isDarkMode ? 'bg-gradient-to-r from-blue-900/30 to-blue-800/30 border-blue-700' : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200'}`}>
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className={`font-bold text-lg ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{cliente.nombre_completo}</p>
-                <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  <span className="inline-flex items-center gap-1">
-                    <span className="font-semibold">{cliente.tipo_documento}:</span>
-                    <span>{cliente.numero_documento}</span>
-                  </span>
-                </p>
-                {cliente.correo && (
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{cliente.correo}</p>
-                )}
-                {cliente.telefono && (
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{cliente.telefono}</p>
-                )}
+          <>
+            {/* Alerta de mora */}
+            {clienteMora && (
+              <div className={`mt-2 p-4 rounded-xl border-2 animate-pulse ${isDarkMode ? 'bg-gradient-to-r from-red-900/40 to-orange-900/40 border-red-600' : 'bg-gradient-to-r from-red-50 to-orange-50 border-red-400'}`}>
+                <div className="flex items-start gap-3">
+                  <ExclamationCircleIcon className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className={`font-bold text-lg ${isDarkMode ? 'text-red-300' : 'text-red-800'}`}>
+                      CLIENTE EN MORA
+                    </p>
+                    <p className={`text-sm mt-1 ${isDarkMode ? 'text-red-200' : 'text-red-700'}`}>
+                      {clienteMora.dias_mora} días sin pagar. Último pago: {clienteMora.fecha_ultimo_pago ? new Date(clienteMora.fecha_ultimo_pago).toLocaleDateString('es-CO') : 'N/A'}
+                    </p>
+                    {clienteMora.observaciones_mora && (
+                      <p className={`text-xs mt-1 italic ${isDarkMode ? 'text-red-300' : 'text-red-600'}`}>
+                        Nota: {clienteMora.observaciones_mora}
+                      </p>
+                    )}
+                    {clienteMora.limite_credito && clienteMora.limite_credito !== '0.00' && (
+                      <p className={`text-sm mt-1 font-semibold ${isDarkMode ? 'text-red-200' : 'text-red-700'}`}>
+                        Límite de crédito: ${clienteMora.limite_credito}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={handleClearCliente}
-                className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'text-blue-400 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-200'}`}
-                title="Cambiar cliente"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
+            )}
+
+            <div className={`mt-2 p-4 rounded-xl border-2 ${clienteMora ? 'mt-3' : 'mt-2'} ${isDarkMode ? 'bg-gradient-to-r from-blue-900/30 to-blue-800/30 border-blue-700' : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200'}`}>
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className={`font-bold text-lg ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{cliente.nombre_completo}</p>
+                  <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="font-semibold">{cliente.tipo_documento}:</span>
+                      <span>{cliente.numero_documento}</span>
+                    </span>
+                  </p>
+                  {cliente.correo && (
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{cliente.correo}</p>
+                  )}
+                  {cliente.telefono && (
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{cliente.telefono}</p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleClearCliente}
+                  className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'text-blue-400 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-200'}`}
+                  title="Cambiar cliente"
+                >
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
 

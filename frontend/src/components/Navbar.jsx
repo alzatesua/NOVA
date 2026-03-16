@@ -15,8 +15,8 @@ function getRandomColor() {
 }
 
 export default function Navbar({ rol: propRol, onViewChange, onLogout, currentView }) {
-  const adminButtons = ['dashboard', 'usuarios', 'sucursales', 'productos', 'clientes', 'configuracion', 'facturacion'];
-  const operarioButtons = ['entrada', 'productos', 'clientes', 'facturacion'];
+  const adminButtons = ['dashboard', 'usuarios', 'sucursales', 'productos', 'clientes', 'configuracion', 'facturacion', 'caja', 'mora'];
+  const operarioButtons = ['entrada', 'productos', 'clientes', 'facturacion', 'caja', 'mora'];
 
   const viewLabels = {
     dashboard: 'Dashboard',
@@ -27,6 +27,8 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
     configuracion: 'Configuracion',
     facturacion: 'Facturacion',
     entrada: 'Entrada',
+    caja: 'Caja',
+    mora: 'Gestión Mora',
   };
 
   const { usuario, rol } = useAuth();

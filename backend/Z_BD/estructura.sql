@@ -378,8 +378,6 @@ COMMENT ON TABLE facturacion_forma_pago IS 'Formas de pago por defecto del siste
 
 
 
-
--- Tabla de cupones (maestro)
 CREATE TABLE IF NOT EXISTS cupones (
     id BIGSERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -392,8 +390,6 @@ CREATE TABLE IF NOT EXISTS cupones (
     CONSTRAINT chk_cupones_tipo CHECK (tipo IN ('PCT', 'VAL')),
     CONSTRAINT chk_cupones_valor CHECK (valor > 0)
 );
-
--- Tabla de asignaciones de cupones a clientes
 CREATE TABLE IF NOT EXISTS cliente_cupones (
     id BIGSERIAL PRIMARY KEY,
     cliente_tienda_id BIGINT,
@@ -418,8 +414,6 @@ CREATE TABLE IF NOT EXISTS cliente_cupones (
         REFERENCES cupones(id)
         ON DELETE CASCADE
 );
-
--- Índices para rendimiento
 CREATE INDEX IF NOT EXISTS idx_cliente_cupones_cliente_tienda ON cliente_cupones(cliente_tienda_id);
 CREATE INDEX IF NOT EXISTS idx_cliente_cupones_cliente_fiscal ON cliente_cupones(cliente_fiscal_id);
 CREATE INDEX IF NOT EXISTS idx_cliente_cupones_cupon ON cliente_cupones(cupon_id);
@@ -427,47 +421,87 @@ CREATE INDEX IF NOT EXISTS idx_cliente_cupones_activos ON cliente_cupones(client
 CREATE INDEX IF NOT EXISTS idx_cupones_activos ON cupones(activo);
 CREATE INDEX IF NOT EXISTS idx_cupones_vencimiento ON cupones(fecha_vencimiento);
 CREATE INDEX IF NOT EXISTS idx_cupones_actualizado_en ON cupones(actualizado_en);
-
--- Comentario sobre las tablas
 COMMENT ON TABLE cupones IS 'Cupones de descuento: porcentaje (PCT) o valor fijo (VAL)';
 COMMENT ON TABLE cliente_cupones IS 'Asignación de cupones a ClienteTienda con control de cantidad disponible';
-
--- ============================================================
--- TABLA DE CONTACTOS RECIBIDOS DESDE EL FORMULARIO WEB
--- ============================================================
 CREATE TABLE IF NOT EXISTS contactos (
     id BIGSERIAL PRIMARY KEY,
-
-    -- Datos del formulario
     nombre_completo VARCHAR(255) NOT NULL,
     email VARCHAR(254) NOT NULL,
     mensaje TEXT NOT NULL,
-
-    -- Tracking multitenant
     subdominio VARCHAR(100) NOT NULL,
     tienda_id INTEGER NOT NULL,
-
-    -- Estado y procesamiento
     leido BOOLEAN DEFAULT FALSE,
     respondido BOOLEAN DEFAULT FALSE,
     fecha_respuesta TIMESTAMP,
-
-    -- Metadata para auditoría
     ip_cliente VARCHAR(45),
     user_agent TEXT,
     origen_referer VARCHAR(500),
-
-    -- Timestamps
     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
--- Índices para optimización
 CREATE INDEX IF NOT EXISTS idx_contactos_email ON contactos(email);
 CREATE INDEX IF NOT EXISTS idx_contactos_tienda ON contactos(tienda_id);
 CREATE INDEX IF NOT EXISTS idx_contactos_subdominio ON contactos(subdominio);
 CREATE INDEX IF NOT EXISTS idx_contactos_creado_en ON contactos(creado_en DESC);
 CREATE INDEX IF NOT EXISTS idx_contactos_leido_respondido ON contactos(leido, respondido);
 CREATE INDEX IF NOT EXISTS idx_contactos_sin_responder ON contactos(respondido) WHERE respondido = FALSE;
-
 COMMENT ON TABLE contactos IS 'Mensajes de contacto recibidos desde el formulario web de e-commerce';
+CREATE TABLE caja_movimientos (
+    id BIGSERIAL PRIMARY KEY,
+    usuario_id INTEGER REFERENCES login_usuario(id_login_usuario) ON DELETE SET NULL,
+    tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('entrada', 'salida')),
+    categoria VARCHAR(30) NOT NULL,
+    monto NUMERIC(12,2) NOT NULL,
+    metodo_pago VARCHAR(20) NOT NULL DEFAULT 'efectivo' CHECK (metodo_pago IN ('efectivo', 'transferencia', 'nequi', 'daviplata', 'tarjeta', 'otro')),
+    descripcion TEXT NOT NULL,
+    factura_id BIGINT REFERENCES facturacion_factura(id) ON DELETE SET NULL,
+    fecha_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha DATE NOT NULL DEFAULT CURRENT_DATE
+);
+CREATE INDEX caja_movimi_fecha_c2145e_idx ON caja_movimientos(fecha, fecha_hora DESC);
+CREATE INDEX caja_movimi_tipo_68aa76_idx ON caja_movimientos(tipo, fecha);
+CREATE INDEX caja_movimi_metodo__0c788f_idx ON caja_movimientos(metodo_pago, fecha);
+COMMENT ON TABLE caja_movimientos IS 'Movimientos de entrada y salida de dinero en caja';
+CREATE TABLE caja_arqueos (
+    id BIGSERIAL PRIMARY KEY,
+    usuario_id INTEGER REFERENCES login_usuario(id_login_usuario) ON DELETE SET NULL,
+    fecha DATE NOT NULL,
+    fecha_hora_registro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    saldo_inicial NUMERIC(12,2) NOT NULL DEFAULT 0,
+    total_entradas NUMERIC(12,2) NOT NULL DEFAULT 0,
+    total_salidas NUMERIC(12,2) NOT NULL DEFAULT 0,
+    saldo_esperado NUMERIC(12,2) NOT NULL,
+    monto_contado NUMERIC(12,2) NOT NULL,
+    diferencia NUMERIC(12,2) NOT NULL DEFAULT 0,
+    observaciones TEXT
+);
+CREATE INDEX caja_arqueo_fecha_96a707_idx ON caja_arqueos(fecha, fecha_hora_registro DESC);
+COMMENT ON TABLE caja_arqueos IS 'Arqueos de caja con comparación de esperado vs contado';
+
+ALTER TABLE facturacion_cliente
+ADD COLUMN IF NOT EXISTS en_mora BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS fecha_ultimo_pago DATE,
+ADD COLUMN IF NOT EXISTS dias_mora INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS observaciones_mora TEXT,
+ADD COLUMN IF NOT EXISTS usuario_registro_id INTEGER REFERENCES login_usuario(id_login_usuario) ON DELETE SET NULL;
+
+-- Tabla de Abonos a clientes en mora
+CREATE TABLE IF NOT EXISTS facturacion_abono (
+    id BIGSERIAL PRIMARY KEY,
+    cliente_id BIGINT NOT NULL REFERENCES facturacion_cliente(id) ON DELETE CASCADE,
+    monto NUMERIC(12,2) NOT NULL,
+    metodo_pago VARCHAR(20) NOT NULL DEFAULT 'efectivo' CHECK (metodo_pago IN ('efectivo', 'transferencia', 'nequi', 'tarjeta', 'otro')),
+    referencia VARCHAR(100),
+    observaciones TEXT,
+    fecha_abono DATE NOT NULL DEFAULT CURRENT_DATE,
+    fecha_hora_registro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    registrado_por_id INTEGER REFERENCES login_usuario(id_login_usuario) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_abono_cliente ON facturacion_abono(cliente_id);
+CREATE INDEX idx_abono_fecha ON facturacion_abono(fecha_abono DESC);
+
+COMMENT ON TABLE facturacion_abono IS 'Abonos o pagos parciales de clientes en mora para reducir su deuda';
+
+ALTER TABLE caja_movimientos 
+ADD COLUMN sucursal_id INTEGER;

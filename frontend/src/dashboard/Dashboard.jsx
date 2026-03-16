@@ -9,6 +9,8 @@ import DashboardView from '../components/DashboardView';
 import SucursalesGrid from '../components/SucursalesGrid';
 import ConfiguracionView from '../components/ConfiguracionView';
 import ClientesView from '../components/ClientesView';
+import CajaView from '../components/CajaView';
+import MoraView from '../components/MoraView';
 import { useFetchUsers } from '../hooks/useFetchUsers';
 import { useFetchSucursales } from '../hooks/useFetchSucursales';
 import { useAuth } from '../hooks/useAuth';
@@ -147,6 +149,20 @@ export default function Dashboard() {
           <div className="relative w-full mb-8 p-8 rounded-3xl
             bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
             <ClientesView />
+          </div>
+        )}
+
+        {/* VISTA DE CAJA - CONTROL DE CAJA */}
+        {view === 'caja' && (
+          <div className="relative w-full mb-8">
+            <CajaView />
+          </div>
+        )}
+
+        {/* VISTA DE GESTIÓN DE MORA */}
+        {view === 'mora' && (
+          <div className="relative w-full mb-8">
+            <MoraView />
           </div>
         )}
 

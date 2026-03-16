@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  TrashIcon, 
-  PlusIcon, 
-  ArrowRightIcon, 
+import {
+  TrashIcon,
+  PlusIcon,
+  ArrowRightIcon,
   ArrowLeftIcon,
   CheckIcon,
   UserCircleIcon,
@@ -11,11 +11,13 @@ import {
   DocumentCheckIcon,
   ChevronUpIcon,
   ChevronDownIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  ExclamationTriangleIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import ClienteSelector from './ClienteSelector';
 import ProductoSelectorPOS from './ProductoSelectorPOS';
-import { fetchFormasPago, crearFactura } from '../../services/api';
+import { fetchFormasPago, crearFactura, verificarMoraCliente } from '../../services/api';
 import { showToast } from '../../utils/toast';
 
 export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
@@ -25,7 +27,12 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
   const [formasPago, setFormasPago] = useState([]);
   const [pagos, setPagos] = useState([{ forma_pago: null, monto: '', referencia: '' }]);
   const [observaciones, setObservaciones] = useState('');
+  const [tipoFactura, setTipoFactura] = useState('contado'); // 'contado' o 'credito'
+  const [diaPago, setDiaPago] = useState(''); // Día del mes en que pagará (1-31)
+  const [cuotas, setCuotas] = useState(''); // Número de cuotas
   const [loading, setLoading] = useState(false);
+  const [clienteMora, setClienteMora] = useState(null); // Información de mora del cliente
+  const [mostrarConfirmacionMora, setMostrarConfirmacionMora] = useState(false); // Modal de confirmación
 
   const tokenUsuario = localStorage.getItem('token_usuario');
   const usuario = localStorage.getItem('usuario');
@@ -33,29 +40,31 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
 
   // Definir los pasos
   const pasos = [
-    { 
-      numero: 1, 
-      titulo: 'Cliente', 
-      icono: UserCircleIcon, 
+    {
+      numero: 1,
+      titulo: 'Cliente',
+      icono: UserCircleIcon,
       completado: true // Cliente es opcional
     },
-    { 
-      numero: 2, 
-      titulo: 'Productos', 
-      icono: ShoppingCartIcon, 
+    {
+      numero: 2,
+      titulo: 'Productos',
+      icono: ShoppingCartIcon,
       completado: productos.length > 0 && productos.every(p => p.producto_seleccionado)
     },
-    { 
-      numero: 3, 
-      titulo: 'Pago', 
-      icono: CreditCardIcon, 
-      completado: calcularTotalPagado() >= calcularTotal() && productos.length > 0 && productos.every(p => p.producto_seleccionado)
+    {
+      numero: 3,
+      titulo: tipoFactura === 'credito' ? 'Crédito' : 'Pago',
+      icono: CreditCardIcon,
+      completado: tipoFactura === 'credito'
+        ? diaPago && cuotas && parseInt(diaPago) >= 1 && parseInt(diaPago) <= 31 && parseInt(cuotas) >= 1 && productos.length > 0 && productos.every(p => p.producto_seleccionado)
+        : calcularTotalPagado() >= calcularTotal() && productos.length > 0 && productos.every(p => p.producto_seleccionado)
     },
-    { 
-      numero: 4, 
-      titulo: 'Confirmar', 
-      icono: DocumentCheckIcon, 
-      completado: false 
+    {
+      numero: 4,
+      titulo: 'Confirmar',
+      icono: DocumentCheckIcon,
+      completado: false
     }
   ];
 
@@ -64,6 +73,24 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
       cargarFormasPago();
     }
   }, [tokenUsuario, usuario, subdominio]);
+
+  // Efecto para limpiar campos cuando cambia el tipo de factura
+  useEffect(() => {
+    console.log('tipoFactura cambió a:', tipoFactura);
+    if (tipoFactura === 'contado') {
+      // Limpiar campos de crédito cuando cambia a contado
+      setDiaPago('');
+      setCuotas('');
+      // Restablecer pagos para contado
+      const efectivo = formasPago.find(f => f.codigo === 'EFE');
+      if (efectivo) {
+        setPagos([{ forma_pago: efectivo.id, monto: '', referencia: '' }]);
+      }
+    } else if (tipoFactura === 'credito') {
+      // Limpiar pagos cuando cambia a crédito
+      setPagos([]);
+    }
+  }, [tipoFactura, formasPago]);
 
   const cargarFormasPago = async () => {
     try {
@@ -231,29 +258,50 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
       return hayProductos && todosSeleccionados && todosConCantidadValida;
     }
 
-    // Paso 3: Requiere productos validados Y pagos completos
+    // Paso 3: Requiere productos validados Y pagos/crédito completos
     if (numeroPaso === 3) {
-      // Validar pagos
       const totalMayorQueCero = calcularTotal() > 0;
-      const hayPagosValidos = pagos.length > 0 && pagos.some(p => parseFloat(p.monto) > 0);
-      const pagoCompleto = calcularTotalPagado() >= calcularTotal();
 
-      return hayProductos && todosSeleccionados && todosConCantidadValida && totalMayorQueCero && hayPagosValidos && pagoCompleto;
+      if (tipoFactura === 'credito') {
+        // Para crédito: validar día de pago y cuotas
+        const diaPagoValido = diaPago && parseInt(diaPago) >= 1 && parseInt(diaPago) <= 31;
+        const cuotasValidas = cuotas && parseInt(cuotas) >= 1;
+        return hayProductos && todosSeleccionados && todosConCantidadValida && totalMayorQueCero && diaPagoValido && cuotasValidas;
+      } else {
+        // Para contado: validar pagos
+        const hayPagosValidos = pagos.length > 0 && pagos.some(p => parseFloat(p.monto) > 0);
+        const pagoCompleto = calcularTotalPagado() >= calcularTotal();
+        return hayProductos && todosSeleccionados && todosConCantidadValida && totalMayorQueCero && hayPagosValidos && pagoCompleto;
+      }
     }
 
     // Paso 4: Confirmar - Mismos requisitos que paso 3
     if (numeroPaso === 4) {
       const totalMayorQueCero = calcularTotal() > 0;
-      const hayPagosValidos = pagos.length > 0 && pagos.some(p => parseFloat(p.monto) > 0);
-      const pagoCompleto = calcularTotalPagado() >= calcularTotal();
 
-      return hayProductos && todosSeleccionados && todosConCantidadValida && totalMayorQueCero && hayPagosValidos && pagoCompleto;
+      if (tipoFactura === 'credito') {
+        const diaPagoValido = diaPago && parseInt(diaPago) >= 1 && parseInt(diaPago) <= 31;
+        const cuotasValidas = cuotas && parseInt(cuotas) >= 1;
+        return hayProductos && todosSeleccionados && todosConCantidadValida && totalMayorQueCero && diaPagoValido && cuotasValidas;
+      } else {
+        const hayPagosValidos = pagos.length > 0 && pagos.some(p => parseFloat(p.monto) > 0);
+        const pagoCompleto = calcularTotalPagado() >= calcularTotal();
+        return hayProductos && todosSeleccionados && todosConCantidadValida && totalMayorQueCero && hayPagosValidos && pagoCompleto;
+      }
     }
 
     return false;
   };
 
   const puedeAvanzar = () => {
+    console.log('=== puedeAvanzar() called ===');
+    console.log('pasoActual:', pasoActual);
+    console.log('tipoFactura:', tipoFactura);
+    console.log('diaPago:', diaPago);
+    console.log('cuotas:', cuotas);
+
+    let result = false;
+
     let hayProductos;
     let todosProductosSeleccionados;
     let todosConCantidadValida;
@@ -267,6 +315,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
       case 1:
         // Paso 1: Cliente es opcional, pero si se selecciona uno debe ser válido
         // Se puede avanzar siempre (con o sin cliente)
+        console.log('puedeAvanzar() Paso 1: return true');
         return true;
 
       case 2:
@@ -288,7 +337,9 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
           return cantidad > 0 && cantidad <= (p.disponible || 9999);
         });
 
-        return hayProductos && todosProductosSeleccionados && todosConCantidadValida;
+        result = hayProductos && todosProductosSeleccionados && todosConCantidadValida;
+        console.log('puedeAvanzar() Paso 2: result =', result);
+        return result;
 
       case 3:
         // Paso 3: Pago - VALIDACIONES ESTRICTAS
@@ -296,26 +347,51 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
         // - No hay productos
         // - Productos no seleccionados
         // - Total es 0
-        // - Pagos incompletos
-        // - Monto pagado insuficiente
+        // Para contado: Pagos incompletos o monto insuficiente
+        // Para crédito: Día de pago o cuotas no especificados
         hayProductosPago = productos.length > 0;
         productosSeleccionados = hayProductosPago && productos.every(p => p.producto_seleccionado);
         totalMayorQueCero = calcularTotal() > 0;
 
-        // Verificar que haya al menos un método de pago con monto
-        hayPagosValidos = pagos.length > 0 && pagos.some(p => {
-          const monto = parseFloat(p.monto);
-          return monto > 0;
-        });
+        console.log('=== puedeAvanzar Paso 3 ===');
+        console.log('tipoFactura:', tipoFactura);
+        console.log('diaPago:', diaPago, 'tipo:', typeof diaPago);
+        console.log('cuotas:', cuotas, 'tipo:', typeof cuotas);
 
-        pagoCompleto = calcularTotalPagado() >= calcularTotal();
+        if (tipoFactura === 'credito') {
+          // Para crédito: validar día de pago y cuotas
+          const diaPagoNum = parseInt(diaPago);
+          const cuotasNum = parseInt(cuotas);
+          const diaPagoValido = !isNaN(diaPagoNum) && diaPagoNum >= 1 && diaPagoNum <= 31;
+          const cuotasValidas = !isNaN(cuotasNum) && cuotasNum >= 1;
 
-        return hayProductosPago && productosSeleccionados && totalMayorQueCero && hayPagosValidos && pagoCompleto;
+          console.log('diaPagoNum:', diaPagoNum, 'diaPagoValido:', diaPagoValido);
+          console.log('cuotasNum:', cuotasNum, 'cuotasValidas:', cuotasValidas);
+
+          result = hayProductosPago && productosSeleccionados && totalMayorQueCero && diaPagoValido && cuotasValidas;
+          console.log('puedeAvanzar() Paso 3 Crédito: result =', result);
+          return result;
+        } else {
+          // Para contado: validar pagos
+          hayPagosValidos = pagos.length > 0 && pagos.some(p => {
+            const monto = parseFloat(p.monto);
+            return monto > 0;
+          });
+          pagoCompleto = calcularTotalPagado() >= calcularTotal();
+          result = hayProductosPago && productosSeleccionados && totalMayorQueCero && hayPagosValidos && pagoCompleto;
+          console.log('puedeAvanzar() Paso 3 Contado: result =', result);
+          return result;
+        }
 
       default:
+        console.log('puedeAvanzar() Default: return true');
         return true;
     }
   };
+
+  // Agregar console.log al final para depuración
+  console.log('=== puedeAvanzar() result ===');
+  console.log('pasoActual:', pasoActual, 'result:', puedeAvanzar.result);
 
   const handleSiguiente = () => {
     if (puedeAvanzar()) {
@@ -350,11 +426,21 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
           showToast('error', '⚠️ Debes agregar y seleccionar productos antes de continuar');
         } else if (calcularTotal() === 0) {
           showToast('error', '⚠️ El total de la venta es $0. Debes agregar productos');
-        } else if (!pagos.some(p => parseFloat(p.monto) > 0)) {
-          showToast('error', '⚠️ Debes agregar al menos un método de pago con monto antes de continuar');
-        } else if (calcularTotalPagado() < calcularTotal()) {
-          const faltante = (calcularTotal() - calcularTotalPagado()).toFixed(2);
-          showToast('error', `⚠️ Monto insuficiente. Faltan $${faltante} para completar la venta`);
+        } else if (tipoFactura === 'credito') {
+          // Validaciones para crédito
+          if (!diaPago || parseInt(diaPago) < 1 || parseInt(diaPago) > 31) {
+            showToast('error', '⚠️ Debes seleccionar un día de pago válido (1-31)');
+          } else if (!cuotas || parseInt(cuotas) < 1) {
+            showToast('error', '⚠️ Debes seleccionar el número de cuotas');
+          }
+        } else {
+          // Validaciones para contado
+          if (!pagos.some(p => parseFloat(p.monto) > 0)) {
+            showToast('error', '⚠️ Debes agregar al menos un método de pago con monto antes de continuar');
+          } else if (calcularTotalPagado() < calcularTotal()) {
+            const faltante = (calcularTotal() - calcularTotalPagado()).toFixed(2);
+            showToast('error', `⚠️ Monto insuficiente. Faltan $${faltante} para completar la venta`);
+          }
         }
       }
     }
@@ -364,7 +450,39 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
     setPasoActual(pasoActual - 1);
   };
 
-  const handleSubmit = async () => {
+  const verificarMoraClienteAntesDeFacturar = async () => {
+    // Si no hay cliente, proceder normalmente
+    if (!cliente || !cliente.id) {
+      crearFacturaDirectamente();
+      return;
+    }
+
+    // Verificar si el cliente está en mora
+    try {
+      const response = await verificarMoraCliente({
+        token: tokenUsuario,
+        usuario,
+        subdominio,
+        cliente_id: cliente.id
+      });
+
+      if (response.success && response.data.en_mora) {
+        // Cliente en mora - guardar info y mostrar confirmación
+        setClienteMora(response.data);
+        setMostrarConfirmacionMora(true);
+      } else {
+        // Cliente no está en mora - proceder normalmente
+        setClienteMora(null);
+        crearFacturaDirectamente();
+      }
+    } catch (error) {
+      console.error('Error verificando mora:', error);
+      // Si hay error en la verificación, permitir la factura
+      crearFacturaDirectamente();
+    }
+  };
+
+  const crearFacturaDirectamente = async () => {
     if (productos.length === 0) {
       showToast('error', 'Debe agregar al menos un producto');
       return;
@@ -375,9 +493,23 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
       return;
     }
 
-    if (calcularTotalPagado() < calcularTotal()) {
-      showToast('error', 'El monto pagado es insuficiente');
-      return;
+    // Validaciones específicas según tipo de factura
+    if (tipoFactura === 'credito') {
+      // Para crédito, validar día de pago y cuotas
+      if (!diaPago || parseInt(diaPago) < 1 || parseInt(diaPago) > 31) {
+        showToast('error', 'Debe seleccionar un día de pago válido');
+        return;
+      }
+      if (!cuotas || parseInt(cuotas) < 1) {
+        showToast('error', 'Debe seleccionar el número de cuotas');
+        return;
+      }
+    } else {
+      // Para contado, validar pagos
+      if (tipoFactura === 'contado' && calcularTotalPagado() < calcularTotal()) {
+        showToast('error', 'El monto pagado es insuficiente');
+        return;
+      }
     }
 
     setLoading(true);
@@ -390,12 +522,15 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
         vendedor: vendedorId,
         sucursal: sucursalId,
         bodega: bodegaId,
+        tipo_factura: tipoFactura, // 'contado' o 'credito'
+        dia_pago: tipoFactura === 'credito' ? parseInt(diaPago) : null,
+        cuotas: tipoFactura === 'credito' ? parseInt(cuotas) : null,
         subtotal: calcularSubtotal(),
         total_descuento: 0,
         total_iva: calcularIVA(),
         total: calcularTotal(),
-        total_pagado: calcularTotalPagado(),
-        cambio: calcularCambio(),
+        total_pagado: tipoFactura === 'contado' ? calcularTotalPagado() : 0,
+        cambio: tipoFactura === 'contado' ? calcularCambio() : 0,
         detalles: productos.filter(p => p.producto_seleccionado).map(p => {
           const precio = parseFloat(p.precio);
           const ivaPorcentaje = parseFloat(p.iva_porcentaje || 0);
@@ -419,7 +554,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
             total: total
           };
         }),
-        pagos: pagos.map(p => ({
+        pagos: tipoFactura === 'credito' ? [] : pagos.filter(p => p.forma_pago && p.monto).map(p => ({
           forma_pago: p.forma_pago,
           monto: parseFloat(p.monto),
           referencia: p.referencia || null,
@@ -439,9 +574,13 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
 
       // Limpiar formulario y volver al paso 1
       setCliente(null);
+      setClienteMora(null);
       setProductos([]);
       setPagos([{ forma_pago: null, monto: '', referencia: '' }]);
       setObservaciones('');
+      setTipoFactura('contado');
+      setDiaPago('');
+      setCuotas('');
       setPasoActual(1);
 
     } catch (error) {
@@ -449,6 +588,37 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async () => {
+    // Validaciones básicas
+    if (productos.length === 0) {
+      showToast('error', 'Debe agregar al menos un producto');
+      return;
+    }
+
+    if (!productos.every(p => p.producto_seleccionado)) {
+      showToast('error', 'Debe seleccionar un producto para cada fila');
+      return;
+    }
+
+    if (tipoFactura === 'contado' && calcularTotalPagado() < calcularTotal()) {
+      showToast('error', 'El monto pagado es insuficiente');
+      return;
+    }
+
+    // Verificar mora antes de crear la factura
+    await verificarMoraClienteAntesDeFacturar();
+  };
+
+  const handleConfirmarFacturaConMora = () => {
+    setMostrarConfirmacionMora(false);
+    crearFacturaDirectamente();
+  };
+
+  const handleCancelarFacturaPorMora = () => {
+    setMostrarConfirmacionMora(false);
+    showToast('info', 'Venta cancelada por mora del cliente');
   };
 
   return (
@@ -533,6 +703,49 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
               </div>
             </div>
             <ClienteSelector cliente={cliente} onClienteChange={setCliente} />
+
+            {/* Selector de Tipo de Factura */}
+            <div className="mt-4 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2 mb-2">
+                <DocumentCheckIcon className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tipo de Factura</span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTipoFactura('contado')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                    tipoFactura === 'contado'
+                      ? 'bg-green-600 text-white shadow-md'
+                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-2 border-slate-200 dark:border-slate-700 hover:border-green-400 dark:hover:border-green-600'
+                  }`}
+                >
+                  <CreditCardIcon className="h-4 w-4" />
+                  Contado
+                  <span className="text-xs opacity-80">(Paga al momento)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTipoFactura('credito')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                    tipoFactura === 'credito'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-600'
+                  }`}
+                >
+                  <DocumentCheckIcon className="h-4 w-4" />
+                  Crédito / Fiado
+                  <span className="text-xs opacity-80">(Paga después)</span>
+                </button>
+              </div>
+              {tipoFactura === 'credito' && (
+                <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800">
+                  <p className="text-xs text-blue-700 dark:text-blue-400">
+                    <strong>Nota:</strong> La factura se registrará como crédito. El cliente deberá abonar posteriormente y se sumará a su deuda total.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -696,105 +909,178 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
         {/* Paso 3: Pago */}
         {pasoActual === 3 && (
           <div className="p-3 sm:p-4">
+            {console.log('=== RENDER PASO 3 ===')}
+            {console.log('tipoFactura:', tipoFactura)}
+            {console.log('tipoFactura === "credito":', tipoFactura === 'credito')}
             <div className="flex items-center gap-2 mb-3">
               <div className="p-1.5 bg-sky-100 dark:bg-sky-900/30 rounded-lg">
                 <CreditCardIcon className="h-5 w-5 text-sky-600 dark:text-sky-400" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:!text-slate-100">Métodos de Pago</h3>
-                <p className="text-xs text-slate-500 dark:!text-slate-400">Configura cómo se realizará el pago</p>
-              </div>
-            </div>
-
-            {formasPago.length === 0 && (
-              <div className="mb-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                <p className="text-yellow-700 dark:text-yellow-400 text-xs font-medium">
-                  ⚠ No se han cargado las formas de pago
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:!text-slate-100">
+                  {tipoFactura === 'credito' ? 'Configuración del Crédito' : 'Métodos de Pago'}
+                </h3>
+                <p className="text-xs text-slate-500 dark:!text-slate-400">
+                  {tipoFactura === 'credito' ? 'Configura el día de pago y las cuotas' : 'Configura cómo se realizará el pago'}
                 </p>
               </div>
-            )}
-
-            <div className="space-y-2 mb-3">
-              {pagos.map((pago, index) => (
-                <div key={index} className="flex flex-col sm:flex-row gap-2">
-                  <select
-                    value={pago.forma_pago || ''}
-                    onChange={(e) => actualizarPago(index, 'forma_pago', parseInt(e.target.value))}
-                    className="flex-1 px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100"
-                    required
-                  >
-                    <option value="">Seleccionar método...</option>
-                    {formasPago.map(fp => (
-                      <option key={fp.id} value={fp.id}>{fp.nombre}</option>
-                    ))}
-                  </select>
-
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={pago.monto}
-                    onChange={(e) => actualizarPago(index, 'monto', e.target.value)}
-                    placeholder="Monto"
-                    className="w-full sm:w-28 px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100"
-                    required
-                  />
-
-                  <input
-                    type="text"
-                    value={pago.referencia}
-                    onChange={(e) => actualizarPago(index, 'referencia', e.target.value)}
-                    placeholder="Ref. (opcional)"
-                    className="flex-1 px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100"
-                  />
-
-                  {pagos.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => eliminarPago(index)}
-                      className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                      title="Eliminar"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={agregarPago}
-                className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 text-xs sm:text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors font-semibold"
-              >
-                <PlusIcon className="h-3.5 w-3.5" />
-                <span>Agregar otro método</span>
-              </button>
             </div>
+
+            {tipoFactura === 'credito' ? (
+              <>
+                {/* Configuración para ventas a crédito */}
+                <div className="space-y-3 mb-3">
+                  {/* Día de pago */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                      Día de pago del mes
+                    </label>
+                    <select
+                      value={diaPago}
+                      onChange={(e) => setDiaPago(e.target.value)}
+                      className="w-full px-3 py-2 text-sm border-2 border-blue-200 dark:border-blue-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                      required
+                    >
+                      <option value="">Seleccionar día...</option>
+                      {[...Array(31)].map((_, i) => (
+                        <option key={i + 1} value={i + 1}>
+                          Día {i + 1}{i + 1 === 15 && ' (Quincena)'}{i + 1 === 30 && ' (Fin de mes)'}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-blue-700 dark:text-blue-400 mt-1.5">
+                      El cliente deberá pagar el día {diaPago || '__'} de cada mes.
+                    </p>
+                  </div>
+
+                  {/* Cuotas */}
+                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                      Número de cuotas
+                    </label>
+                    <select
+                      value={cuotas}
+                      onChange={(e) => setCuotas(e.target.value)}
+                      className="w-full px-3 py-2 text-sm border-2 border-purple-200 dark:border-purple-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                      required
+                    >
+                      <option value="">Seleccionar cuotas...</option>
+                      {[...Array(24)].map((_, i) => (
+                        <option key={i + 1} value={i + 1}>
+                          {i + 1} {i + 1 === 1 ? 'cuota' : 'cuotas'} {i + 1 === 1 && '(Pago único)'}{i + 1 === 2 && '(Bimestral)'}{i + 1 === 3 && '(Trimestral)'}{i + 1 === 6 && '(Semestral)'}{i + 1 === 12 && '(Anual)'}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-purple-700 dark:text-purple-400 mt-1.5">
+                      Valor de cada cuota: <strong>${cuotas ? (calcularTotal() / parseInt(cuotas)).toFixed(2) : '0.00'}</strong>
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Métodos de pago para ventas de contado */}
+                {formasPago.length === 0 && (
+                  <div className="mb-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                    <p className="text-yellow-700 dark:text-yellow-400 text-xs font-medium">
+                      ⚠ No se han cargado las formas de pago
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-2 mb-3">
+                  {pagos.map((pago, index) => (
+                    <div key={index} className="flex flex-col sm:flex-row gap-2">
+                      <select
+                        value={pago.forma_pago || ''}
+                        onChange={(e) => actualizarPago(index, 'forma_pago', parseInt(e.target.value))}
+                        className="flex-1 px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                        required
+                      >
+                        <option value="">Seleccionar método...</option>
+                        {formasPago.map(fp => (
+                          <option key={fp.id} value={fp.id}>{fp.nombre}</option>
+                        ))}
+                      </select>
+
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={pago.monto}
+                        onChange={(e) => actualizarPago(index, 'monto', e.target.value)}
+                        placeholder="Monto"
+                        className="w-full sm:w-28 px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                        required
+                      />
+
+                      <input
+                        type="text"
+                        value={pago.referencia}
+                        onChange={(e) => actualizarPago(index, 'referencia', e.target.value)}
+                        placeholder="Ref. (opcional)"
+                        className="flex-1 px-2 py-1.5 text-xs sm:text-sm border-2 border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                      />
+
+                      {pagos.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => eliminarPago(index)}
+                          className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          title="Eliminar"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={agregarPago}
+                    className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 text-xs sm:text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors font-semibold"
+                  >
+                    <PlusIcon className="h-3.5 w-3.5" />
+                    <span>Agregar otro método</span>
+                  </button>
+                </div>
+              </>
+            )}
 
             {/* Resumen de totales - Compacto */}
             <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 p-3 rounded-lg border border-slate-200 dark:border-slate-600">
-              <h4 className="text-sm font-bold text-slate-900 dark:!text-slate-100 mb-2">Resumen</h4>
+              <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">Resumen</h4>
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center py-1 border-b border-slate-200 dark:border-slate-600">
-                  <span className="text-xs sm:text-sm text-slate-600 dark:!text-slate-400">Subtotal:</span>
-                  <span className="text-xs sm:text-sm font-bold text-slate-900 dark:!text-slate-100">${calcularSubtotal().toFixed(2)}</span>
+                  <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Subtotal:</span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">${calcularSubtotal().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center py-1 border-b border-slate-200 dark:border-slate-600">
-                  <span className="text-xs sm:text-sm text-slate-600 dark:!text-slate-400">IVA:</span>
-                  <span className="text-xs sm:text-sm font-bold text-slate-900 dark:!text-slate-100">${calcularIVA().toFixed(2)}</span>
+                  <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">IVA:</span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">${calcularIVA().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg px-2">
                   <span className="text-sm sm:text-base font-bold text-white">TOTAL:</span>
                   <span className="text-lg sm:text-xl font-bold text-white">${calcularTotal().toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-xs sm:text-sm text-sky-700 dark:text-sky-400 font-semibold">Pagado:</span>
-                  <span className="text-sm sm:text-base font-bold text-sky-600 dark:text-sky-400">${calcularTotalPagado().toFixed(2)}</span>
-                </div>
-                {calcularCambio() > 0 && (
-                  <div className="flex justify-between items-center py-1 bg-blue-50 dark:bg-blue-900/30 rounded-lg px-2">
-                    <span className="text-xs sm:text-sm text-blue-700 dark:text-blue-400 font-semibold">Cambio:</span>
-                    <span className="text-base sm:text-lg font-bold text-blue-600 dark:text-blue-400">${calcularCambio().toFixed(2)}</span>
+                {tipoFactura === 'contado' && (
+                  <>
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-xs sm:text-sm text-sky-700 dark:text-sky-400 font-semibold">Pagado:</span>
+                      <span className="text-sm sm:text-base font-bold text-sky-600 dark:text-sky-400">${calcularTotalPagado().toFixed(2)}</span>
+                    </div>
+                    {calcularCambio() > 0 && (
+                      <div className="flex justify-between items-center py-1 bg-blue-50 dark:bg-blue-900/30 rounded-lg px-2">
+                        <span className="text-xs sm:text-sm text-blue-700 dark:text-blue-400 font-semibold">Cambio:</span>
+                        <span className="text-base sm:text-lg font-bold text-blue-600 dark:text-blue-400">${calcularCambio().toFixed(2)}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+                {tipoFactura === 'credito' && cuotas && (
+                  <div className="flex justify-between items-center py-1 bg-purple-50 dark:bg-purple-900/30 rounded-lg px-2">
+                    <span className="text-xs sm:text-sm text-purple-700 dark:text-purple-400 font-semibold">Valor por cuota:</span>
+                    <span className="text-base sm:text-lg font-bold text-purple-600 dark:text-purple-400">${(calcularTotal() / parseInt(cuotas)).toFixed(2)}</span>
                   </div>
                 )}
               </div>
@@ -852,23 +1138,40 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 </div>
               </div>
 
-              {/* Pagos */}
+              {/* Pagos o Crédito */}
               <div className="bg-slate-50 dark:!bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:!border-slate-700">
                 <h4 className="text-xs sm:text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-1.5 flex items-center gap-1">
                   <CreditCardIcon className="h-3.5 w-3.5" />
-                  Métodos de Pago
+                  {tipoFactura === 'credito' ? 'Configuración del Crédito' : 'Métodos de Pago'}
                 </h4>
-                <div className="space-y-1">
-                  {pagos.map((pago, index) => {
-                    const formaPago = formasPago.find(f => f.id === pago.forma_pago);
-                    return (
-                      <div key={index} className="flex justify-between items-center text-xs sm:text-sm">
-                        <span className="text-slate-700 dark:!text-slate-300">{formaPago?.nombre || 'N/A'}</span>
-                        <span className="font-semibold text-slate-900 dark:!text-slate-100">${parseFloat(pago.monto).toFixed(2)}</span>
-                      </div>
-                    );
-                  })}
-                </div>
+                {tipoFactura === 'credito' ? (
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center text-xs sm:text-sm">
+                      <span className="text-slate-700 dark:!text-slate-300">Día de pago:</span>
+                      <span className="font-semibold text-blue-600 dark:text-blue-400">Día {diaPago}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs sm:text-sm">
+                      <span className="text-slate-700 dark:!text-slate-300">Número de cuotas:</span>
+                      <span className="font-semibold text-purple-600 dark:text-purple-400">{cuotas} {cuotas == 1 ? 'cuota' : 'cuotas'}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs sm:text-sm bg-purple-50 dark:bg-purple-900/20 rounded px-2 py-1">
+                      <span className="text-slate-700 dark:!text-slate-300">Valor por cuota:</span>
+                      <span className="font-bold text-purple-700 dark:text-purple-400">${cuotas ? (calcularTotal() / parseInt(cuotas)).toFixed(2) : '0.00'}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {pagos.map((pago, index) => {
+                      const formaPago = formasPago.find(f => f.id === pago.forma_pago);
+                      return (
+                        <div key={index} className="flex justify-between items-center text-xs sm:text-sm">
+                          <span className="text-slate-700 dark:!text-slate-300">{formaPago?.nombre || 'N/A'}</span>
+                          <span className="font-semibold text-slate-900 dark:!text-slate-100">${parseFloat(pago.monto).toFixed(2)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Total final */}
@@ -943,6 +1246,79 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
           </button>
         )}
       </div>
+
+      {/* Modal de Confirmación de Mora */}
+      {mostrarConfirmacionMora && clienteMora && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white dark:!bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full animate-scaleIn">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-red-600 to-orange-600 px-6 py-4 rounded-t-2xl">
+              <div className="flex items-center gap-3">
+                <ExclamationTriangleIcon className="h-8 w-8 text-white flex-shrink-0" />
+                <div>
+                  <h3 className="text-xl font-bold text-white">Cliente en Mora</h3>
+                  <p className="text-red-100 text-sm">Advertencia de crédito</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-6">
+              <div className="bg-red-50 dark:!bg-red-900/20 border-2 border-red-200 dark:!border-red-800 rounded-xl p-4 mb-4">
+                <div className="space-y-2">
+                  <p className="font-bold text-red-800 dark:!text-red-300">
+                    {cliente?.nombre_completo || 'El cliente'} tiene deuda pendiente
+                  </p>
+                  <div className="text-sm text-red-700 dark:!text-red-400 space-y-1">
+                    <p>• <strong>Días de mora:</strong> {clienteMora.dias_mora} días</p>
+                    {clienteMora.fecha_ultimo_pago && (
+                      <p>• <strong>Último pago:</strong> {new Date(clienteMora.fecha_ultimo_pago).toLocaleDateString('es-CO')}</p>
+                    )}
+                    {clienteMora.limite_credito && clienteMora.limite_credito !== '0.00' && (
+                      <p>• <strong>Límite de crédito:</strong> ${clienteMora.limite_credito}</p>
+                    )}
+                  </div>
+                  {clienteMora.observaciones_mora && (
+                    <div className="mt-2 pt-2 border-t border-red-300 dark:!border-red-700">
+                      <p className="text-xs italic text-red-600 dark:!text-red-500">
+                        Nota: {clienteMora.observaciones_mora}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <p className="text-sm text-slate-600 dark:!text-slate-400 mb-4">
+                Este cliente tiene mora de {clienteMora.dias_mora} días. Puedes continuar con la venta si lo deseas.
+              </p>
+
+              <div className="bg-blue-50 dark:!bg-blue-900/20 border border-blue-200 dark:!border-blue-800 rounded-lg p-3">
+                <p className="text-xs text-blue-800 dark:!text-blue-300">
+                  <strong>Recomendación:</strong> Verificar con el supervisor antes de continuar con la venta.
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className={`flex gap-3 px-6 py-4 border-t ${'border-slate-200 dark:!border-slate-700'}`}>
+              <button
+                type="button"
+                onClick={handleCancelarFacturaPorMora}
+                className="flex-1 px-4 py-2.5 bg-slate-200 dark:!bg-slate-700 text-slate-700 dark:!text-slate-200 font-semibold rounded-xl hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors"
+              >
+                Cancelar Venta
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmarFacturaConMora}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30"
+              >
+                Continuar de Todos Modos
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

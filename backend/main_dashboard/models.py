@@ -604,6 +604,22 @@ class Cliente(models.Model):
     limite_credito = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     dias_credito = models.IntegerField(default=0)
 
+    # Control de mora y lista negra
+    en_mora = models.BooleanField(default=False, help_text='Indica si el cliente está en lista negra por mora')
+    fecha_ultimo_pago = models.DateField(blank=True, null=True, help_text='Fecha del último pago realizado')
+    dias_mora = models.IntegerField(default=0, help_text='Días de mora calculados automáticamente')
+    observaciones_mora = models.TextField(blank=True, null=True, help_text='Observaciones sobre el estado de mora')
+
+    # Registro de quién creó el cliente
+    usuario_registro = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='clientes_registrados',
+        help_text='Usuario que registró al cliente'
+    )
+
     estatus = models.BooleanField(default=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
@@ -627,6 +643,157 @@ class Cliente(models.Model):
     def nombre_completo(self):
         """Retorna el nombre completo formateado"""
         return self.__str__()
+
+    def actualizar_estado_mora(self):
+        """
+        Calcula automáticamente los días de mora y actualiza el estado en_mora.
+        Debe llamarse regularmente (ej: scheduler diario)
+        """
+        from django.utils import timezone
+
+        if self.fecha_ultimo_pago:
+            hoy = timezone.now().date()
+            delta = hoy - self.fecha_ultimo_pago
+            self.dias_mora = delta.days
+
+            # Considerar en mora si tiene más de 30 días sin pagar
+            self.en_mora = self.dias_mora > 30
+        else:
+            self.dias_mora = 0
+            self.en_mora = False
+
+        self.save(update_fields=['dias_mora', 'en_mora'])
+
+    def marcar_como_mora(self, observaciones=None):
+        """Marca manualmente al cliente como en mora"""
+        from django.utils import timezone
+
+        self.en_mora = True
+        if not self.fecha_ultimo_pago:
+            # Si no hay fecha de último pago, calcular desde la fecha de creación
+            self.fecha_ultimo_pago = self.creado_en.date()
+            hoy = timezone.now().date()
+            delta = hoy - self.fecha_ultimo_pago
+            self.dias_mora = delta.days
+
+        if observaciones:
+            self.observaciones_mora = observaciones
+
+        self.save(update_fields=['en_mora', 'dias_mora', 'observaciones_mora'])
+
+    def quitar_mora(self, observaciones=None):
+        """Quita al cliente de la lista negra"""
+        self.en_mora = False
+        self.dias_mora = 0
+        if observaciones:
+            if self.observaciones_mora:
+                self.observaciones_mora += f'\n\nRecuperado: {observaciones}'
+            else:
+                self.observaciones_mora = observaciones
+
+        self.save(update_fields=['en_mora', 'dias_mora', 'observaciones_mora'])
+
+
+    def calcular_deuda_total(self):
+        from django.db.models import Sum
+
+        # Sumar facturas de crédito activas (no anuladas)
+        facturas_credito = self.facturas.filter(
+            tipo_factura='credito',
+        ).exclude(
+            estado='ANU'  # Excluir solo las anuladas
+        ).aggregate(
+            total_facturas=Sum('total')
+        )['total_facturas'] or 0
+
+        # Sumar todos los abonos
+        total_abonos = self.abonos.aggregate(
+            total_abonos=Sum('monto')
+        )['total_abonos'] or 0
+
+        deuda_total = float(facturas_credito) - float(total_abonos)
+
+        return {
+            'deuda_total': deuda_total,
+            'total_facturas_credito': float(facturas_credito),
+            'total_abonos': float(total_abonos),
+            'tiene_deuda': deuda_total > 0
+        }
+
+
+# =========================
+# ABONOS (Pagos a clientes en mora)
+# =========================
+
+class Abono(models.Model):
+    """Abonos o pagos parciales que reducen la deuda de un cliente en mora."""
+
+    METODO_PAGO_CHOICES = [
+        ('efectivo', 'Efectivo'),
+        ('transferencia', 'Transferencia'),
+        ('nequi', 'Nequi'),
+        ('tarjeta', 'Tarjeta'),
+        ('otro', 'Otro'),
+    ]
+
+    cliente = models.ForeignKey(
+        'Cliente',
+        on_delete=models.CASCADE,
+        related_name='abonos'
+    )
+    monto = models.DecimalField(max_digits=12, decimal_places=2)
+    metodo_pago = models.CharField(
+        max_length=20,
+        choices=METODO_PAGO_CHOICES,
+        default='efectivo'
+    )
+    referencia = models.CharField(max_length=100, blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
+    fecha_abono = models.DateField(db_index=True)
+    fecha_hora_registro = models.DateTimeField(auto_now_add=True)
+    registrado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='abonos_registrados'
+    )
+
+    class Meta:
+        db_table = 'facturacion_abono'
+        verbose_name = 'Abono'
+        verbose_name_plural = 'Abonos'
+        indexes = [
+            models.Index(fields=['cliente', '-fecha_abono']),
+            models.Index(fields=['-fecha_abono']),
+        ]
+        ordering = ['-fecha_abono', '-fecha_hora_registro']
+
+    def __str__(self):
+        cliente_nombre = self.cliente.nombre_completo if self.cliente else 'Cliente eliminado'
+        return f'Abono de {self.monto} a {cliente_nombre}'
+
+    def save(self, *args, **kwargs):
+        """Al guardar el abono, actualizar la fecha de último pago del cliente."""
+        from django.utils import timezone
+
+        # Primero guardar el abono
+        super().save(*args, **kwargs)
+
+        # Luego actualizar el cliente
+        if self.cliente:
+            self.cliente.fecha_ultimo_pago = self.fecha_abono
+
+            # Recalcular días de mora
+            hoy = timezone.now().date()
+            delta = hoy - self.cliente.fecha_ultimo_pago
+            self.cliente.dias_mora = delta.days
+
+            # Si el cliente tiene menos de 30 días de mora, quitarlo de mora
+            if self.cliente.dias_mora < 30:
+                self.cliente.en_mora = False
+
+            self.cliente.save(update_fields=['fecha_ultimo_pago', 'dias_mora', 'en_mora'])
 
 
 # =========================
@@ -765,9 +932,33 @@ class Factura(models.Model):
         ('ANU', 'Anulada'),       # Anulada con reversión de stock
     ]
 
+    TIPO_FACTURA_CHOICES = [
+        ('contado', 'Contado'),        # Paga al momento
+        ('credito', 'Crédito/Fiado'),  # Paga después
+    ]
+
     # Datos básicos
     numero_factura = models.CharField(max_length=50, unique=True, db_index=True)  # FACT-000001
     estado = models.CharField(max_length=3, choices=ESTADO_CHOICES, default='BOR')
+    tipo_factura = models.CharField(
+        max_length=10,
+        choices=TIPO_FACTURA_CHOICES,
+        default='contado',
+        db_index=True,
+        help_text='Contado: paga al momento, Crédito: fiado que se paga después'
+    )
+
+    # Campos para facturas de crédito (fiado)
+    dia_pago = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text='Día del mes en que el cliente pagará (1-31). Solo para facturas de crédito.'
+    )
+    cuotas = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text='Número de cuotas en las que se dividirá el pago. Solo para facturas de crédito.'
+    )
 
     # Cliente (opcional para venta al público)
     cliente = models.ForeignKey(
@@ -1214,3 +1405,179 @@ def actualizar_cache_stock_post_delete(sender, instance, **kwargs):
             import logging
             logger = logging.getLogger(__name__)
             logger.error(f'Error actualizando stock cache para producto {instance.producto_id}: {e}')
+
+
+# =========================
+# CAJA Y CUADRE DE CAJA
+# =========================
+
+class MovimientoCaja(models.Model):
+    """
+    Registra movimientos de entrada y salida de dinero en caja.
+    """
+    TIPO_CHOICES = [
+        ('entrada', 'Entrada'),
+        ('salida', 'Salida'),
+    ]
+
+    CATEGORIA_ENTRADA_CHOICES = [
+        ('venta', 'Venta'),
+        ('abono', 'Abono'),
+        ('reembolso', 'Reembolso'),
+        ('ajuste_positivo', 'Ajuste Positivo'),
+        ('otra_entrada', 'Otra Entrada'),
+    ]
+
+    CATEGORIA_SALIDA_CHOICES = [
+        ('compra', 'Compra'),
+        ('gasto', 'Gasto'),
+        ('retiro', 'Retiro'),
+        ('devolucion', 'Devolución'),
+        ('ajuste_negativo', 'Ajuste Negativo'),
+        ('otra_salida', 'Otra Salida'),
+    ]
+
+    METODO_PAGO_CHOICES = [
+        ('efectivo', 'Efectivo'),
+        ('transferencia', 'Transferencia'),
+        ('nequi', 'Nequi'),
+        ('daviplata', 'Daviplata'),
+        ('tarjeta', 'Tarjeta'),
+        ('otro', 'Otro'),
+    ]
+
+    # Usuario que registra el movimiento
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='movimientos_caja'
+    )
+
+    # Tipo y categoría
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    categoria = models.CharField(max_length=30)
+
+    # Monto
+    monto = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # Método de pago
+    metodo_pago = models.CharField(
+        max_length=20,
+        choices=METODO_PAGO_CHOICES,
+        default='efectivo'
+    )
+
+    # Descripción del movimiento
+    descripcion = models.TextField()
+
+    # Referencia a factura (opcional)
+    factura = models.ForeignKey(
+        Factura,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='movimientos_caja'
+    )
+
+    # Sucursal (para filtrado por usuarios no-admin)
+    sucursal = models.ForeignKey(
+        'Sucursales',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='movimientos_caja'
+    )
+
+    # Fecha y hora del movimiento
+    fecha_hora = models.DateTimeField(auto_now_add=True)
+
+    # Fecha del movimiento (para filtrados por día)
+    fecha = models.DateField(db_index=True)
+
+    class Meta:
+        db_table = 'caja_movimientos'
+        verbose_name = 'Movimiento de Caja'
+        verbose_name_plural = 'Movimientos de Caja'
+        ordering = ('-fecha_hora',)
+        indexes = [
+            models.Index(fields=['fecha', '-fecha_hora']),
+            models.Index(fields=['tipo', 'fecha']),
+            models.Index(fields=['metodo_pago', 'fecha']),
+        ]
+
+    def __str__(self):
+        return f'{self.tipo.upper()}: {self.monto} - {self.descripcion[:30]}'
+
+
+class ArqueoCaja(models.Model):
+    """
+    Registra los arqueos de caja (conteo físico del dinero).
+    Permite comparar el saldo esperado vs el saldo real.
+    """
+    # Usuario que realiza el arqueo
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='arqueos_caja'
+    )
+
+    # Sucursal (para filtrado por usuarios no-admin)
+    sucursal = models.ForeignKey(
+        'Sucursales',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='arqueos_caja'
+    )
+
+    # Fecha del arqueo
+    fecha = models.DateField(db_index=True)
+
+    # Fecha y hora de registro
+    fecha_hora_registro = models.DateTimeField(auto_now_add=True)
+
+    # Saldo inicial del día
+    saldo_inicial = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    # Total de entradas del día
+    total_entradas = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    # Total de salidas del día
+    total_salidas = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    # Saldo esperado (inicial + entradas - salidas)
+    saldo_esperado = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # Monto contado físicamente
+    monto_contado = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # Diferencia (contado - esperado)
+    diferencia = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    # Observaciones
+    observaciones = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'caja_arqueos'
+        verbose_name = 'Arqueo de Caja'
+        verbose_name_plural = 'Arqueos de Caja'
+        ordering = ('-fecha', '-fecha_hora_registro')
+        indexes = [
+            models.Index(fields=['fecha', '-fecha_hora_registro']),
+        ]
+
+    def __str__(self):
+        return f'Arqueo {self.fecha} - Diferencia: {self.diferencia}'
+
+    def calcular_diferencia(self):
+        """Calcula la diferencia entre el monto contado y el esperado"""
+        return self.monto_contado - self.saldo_esperado
+
+    def save(self, *args, **kwargs):
+        # Calcular diferencia automáticamente
+        self.diferencia = self.calcular_diferencia()
+        super().save(*args, **kwargs)

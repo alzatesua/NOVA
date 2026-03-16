@@ -1317,3 +1317,268 @@ export async function getCuponesActivos() {
     subdominio
   }, token);
 }
+
+// ==================== CAJA ====================
+
+/**
+ * Obtiene las estadísticas de caja para una fecha específica
+ */
+export function fetchEstadisticasCaja({
+  token,
+  usuario,
+  subdominio,
+  fecha,
+  id_sucursal  // ← agregar
+}) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/estadisticas/', {
+    usuario,
+    token,
+    subdominio,
+    fecha,
+    ...(id_sucursal && { id_sucursal })  // ← enviar solo si tiene valor
+  }, token);
+}
+
+export function fetchMovimientosCaja({
+  token,
+  usuario,
+  subdominio,
+  fecha,
+  tipo = 'todos',
+  pagina = 1,
+  por_pagina = 20,
+  id_sucursal  // ← agregar
+}) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/movimientos/', {
+    usuario,
+    token,
+    subdominio,
+    fecha,
+    tipo,
+    pagina,
+    por_pagina,
+    ...(id_sucursal && { id_sucursal })  // ← enviar solo si tiene valor
+  }, token);
+}
+
+
+/**
+ * Registra un nuevo movimiento de caja (entrada o salida)
+ */
+export function registrarMovimientoCaja({
+  token, usuario, subdominio, tipo, categoria,
+  monto, metodo_pago = 'efectivo', descripcion, id_sucursal
+}) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/registrar_movimiento/', {
+    usuario, token, subdominio, tipo, categoria,
+    monto, metodo_pago, descripcion,
+    ...(id_sucursal && { id_sucursal, sucursal: id_sucursal }) // 👈
+  }, token);
+}
+
+/**
+ * Obtiene el cuadre de caja completo para una fecha específica
+ */
+export function fetchCuadreCaja({
+  token,
+  usuario,
+  subdominio,
+  fecha
+}) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/cuadre/', {
+    usuario,
+    token,
+    subdominio,
+    fecha
+  }, token);
+}
+
+/**
+ * Realiza un arqueo de caja (cierra la caja)
+ */
+/*export function realizarArqueoCaja({
+  token,
+  usuario,
+  subdominio,
+  fecha,
+  monto_contado
+}) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/realizar_arqueo/', {
+    usuario,
+    token,
+    subdominio,
+    fecha,
+    monto_contado
+  }, token);
+}*/
+
+
+export function realizarArqueoCaja({ token, usuario, subdominio, fecha, monto_contado, id_sucursal }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/realizar_arqueo/', {
+    usuario, token, subdominio, fecha, monto_contado,
+    ...(id_sucursal && { id_sucursal })  // 👈 para que el arqueo quede en la sede correcta
+  }, token);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// API DE CONTROL DE MORA (LISTA NEGRA DE CLIENTES)
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Verifica si un cliente está en mora antes de permitir una venta
+ */
+export function verificarMoraCliente({ token, usuario, subdominio, cliente_id }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/clientes-mora/verificar/', {
+    usuario,
+    token,
+    subdominio,
+    cliente_id
+  }, token);
+}
+
+/**
+ * Marca manualmente un cliente como en mora
+ */
+export function marcarClienteMora({ token, usuario, subdominio, cliente_id, observaciones }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/clientes-mora/marcar/', {
+    usuario,
+    token,
+    subdominio,
+    cliente_id,
+    observaciones
+  }, token);
+}
+
+/**
+ * Quita a un cliente de la lista negra de mora
+ */
+export function quitarMoraCliente({ token, usuario, subdominio, cliente_id, observaciones }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/clientes-mora/quitar/', {
+    usuario,
+    token,
+    subdominio,
+    cliente_id,
+    observaciones
+  }, token);
+}
+
+/**
+ * Lista todos los clientes en mora para un tenant
+ */
+export function listarClientesMora({ token, usuario, subdominio }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/clientes-mora/listar/', {
+    usuario,
+    token,
+    subdominio
+  }, token);
+}
+
+/**
+ * Actualiza los días de mora de todos los clientes (job programado)
+ */
+export function actualizarDiasMoraTodos({ token, usuario, subdominio }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/clientes-mora/actualizar-todos/', {
+    usuario,
+    token,
+    subdominio
+  }, token);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// API DE GESTIÓN DE ABONOS (Pagos a clientes en mora)
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Lista los abonos de un cliente específico
+ */
+export function listarAbonosCliente({ token, usuario, subdominio, cliente_id }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/abonos/listar/', {
+    usuario,
+    token,
+    subdominio,
+    cliente_id
+  }, token);
+}
+
+/**
+ * Crea un nuevo abono a un cliente en mora
+ */
+export function crearAbono({ token, usuario, subdominio, cliente_id, monto, metodo_pago, referencia, observaciones, fecha_abono }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/abonos/crear/', {
+    usuario,
+    token,
+    subdominio,
+    cliente_id,
+    monto,
+    metodo_pago: metodo_pago || 'efectivo',
+    referencia,
+    observaciones,
+    fecha_abono
+  }, token);
+}
+
+/**
+ * Obtiene un resumen completo de la mora de un cliente con sus abonos
+ */
+export function resumenMoraCliente({ token, usuario, subdominio, cliente_id }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/abonos/resumen/', {
+    usuario,
+    token,
+    subdominio,
+    cliente_id
+  }, token);
+}
+
+/**
+ * Lista todos los clientes que deben dinero
+ */
+export function listarClientesConDeuda({ token, usuario, subdominio, solo_mora = false }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/clientes-mora/deuda/listar/', {
+    usuario,
+    token,
+    subdominio,
+    solo_mora
+  }, token);
+}
+
+/**
+ * Obtiene el resumen de deuda de un cliente específico
+ */
+export function resumenDeudaCliente({ token, usuario, subdominio, cliente_id }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/facturacion/clientes-mora/deuda/resumen/', {
+    usuario,
+    token,
+    subdominio,
+    cliente_id
+  }, token);
+}
+export function fetchSucursalesCaja({ token, usuario, subdominio }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/sucursales/', {
+    usuario,
+    token,
+    subdominio,
+  }, token);
+}
+
+
+// Exportar funciones principales para uso en componentes
+export { post, get, patch };
+
+
