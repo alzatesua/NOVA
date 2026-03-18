@@ -8,6 +8,7 @@ import CajaDashboard from './caja/CajaDashboard';
 import MovimientosTable from './caja/MovimientosTable';
 import RegistroMovimiento from './caja/RegistroMovimiento';
 import CuadreCaja from './caja/CuadreCaja';
+import CajaMenor from './caja/CajaMenor';
 import { fetchSucursalesCaja } from '../services/api';
 import { showToast } from '../utils/toast';
 
@@ -201,7 +202,7 @@ export default function CajaView() {
   const handleRegistroExitoso = () => setRefreshKey(k => k + 1);
   const handleRefresh         = () => setRefreshKey(k => k + 1);
 
-  const vistaOptions  = [{ value:'general',label:'Vista General'},{value:'movimientos',label:'Movimientos'},{value:'cuadre',label:'Cuadre de Caja'}];
+  const vistaOptions  = [{ value:'general',label:'Vista General'},{ value:'movimientos',label:'Movimientos'},{value:'cuadre',label:'Cuadre de Caja'},{value:'caja_menor',label:'Caja Menor'}];
   const filtroOptions = [{ value:'todos',label:'Todos'},{value:'entrada',label:'Entradas'},{value:'salida',label:'Salidas'}];
 
   return (
@@ -296,6 +297,12 @@ export default function CajaView() {
         {vista === 'cuadre' && (
           <div className="cv-section" key={`cuadre-${refreshKey}`}>
             <CuadreCaja fecha={fecha} isAdmin={isAdmin} idSucursal={getSucursalFilter()} />
+          </div>
+        )}
+
+        {vista === 'caja_menor' && (
+          <div className="cv-section" key={`caja_menor-${refreshKey}`}>
+            <CajaMenor fecha={fecha} idSucursal={getSucursalFilter()} onRefresh={handleRefresh} />
           </div>
         )}
 

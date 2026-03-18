@@ -1426,6 +1426,10 @@ class MovimientoCaja(models.Model):
         ('reembolso', 'Reembolso'),
         ('ajuste_positivo', 'Ajuste Positivo'),
         ('otra_entrada', 'Otra Entrada'),
+        ('reembolso_caja_menor', 'Reembolso Caja Menor'),
+        ('venta_caja_menor', 'Venta Caja Menor'),
+        ('abono_caja_menor', 'Abono Caja Menor'),
+        ('otra_entrada_caja_menor', 'Otra Entrada Caja Menor'),
     ]
 
     CATEGORIA_SALIDA_CHOICES = [
@@ -1435,6 +1439,10 @@ class MovimientoCaja(models.Model):
         ('devolucion', 'Devolución'),
         ('ajuste_negativo', 'Ajuste Negativo'),
         ('otra_salida', 'Otra Salida'),
+        ('compra_caja_menor', 'Compra Caja Menor'),
+        ('gasto_caja_menor', 'Gasto Caja Menor'),
+        ('pago_caja_menor', 'Pago Caja Menor'),
+        ('otra_salida_caja_menor', 'Otra Salida Caja Menor'),
     ]
 
     METODO_PAGO_CHOICES = [
@@ -1495,6 +1503,9 @@ class MovimientoCaja(models.Model):
 
     # Fecha del movimiento (para filtrados por día)
     fecha = models.DateField(db_index=True)
+
+    # Indica si el movimiento es de caja menor
+    es_caja_menor = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'caja_movimientos'

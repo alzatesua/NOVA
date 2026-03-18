@@ -6,6 +6,7 @@ from django.urls import path
 from .views_caja import (
     estadisticas_caja,
     listar_movimientos,
+    listar_movimientos_caja_menor,
     registrar_movimiento,
     cuadre_caja,
     realizar_arqueo,
@@ -20,6 +21,9 @@ urlpatterns = [
 
     # Listado de movimientos
     path('movimientos/', listar_movimientos, name='listar_movimientos'),
+
+    # Listado de movimientos de caja menor
+    path('movimientos_caja_menor/', listar_movimientos_caja_menor, name='listar_movimientos_caja_menor'),
 
     # Registrar movimiento (entrada/salida)
     path('registrar_movimiento/', registrar_movimiento, name='registrar_movimiento'),

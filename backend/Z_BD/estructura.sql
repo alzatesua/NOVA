@@ -503,5 +503,33 @@ CREATE INDEX idx_abono_fecha ON facturacion_abono(fecha_abono DESC);
 
 COMMENT ON TABLE facturacion_abono IS 'Abonos o pagos parciales de clientes en mora para reducir su deuda';
 
-ALTER TABLE caja_movimientos 
-ADD COLUMN sucursal_id INTEGER;
+ALTER TABLE caja_movimientos
+ADD COLUMN IF NOT EXISTS sucursal_id INTEGER;
+
+ALTER TABLE caja_movimientos ADD COLUMN IF NOT EXISTS es_caja_menor BOOLEAN DEFAULT FALSE;
+
+-- Función para marcar automáticamente los movimientos como caja menor según la categoría
+CREATE OR REPLACE FUNCTION marcar_caja_menor()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.categoria IN (
+        'reembolso_caja_menor', 'venta_caja_menor', 'abono_caja_menor', 'otra_entrada_caja_menor',
+        'compra_caja_menor', 'gasto_caja_menor', 'pago_caja_menor', 'otra_salida_caja_menor'
+    ) THEN
+        NEW.es_caja_menor := true;
+    ELSE
+        NEW.es_caja_menor := false;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para ejecutar automáticamente la función antes de cada INSERT
+DROP TRIGGER IF EXISTS trigger_marcar_caja_menor ON caja_movimientos;
+CREATE TRIGGER trigger_marcar_caja_menor
+    BEFORE INSERT ON caja_movimientos
+    FOR EACH ROW
+    EXECUTE FUNCTION marcar_caja_menor();
+
+COMMENT ON FUNCTION marcar_caja_menor() IS 'Marca automáticamente los movimientos como caja menor según la categoría';
+COMMENT ON TRIGGER trigger_marcar_caja_menor ON caja_movimientos IS 'Trigger automático para clasificar movimientos de caja menor';

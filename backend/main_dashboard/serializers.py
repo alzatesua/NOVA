@@ -1549,7 +1549,8 @@ class MovimientoCajaSerializer(DbAliasModelSerializer):
         fields = [
             'id', 'tipo', 'categoria', 'monto', 'metodo_pago',
             'descripcion', 'factura', 'fecha_hora', 'fecha',
-            'usuario_nombre', 'usuario_email', 'sucursal', 'sucursal_nombre'
+            'usuario_nombre', 'usuario_email', 'sucursal', 'sucursal_nombre',
+            'es_caja_menor'
         ]
         read_only_fields = ['id', 'fecha_hora', 'fecha']
 
@@ -1558,7 +1559,7 @@ class MovimientoCajaCreateSerializer(DbAliasModelSerializer):
         model = MovimientoCaja
         fields = [
             'tipo', 'categoria', 'monto', 'metodo_pago',
-            'descripcion', 'factura', 'sucursal'
+            'descripcion', 'factura', 'sucursal', 'es_caja_menor'
         ]
         extra_kwargs = {
             'tipo': {'required': True},
@@ -1568,10 +1569,17 @@ class MovimientoCajaCreateSerializer(DbAliasModelSerializer):
             'descripcion': {'required': True},
             'factura': {'required': False, 'allow_null': True},
             'sucursal': {'required': False, 'allow_null': True},
+            'es_caja_menor': {'required': False, 'default': False},
         }
 
     def validate(self, attrs):
         from decimal import Decimal
+        import logging
+        logger = logging.getLogger(__name__)
+
+        # ── DEBUG: Log de datos recibidos en validate ──
+        logger.info(f"🔍 validate() llamado con attrs: {attrs}")
+        logger.info(f"🔍 es_caja_menor en attrs: {attrs.get('es_caja_menor')}")
 
         if 'monto' in attrs and attrs['monto'] is not None:
             if not isinstance(attrs['monto'], Decimal):
@@ -1597,12 +1605,24 @@ class MovimientoCajaCreateSerializer(DbAliasModelSerializer):
 
     def create(self, validated_data):
         from django.utils import timezone
+        import logging
+        logger = logging.getLogger(__name__)
 
         alias = self.context.get('db_alias', 'default')
         validated_data['fecha'] = timezone.now().date()
 
+        # ── DEBUG: Log de es_caja_menor al inicio del create ──
+        logger.info(f"🔧 create() llamado - es_caja_menor en validated_data: {validated_data.get('es_caja_menor')}")
+        logger.info(f"🔧 validated_data completo: {validated_data}")
+
         usuario = self.context.get('usuario')
         request = self.context.get('request')
+
+        # ── IMPORTANTE: Si es_caja_menor no está en validated_data pero viene en request, agregarlo ──
+        if 'es_caja_menor' not in validated_data or validated_data.get('es_caja_menor') is None:
+            if request and 'es_caja_menor' in request.data:
+                validated_data['es_caja_menor'] = request.data.get('es_caja_menor')
+                logger.info(f"✅ es_caja_menor agregado desde request.data: {validated_data.get('es_caja_menor')}")
 
         # ── Resolver sucursal ──────────────────────────────────
         if not validated_data.get('sucursal'):
@@ -1621,7 +1641,16 @@ class MovimientoCajaCreateSerializer(DbAliasModelSerializer):
         if usuario:
             validated_data['usuario'] = usuario
 
-        return super().create(validated_data)
+        # ── DEBUG: Log de es_caja_menor antes de guardar ──
+        logger.info(f"💾 Antes de super().create() - es_caja_menor: {validated_data.get('es_caja_menor')}")
+        logger.info(f"💾 validated_data final: {validated_data}")
+
+        movimiento = super().create(validated_data)
+
+        # ── DEBUG: Log de es_caja_menor después de guardar ──
+        logger.info(f"✅ Después de super().create() - movimiento.es_caja_menor: {movimiento.es_caja_menor}")
+
+        return movimiento
 
 class ArqueoCajaSerializer(DbAliasModelSerializer):
     """Serializer para ArqueoCaja"""

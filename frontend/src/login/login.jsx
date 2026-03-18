@@ -36,9 +36,12 @@ function Login() {
 
         // Guardar todos los datos en localStorage
         localStorage.setItem("accessToken", data.access);
+        localStorage.setItem("auth_access_token", data.access); // Para el sistema de refresh
         localStorage.setItem("token_usuario", data.token_usuario);
         localStorage.setItem("refresh_token", data.refresh);
+        localStorage.setItem("auth_refresh_token", data.refresh); // Para el sistema de refresh
         localStorage.setItem("usuario", data.usuario);
+        localStorage.setItem("auth_usuario", data.usuario); // Para el sistema de refresh
         localStorage.setItem("rol", data.rol);
         localStorage.setItem("slug", data.tienda_slug);
         localStorage.setItem("tienda", data.tienda);

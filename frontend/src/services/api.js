@@ -58,26 +58,29 @@ async function post(endpoint, body, token, skipRefresh = false) {
     if (!isAuthEndpoint) {
       console.warn('⚠️ Error 401 detectado. Intentando refresh de token...');
 
-      const refreshToken = localStorage.getItem('auth_refresh_token');
+      // Obtener credenciales para el refresh
+      const usuario = localStorage.getItem('auth_usuario');
+      const subdominio = window.location.hostname.split('.')[0];
 
-      if (refreshToken) {
+      if (usuario) {
         try {
-          const subdominio = window.location.hostname.split('.')[0];
-
           // Usar _postRaw para evitar recursión (skipRefresh=true)
+          // Intentamos hacer login nuevamente para obtener un token fresco
           const refreshResult = await _postRaw('api/auth/refresh/', {
-            refresh: refreshToken,
-            subdominio
+            usuario,
+            subdominio,
+            token: token // Enviamos el token actual
           }, null);
 
-          if (refreshResult.res.ok && refreshResult.json.access) {
-            // Guardar nuevo access token
-            const newAccessToken = refreshResult.json.access;
-            localStorage.setItem('auth_access_token', newAccessToken);
+          if (refreshResult.res.ok && (refreshResult.json.access || refreshResult.json.token || refreshResult.json.nuevo_token)) {
+            // Guardar nuevo token
+            const newToken = refreshResult.json.access || refreshResult.json.token || refreshResult.json.nuevo_token;
+            localStorage.setItem('token_usuario', newToken);
+            localStorage.setItem('auth_access_token', newToken);
             console.log('✅ Token refrescado exitosamente');
 
             // Reintentar la petición original con el nuevo token
-            const retryResult = await _postRaw(endpoint, body, newAccessToken);
+            const retryResult = await _postRaw(endpoint, body, newToken);
             if (retryResult.res.ok) {
               console.log(`✅ Reintento exitoso después de refresh`);
               // Guardar nuevo_token si está presente en la respuesta del reintento
@@ -104,6 +107,12 @@ async function post(endpoint, body, token, skipRefresh = false) {
       localStorage.removeItem('auth_access_token');
       localStorage.removeItem('auth_refresh_token');
       localStorage.removeItem('auth_usuario');
+      localStorage.removeItem('token_usuario');
+
+      // Disparar evento de sesión expirada
+      window.dispatchEvent(new CustomEvent('session:expired', {
+        detail: { message: 'SESSION_EXPIRED', isAuthError: true, details: json }
+      }));
 
       // Lanzar error especial para que el componente lo capture
       throw {
@@ -161,26 +170,29 @@ async function get(endpoint, token, skipRefresh = false) {
     if (!isAuthEndpoint) {
       console.warn('⚠️ Error 401 detectado (GET). Intentando refresh de token...');
 
-      const refreshToken = localStorage.getItem('auth_refresh_token');
+      // Obtener credenciales para el refresh
+      const usuario = localStorage.getItem('auth_usuario');
+      const subdominio = window.location.hostname.split('.')[0];
 
-      if (refreshToken) {
+      if (usuario) {
         try {
-          const subdominio = window.location.hostname.split('.')[0];
-
           // Usar _postRaw para evitar recursión (skipRefresh=true)
+          // Intentamos hacer refresh para obtener un token fresco
           const refreshResult = await _postRaw('api/auth/refresh/', {
-            refresh: refreshToken,
-            subdominio
+            usuario,
+            subdominio,
+            token: token // Enviamos el token actual
           }, null);
 
-          if (refreshResult.res.ok && refreshResult.json.access) {
-            // Guardar nuevo access token
-            const newAccessToken = refreshResult.json.access;
-            localStorage.setItem('auth_access_token', newAccessToken);
+          if (refreshResult.res.ok && (refreshResult.json.access || refreshResult.json.token || refreshResult.json.nuevo_token)) {
+            // Guardar nuevo token
+            const newToken = refreshResult.json.access || refreshResult.json.token || refreshResult.json.nuevo_token;
+            localStorage.setItem('token_usuario', newToken);
+            localStorage.setItem('auth_access_token', newToken);
             console.log('✅ Token refrescado exitosamente (GET)');
 
             // Reintentar la petición original con el nuevo token
-            const retryResult = await _getRaw(endpoint, newAccessToken);
+            const retryResult = await _getRaw(endpoint, newToken);
             if (retryResult.res.ok) {
               console.log(`✅ Reintento exitoso después de refresh (GET)`);
               // Guardar nuevo_token si está presente en la respuesta del reintento
@@ -207,6 +219,12 @@ async function get(endpoint, token, skipRefresh = false) {
       localStorage.removeItem('auth_access_token');
       localStorage.removeItem('auth_refresh_token');
       localStorage.removeItem('auth_usuario');
+      localStorage.removeItem('token_usuario');
+
+      // Disparar evento de sesión expirada
+      window.dispatchEvent(new CustomEvent('session:expired', {
+        detail: { message: 'SESSION_EXPIRED', isAuthError: true, details: json }
+      }));
 
       // Lanzar error especial para que el componente lo capture
       throw {

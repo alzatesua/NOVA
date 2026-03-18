@@ -230,6 +230,10 @@ def registrar_movimiento(request):
         alias = mixin._resolve_alias(request)
         user = mixin._tenant_user
 
+        # ── DEBUG: Log de datos recibidos ──
+        logger.info(f"📥 Datos recibidos en registrar_movimiento: {request.data}")
+        logger.info(f"📥 es_caja_menor en request.data: {request.data.get('es_caja_menor')}")
+
         serializer = MovimientoCajaCreateSerializer(
             data=request.data,
             context={
@@ -239,7 +243,15 @@ def registrar_movimiento(request):
             }
         )
         serializer.is_valid(raise_exception=True)
+
+        # ── DEBUG: Log de datos validados ──
+        logger.info(f"✅ Datos validados: {serializer.validated_data}")
+        logger.info(f"✅ es_caja_menor en validated_data: {serializer.validated_data.get('es_caja_menor')}")
+
         movimiento = serializer.save()
+
+        # ── DEBUG: Log del movimiento guardado ──
+        logger.info(f"💾 Movimiento guardado - es_caja_menor: {movimiento.es_caja_menor}")
 
         if user and not movimiento.usuario:
             movimiento.usuario = user
@@ -548,6 +560,65 @@ def realizar_arqueo(request):
             {'success': False, 'message': str(e)},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+@api_view(['POST'])
+def listar_movimientos_caja_menor(request):
+    """
+    Lista los movimientos de caja menor para una fecha específica.
+
+    Body esperado:
+    {
+        "usuario": "...",
+        "token": "...",
+        "subdominio": "...",
+        "fecha": "2024-01-15",  # opcional, por defecto hoy
+        "id_sucursal": 1        # opcional, para filtrar por sucursal
+    }
+
+    Retorna:
+    {
+        "success": true,
+        "movimientos": [...]
+    }
+    """
+    try:
+        mixin = CajaTenantMixin()
+        alias = mixin._resolve_alias(request)
+
+        fecha_str = request.data.get('fecha')
+        if fecha_str:
+            from datetime import datetime
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        else:
+            fecha = timezone.now().date()
+
+        id_sucursal = request.data.get('id_sucursal')
+
+        # Filtrar movimientos de caja menor
+        queryset = MovimientoCaja.objects.using(alias).filter(
+            fecha=fecha,
+            es_caja_menor=True
+        )
+
+        if id_sucursal:
+            queryset = queryset.filter(sucursal_id=id_sucursal)
+
+        queryset = queryset.order_by('-fecha_hora')
+
+        serializer = MovimientoCajaSerializer(queryset, many=True)
+
+        return Response({
+            'success': True,
+            'movimientos': serializer.data
+        }, status=status.HTTP_200_OK)
+
+    except ValueError as e:
+        logger.error(f"Error en listar_movimientos_caja_menor (ValueError): {str(e)}")
+        return Response({'success': False, 'message': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+    except Exception as e:
+        logger.error(f"Error en listar_movimientos_caja_menor: {str(e)}", exc_info=True)
+        return Response({'success': False, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
