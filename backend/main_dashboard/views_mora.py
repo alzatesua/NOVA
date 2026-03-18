@@ -416,7 +416,9 @@ def listar_clientes_con_deuda(request):
     """
     Lista todos los clientes que deben dinero (tienen deuda > 0).
     Incluye clientes en mora y clientes con crédito vigente.
-    
+    Incluye el detalle de productos llevados a crédito (fiado).
+    Incluye el detalle de abonos realizados con métodos de pago.
+
     Body esperado:
     {
         "usuario": "...",
@@ -426,30 +428,94 @@ def listar_clientes_con_deuda(request):
     }
     """
     try:
+        logger.info("=== INICIO listar_clientes_con_deuda ===")
         alias = _get_tenant_alias(request)
         solo_mora = request.data.get('solo_mora', False)
 
-        from .models import Cliente
+        from .models import Cliente, Factura, FacturaDetalle, Abono
         from django.db.models import Sum, Q
-        
+
+        logger.info(f"Modelos importados correctamente. Alias: {alias}")
+
         # Obtener todos los clientes
         clientes = Cliente.objects.using(alias).filter(estatus=True)
-        
+        logger.info(f"Total clientes: {clientes.count()}")
+
         data = []
         total_deuda_general = 0
-        
+
         for cliente in clientes:
+            logger.info(f"Procesando cliente {cliente.id} - {cliente.nombre_completo}")
+
             # Calcular deuda usando el método del modelo
             info_deuda = cliente.calcular_deuda_total()
-            
+            logger.info(f"Info deuda: {info_deuda}")
+
             # Solo incluir si tiene deuda
             if info_deuda['tiene_deuda']:
                 # Si solo_mora es true, verificar que esté en mora
                 if solo_mora and not cliente.en_mora:
+                    logger.info(f"Cliente {cliente.id} excluido por filtro solo_mora")
                     continue
-                
+
                 total_deuda_general += info_deuda['deuda_total']
-                
+
+                # ==================== OBTENER PRODUCTOS FIADOS ====================
+                facturas_credito = Factura.objects.using(alias).filter(
+                    cliente=cliente,
+                    tipo_factura='credito'
+                ).exclude(estado='ANU').order_by('-fecha_venta')
+
+                logger.info(f"Facturas de crédito encontradas: {facturas_credito.count()}")
+
+                productos_fiados = []
+                for factura in facturas_credito:
+                    logger.info(f"Procesando factura {factura.id}")
+                    try:
+                        detalles = factura.detalles.all().using(alias)
+                        logger.info(f"Detalles de factura {factura.id}: {detalles.count()}")
+                        for detalle in detalles:
+                            productos_fiados.append({
+                                'producto_id': detalle.producto_id,
+                                'producto_nombre': detalle.producto_nombre,
+                                'producto_sku': detalle.producto_sku,
+                                'cantidad': detalle.cantidad,
+                                'valor_unitario': round(float(detalle.precio_unitario), 2),
+                                'valor_total': round(float(detalle.total), 2),
+                                'fecha_venta': factura.fecha_venta.isoformat(),
+                                'numero_factura': factura.numero_factura,
+                                'factura_id': factura.id,
+                            })
+                    except Exception as e:
+                        logger.error(f"Error obteniendo detalles de factura {factura.id}: {str(e)}", exc_info=True)
+
+                logger.info(f"Total productos fiados: {len(productos_fiados)}")
+
+                # ==================== OBTENER ABONOS REALIZADOS ====================
+                abonos_realizados = []
+                try:
+                    abonos_queryset = Abono.objects.using(alias).filter(
+                        cliente=cliente
+                    ).order_by('-fecha_abono', '-fecha_hora_registro')
+
+                    logger.info(f"Abonos encontrados: {abonos_queryset.count()}")
+
+                    for abono in abonos_queryset:
+                        abonos_realizados.append({
+                            'abono_id': abono.id,
+                            'monto': round(float(abono.monto), 2),
+                            'fecha_abono': abono.fecha_abono.isoformat(),
+                            'fecha_hora_registro': abono.fecha_hora_registro.isoformat(),
+                            'metodo_pago': abono.get_metodo_pago_display(),
+                            'metodo_pago_codigo': abono.metodo_pago,
+                            'referencia': abono.referencia,
+                            'observaciones': abono.observaciones,
+                        })
+                except Exception as e:
+                    logger.error(f"Error obteniendo abonos: {str(e)}", exc_info=True)
+
+                logger.info(f"Total abonos realizados: {len(abonos_realizados)}")
+
                 data.append({
                     'cliente_id': cliente.id,
                     'nombre': cliente.nombre_completo,
@@ -464,13 +530,20 @@ def listar_clientes_con_deuda(request):
                     'total_abonos': round(info_deuda['total_abonos'], 2),
                     'limite_credito': round(float(cliente.limite_credito), 2) if cliente.limite_credito else 0,
                     'observaciones_mora': cliente.observaciones_mora,
+                    'productos_fiados': productos_fiados,
+                    'total_productos_fiados': len(productos_fiados),
+                    'abonos_realizados': abonos_realizados,
+                    'total_abonos_count': len(abonos_realizados),
                 })
-        
+
+                logger.info(f"Cliente agregado a data. Productos fiados: {len(productos_fiados)}, Abonos: {len(abonos_realizados)}")
+
         # Ordenar por deuda (mayor a menor)
         data.sort(key=lambda x: x['deuda_total'], reverse=True)
-        
+
         return Response({
             'success': True,
+            'version_codigo': '2.0-productos-abonos',  # Campo de prueba para verificar actualización
             'data': data,
             'resumen': {
                 'total_clientes_con_deuda': len(data),
@@ -481,7 +554,7 @@ def listar_clientes_con_deuda(request):
                 'total_deuda_credito_vigente': round(sum(c['deuda_total'] for c in data if not c['en_mora']), 2),
             }
         }, status=status.HTTP_200_OK)
-        
+
     except Exception as e:
         logger.error(f"Error en listar_clientes_con_deuda: {str(e)}", exc_info=True)
         return Response({
@@ -523,13 +596,14 @@ def resumen_deuda_cliente(request):
         # Calcular deuda
         info_deuda = cliente.calcular_deuda_total()
         
-        # Obtener facturas de crédito
+        # Obtener facturas de crédito con detalles de productos
         facturas = Factura.objects.using(alias).filter(
             cliente=cliente,
             tipo_factura='credito',
         ).exclude(estado='ANU')
-        
+
         lista_facturas = []
+        productos_fiados = []
         for f in facturas:
             lista_facturas.append({
                 'factura_id': f.id,
@@ -537,6 +611,24 @@ def resumen_deuda_cliente(request):
                 'fecha': f.fecha_venta.isoformat(),
                 'total': float(f.total),
             })
+
+            # Obtener detalles de productos de esta factura
+            try:
+                detalles = f.detalles.all().using(alias)
+                for detalle in detalles:
+                    productos_fiados.append({
+                        'producto_id': detalle.producto_id,
+                        'producto_nombre': detalle.producto_nombre,
+                        'producto_sku': detalle.producto_sku,
+                        'cantidad': detalle.cantidad,
+                        'valor_unitario': round(float(detalle.precio_unitario), 2),
+                        'valor_total': round(float(detalle.total), 2),
+                        'fecha_venta': f.fecha_venta.isoformat(),
+                        'numero_factura': f.numero_factura,
+                        'factura_id': f.id,
+                    })
+            except Exception as e:
+                logger.error(f"Error obteniendo detalles de factura {f.id}: {str(e)}")
         
         # Obtener abonos
         abonos = Abono.objects.using(alias).filter(
@@ -567,6 +659,8 @@ def resumen_deuda_cliente(request):
             'deuda': info_deuda,
             'facturas_credito': lista_facturas,
             'abonos': lista_abonos,
+            'productos_fiados': productos_fiados,
+            'total_productos_fiados': len(productos_fiados),
         }, status=status.HTTP_200_OK)
         
     except Exception as e:

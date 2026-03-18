@@ -105,11 +105,27 @@ export default function MoraView() {
       });
 
       if (response.success) {
-        setResumenCliente(response);
+        // Mezclar la respuesta del resumen con los productos fiados del cliente original
+        setResumenCliente({
+          ...response,
+          // Si la respuesta no tiene productos fiados, usar los del cliente seleccionado
+          productos_fiados: response.productos_fiados || cliente.productos_fiados || []
+        });
       }
     } catch (error) {
       console.error('Error cargando resumen del cliente:', error);
       showToast('error', 'Error al cargar detalles del cliente');
+      // En caso de error, al menos mostrar los datos del cliente con sus productos
+      setResumenCliente({
+        cliente: cliente,
+        deuda: {
+          deuda_total: cliente.deuda_total,
+          total_facturas_credito: cliente.total_facturas_credito,
+          total_abonos: cliente.total_abonos
+        },
+        productos_fiados: cliente.productos_fiados || [],
+        abonos: []
+      });
     }
   };
 
@@ -403,11 +419,16 @@ export default function MoraView() {
                                   <CurrencyDollarIcon className="h-4 w-4 text-blue-600" />
                                   <span className="font-bold text-blue-600">{formatCurrency(cliente.deuda_total)}</span>
                                 </div>
-                                {cliente.total_facturas_credito !== '0' && (
-                                  <span className="text-slate-500 dark:!text-slate-400">
-                                    Facturas: {formatCurrency(cliente.total_facturas_credito)}
-                                  </span>
-                                )}
+                                <div className="flex items-center gap-3 text-xs text-slate-500 dark:!text-slate-400">
+                                  {cliente.total_facturas_credito !== '0' && (
+                                    <span>Facturas: {formatCurrency(cliente.total_facturas_credito)}</span>
+                                  )}
+                                  {cliente.total_productos_fiados > 0 && (
+                                    <span className="px-2 py-0.5 bg-purple-100 dark:!bg-purple-900/30 text-purple-700 dark:!text-purple-400 rounded-full font-semibold">
+                                      {cliente.total_productos_fiados} productos
+                                    </span>
+                                  )}
+                                </div>
                               </>
                             )}
                           </div>
@@ -546,6 +567,52 @@ export default function MoraView() {
                   ) : (
                     <div className="text-center py-4 bg-slate-50 dark:!bg-slate-800 rounded-lg">
                       <p className="text-sm text-slate-500 dark:!text-slate-400">Sin abonos registrados</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Productos Fiados */}
+                <div>
+                  <h4 className="font-semibold text-slate-900 dark:!text-slate-100 mb-3">
+                    Productos Adquiridos a Crédito
+                  </h4>
+                  {resumenCliente.productos_fiados && resumenCliente.productos_fiados.length > 0 ? (
+                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                      {resumenCliente.productos_fiados.map((producto, idx) => (
+                        <div key={`${producto.factura_id}-${idx}`} className="bg-blue-50 dark:!bg-blue-900/20 border border-blue-200 dark:!border-blue-800 rounded-lg p-3">
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1">
+                              <p className="font-bold text-blue-900 dark:!text-blue-300 text-sm">
+                                {producto.producto_nombre}
+                              </p>
+                              <div className="flex items-center gap-3 mt-1 text-xs text-blue-700 dark:!text-blue-400">
+                                <span>SKU: {producto.producto_sku || 'N/A'}</span>
+                                <span>Cant: {producto.cantidad}</span>
+                                <span>{formatCurrency(producto.valor_unitario)} c/u</span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-blue-800 dark:!text-blue-300">
+                                {formatCurrency(producto.valor_total)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-slate-600 dark:!text-slate-400 border-t border-blue-200 dark:!border-blue-800 pt-2 mt-2">
+                            <div className="flex items-center gap-2">
+                              <DocumentTextIcon className="h-3 w-3" />
+                              <span>Factura: {producto.numero_factura}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <CalendarIcon className="h-3 w-3" />
+                              <span>{formatDate(producto.fecha_venta)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 bg-slate-50 dark:!bg-slate-800 rounded-lg">
+                      <p className="text-sm text-slate-500 dark:!text-slate-400">Sin productos fiados registrados</p>
                     </div>
                   )}
                 </div>

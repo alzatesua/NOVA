@@ -186,7 +186,14 @@ export default function CajaView() {
       } else { showToast('Error al cargar las sucursales', 'error'); }
     } catch (err) {
       console.error(err);
-      showToast('Error al cargar las sucursales', 'error');
+      // Manejar error de sesión expirada
+      if (err.message === 'SESSION_EXPIRED' || err.isAuthError) {
+        showToast('Tu sesión ha expirado. Por favor inicia sesión nuevamente.', 'error');
+        // Opcional: redirigir al login
+        // setTimeout(() => window.location.href = '/login', 2000);
+      } else {
+        showToast('Error al cargar las sucursales', 'error');
+      }
     } finally { setLoadingSucursales(false); }
   };
 
