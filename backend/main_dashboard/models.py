@@ -1,6 +1,7 @@
 from django.db import models
 from django.db import models, transaction
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from django.conf import settings
 from django.db.models.signals import post_save, post_delete
@@ -1613,3 +1614,714 @@ class ArqueoCaja(models.Model):
         # Calcular diferencia automáticamente
         self.diferencia = self.calcular_diferencia()
         super().save(*args, **kwargs)
+
+
+# ============================================================================
+# MÓDULO DE PROVEEDORES
+# ============================================================================
+
+class Proveedor(models.Model):
+    """
+    Modelo principal para gestionar proveedores del negocio.
+    Almacena información general, contacto y datos comerciales.
+    """
+    ESTADO_CHOICES = [
+        ('activo', 'Activo'),
+        ('inactivo', 'Inactivo'),
+        ('bloqueado', 'Bloqueado'),
+    ]
+
+    # Datos básicos
+    nit = models.CharField(
+        "NIT/Identificación Fiscal",
+        max_length=50,
+        unique=True,
+        db_index=True,
+        help_text="Número de identificación tributaria del proveedor"
+    )
+    razon_social = models.CharField(
+        "Razón Social",
+        max_length=255,
+        help_text="Nombre legal de la empresa proveedora"
+    )
+    nombre_comercial = models.CharField(
+        "Nombre Comercial",
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Nombre con el que se conoce comercialmente"
+    )
+
+    # Datos de contacto principal
+    direccion = models.TextField("Dirección Física", blank=True, null=True)
+    ciudad = models.CharField("Ciudad", max_length=100, blank=True, null=True)
+    pais = models.CharField("País", max_length=100, default="Colombia")
+    correo_electronico = models.EmailField("Correo Electrónico", blank=True, null=True)
+    telefono = models.CharField("Teléfono", max_length=20, blank=True, null=True)
+    telefono_whatsapp = models.CharField(
+        "WhatsApp",
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text="Número de WhatsApp con código de país (ej: +573001234567)"
+    )
+
+    # Persona de contacto
+    contacto_principal = models.CharField(
+        "Persona de Contacto",
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Nombre de la persona principal de contacto"
+    )
+    cargo_contacto = models.CharField(
+        "Cargo del Contacto",
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    # Información web
+    sitio_web = models.URLField("Sitio Web", blank=True, null=True)
+    logo_url = models.URLField(
+        "URL del Logo",
+        blank=True,
+        null=True,
+        help_text="URL de la imagen del logo del proveedor"
+    )
+
+    # Condiciones comerciales
+    plazo_pago_dias = models.IntegerField(
+        "Plazo de Pago (días)",
+        blank=True,
+        null=True,
+        help_text="Plazo en días para pagar facturas"
+    )
+    descuento_comercial = models.DecimalField(
+        "Descuento Comercial (%)",
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+        help_text="Descuento por volumen de compra"
+    )
+    limite_credito = models.DecimalField(
+        "Límite de Crédito",
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        help_text="Monto máximo de crédito otorgado"
+    )
+
+    # Estado y calificación
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='activo',
+        db_index=True
+    )
+    calificacion_promedio = models.DecimalField(
+        "Calificación Promedio",
+        max_digits=3,
+        decimal_places=2,
+        default=0,
+        help_text="Promedio de calificaciones (1-5)"
+    )
+    numero_calificaciones = models.IntegerField(
+        "Número de Calificaciones",
+        default=0
+    )
+
+    # Observaciones y notas
+    observaciones = models.TextField(
+        "Observaciones",
+        blank=True,
+        null=True,
+        help_text="Notas generales sobre el proveedor"
+    )
+
+    # Metadatos
+    creado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='proveedores_creados'
+    )
+    creado_en = models.DateTimeField(auto_now_add=True, db_index=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+
+    class Meta:
+        db_table = 'proveedores'
+        verbose_name = 'Proveedor'
+        verbose_name_plural = 'Proveedores'
+        ordering = ('razon_social',)
+        indexes = [
+            models.Index(fields=['razon_social']),
+            models.Index(fields=['nit']),
+            models.Index(fields=['estado']),
+            models.Index(fields=['calificacion_promedio']),
+        ]
+
+    def __str__(self):
+        return f"{self.razon_social} ({self.nit})"
+
+    def actualizar_calificacion(self):
+        """Actualiza la calificación promedio del proveedor"""
+        calificaciones = self.calificaciones.all()
+        if calificaciones.exists():
+            total = sum(c.calificacion for c in calificaciones)
+            self.calificacion_promedio = round(total / calificaciones.count(), 2)
+            self.numero_calificaciones = calificaciones.count()
+            self.save(update_fields=['calificacion_promedio', 'numero_calificaciones'])
+
+    def get_total_compras(self):
+        """Retorna el total de compras realizadas a este proveedor"""
+        return self.pedidos.aggregate(
+            total=models.Sum('monto_total')
+        )['total'] or 0
+
+    def get_ultimo_pedido(self):
+        """Retorna la fecha del último pedido realizado"""
+        ultimo = self.pedidos.order_by('-fecha_pedido').first()
+        return ultimo.fecha_pedido if ultimo else None
+
+
+class ProductoProveedor(models.Model):
+    """
+    Productos que surte un proveedor específico.
+    Permite mantener un catálogo de productos por proveedor.
+    """
+    proveedor = models.ForeignKey(
+        Proveedor,
+        on_delete=models.CASCADE,
+        related_name='productos'
+    )
+    
+    # Datos del producto
+    nombre_producto = models.CharField("Nombre del Producto", max_length=255)
+    codigo_producto = models.CharField(
+        "Código/SKU",
+        max_length=100,
+        blank=True,
+        null=True
+    )
+    descripcion = models.TextField("Descripción", blank=True, null=True)
+    
+    # Información de precio y disponibilidad
+    precio_unitario = models.DecimalField(
+        "Precio Unitario",
+        max_digits=12,
+        decimal_places=2,
+        help_text="Precio al que el proveedor vende este producto"
+    )
+    moneda = models.CharField("Moneda", max_length=10, default="COP")
+    
+    # Datos de compra
+    tiempo_entrega_dias = models.IntegerField(
+        "Tiempo de Entrega (días)",
+        blank=True,
+        null=True,
+        help_text="Días que tarda el proveedor en entregar este producto"
+    )
+    minimo_pedido = models.IntegerField(
+        "Mínimo de Pedido",
+        blank=True,
+        null=True,
+        help_text="Cantidad mínima que se debe pedir"
+    )
+    
+    # Disponibilidad
+    disponible = models.BooleanField("Disponible", default=True)
+    stock_actual = models.IntegerField(
+        "Stock Actual",
+        blank=True,
+        null=True,
+        help_text="Stock disponible según proveedor"
+    )
+    
+    # Categorización
+    categoria = models.CharField(
+        "Categoría",
+        max_length=100,
+        blank=True,
+        null=True
+    )
+    
+    # Observaciones
+    observaciones = models.TextField("Observaciones", blank=True, null=True)
+    
+    # Metadatos
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'proveedor_productos'
+        verbose_name = 'Producto de Proveedor'
+        verbose_name_plural = 'Productos de Proveedores'
+        ordering = ('nombre_producto',)
+        indexes = [
+            models.Index(fields=['proveedor', 'nombre_producto']),
+            models.Index(fields=['disponible']),
+        ]
+
+    def __str__(self):
+        return f"{self.nombre_producto} - {self.proveedor.razon_social}"
+
+
+class ContactoProveedor(models.Model):
+    """
+    Múltiples medios de contacto para un proveedor.
+    Permite tener varios contactos por diferentes departamentos.
+    """
+    TIPO_CONTACTO_CHOICES = [
+        ('ventas', 'Ventas'),
+        ('cobranza', 'Cobranza'),
+        ('soporte', 'Soporte Técnico'),
+        ('logistica', 'Logística/Distribución'),
+        ('direccion', 'Dirección General'),
+        ('otro', 'Otro'),
+    ]
+
+    proveedor = models.ForeignKey(
+        Proveedor,
+        on_delete=models.CASCADE,
+        related_name='contactos'
+    )
+
+    tipo_contacto = models.CharField(
+        "Tipo de Contacto",
+        max_length=20,
+        choices=TIPO_CONTACTO_CHOICES,
+        default='ventas'
+    )
+    
+    nombre = models.CharField("Nombre del Contacto", max_length=255)
+    cargo = models.CharField("Cargo", max_length=100, blank=True, null=True)
+    correo_electronico = models.EmailField("Correo Electrónico", blank=True, null=True)
+    telefono = models.CharField("Teléfono", max_length=20, blank=True, null=True)
+    telefono_whatsapp = models.CharField(
+        "WhatsApp",
+        max_length=20,
+        blank=True,
+        null=True
+    )
+    extension = models.CharField("Extensión", max_length=10, blank=True, null=True)
+    
+    # Horario de contacto
+    horario_contacto = models.CharField(
+        "Horario de Contacto",
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Ej: Lun-Vie 8am-5pm"
+    )
+    
+    notas = models.TextField("Notas", blank=True, null=True)
+    
+    # Metadatos
+    principal = models.BooleanField(
+        "Contacto Principal",
+        default=False,
+        help_text="Marcar como contacto principal para este tipo"
+    )
+    activo = models.BooleanField("Activo", default=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'proveedor_contactos'
+        verbose_name = 'Contacto de Proveedor'
+        verbose_name_plural = 'Contactos de Proveedores'
+        ordering = ('tipo_contacto', 'nombre')
+        indexes = [
+            models.Index(fields=['proveedor', 'tipo_contacto']),
+            models.Index(fields=['principal']),
+        ]
+
+    def __str__(self):
+        return f"{self.nombre} - {self.get_tipo_contacto_display()} ({self.proveedor.razon_social})"
+    
+    def save(self, *args, **kwargs):
+        # Si se marca como principal, desmarcar otros del mismo tipo
+        if self.principal:
+            ContactoProveedor.objects.filter(
+                proveedor=self.proveedor,
+                tipo_contacto=self.tipo_contacto
+            ).exclude(pk=self.pk).update(principal=False)
+        super().save(*args, **kwargs)
+
+
+class PedidoProveedor(models.Model):
+    """
+    Historial de pedidos realizados a proveedores.
+    Registra compras, fechas y montos.
+    """
+    ESTADO_CHOICES = [
+        ('borrador', 'Borrador'),
+        ('solicitado', 'Solicitado'),
+        ('aprobado', 'Aprobado'),
+        ('en_transito', 'En Tránsito'),
+        ('recibido', 'Recibido'),
+        ('cancelado', 'Cancelado'),
+    ]
+
+    proveedor = models.ForeignKey(
+        Proveedor,
+        on_delete=models.PROTECT,
+        related_name='pedidos'
+    )
+
+    # Datos del pedido
+    numero_pedido = models.CharField(
+        "Número de Pedido",
+        max_length=50,
+        unique=True,
+        db_index=True
+    )
+    fecha_pedido = models.DateField("Fecha del Pedido", db_index=True)
+    fecha_entrega_estimada = models.DateField(
+        "Fecha de Entrega Estimada",
+        blank=True,
+        null=True
+    )
+    fecha_entrega_real = models.DateField(
+        "Fecha de Entrega Real",
+        blank=True,
+        null=True
+    )
+
+    # Montos
+    monto_subtotal = models.DecimalField(
+        "Subtotal",
+        max_digits=12,
+        decimal_places=2
+    )
+    monto_descuento = models.DecimalField(
+        "Descuento",
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+    monto_iva = models.DecimalField("IVA", max_digits=12, decimal_places=2, default=0)
+    monto_total = models.DecimalField("Total", max_digits=12, decimal_places=2)
+    
+    # Estado
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='borrador'
+    )
+    
+    # Información adicional
+    observaciones = models.TextField("Observaciones", blank=True, null=True)
+    notas_internas = models.TextField(
+        "Notas Internas",
+        blank=True,
+        null=True,
+        help_text="Notas visibles solo para usuarios internos"
+    )
+    
+    # Responsables
+    solicitado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='pedidos_solicitados'
+    )
+    recibido_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='pedidos_recibidos'
+    )
+    
+    # Metadatos
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'proveedor_pedidos'
+        verbose_name = 'Pedido a Proveedor'
+        verbose_name_plural = 'Pedidos a Proveedores'
+        ordering = ('-fecha_pedido', '-creado_en')
+        indexes = [
+            models.Index(fields=['proveedor', '-fecha_pedido']),
+            models.Index(fields=['numero_pedido']),
+            models.Index(fields=['estado']),
+            models.Index(fields=['-fecha_pedido']),
+        ]
+
+    def __str__(self):
+        return f"Pedido {self.numero_pedido} - {self.proveedor.razon_social}"
+    
+    def calcular_total(self):
+        """Calcula el total del pedido basado en los detalles"""
+        subtotal = sum(detalle.subtotal for detalle in self.detalles.all())
+        self.monto_subtotal = subtotal
+        self.monto_total = subtotal - self.monto_descuento + self.monto_iva
+        self.save(update_fields=['monto_subtotal', 'monto_total'])
+
+
+class DetallePedidoProveedor(models.Model):
+    """
+    Detalles de un pedido a proveedor.
+    Productos específicos incluidos en cada pedido.
+    """
+    pedido = models.ForeignKey(
+        PedidoProveedor,
+        on_delete=models.CASCADE,
+        related_name='detalles'
+    )
+    
+    # Producto
+    producto = models.ForeignKey(
+        ProductoProveedor,
+        on_delete=models.PROTECT,
+        related_name='detalles_pedidos'
+    )
+    
+    # Cantidades y precios
+    cantidad_solicitada = models.IntegerField("Cantidad Solicitada")
+    cantidad_recibida = models.IntegerField(
+        "Cantidad Recibida",
+        blank=True,
+        null=True
+    )
+    precio_unitario = models.DecimalField(
+        "Precio Unitario",
+        max_digits=12,
+        decimal_places=2
+    )
+    descuento_porcentaje = models.DecimalField(
+        "Descuento (%)",
+        max_digits=5,
+        decimal_places=2,
+        default=0
+    )
+    
+    # Totales
+    subtotal = models.DecimalField("Subtotal", max_digits=12, decimal_places=2)
+    total = models.DecimalField("Total", max_digits=12, decimal_places=2)
+    
+    # Observaciones
+    observaciones = models.TextField("Observaciones", blank=True, null=True)
+
+    class Meta:
+        db_table = 'proveedor_pedido_detalles'
+        verbose_name = 'Detalle de Pedido'
+        verbose_name_plural = 'Detalles de Pedidos'
+        ordering = ('pedido', 'id')
+
+    def __str__(self):
+        return f"{self.producto.nombre_producto} x{self.cantidad_solicitada}"
+    
+    def save(self, *args, **kwargs):
+        # Calcular subtotal y total
+        self.subtotal = self.cantidad_solicitada * self.precio_unitario
+        descuento = self.subtotal * (self.descuento_porcentaje / 100)
+        self.total = self.subtotal - descuento
+        super().save(*args, **kwargs)
+
+
+class DocumentoProveedor(models.Model):
+    """
+    Documentación y archivos relacionados con proveedores.
+    Almacena contratos, facturas, certificaciones, etc.
+    """
+    TIPO_DOCUMENTO_CHOICES = [
+        ('contrato', 'Contrato'),
+        ('certificado', 'Certificado'),
+        ('factura', 'Factura'),
+        ('catalogo', 'Catálogo de Productos'),
+        ('cotizacion', 'Cotización'),
+        ('otro', 'Otro'),
+    ]
+
+    proveedor = models.ForeignKey(
+        Proveedor,
+        on_delete=models.CASCADE,
+        related_name='documentos'
+    )
+
+    tipo_documento = models.CharField(
+        max_length=20,
+        choices=TIPO_DOCUMENTO_CHOICES
+    )
+    titulo = models.CharField("Título", max_length=255)
+    descripcion = models.TextField("Descripción", blank=True, null=True)
+    
+    # Archivo
+    archivo = models.FileField(
+        "Archivo",
+        upload_to='proveedores/documentos/%Y/%m/',
+        blank=True,
+        null=True
+    )
+    url_externa = models.URLField(
+        "URL Externa",
+        blank=True,
+        null=True,
+        help_text="Si el documento está en un sistema externo"
+    )
+    
+    # Fechas importantes
+    fecha_emision = models.DateField(
+        "Fecha de Emisión",
+        blank=True,
+        null=True
+    )
+    fecha_vencimiento = models.DateField(
+        "Fecha de Vencimiento",
+        blank=True,
+        null=True,
+        help_text="Para contratos o certificados con vigencia"
+    )
+    
+    # Alertas
+    generar_alerta_vencimiento = models.BooleanField(
+        "Generar Alerta de Vencimiento",
+        default=False,
+        help_text="Enviar alerta antes de que venza"
+    )
+    dias_alerta = models.IntegerField(
+        "Días de Anticipación para Alerta",
+        blank=True,
+        null=True,
+        help_text="Días antes del vencimiento para enviar alerta"
+    )
+    
+    # Metadatos
+    subido_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'proveedor_documentos'
+        verbose_name = 'Documento de Proveedor'
+        verbose_name_plural = 'Documentos de Proveedores'
+        ordering = ('-fecha_emision', '-creado_en')
+        indexes = [
+            models.Index(fields=['proveedor', 'tipo_documento']),
+            models.Index(fields=['fecha_vencimiento']),
+        ]
+
+    def __str__(self):
+        return f"{self.titulo} - {self.proveedor.razon_social}"
+    
+    def esta_proximo_a_vencer(self):
+        """Verifica si el documento está próximo a vencer"""
+        if not self.fecha_vencimiento or not self.generar_alerta_vencimiento:
+            return False
+        
+        from django.utils import timezone
+        hoy = timezone.now().date()
+        dias_restantes = (self.fecha_vencimiento - hoy).days
+        
+        return 0 <= dias_restantes <= (self.dias_alerta or 30)
+    
+    def esta_vencido(self):
+        """Verifica si el documento está vencido"""
+        if not self.fecha_vencimiento:
+            return False
+        
+        from django.utils import timezone
+        return timezone.now().date() > self.fecha_vencimiento
+
+
+class CalificacionProveedor(models.Model):
+    """
+    Calificaciones y evaluaciones internas de proveedores.
+    Permite evaluar calidad, tiempos de entrega y servicio.
+    """
+    CATEGORIA_EVALUACION_CHOICES = [
+        ('calidad', 'Calidad de Productos'),
+        ('tiempos_entrega', 'Tiempos de Entrega'),
+        ('servicio', 'Servicio al Cliente'),
+        ('precios', 'Precios Competitivos'),
+        ('general', 'Evaluación General'),
+    ]
+
+    proveedor = models.ForeignKey(
+        Proveedor,
+        on_delete=models.CASCADE,
+        related_name='calificaciones'
+    )
+
+    categoria_evaluacion = models.CharField(
+        max_length=20,
+        choices=CATEGORIA_EVALUACION_CHOICES,
+        default='general'
+    )
+    calificacion = models.IntegerField(
+        "Calificación",
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Calificación de 1 a 5 estrellas"
+    )
+    
+    # Comentarios
+    comentario = models.TextField("Comentario", blank=True, null=True)
+    puntos_fuertes = models.TextField(
+        "Puntos Fuertes",
+        blank=True,
+        null=True,
+        help_text="Aspectos positivos del proveedor"
+    )
+    puntos_a_mejorar = models.TextField(
+        "Puntos a Mejorar",
+        blank=True,
+        null=True,
+        help_text="Aspectos que el proveedor debe mejorar"
+    )
+    
+    # Referencia al pedido/interacción
+    pedido_referencia = models.ForeignKey(
+        PedidoProveedor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='calificaciones',
+        help_text="Pedido específico que se está evaluando"
+    )
+    
+    # Metadatos
+    evaluado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='calificaciones_proveedores'
+    )
+    fecha_evaluacion = models.DateField(
+        "Fecha de Evaluación",
+        db_index=True
+    )
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'proveedor_calificaciones'
+        verbose_name = 'Calificación de Proveedor'
+        verbose_name_plural = 'Calificaciones de Proveedores'
+        ordering = ('-fecha_evaluacion', '-creado_en')
+        indexes = [
+            models.Index(fields=['proveedor', '-fecha_evaluacion']),
+            models.Index(fields=['categoria_evaluacion']),
+        ]
+
+    def __str__(self):
+        return f"{self.proveedor.razon_social} - {self.calificacion}★ ({self.get_categoria_evaluacion_display()})"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Actualizar calificación promedio del proveedor
+        self.proveedor.actualizar_calificacion()
+
+
+# ============================================================================
+# FIN DEL MÓDULO DE PROVEEDORES
+# ============================================================================

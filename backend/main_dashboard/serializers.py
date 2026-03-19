@@ -1543,6 +1543,7 @@ class MovimientoCajaSerializer(DbAliasModelSerializer):
     usuario_nombre = serializers.CharField(source='usuario.usuario', read_only=True)
     usuario_email = serializers.CharField(source='usuario.correo_usuario', read_only=True)
     sucursal_nombre = serializers.CharField(source='sucursal.nombre', read_only=True)
+    soporte_pago_url = serializers.SerializerMethodField()
 
     class Meta:
         model = MovimientoCaja
@@ -1550,9 +1551,15 @@ class MovimientoCajaSerializer(DbAliasModelSerializer):
             'id', 'tipo', 'categoria', 'monto', 'metodo_pago',
             'descripcion', 'factura', 'fecha_hora', 'fecha',
             'usuario_nombre', 'usuario_email', 'sucursal', 'sucursal_nombre',
-            'es_caja_menor', 'soporte_pago'
+            'es_caja_menor', 'soporte_pago', 'soporte_pago_url'
         ]
         read_only_fields = ['id', 'fecha_hora', 'fecha']
+
+    def get_soporte_pago_url(self, obj):
+        from django.conf import settings
+        if obj.soporte_pago:
+            return settings.MEDIA_URL + str(obj.soporte_pago)
+        return None
 
 class MovimientoCajaCreateSerializer(DbAliasModelSerializer):
     class Meta:

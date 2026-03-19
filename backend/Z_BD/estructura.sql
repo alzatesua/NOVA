@@ -536,3 +536,665 @@ COMMENT ON TRIGGER trigger_marcar_caja_menor ON caja_movimientos IS 'Trigger aut
 
 ALTER TABLE facturacion_abono 
 ADD COLUMN soporte_pago VARCHAR(255) NULL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================================================
+-- MÓDULO DE PROVEEDORES - ESTRUCTURA SQL
+-- Base de datos: PostgreSQL
+-- Charset: UTF-8
+-- ============================================================================
+
+-- ============================================================================
+-- TABLA: proveedores
+-- Descripción: Almacena información general de proveedores
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS proveedores (
+    id SERIAL PRIMARY KEY,
+
+    -- Datos básicos
+    nit VARCHAR(50) UNIQUE NOT NULL,
+    razon_social VARCHAR(255) NOT NULL,
+    nombre_comercial VARCHAR(255),
+
+    -- Datos de contacto principal
+    direccion TEXT,
+    ciudad VARCHAR(100),
+    pais VARCHAR(100) DEFAULT 'Colombia',
+    correo_electronico VARCHAR(254),
+    telefono VARCHAR(20),
+    telefono_whatsapp VARCHAR(20),
+
+    -- Persona de contacto
+    contacto_principal VARCHAR(255),
+    cargo_contacto VARCHAR(100),
+
+    -- Información web
+    sitio_web VARCHAR(500),
+    logo_url VARCHAR(500),
+
+    -- Condiciones comerciales
+    plazo_pago_dias INTEGER,
+    descuento_comercial DECIMAL(5,2) DEFAULT 0,
+    limite_credito DECIMAL(12,2) DEFAULT 0,
+
+    -- Estado y calificación
+    estado VARCHAR(20) DEFAULT 'activo' CHECK (estado IN ('activo', 'inactivo', 'bloqueado')),
+    calificacion_promedio DECIMAL(3,2) DEFAULT 0,
+    numero_calificaciones INTEGER DEFAULT 0,
+
+    -- Observaciones y notas
+    observaciones TEXT,
+
+    -- Metadatos
+    creado_por_id INTEGER,
+    creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    -- Restricciones
+    CONSTRAINT chk_calificacion_rango CHECK (calificacion_promedio >= 0 AND calificacion_promedio <= 5),
+    CONSTRAINT chk_descuento_rango CHECK (descuento_comercial >= 0 AND descuento_comercial <= 100)
+);
+
+-- Índices
+CREATE INDEX idx_proveedores_razon_social ON proveedores(razon_social);
+CREATE INDEX idx_proveedores_nit ON proveedores(nit);
+CREATE INDEX idx_proveedores_estado ON proveedores(estado);
+CREATE INDEX idx_proveedores_calificacion ON proveedores(calificacion_promedio);
+CREATE INDEX idx_proveedores_creado_en ON proveedores(creado_en);
+
+-- Comentario
+COMMENT ON TABLE proveedores IS 'Tabla principal de proveedores con información comercial y de contacto';
+
+
+-- ============================================================================
+-- TABLA: proveedor_productos
+-- Descripción: Catálogo de productos que surte cada proveedor
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS proveedor_productos (
+    id SERIAL PRIMARY KEY,
+
+    -- Relación con proveedor
+    proveedor_id INTEGER NOT NULL,
+
+    -- Datos del producto
+    nombre_producto VARCHAR(255) NOT NULL,
+    codigo_producto VARCHAR(100),
+    descripcion TEXT,
+
+    -- Información de precio y disponibilidad
+    precio_unitario DECIMAL(12,2) NOT NULL,
+    moneda VARCHAR(10) DEFAULT 'COP',
+
+    -- Datos de compra
+    tiempo_entrega_dias INTEGER,
+    minimo_pedido INTEGER,
+
+    -- Disponibilidad
+    disponible BOOLEAN DEFAULT true,
+    stock_actual INTEGER,
+
+    -- Categorización
+    categoria VARCHAR(100),
+
+    -- Observaciones
+    observaciones TEXT,
+
+    -- Metadatos
+    creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    -- Restricciones
+    CONSTRAINT fk_proveedor_productos_proveedor
+        FOREIGN KEY (proveedor_id)
+        REFERENCES proveedores(id)
+        ON DELETE CASCADE,
+    CONSTRAINT chk_precio_positivo CHECK (precio_unitario >= 0),
+    CONSTRAINT chk_stock_positivo CHECK (stock_actual IS NULL OR stock_actual >= 0)
+);
+
+-- Índices
+CREATE INDEX idx_proveedor_productos_proveedor_nombre ON proveedor_productos(proveedor_id, nombre_producto);
+CREATE INDEX idx_proveedor_productos_disponible ON proveedor_productos(disponible);
+CREATE INDEX idx_proveedor_productos_categoria ON proveedor_productos(categoria);
+
+-- Comentario
+COMMENT ON TABLE proveedor_productos IS 'Catálogo de productos por proveedor con precios y disponibilidad';
+
+
+-- ============================================================================
+-- TABLA: proveedor_contactos
+-- Descripción: Múltiples medios de contacto por proveedor y departamento
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS proveedor_contactos (
+    id SERIAL PRIMARY KEY,
+
+    -- Relación con proveedor
+    proveedor_id INTEGER NOT NULL,
+
+    -- Tipo de contacto
+    tipo_contacto VARCHAR(20) DEFAULT 'ventas'
+        CHECK (tipo_contacto IN ('ventas', 'cobranza', 'soporte', 'logistica', 'direccion', 'otro')),
+
+    -- Datos del contacto
+    nombre VARCHAR(255) NOT NULL,
+    cargo VARCHAR(100),
+    correo_electronico VARCHAR(254),
+    telefono VARCHAR(20),
+    telefono_whatsapp VARCHAR(20),
+    extension VARCHAR(10),
+
+    -- Horario de contacto
+    horario_contacto VARCHAR(100),
+
+    -- Notas
+    notas TEXT,
+
+    -- Metadatos
+    principal BOOLEAN DEFAULT false,
+    activo BOOLEAN DEFAULT true,
+    creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    -- Restricciones
+    CONSTRAINT fk_proveedor_contactos_proveedor
+        FOREIGN KEY (proveedor_id)
+        REFERENCES proveedores(id)
+        ON DELETE CASCADE
+);
+
+-- Índices
+CREATE INDEX idx_proveedor_contactos_proveedor_tipo ON proveedor_contactos(proveedor_id, tipo_contacto);
+CREATE INDEX idx_proveedor_contactos_principal ON proveedor_contactos(principal);
+CREATE INDEX idx_proveedor_contactos_activo ON proveedor_contactos(activo);
+
+-- Comentario
+COMMENT ON TABLE proveedor_contactos IS 'Múltiples contactos organizados por tipo/departmento';
+
+
+-- ============================================================================
+-- TABLA: proveedor_pedidos
+-- Descripción: Historial de pedidos realizados a proveedores
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS proveedor_pedidos (
+    id SERIAL PRIMARY KEY,
+
+    -- Relación con proveedor
+    proveedor_id INTEGER NOT NULL,
+
+    -- Datos del pedido
+    numero_pedido VARCHAR(50) UNIQUE NOT NULL,
+    fecha_pedido DATE NOT NULL,
+    fecha_entrega_estimada DATE,
+    fecha_entrega_real DATE,
+
+    -- Montos
+    monto_subtotal DECIMAL(12,2) NOT NULL,
+    monto_descuento DECIMAL(12,2) DEFAULT 0,
+    monto_iva DECIMAL(12,2) DEFAULT 0,
+    monto_total DECIMAL(12,2) NOT NULL,
+
+    -- Estado
+    estado VARCHAR(20) DEFAULT 'borrador'
+        CHECK (estado IN ('borrador', 'solicitado', 'aprobado', 'en_transito', 'recibido', 'cancelado')),
+
+    -- Información adicional
+    observaciones TEXT,
+    notas_internas TEXT,
+
+    -- Responsables
+    solicitado_por_id INTEGER,
+    recibido_por_id INTEGER,
+
+    -- Metadatos
+    creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    -- Restricciones
+    CONSTRAINT fk_proveedor_pedidos_proveedor
+        FOREIGN KEY (proveedor_id)
+        REFERENCES proveedores(id)
+        ON DELETE RESTRICT,
+    CONSTRAINT chk_montos_no_negativos CHECK (
+        monto_subtotal >= 0 AND
+        monto_descuento >= 0 AND
+        monto_iva >= 0 AND
+        monto_total >= 0
+    )
+);
+
+-- Índices
+CREATE INDEX idx_proveedor_pedidos_proveedor_fecha ON proveedor_pedidos(proveedor_id, fecha_pedido DESC);
+CREATE INDEX idx_proveedor_pedidos_numero ON proveedor_pedidos(numero_pedido);
+CREATE INDEX idx_proveedor_pedidos_estado ON proveedor_pedidos(estado);
+CREATE INDEX idx_proveedor_pedidos_fecha_pedido ON proveedor_pedidos(fecha_pedido DESC);
+
+-- Comentario
+COMMENT ON TABLE proveedor_pedidos IS 'Historial de pedidos de compras a proveedores';
+
+
+-- ============================================================================
+-- TABLA: proveedor_pedido_detalles
+-- Descripción: Detalles (líneas) de cada pedido a proveedor
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS proveedor_pedido_detalles (
+    id SERIAL PRIMARY KEY,
+
+    -- Relación con pedido
+    pedido_id INTEGER NOT NULL,
+
+    -- Producto
+    producto_id INTEGER NOT NULL,
+
+    -- Cantidades y precios
+    cantidad_solicitada INTEGER NOT NULL,
+    cantidad_recibida INTEGER,
+    precio_unitario DECIMAL(12,2) NOT NULL,
+    descuento_porcentaje DECIMAL(5,2) DEFAULT 0,
+
+    -- Totales
+    subtotal DECIMAL(12,2) NOT NULL,
+    total DECIMAL(12,2) NOT NULL,
+
+    -- Observaciones
+    observaciones TEXT,
+
+    -- Restricciones
+    CONSTRAINT fk_pedido_detalles_pedido
+        FOREIGN KEY (pedido_id)
+        REFERENCES proveedor_pedidos(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_pedido_detalles_producto
+        FOREIGN KEY (producto_id)
+        REFERENCES proveedor_productos(id)
+        ON DELETE RESTRICT,
+    CONSTRAINT chk_cantidad_positiva CHECK (cantidad_solicitada > 0),
+    CONSTRAINT chk_cantidad_recibida_valida CHECK (
+        cantidad_recibida IS NULL OR
+        cantidad_recibida >= 0 OR
+        cantidad_recibida <= cantidad_solicitada
+    ),
+    CONSTRAINT chk_precios_no_negativos CHECK (
+        precio_unitario >= 0 AND
+        subtotal >= 0 AND
+        total >= 0
+    ),
+    CONSTRAINT chk_descuento_rango CHECK (descuento_porcentaje >= 0 AND descuento_porcentaje <= 100)
+);
+
+-- Índice
+CREATE INDEX idx_pedido_detalles_pedido ON proveedor_pedido_detalles(pedido_id);
+CREATE INDEX idx_pedido_detalles_producto ON proveedor_pedido_detalles(producto_id);
+
+-- Comentario
+COMMENT ON TABLE proveedor_pedido_detalles IS 'Líneas de detalle de los pedidos (productos específicos)';
+
+
+-- ============================================================================
+-- TABLA: proveedor_documentos
+-- Descripción: Documentación y archivos relacionados con proveedores
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS proveedor_documentos (
+    id SERIAL PRIMARY KEY,
+
+    -- Relación con proveedor
+    proveedor_id INTEGER NOT NULL,
+
+    -- Tipo de documento
+    tipo_documento VARCHAR(20) DEFAULT 'otro'
+        CHECK (tipo_documento IN ('contrato', 'certificado', 'factura', 'catalogo', 'cotizacion', 'otro')),
+
+    -- Descripción
+    titulo VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+
+    -- Archivo
+    archivo VARCHAR(500),
+    url_externa VARCHAR(500),
+
+    -- Fechas importantes
+    fecha_emision DATE,
+    fecha_vencimiento DATE,
+
+    -- Sistema de alertas
+    generar_alerta_vencimiento BOOLEAN DEFAULT false,
+    dias_alerta INTEGER,
+
+    -- Metadatos
+    subido_por_id INTEGER,
+    creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    -- Restricciones
+    CONSTRAINT fk_proveedor_documentos_proveedor
+        FOREIGN KEY (proveedor_id)
+        REFERENCES proveedores(id)
+        ON DELETE CASCADE,
+    CONSTRAINT chk_dias_alerta CHECK (dias_alerta IS NULL OR dias_alerta > 0),
+    CONSTRAINT chk_archivo_o_url CHECK (
+        (archivo IS NOT NULL AND url_externa IS NULL) OR
+        (archivo IS NULL AND url_externa IS NOT NULL) OR
+        (archivo IS NULL AND url_externa IS NULL)
+    )
+);
+
+-- Índices
+CREATE INDEX idx_proveedor_documentos_proveedor_tipo ON proveedor_documentos(proveedor_id, tipo_documento);
+CREATE INDEX idx_proveedor_documentos_vencimiento ON proveedor_documentos(fecha_vencimiento);
+CREATE INDEX idx_proveedor_documentos_alertas ON proveedor_documentos(generar_alerta_vencimiento) WHERE generar_alerta_vencimiento = true;
+
+-- Comentario
+COMMENT ON TABLE proveedor_documentos IS 'Gestión documental de proveedores con sistema de alertas de vencimiento';
+
+
+-- ============================================================================
+-- TABLA: proveedor_calificaciones
+-- Descripción: Calificaciones y evaluaciones internas de proveedores
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS proveedor_calificaciones (
+    id SERIAL PRIMARY KEY,
+
+    -- Relación con proveedor
+    proveedor_id INTEGER NOT NULL,
+
+    -- Categoría de evaluación
+    categoria_evaluacion VARCHAR(20) DEFAULT 'general'
+        CHECK (categoria_evaluacion IN ('calidad', 'tiempos_entrega', 'servicio', 'precios', 'general')),
+
+    -- Calificación
+    calificacion INTEGER NOT NULL CHECK (calificacion >= 1 AND calificacion <= 5),
+
+    -- Comentarios
+    comentario TEXT,
+    puntos_fuertes TEXT,
+    puntos_a_mejorar TEXT,
+
+    -- Referencia al pedido
+    pedido_referencia_id INTEGER,
+
+    -- Metadatos
+    evaluado_por_id INTEGER,
+    fecha_evaluacion DATE NOT NULL,
+    creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    -- Restricciones
+    CONSTRAINT fk_calificaciones_proveedor
+        FOREIGN KEY (proveedor_id)
+        REFERENCES proveedores(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_calificaciones_pedido
+        FOREIGN KEY (pedido_referencia_id)
+        REFERENCES proveedor_pedidos(id)
+        ON DELETE SET NULL
+);
+
+-- Índices
+CREATE INDEX idx_proveedor_calificaciones_proveedor_fecha ON proveedor_calificaciones(proveedor_id, fecha_evaluacion DESC);
+CREATE INDEX idx_proveedor_calificaciones_categoria ON proveedor_calificaciones(categoria_evaluacion);
+CREATE INDEX idx_proveedor_calificaciones_calificacion ON proveedor_calificaciones(calificacion);
+
+-- Comentario
+COMMENT ON TABLE proveedor_calificaciones IS 'Evaluaciones internas de proveedores (sistema de 1-5 estrellas)';
+
+
+-- ============================================================================
+-- FUNCIONES Y TRIGGERS
+-- ============================================================================
+
+-- Función: Actualizar calificación promedio del proveedor
+CREATE OR REPLACE FUNCTION actualizar_calificacion_proveedor()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE proveedores
+    SET calificacion_promedio = (
+            SELECT ROUND(AVG(c.calificacion)::numeric, 2)
+            FROM proveedor_calificaciones c
+            WHERE c.proveedor_id = NEW.proveedor_id
+        ),
+        numero_calificaciones = (
+            SELECT COUNT(*)
+            FROM proveedor_calificaciones c
+            WHERE c.proveedor_id = NEW.proveedor_id
+        ),
+        actualizado_en = CURRENT_TIMESTAMP
+    WHERE id = NEW.proveedor_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger: Auto-actualizar calificación cuando se agrega una calificación
+DROP TRIGGER IF EXISTS trigger_actualizar_calificacion ON proveedor_calificaciones;
+CREATE TRIGGER trigger_actualizar_calificacion
+    AFTER INSERT OR UPDATE ON proveedor_calificaciones
+    FOR EACH ROW
+    EXECUTE FUNCTION actualizar_calificacion_proveedor();
+
+
+-- ============================================================================
+-- VISTAS ÚTILES
+-- ============================================================================
+
+-- Vista: Resumen de proveedores con métricas
+CREATE OR REPLACE VIEW vista_resumen_proveedores AS
+SELECT
+    p.id,
+    p.nit,
+    p.razon_social,
+    p.nombre_comercial,
+    p.estado,
+    p.ciudad,
+    p.correo_electronico,
+    p.telefono,
+    p.telefono_whatsapp,
+    p.calificacion_promedio,
+    p.numero_calificaciones,
+    p.creado_en,
+    COUNT(DISTINCT pp.id) as total_productos,
+    COUNT(DISTINCT pc.id) as total_contactos,
+    COUNT(DISTINCT ped.id) as total_pedidos,
+    COUNT(DISTINCT doc.id) as total_documentos,
+    COALESCE(SUM(ped.monto_total), 0) as total_compras,
+    COALESCE(MAX(ped.fecha_pedido), NULL) as ultimo_pedido
+FROM proveedores p
+LEFT JOIN proveedor_productos pp ON p.id = pp.proveedor_id
+LEFT JOIN proveedor_contactos pc ON p.id = pc.proveedor_id AND pc.activo = true
+LEFT JOIN proveedor_pedidos ped ON p.id = ped.proveedor_id
+LEFT JOIN proveedor_documentos doc ON p.id = doc.proveedor_id
+GROUP BY p.id, p.nit, p.razon_social, p.nombre_comercial, p.estado, p.ciudad,
+         p.correo_electronico, p.telefono, p.telefono_whatsapp, p.calificacion_promedio,
+         p.numero_calificaciones, p.creado_en;
+
+-- Comentario
+COMMENT ON VIEW vista_resumen_proveedores IS 'Vista resumen con métricas calculadas de proveedores';
+
+
+-- Vista: Documentos por vencer o vencidos
+CREATE OR REPLACE VIEW vista_alertas_documentos_proveedores AS
+SELECT
+    doc.id,
+    doc.proveedor_id,
+    p.razon_social as proveedor_nombre,
+    doc.tipo_documento,
+    doc.titulo,
+    doc.fecha_vencimiento,
+    doc.generar_alerta_vencimiento,
+    doc.dias_alerta,
+    CASE
+        WHEN doc.fecha_vencimiento < CURRENT_DATE THEN 'vencido'
+        WHEN doc.fecha_vencimiento <= CURRENT_DATE + (COALESCE(doc.dias_alerta, 30) || ' days')::interval THEN 'proximo_a_vencer'
+        ELSE 'vigente'
+    END as estado_documento,
+    (CURRENT_DATE - doc.fecha_vencimiento)::integer as dias_vencido
+FROM proveedor_documentos doc
+JOIN proveedores p ON doc.proveedor_id = p.id
+WHERE doc.fecha_vencimiento IS NOT NULL
+  AND doc.generar_alerta_vencimiento = true;
+
+-- Comentario
+COMMENT ON VIEW vista_alertas_documentos_proveedores IS 'Alertas de documentos próximos a vencer o vencidos';
+
+
+-- Vista: Proveedores mejor calificados
+CREATE OR REPLACE VIEW vista_top_proveedores AS
+SELECT
+    p.id,
+    p.nit,
+    p.razon_social,
+    p.ciudad,
+    p.calificacion_promedio,
+    p.numero_calificaciones,
+    COALESCE(SUM(ped.monto_total), 0) as total_compras,
+    COUNT(DISTINCT ped.id) as total_pedidos,
+    ROW_NUMBER() OVER (ORDER BY p.calificacion_promedio DESC, p.numero_calificaciones DESC) as posicion_calificacion,
+    ROW_NUMBER() OVER (ORDER BY SUM(ped.monto_total) DESC NULLS LAST) as posicion_compras
+FROM proveedores p
+LEFT JOIN proveedor_pedidos ped ON p.id = ped.proveedor_id AND ped.estado != 'cancelado'
+WHERE p.calificacion_promedio > 0
+GROUP BY p.id, p.nit, p.razon_social, p.ciudad, p.calificacion_promedio, p.numero_calificaciones
+ORDER BY p.calificacion_promedio DESC, p.numero_calificaciones DESC;
+
+-- Comentario
+COMMENT ON VIEW vista_top_proveedores IS 'Ranking de proveedores por calificación y volumen de compras';
+
+
+-- ============================================================================
+-- DATOS DE EJEMPLO (OPTIONAL)
+-- ============================================================================
+
+-- Ejemplo: Insertar un proveedor de prueba
+INSERT INTO proveedores (
+    nit, razon_social, nombre_comercial, direccion, ciudad, pais,
+    correo_electronico, telefono, telefono_whatsapp, contacto_principal,
+    cargo_contacto, sitio_web, plazo_pago_dias, descuento_comercial,
+    limite_credito, estado, observaciones
+) VALUES (
+    '900123456-1',
+    'TECHNOLOGIES SAS',
+    'TechProveedores',
+    'Calle 123 #45-67, Edificio Empresarial',
+    'Bogotá',
+    'Colombia',
+    'contacto@technologies.com',
+    '573001234567',
+    '573001234567',
+    'Juan Carlos Pérez',
+    'Gerente Comercial',
+    'https://technologies.com',
+    30,
+    5.00,
+    50000000,
+    'activo',
+    'Proveedor confiable con entrega oportuna'
+);
+
+-- Ejemplo: Insertar un producto para el proveedor
+INSERT INTO proveedor_productos (
+    proveedor_id, nombre_producto, codigo_producto, descripcion,
+    precio_unitario, moneda, tiempo_entrega_dias, minimo_pedido,
+    disponible, categoria
+) VALUES (
+    1,
+    'Laptop HP 15.6"',
+    'LAP-HP-156',
+    'Laptop HP 15.6 pulgadas, Intel i5, 8GB RAM, 256GB SSD',
+    2500000.00,
+    'COP',
+    5,
+    10,
+    true,
+    'Computadores'
+);
+
+-- Ejemplo: Insertar un contacto
+INSERT INTO proveedor_contactos (
+    proveedor_id, tipo_contacto, nombre, cargo, correo_electronico,
+    telefono, telefono_whatsapp, principal
+) VALUES (
+    1,
+    'ventas',
+    'María Rodríguez',
+    'Ejecutiva de Ventas',
+    'maria.rodriguez@technologies.com',
+    '573001234568',
+    '573001234568',
+    true
+);
+
+-- Ejemplo: Insertar un pedido
+INSERT INTO proveedor_pedidos (
+    proveedor_id, numero_pedido, fecha_pedido, fecha_entrega_estimada,
+    monto_subtotal, monto_descuento, monto_iva, monto_total, estado
+) VALUES (
+    1,
+    'PED-20260319-001',
+    '2026-03-19',
+    '2026-03-26',
+    25000000.00,
+    1250000.00,
+    0.00,
+    23750000.00,
+    'solicitado'
+);
+
+-- Ejemplo: Insertar una calificación
+INSERT INTO proveedor_calificaciones (
+    proveedor_id, categoria_evaluacion, calificacion, comentario,
+    puntos_fuertes, puntos_a_mejorar, fecha_evaluacion
+) VALUES (
+    1,
+    'calidad',
+    5,
+    'Excelente calidad de productos',
+    'Productos de alta calidad, buena presentación',
+    'Podrían mejorar en la variedad de productos',
+    '2026-03-19'
+);
+
+
+-- ============================================================================
+-- FIN DEL SCRIPT SQL
+-- ============================================================================
