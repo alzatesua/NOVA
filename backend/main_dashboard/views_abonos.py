@@ -3,10 +3,13 @@
 Vistas para gestionar abonos a clientes en mora
 """
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from django.utils import timezone
+from django.conf import settings
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +82,7 @@ def listar_abonos_cliente(request):
                 'observaciones': abono.observaciones,
                 'fecha_abono': abono.fecha_abono.isoformat(),
                 'fecha_hora_registro': abono.fecha_hora_registro.isoformat(),
+                'soporte_pago': abono.soporte_pago.url if abono.soporte_pago else None,
                 'registrado_por': abono.registrado_por.usuario if abono.registrado_por else None,
             })
 
@@ -97,19 +101,20 @@ def listar_abonos_cliente(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'PUT'])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def crear_abono(request):
     """
     Registra un nuevo abono a un cliente en mora.
 
-    Body esperado:
-    {
-        "cliente_id": 123,
-        "monto": 50000,
-        "metodo_pago": "efectivo",
-        "referencia": "REC-001",
-        "observaciones": "Abono parcial de deuda"
-    }
+    Body esperado (multipart/form-data para soporte):
+    - cliente_id: ID del cliente
+    - monto: Monto del abono
+    - metodo_pago: efectivo, transferencia, nequi, tarjeta, otro
+    - referencia: Referencia opcional
+    - observaciones: Observaciones opcionales
+    - soporte_pago: Archivo de soporte (requerido para métodos digitales)
+    - fecha_abono: Fecha del abono (opcional, usa hoy por defecto)
     """
     try:
         alias = _get_tenant_alias(request)
@@ -121,6 +126,7 @@ def crear_abono(request):
         referencia = request.data.get('referencia')
         observaciones = request.data.get('observaciones')
         fecha_abono = request.data.get('fecha_abono')
+        soporte_pago = request.FILES.get('soporte_pago')
 
         if not cliente_id:
             return Response({
@@ -135,6 +141,7 @@ def crear_abono(request):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         from .models import Abono, Cliente
+        from decimal import Decimal
 
         # Verificar que el cliente existe
         try:
@@ -145,14 +152,43 @@ def crear_abono(request):
                 'message': 'Cliente no encontrado'
             }, status=status.HTTP_404_NOT_FOUND)
 
+        # Calcular deuda total del cliente
+        info_deuda = cliente.calcular_deuda_total()
+        deuda_total = Decimal(str(info_deuda['deuda_total']))
+
+        # Validar que el monto no supere la deuda
+        monto_decimal = Decimal(str(monto))
+        if monto_decimal > deuda_total:
+            return Response({
+                'success': False,
+                'message': f'El monto del abono (${monto_decimal}) no puede superar la deuda total (${deuda_total})'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validar que se suba soporte para métodos digitales
+        metodos_digitales = ['transferencia', 'nequi', 'tarjeta', 'otro']
+        if metodo_pago in metodos_digitales and not soporte_pago:
+            return Response({
+                'success': False,
+                'message': 'Debes adjuntar el soporte de pago para este método de pago'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validar tamaño del archivo (máximo 5MB)
+        if soporte_pago:
+            max_size = 5 * 1024 * 1024  # 5MB
+            if soporte_pago.size > max_size:
+                return Response({
+                    'success': False,
+                    'message': 'El archivo de soporte no puede superar los 5MB'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
         # Crear el abono
-        from decimal import Decimal
         abono = Abono.objects.using(alias).create(
             cliente=cliente,
-            monto=Decimal(str(monto)),
+            monto=monto_decimal,
             metodo_pago=metodo_pago,
             referencia=referencia,
             observaciones=observaciones,
+            soporte_pago=soporte_pago,
             fecha_abono=fecha_abono or timezone.now().date(),
         )
 
@@ -175,7 +211,8 @@ def crear_abono(request):
             metodo_pago=metodo_pago,
             descripcion=f'Abono cliente {cliente.nombre_completo} - Ref: {referencia or "N/A"}',
             fecha=abono.fecha_abono or timezone.now().date(),
-            fecha_hora=timezone.now()
+            fecha_hora=timezone.now(),
+            soporte_pago=soporte_pago
         )
         logger.info(f"Movimiento de caja creado para abono: cliente={cliente.id}, monto={monto}, metodo={metodo_pago}, usuario={usuario_nombre}")
 
@@ -185,7 +222,9 @@ def crear_abono(request):
             'data': {
                 'id': abono.id,
                 'monto': str(abono.monto),
+                'metodo_pago': abono.get_metodo_pago_display(),
                 'fecha_abono': abono.fecha_abono.isoformat(),
+                'soporte_pago': abono.soporte_pago.url if abono.soporte_pago else None,
                 'cliente_nuevo_estado': {
                     'en_mora': cliente.en_mora,
                     'dias_mora': cliente.dias_mora,
@@ -259,6 +298,7 @@ def resumen_mora_cliente(request):
                 'metodo_pago': abono.get_metodo_pago_display(),
                 'fecha_abono': abono.fecha_abono.isoformat(),
                 'observaciones': abono.observaciones,
+                'soporte_pago': abono.soporte_pago.url if abono.soporte_pago else None,
                 'registrado_por': abono.registrado_por.usuario if abono.registrado_por else 'Sistema',
             })
 

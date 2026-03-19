@@ -700,6 +700,37 @@ export function crearMedida({ usuario, token, subdominio, datos }) {
   });
 }
 
+/**
+ * Función genérica para subir archivos usando FormData
+ */
+async function uploadFile(endpoint, formData, token) {
+  const url = `${BASE_URL}${endpoint}`;
+  console.log(`POST (file) ${url}`, formData);
+
+  const res = await fetch(url, {
+    method: 'POST',
+    body: formData
+    // NOTA: No incluir Content-Type al usar FormData, el navegador lo establece automáticamente con el boundary
+    // NOTA: El token ya está incluido en el formData
+  });
+
+  const json = await res.json().catch(() => null);
+  console.log(`Response ${res.status}:`, json);
+
+  // Si la petición fue exitosa, guardar nuevo_token si está presente
+  if (res.ok && json && json.nuevo_token) {
+    console.log('✅ Nuevo token recibido, guardando en localStorage...');
+    localStorage.setItem('token_usuario', json.nuevo_token);
+  }
+
+  if (!res.ok) {
+    console.error(`Error ${res.status}:`, json);
+    throw new Error(json?.message || json?.error || 'Error al subir archivo');
+  }
+
+  return json;
+}
+
 export async function subirImagenProducto({
   id, usuario, token, subdominio, categoriaId, imagen
 }) {
@@ -1532,9 +1563,29 @@ export function listarAbonosCliente({ token, usuario, subdominio, cliente_id }) 
 
 /**
  * Crea un nuevo abono a un cliente en mora
+ * Soporta subida de soporte de pago (multipart/form-data)
  */
-export function crearAbono({ token, usuario, subdominio, cliente_id, monto, metodo_pago, referencia, observaciones, fecha_abono }) {
+export function crearAbono({ token, usuario, subdominio, cliente_id, monto, metodo_pago, referencia, observaciones, fecha_abono, soporte_pago }) {
   token = token || localStorage.getItem('token_usuario');
+
+  // Si hay archivo de soporte, usar FormData
+  if (soporte_pago) {
+    const formData = new FormData();
+    formData.append('usuario', usuario);
+    formData.append('token', token);
+    formData.append('subdominio', subdominio);
+    formData.append('cliente_id', cliente_id);
+    formData.append('monto', monto);
+    formData.append('metodo_pago', metodo_pago || 'efectivo');
+    if (referencia) formData.append('referencia', referencia);
+    if (observaciones) formData.append('observaciones', observaciones);
+    if (fecha_abono) formData.append('fecha_abono', fecha_abono);
+    formData.append('soporte_pago', soporte_pago);
+
+    return uploadFile('api/facturacion/abonos/crear/', formData, token);
+  }
+
+  // Si no hay archivo, usar el método normal
   return post('api/facturacion/abonos/crear/', {
     usuario,
     token,

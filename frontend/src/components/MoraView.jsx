@@ -15,7 +15,9 @@ import {
   CalendarIcon,
   DocumentTextIcon,
   ChartBarIcon,
-  UsersIcon
+  UsersIcon,
+  EyeIcon,
+  PhotoIcon
 } from '@heroicons/react/24/outline';
 
 export default function MoraView() {
@@ -32,6 +34,8 @@ export default function MoraView() {
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [resumenCliente, setResumenCliente] = useState(null);
   const [mostrarModalAbono, setMostrarModalAbono] = useState(false);
+  const [mostrarModalSoporte, setMostrarModalSoporte] = useState(false);
+  const [soporteSeleccionado, setSoporteSeleccionado] = useState(null);
   const [procesando, setProcesando] = useState(false);
 
   // Estado del formulario de abono
@@ -39,7 +43,8 @@ export default function MoraView() {
     monto: '',
     metodo_pago: 'efectivo',
     referencia: '',
-    observaciones: ''
+    observaciones: '',
+    soporte_pago: null
   });
 
   useEffect(() => {
@@ -142,6 +147,22 @@ export default function MoraView() {
       return;
     }
 
+    // Validar que el monto no supere la deuda total
+    const deudaTotal = resumenCliente?.deuda?.deuda_total ? parseFloat(resumenCliente.deuda.deuda_total) : 0;
+    const montoAbono = parseFloat(formularioAbono.monto);
+
+    if (montoAbono > deudaTotal) {
+      showToast('error', `El monto del abono no puede superar la deuda total de ${formatCurrency(deudaTotal)}`);
+      return;
+    }
+
+    // Validar que se suba soporte para métodos digitales
+    const metodosDigitales = ['transferencia', 'nequi', 'tarjeta'];
+    if (metodosDigitales.includes(formularioAbono.metodo_pago) && !formularioAbono.soporte_pago) {
+      showToast('error', 'Debes adjuntar el soporte de pago para este método de pago');
+      return;
+    }
+
     setProcesando(true);
     try {
       const response = await crearAbono({
@@ -152,7 +173,8 @@ export default function MoraView() {
         monto: formularioAbono.monto,
         metodo_pago: formularioAbono.metodo_pago,
         referencia: formularioAbono.referencia,
-        observaciones: formularioAbono.observaciones
+        observaciones: formularioAbono.observaciones,
+        soporte_pago: formularioAbono.soporte_pago
       });
 
       if (response.success) {
@@ -173,7 +195,8 @@ export default function MoraView() {
           monto: '',
           metodo_pago: 'efectivo',
           referencia: '',
-          observaciones: ''
+          observaciones: '',
+          soporte_pago: null
         });
         setMostrarModalAbono(false);
       }
@@ -547,9 +570,23 @@ export default function MoraView() {
                                 {formatDate(abono.fecha_abono)}
                               </p>
                             </div>
-                            <span className="text-xs px-2 py-1 bg-green-200 dark:!bg-green-900 text-green-800 dark:!text-green-300 rounded-full">
-                              {abono.metodo_pago}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs px-2 py-1 bg-green-200 dark:!bg-green-900 text-green-800 dark:!text-green-300 rounded-full">
+                                {abono.metodo_pago}
+                              </span>
+                              {abono.soporte_pago && (
+                                <button
+                                  onClick={() => {
+                                    setSoporteSeleccionado(abono.soporte_pago);
+                                    setMostrarModalSoporte(true);
+                                  }}
+                                  className="p-1.5 bg-blue-100 dark:!bg-blue-900 text-blue-600 dark:!text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:!bg-blue-800 transition-colors"
+                                  title="Ver soporte de pago"
+                                >
+                                  <EyeIcon className="h-4 w-4" />
+                                </button>
+                              )}
+                            </div>
                           </div>
                           {abono.observaciones && (
                             <p className="text-xs text-slate-600 dark:!text-slate-400 italic">
@@ -661,6 +698,16 @@ export default function MoraView() {
 
             {/* Body */}
             <form onSubmit={handleCrearAbono} className="p-6 space-y-4">
+              {/* Info de deuda actual */}
+              <div className="bg-blue-50 dark:!bg-blue-900/20 border border-blue-200 dark:!border-blue-800 rounded-xl p-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-blue-800 dark:!text-blue-300">Deuda Total:</span>
+                  <span className="text-lg font-bold text-blue-900 dark:!text-blue-200">
+                    {formatCurrency(resumenCliente?.deuda?.deuda_total || 0)}
+                  </span>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">
                   Monto del Abono *
@@ -669,12 +716,16 @@ export default function MoraView() {
                   type="number"
                   step="0.01"
                   min="0"
+                  max={resumenCliente?.deuda?.deuda_total || ''}
                   value={formularioAbono.monto}
                   onChange={(e) => setFormularioAbono({...formularioAbono, monto: e.target.value})}
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:!border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100"
                   placeholder="0.00"
                   required
                 />
+                <p className="text-xs text-slate-500 dark:!text-slate-400 mt-1">
+                  Máximo: {formatCurrency(resumenCliente?.deuda?.deuda_total || 0)}
+                </p>
               </div>
 
               <div>
@@ -683,7 +734,9 @@ export default function MoraView() {
                 </label>
                 <select
                   value={formularioAbono.metodo_pago}
-                  onChange={(e) => setFormularioAbono({...formularioAbono, metodo_pago: e.target.value})}
+                  onChange={(e) => {
+                    setFormularioAbono({...formularioAbono, metodo_pago: e.target.value, soporte_pago: null});
+                  }}
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:!border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100"
                 >
                   <option value="efectivo">Efectivo</option>
@@ -693,6 +746,44 @@ export default function MoraView() {
                   <option value="otro">Otro</option>
                 </select>
               </div>
+
+              {/* Campo para subir soporte (solo para métodos digitales) */}
+              {['transferencia', 'nequi', 'tarjeta', 'otro'].includes(formularioAbono.metodo_pago) && (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">
+                    Soporte de Pago *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          // Validar tamaño del archivo (máximo 5MB)
+                          if (file.size > 5 * 1024 * 1024) {
+                            showToast('error', 'El archivo no puede superar los 5MB');
+                            e.target.value = '';
+                            return;
+                          }
+                          setFormularioAbono({...formularioAbono, soporte_pago: file});
+                        }
+                      }}
+                      className="w-full px-4 py-3 border-2 border-slate-200 dark:!border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                      required
+                    />
+                  </div>
+                  {formularioAbono.soporte_pago && (
+                    <p className="text-xs text-green-600 dark:!text-green-400 mt-1 flex items-center gap-1">
+                      <CheckIcon className="h-3 w-3" />
+                      Archivo seleccionado: {formularioAbono.soporte_pago.name}
+                    </p>
+                  )}
+                  <p className="text-xs text-slate-500 dark:!text-slate-400 mt-1">
+                    Formatos: JPG, PNG, PDF (Máx. 5MB)
+                  </p>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">
@@ -749,6 +840,96 @@ export default function MoraView() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para ver Soporte de Pago */}
+      {mostrarModalSoporte && soporteSeleccionado && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white dark:!bg-slate-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-scaleIn">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <PhotoIcon className="h-8 w-8 text-white" />
+                <div>
+                  <h3 className="text-xl font-bold text-white">Soporte de Pago</h3>
+                  <p className="text-blue-100 text-sm">Comprobante del abono</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setMostrarModalSoporte(false);
+                  setSoporteSeleccionado(null);
+                }}
+                className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Body - Preview del archivo */}
+            <div className="p-6 flex-1 overflow-auto" style={{ maxHeight: 'calc(90vh - 140px)' }}>
+              {soporteSeleccionado.toLowerCase().endsWith('.pdf') ? (
+                // Para PDF, usar iframe o object
+                <div className="w-full h-full flex items-center justify-center">
+                  <object
+                    data={soporteSeleccionado}
+                    type="application/pdf"
+                    className="w-full h-full rounded-lg border border-slate-200 dark:!border-slate-700"
+                    style={{ minHeight: '500px' }}
+                  >
+                    <div className="text-center p-8">
+                      <p className="text-slate-600 dark:!text-slate-400 mb-4">
+                        No se puede previsualizar el PDF directamente
+                      </p>
+                      <a
+                        href={soporteSeleccionado}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+                      >
+                        <DocumentTextIcon className="h-5 w-5" />
+                        Abrir PDF en nueva pestaña
+                      </a>
+                    </div>
+                  </object>
+                </div>
+              ) : (
+                // Para imágenes, mostrar directamente
+                <div className="flex items-center justify-center">
+                  <img
+                    src={soporteSeleccionado}
+                    alt="Soporte de pago"
+                    className="max-w-full max-h-full rounded-lg shadow-lg border border-slate-200 dark:!border-slate-700"
+                    onError={(e) => {
+                      e.target.src = '/placeholder-image.png';
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="bg-slate-50 dark:!bg-slate-800 px-6 py-4 flex gap-3 justify-end">
+              <a
+                href={soporteSeleccionado}
+                download={`soporte_pago_${new Date().getTime()}`}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-md"
+              >
+                <DocumentTextIcon className="h-5 w-5" />
+                Descargar
+              </a>
+              <button
+                onClick={() => {
+                  setMostrarModalSoporte(false);
+                  setSoporteSeleccionado(null);
+                }}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-200 dark:!bg-slate-700 text-slate-700 dark:!text-slate-200 font-semibold rounded-xl hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

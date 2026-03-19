@@ -533,3 +533,6 @@ CREATE TRIGGER trigger_marcar_caja_menor
 
 COMMENT ON FUNCTION marcar_caja_menor() IS 'Marca automáticamente los movimientos como caja menor según la categoría';
 COMMENT ON TRIGGER trigger_marcar_caja_menor ON caja_movimientos IS 'Trigger automático para clasificar movimientos de caja menor';
+
+ALTER TABLE facturacion_abono 
+ADD COLUMN soporte_pago VARCHAR(255) NULL;

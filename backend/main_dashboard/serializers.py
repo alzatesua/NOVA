@@ -1550,7 +1550,7 @@ class MovimientoCajaSerializer(DbAliasModelSerializer):
             'id', 'tipo', 'categoria', 'monto', 'metodo_pago',
             'descripcion', 'factura', 'fecha_hora', 'fecha',
             'usuario_nombre', 'usuario_email', 'sucursal', 'sucursal_nombre',
-            'es_caja_menor'
+            'es_caja_menor', 'soporte_pago'
         ]
         read_only_fields = ['id', 'fecha_hora', 'fecha']
 

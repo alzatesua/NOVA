@@ -725,6 +725,13 @@ class Cliente(models.Model):
 # ABONOS (Pagos a clientes en mora)
 # =========================
 
+def upload_soporte_abono(instance, filename):
+    """Genera la ruta para guardar el soporte de pago del abono."""
+    import uuid
+    ext = filename.split('.')[-1]
+    filename = f"{uuid.uuid4()}.{ext}"
+    return f"abonos/soportes/{instance.cliente.id}/{filename}"
+
 class Abono(models.Model):
     """Abonos o pagos parciales que reducen la deuda de un cliente en mora."""
 
@@ -749,6 +756,12 @@ class Abono(models.Model):
     )
     referencia = models.CharField(max_length=100, blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
+    soporte_pago = models.FileField(
+        upload_to=upload_soporte_abono,
+        blank=True,
+        null=True,
+        help_text='Soporte del pago (transferencia, nequi, tarjeta)'
+    )
     fecha_abono = models.DateField(db_index=True)
     fecha_hora_registro = models.DateTimeField(auto_now_add=True)
     registrado_por = models.ForeignKey(
@@ -1506,6 +1519,14 @@ class MovimientoCaja(models.Model):
 
     # Indica si el movimiento es de caja menor
     es_caja_menor = models.BooleanField(default=False)
+
+    # Soporte de pago (para métodos digitales)
+    soporte_pago = models.FileField(
+        upload_to='caja/soportes/',
+        blank=True,
+        null=True,
+        help_text='Soporte del pago (transferencia, nequi, tarjeta)'
+    )
 
     class Meta:
         db_table = 'caja_movimientos'

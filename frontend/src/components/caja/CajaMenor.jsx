@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import { registrarMovimientoCaja } from '../../services/api';
 import { showToast } from '../../utils/toast';
+import { EyeIcon } from '@heroicons/react/24/outline';
 
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -406,6 +407,7 @@ const STYLES = `
 
   /* ── Animations ── */
   @keyframes cm-fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes cm-fadeIn { from { opacity:0; } to { opacity:1; } }
   .cm-kpi-card { animation: cm-fadeUp .3s ease both; }
   .cm-kpi-card:nth-child(2) { animation-delay: .06s; }
   .cm-kpi-card:nth-child(3) { animation-delay: .12s; }
@@ -445,6 +447,8 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh }) {
   const [movimientos, setMovimientos] = useState([]);
   const [loading, setLoading]         = useState(false);
   const [balance, setBalance]         = useState({ ingresos: 0, egresos: 0, total: 0 });
+  const [mostrarModalSoporte, setMostrarModalSoporte] = useState(false);
+  const [soporteSeleccionado, setSoporteSeleccionado] = useState(null);
 
   useEffect(() => { cargar(); }, [fecha, idSucursal]);
   useEffect(() => { setCategoria(''); }, [tipo]);
@@ -659,6 +663,7 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh }) {
                     <th>Categoría</th>
                     <th>Descripción</th>
                     <th>Monto</th>
+                    <th>Soporte</th>
                     <th>Usuario</th>
                   </tr>
                 </thead>
@@ -666,10 +671,15 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh }) {
                   {movimientos.map(mov => (
                     <tr key={mov.id}>
                       <td className="cm-td-date">
-                        {new Date(mov.fecha_registro).toLocaleString('es-CO', {
-                          day: '2-digit', month: '2-digit', year: '2-digit',
-                          hour: '2-digit', minute: '2-digit',
-                        })}
+                        {(() => {
+                          const fecha = new Date(mov.fecha_hora);
+                          return !isNaN(fecha.getTime())
+                            ? fecha.toLocaleString('es-CO', {
+                                day: '2-digit', month: '2-digit', year: '2-digit',
+                                hour: '2-digit', minute: '2-digit',
+                              })
+                            : 'Fecha no disponible';
+                        })()}
                       </td>
                       <td>
                         <span className={`cm-badge cm-badge--${mov.tipo}`}>
@@ -685,6 +695,41 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh }) {
                       <td className={`cm-td-amount cm-td-amount--${mov.tipo}`}>
                         {mov.tipo === 'entrada' ? '+' : '-'}{fmt(mov.monto)}
                       </td>
+                      <td style={{ textAlign: 'center' }}>
+                        {mov.soporte_pago ? (
+                          <button
+                            onClick={() => {
+                              setSoporteSeleccionado(mov.soporte_pago);
+                              setMostrarModalSoporte(true);
+                            }}
+                            style={{
+                              padding: '6px',
+                              background: 'var(--blue-bg)',
+                              border: '1px solid var(--blue-border)',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              color: 'var(--blue)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              transition: 'all 0.15s',
+                            }}
+                            title="Ver soporte de pago"
+                            onMouseEnter={(e) => {
+                              e.target.style.background = 'var(--blue)';
+                              e.target.style.color = '#fff';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.background = 'var(--blue-bg)';
+                              e.target.style.color = 'var(--blue)';
+                            }}
+                          >
+                            <EyeIcon style={{ width: '16px', height: '16px' }} />
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: 12, color: 'var(--text-3)' }}>—</span>
+                        )}
+                      </td>
                       <td style={{ fontSize: 12, color: 'var(--text-3)', whiteSpace: 'nowrap' }}>
                         {(mov.usuario_nombre || mov.usuario || '').split(' ')[0]}
                       </td>
@@ -697,6 +742,195 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh }) {
         </div>
 
       </div>
+
+      {/* Modal para ver Soporte de Pago */}
+      {mostrarModalSoporte && soporteSeleccionado && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.8)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 50,
+          padding: '16px',
+          animation: 'cm-fadeIn 0.2s ease'
+        }}>
+          <div style={{
+            background: 'var(--surface)',
+            borderRadius: '16px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            maxWidth: '900px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'hidden',
+            animation: 'cm-fadeUp 0.3s ease'
+          }}>
+            {/* Header */}
+            <div style={{
+              background: 'var(--blue)',
+              padding: '16px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  background: 'rgba(255,255,255,0.2)',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '16px'
+                }}>📄</div>
+                <div>
+                  <div style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>Soporte de Pago</div>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>Comprobante del movimiento</div>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setMostrarModalSoporte(false);
+                  setSoporteSeleccionado(null);
+                }}
+                style={{
+                  padding: '8px',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  color: '#fff',
+                  transition: 'all 0.15s'
+                }}
+                onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
+                onMouseLeave={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
+              >✕</button>
+            </div>
+
+            {/* Body */}
+            <div style={{
+              padding: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              maxHeight: 'calc(90vh - 140px)',
+              overflow: 'auto'
+            }}>
+              {soporteSeleccionado.toLowerCase().endsWith('.pdf') ? (
+                <div style={{ width: '100%', textAlign: 'center' }}>
+                  <object
+                    data={soporteSeleccionado}
+                    type="application/pdf"
+                    style={{
+                      width: '100%',
+                      height: '500px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)'
+                    }}
+                  >
+                    <div style={{ padding: '32px' }}>
+                      <p style={{ color: 'var(--text-2)', marginBottom: '16px' }}>
+                        No se puede previsualizar el PDF directamente
+                      </p>
+                      <a
+                        href={soporteSeleccionado}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 20px',
+                          background: 'var(--blue)',
+                          color: '#fff',
+                          borderRadius: '8px',
+                          textDecoration: 'none',
+                          fontWeight: 600,
+                          fontSize: '14px'
+                        }}
+                      >
+                        📄 Abrir PDF en nueva pestaña
+                      </a>
+                    </div>
+                  </object>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img
+                    src={soporteSeleccionado}
+                    alt="Soporte de pago"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      border: '1px solid var(--border)'
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              background: 'var(--bg)',
+              padding: '16px 24px',
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end'
+            }}>
+              <a
+                href={soporteSeleccionado}
+                download={`soporte_pago_${new Date().getTime()}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 20px',
+                  background: 'var(--blue)',
+                  color: '#fff',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  transition: 'all 0.15s'
+                }}
+                onMouseEnter={(e) => e.target.style.filter = 'brightness(1.1)'}
+                onMouseLeave={(e) => e.target.style.filter = 'brightness(1)'}
+              >
+                📥 Descargar
+              </a>
+              <button
+                onClick={() => {
+                  setMostrarModalSoporte(false);
+                  setSoporteSeleccionado(null);
+                }}
+                style={{
+                  padding: '10px 20px',
+                  background: 'var(--border)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'var(--text-1)',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s'
+                }}
+                onMouseEnter={(e) => e.target.style.background = 'var(--border-light)'}
+                onMouseLeave={(e) => e.target.style.background = 'var(--border)'}
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
