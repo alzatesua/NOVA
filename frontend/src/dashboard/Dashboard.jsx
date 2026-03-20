@@ -11,6 +11,7 @@ import ConfiguracionView from '../components/ConfiguracionView';
 import ClientesView from '../components/ClientesView';
 import CajaView from '../components/CajaView';
 import MoraView from '../components/MoraView';
+import ProveedoresView from '../components/ProveedoresView';
 import { useFetchUsers } from '../hooks/useFetchUsers';
 import { useFetchSucursales } from '../hooks/useFetchSucursales';
 import { useAuth } from '../hooks/useAuth';
@@ -163,6 +164,13 @@ export default function Dashboard() {
         {view === 'mora' && (
           <div className="relative w-full mb-8">
             <MoraView />
+          </div>
+        )}
+
+        {/* VISTA DE GESTIÓN DE PROVEEDORES */}
+        {view === 'proveedores' && (
+          <div className="relative w-full mb-8">
+            <ProveedoresView />
           </div>
         )}
 

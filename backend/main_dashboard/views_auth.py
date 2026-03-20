@@ -322,25 +322,29 @@ class LoginView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class RefreshTokenView(TokenRefreshView):
+class RefreshTokenView(APIView):
     """
-    Renovar token de acceso (SimpleJWT).
-
-    POST /api/auth/refresh/
-    Body:
-        - refresh: Refresh token
+    Renovar token de acceso sin validar contra modelo de usuario global.
+    Esto permite que tokens de ClienteTienda (multitenant) funcionen.
     """
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        try:
-            response = super().post(request, *args, **kwargs)
-            return response
+        from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
-        except InvalidToken:
+        serializer = TokenRefreshSerializer(data=request.data)
+        try:
+            # Validar y refresh el token
+            serializer.is_valid(raise_exception=True)
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        except InvalidToken as e:
             return Response({
                 'detail': 'El refresh token no es válido o ha expirado'
             }, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            return Response({
+                'detail': f'Error al renovar token: {str(e)}'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutView(APIView):

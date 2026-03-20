@@ -1766,24 +1766,38 @@ class Proveedor(models.Model):
     def __str__(self):
         return f"{self.razon_social} ({self.nit})"
 
-    def actualizar_calificacion(self):
-        """Actualiza la calificación promedio del proveedor"""
-        calificaciones = self.calificaciones.all()
+    def actualizar_calificacion(self, alias=None):
+        """
+        Actualiza la calificación promedio del proveedor.
+        Args:
+            alias: Alias de BD para multitenant (opcional)
+        """
+        qs = self.calificaciones.using(alias) if alias else self.calificaciones
+        calificaciones = qs.all()
         if calificaciones.exists():
             total = sum(c.calificacion for c in calificaciones)
             self.calificacion_promedio = round(total / calificaciones.count(), 2)
             self.numero_calificaciones = calificaciones.count()
-            self.save(update_fields=['calificacion_promedio', 'numero_calificaciones'])
+            # Usar el mismo alias para guardar
+            self.save(using=alias if alias else None, update_fields=['calificacion_promedio', 'numero_calificaciones'])
 
-    def get_total_compras(self):
-        """Retorna el total de compras realizadas a este proveedor"""
-        return self.pedidos.aggregate(
-            total=models.Sum('monto_total')
-        )['total'] or 0
+    def get_total_compras(self, alias=None):
+        """
+        Retorna el total de compras realizadas a este proveedor.
+        Args:
+            alias: Alias de BD para multitenant (opcional)
+        """
+        qs = self.pedidos.using(alias) if alias else self.pedidos
+        return qs.aggregate(total=models.Sum('monto_total'))['total'] or 0
 
-    def get_ultimo_pedido(self):
-        """Retorna la fecha del último pedido realizado"""
-        ultimo = self.pedidos.order_by('-fecha_pedido').first()
+    def get_ultimo_pedido(self, alias=None):
+        """
+        Retorna la fecha del último pedido realizado.
+        Args:
+            alias: Alias de BD para multitenant (opcional)
+        """
+        qs = self.pedidos.using(alias) if alias else self.pedidos
+        ultimo = qs.order_by('-fecha_pedido').first()
         return ultimo.fecha_pedido if ultimo else None
 
 

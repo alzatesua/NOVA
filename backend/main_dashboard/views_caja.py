@@ -340,12 +340,12 @@ def cuadre_caja(request):
 
         # Filtrar por sucursal si se proporciona
         id_sucursal = request.data.get('id_sucursal')
-        logger.info(f"🔍 id_sucursal recibido: {id_sucursal} (tipo: {type(id_sucursal)})")
-        logger.info(f"📋 Todos los datos recibidos: {request.data}")
+        print(f"DEBUG CUADRE - id_sucursal recibido: {id_sucursal} (tipo: {type(id_sucursal)})")
+        print(f"DEBUG CUADRE - Todos los datos: {request.data}")
         sucursal_filter = {}
         if id_sucursal:
             sucursal_filter['sucursal_id'] = id_sucursal
-            logger.info(f"✅ Filtrando por sucursal_id: {id_sucursal}")
+            print(f"DEBUG CUADRE - Filtrando por sucursal_id: {id_sucursal}")
 
         # Obtener saldo inicial
         ultimo_arqueo_query = ArqueoCaja.objects.using(alias).filter(

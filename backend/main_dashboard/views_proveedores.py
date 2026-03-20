@@ -45,7 +45,8 @@ def _get_tenant_alias(request):
 def proveedores_list(request):
     """
     GET: Lista todos los proveedores
-    POST: Crea un nuevo proveedor
+    POST: Si solo tiene credenciales (usuario/token/subdominio), lista proveedores.
+         Si tiene nit y razon_social, crea un nuevo proveedor.
 
     Query params (GET):
     - buscar: término de búsqueda
@@ -53,7 +54,7 @@ def proveedores_list(request):
     - solo_calificados: true/false
     - ordenar_por: campo para ordenar
 
-    Body esperado (POST):
+    Body para crear (POST):
     {
         "nit": "900123456-1",
         "razon_social": "Proveedor SAS",
@@ -73,10 +74,21 @@ def proveedores_list(request):
     }
     """
     try:
+        # Logging para debugging
+        logger.info(f"=== PROVEEDORES_LIST ===")
+        logger.info(f"Method: {request.method}")
+        logger.info(f"Request data: {dict(request.data)}")
+
         alias = _get_tenant_alias(request)
         from .models import Proveedor
 
-        if request.method == 'GET':
+        # Para POST, determinamos si es crear o listar basado en si tiene nit y razon_social
+        es_creacion = (request.method == 'POST' and
+                       request.data.get('nit') and
+                       request.data.get('razon_social'))
+
+        if request.method == 'GET' or (request.method == 'POST' and not es_creacion):
+            # Modo LISTADO (GET o POST solo con credenciales)
             # Obtener parámetros de filtrado
             buscar = request.query_params.get('buscar', '')
             estado_filtro = request.query_params.get('estado', '')
@@ -114,6 +126,13 @@ def proveedores_list(request):
             # Serializar resultados
             data = []
             for prov in queryset:
+                # Obtener conteos usando el alias correcto para multitenant
+                # TEMPORAL: Comentado hasta que se creen los modelos ProductoProveedor y PedidoProveedor
+                # total_productos = prov.productos.using(alias).count() if prov.pk else 0
+                # total_pedidos = prov.pedidos.using(alias).count() if prov.pk else 0
+                total_productos = 0  # Temporal: contar cuando se implemente la relación
+                total_pedidos = 0  # Temporal: contar cuando se implemente la relación
+
                 data.append({
                     'id': prov.id,
                     'nit': prov.nit,
@@ -135,9 +154,9 @@ def proveedores_list(request):
                     'calificacion_promedio': float(prov.calificacion_promedio) if prov.calificacion_promedio else 0,
                     'numero_calificaciones': prov.numero_calificaciones,
                     'observaciones': prov.observaciones,
-                    'total_productos': prov.productos.count(),
-                    'total_pedidos': prov.pedidos.count(),
-                    'total_compras': float(prov.get_total_compras()),
+                    'total_productos': total_productos,
+                    'total_pedidos': total_pedidos,
+                    'total_compras': float(prov.get_total_compras(alias=alias)),
                     'creado_en': prov.creado_en.isoformat(),
                     'actualizado_en': prov.actualizado_en.isoformat(),
                 })
@@ -148,7 +167,7 @@ def proveedores_list(request):
                 'total': len(data)
             }, status=status.HTTP_200_OK)
 
-        elif request.method == 'POST':
+        elif es_creacion:
             # Crear nuevo proveedor
             data = request.data
 
@@ -177,7 +196,7 @@ def proveedores_list(request):
                 descuento_comercial=data.get('descuento_comercial', 0),
                 limite_credito=data.get('limite_credito', 0),
                 observaciones=data.get('observaciones'),
-                creado_por=request.user if request.user.is_authenticated else None,
+                creado_por=None,  # No usamos autenticación Django en este endpoint
             )
 
             logger.info(f"Proveedor creado: {proveedor.id} - {proveedor.razon_social}")
@@ -246,12 +265,12 @@ def proveedor_detalle(request, proveedor_id):
                     'calificacion_promedio': float(proveedor.calificacion_promedio) if proveedor.calificacion_promedio else 0,
                     'numero_calificaciones': proveedor.numero_calificaciones,
                     'observaciones': proveedor.observaciones,
-                    'total_productos': proveedor.productos.count(),
-                    'total_contactos': proveedor.contactos.count(),
-                    'total_pedidos': proveedor.pedidos.count(),
-                    'total_documentos': proveedor.documentos.count(),
-                    'total_compras': float(proveedor.get_total_compras()),
-                    'ultimo_pedido': proveedor.get_ultimo_pedido().isoformat() if proveedor.get_ultimo_pedido() else None,
+                    'total_productos': proveedor.productos.using(alias).count() if proveedor.pk else 0,
+                    'total_contactos': proveedor.contactos.using(alias).count() if proveedor.pk else 0,
+                    'total_pedidos': proveedor.pedidos.using(alias).count() if proveedor.pk else 0,
+                    'total_documentos': proveedor.documentos.using(alias).count() if proveedor.pk else 0,
+                    'total_compras': float(proveedor.get_total_compras(alias=alias)),
+                    'ultimo_pedido': proveedor.get_ultimo_pedido(alias=alias).isoformat() if proveedor.get_ultimo_pedido(alias=alias) else None,
                     'creado_en': proveedor.creado_en.isoformat(),
                     'actualizado_en': proveedor.actualizado_en.isoformat(),
                 }
@@ -274,7 +293,7 @@ def proveedor_detalle(request, proveedor_id):
                 if campo in data:
                     setattr(proveedor, campo, data[campo])
 
-            proveedor.save()
+            proveedor.save(using=alias)
 
             logger.info(f"Proveedor actualizado: {proveedor.id} - {proveedor.razon_social}")
 
@@ -290,7 +309,7 @@ def proveedor_detalle(request, proveedor_id):
         elif request.method == 'DELETE':
             # Soft delete: cambiar estado a inactivo
             proveedor.estado = 'inactivo'
-            proveedor.save()
+            proveedor.save(using=alias)
 
             logger.info(f"Proveedor desactivado: {proveedor.id} - {proveedor.razon_social}")
 
