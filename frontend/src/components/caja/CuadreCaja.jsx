@@ -51,6 +51,9 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
         params.id_sucursal = idSucursal;
       }
 
+      console.log('🔍 ENVIANDO PETICIÓN CUADRE - idSucursal:', idSucursal, 'tipo:', typeof idSucursal);
+      console.log('📋 Parámetros completos:', params);
+
       const response = await fetchCuadreCaja(params);
 
       console.log('💰 Respuesta cuadre:', response);
@@ -63,7 +66,7 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
       }
     } catch (error) {
       console.error('Error al cargar cuadre de caja:', error);
-      showToast('Error al cargar el cuadre de caja', 'error');
+      showToast('error', 'Error al cargar el cuadre de caja');
     } finally {
       setLoading(false);
     }
@@ -71,7 +74,7 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
 
   const realizarArqueo = async () => {
     if (!montoArqueo || parseFloat(montoArqueo) < 0) {
-      showToast('Por favor ingresa un monto válido', 'error');
+      showToast('error', 'Por favor ingresa un monto válido');
       return;
     }
 
@@ -93,7 +96,7 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
       const response = await realizarArqueoCaja(params);
 
       if (response.success) {
-        showToast('Arqueo realizado exitosamente', 'success');
+        showToast('success', 'Arqueo realizado exitosamente');
         setMostrarModalArqueo(false);
         setMontoArqueo('');
         cargarCuadre();
@@ -102,7 +105,7 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
       }
     } catch (error) {
       console.error('Error al realizar arqueo:', error);
-      showToast('Error al realizar el arqueo', 'error');
+      showToast('error', 'Error al realizar el arqueo');
     } finally {
       setSubmittingArqueo(false);
     }

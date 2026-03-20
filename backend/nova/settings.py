@@ -243,9 +243,10 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 
 #para la expiracion del token jwt
+# Aumentado para mejorar experiencia de usuario y reducir necesidad de refresh
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=8),  # Cambiado de 30 min a 8 horas
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),  # Cambiado de 7 a 30 días
     'ROTATE_REFRESH_TOKENS': True,  # Rotar refresh tokens
     'BLACKLIST_AFTER_ROTATION': True,  # Poner en blacklist el antiguo
     'UPDATE_LAST_LOGIN': True,  # Actualizar ultimo_login automáticamente

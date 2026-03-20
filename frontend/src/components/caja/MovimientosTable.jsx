@@ -59,7 +59,7 @@ export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursa
       }
     } catch (error) {
       console.error('Error al cargar movimientos:', error);
-      showToast('Error al cargar los movimientos', 'error');
+      showToast('error', 'Error al cargar los movimientos');
       setMovimientos([]);
     } finally {
       setLoading(false);

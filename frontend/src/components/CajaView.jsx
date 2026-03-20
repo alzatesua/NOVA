@@ -198,7 +198,11 @@ export default function CajaView() {
     } finally { setLoadingSucursales(false); }
   };
 
-  const getSucursalFilter    = () => isAdmin ? sucursalSeleccionada : idSucursal;
+  const getSucursalFilter    = () => {
+    const result = isAdmin ? sucursalSeleccionada : idSucursal;
+    console.log('🔍 getSucursalFilter - isAdmin:', isAdmin, 'sucursalSeleccionada:', sucursalSeleccionada, 'idSucursal:', idSucursal, '→ result:', result);
+    return result;
+  };
   const handleRegistroExitoso = () => setRefreshKey(k => k + 1);
   const handleRefresh         = () => setRefreshKey(k => k + 1);
 
@@ -259,7 +263,7 @@ export default function CajaView() {
               <div className="cv-card">
                 <div className="cv-card__head"><span className="cv-card__title">Registrar Movimiento</span></div>
                 <div className="cv-card__body">
-                  <RegistroMovimiento isAdmin={isAdmin} idSucursal={getSucursalFilter()} onRegistroExitoso={handleRegistroExitoso} />
+                  <RegistroMovimiento idSucursal={getSucursalFilter()} onRegistroExitoso={handleRegistroExitoso} />
                 </div>
               </div>
               <div className="cv-card">

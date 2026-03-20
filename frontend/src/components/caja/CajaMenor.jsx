@@ -477,9 +477,9 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh }) {
   };
 
   const submit = async () => {
-    if (!monto || parseFloat(monto) <= 0) return showToast('Ingresa un monto válido', 'error');
-    if (!descripcion.trim())              return showToast('Ingresa una descripción', 'error');
-    if (!categoria)                       return showToast('Selecciona una categoría', 'error');
+    if (!monto || parseFloat(monto) <= 0) return showToast('error', 'Ingresa un monto válido');
+    if (!descripcion.trim())              return showToast('error', 'Ingresa una descripción');
+    if (!categoria)                       return showToast('error', 'Selecciona una categoría');
 
     setSubmitting(true);
     try {
@@ -501,7 +501,7 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh }) {
         showToast(res.message || 'Error al registrar', 'error');
       }
     } catch {
-      showToast('Error al registrar el movimiento', 'error');
+      showToast('error', 'Error al registrar el movimiento');
     } finally {
       setSubmitting(false);
     }

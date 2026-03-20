@@ -268,7 +268,7 @@ const CATEGORIAS = {
 };
 
 /* ─── Componente principal ───────────────────────────────────── */
-export default function RegistroMovimiento({ isAdmin, idSucursal, onRegistroExitoso }) {
+export default function RegistroMovimiento({ idSucursal, onRegistroExitoso }) {
   const { usuario, tokenUsuario, subdominio } = useAuth();
   const { theme } = useTheme();
 
@@ -283,9 +283,9 @@ export default function RegistroMovimiento({ isAdmin, idSucursal, onRegistroExit
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!monto || parseFloat(monto) <= 0) { showToast('Por favor ingresa un monto válido', 'error'); return; }
-    if (!descripcion.trim())              { showToast('Por favor ingresa una descripción', 'error'); return; }
-    if (!categoria)                       { showToast('Por favor selecciona una categoría', 'error'); return; }
+    if (!monto || parseFloat(monto) <= 0) { showToast('error', 'Por favor ingresa un monto válido'); return; }
+    if (!descripcion.trim())              { showToast('error', 'Por favor ingresa una descripción'); return; }
+    if (!categoria)                       { showToast('error', 'Por favor selecciona una categoría'); return; }
 
     setSubmitting(true);
     try {
@@ -298,15 +298,54 @@ export default function RegistroMovimiento({ isAdmin, idSucursal, onRegistroExit
 
       const response = await registrarMovimientoCaja(params);
       if (response.success) {
-        showToast('Movimiento registrado exitosamente', 'success');
+        showToast('success', 'Movimiento registrado exitosamente');
         setMonto(''); setDescripcion(''); setCategoria('');
         if (onRegistroExitoso) onRegistroExitoso();
       } else {
-        showToast(response.message || 'Error al registrar el movimiento', 'error');
+        // Extraer mensajes de error específicos del backend
+        let errorMsg = 'Error al registrar el movimiento';
+        if (response.message) {
+          errorMsg = response.message;
+        } else if (response.data && typeof response.data === 'object') {
+          // Si vienen errores de campo específicos
+          const fieldErrors = [];
+          for (const [field, errors] of Object.entries(response.data)) {
+            const fieldName = field === 'descripcion' ? 'Descripción' :
+                             field === 'monto' ? 'Monto' :
+                             field === 'categoria' ? 'Categoría' :
+                             field === 'metodo_pago' ? 'Método de pago' : field;
+            fieldErrors.push(`${fieldName}: ${Array.isArray(errors) ? errors.join(', ') : errors}`);
+          }
+          if (fieldErrors.length > 0) {
+            errorMsg = fieldErrors.join('. ');
+          }
+        }
+        showToast('error', errorMsg);
       }
     } catch (err) {
       console.error(err);
-      showToast('Error al registrar el movimiento', 'error');
+      // Intentar extraer error de la respuesta
+      let errorMsg = 'Error al registrar el movimiento';
+      if (err.response && err.response.data) {
+        if (err.response.data.message) {
+          errorMsg = err.response.data.message;
+        } else if (err.response.data.detail) {
+          errorMsg = err.response.data.detail;
+        } else if (typeof err.response.data === 'object') {
+          const fieldErrors = [];
+          for (const [field, errors] of Object.entries(err.response.data)) {
+            const fieldName = field === 'descripcion' ? 'Descripción' :
+                             field === 'monto' ? 'Monto' :
+                             field === 'categoria' ? 'Categoría' :
+                             field === 'metodo_pago' ? 'Método de pago' : field;
+            fieldErrors.push(`${fieldName}: ${Array.isArray(errors) ? errors.join(', ') : errors}`);
+          }
+          if (fieldErrors.length > 0) {
+            errorMsg = fieldErrors.join('. ');
+          }
+        }
+      }
+      showToast(errorMsg, 'error');
     } finally {
       setSubmitting(false);
     }

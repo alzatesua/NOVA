@@ -236,7 +236,7 @@ export default function CajaDashboard({ fecha, isAdmin, idSucursal }) {
       if (response?.success) setEstadisticas(response.data);
     } catch (error) {
       console.error(error);
-      showToast('Error al cargar las estadísticas de caja', 'error');
+      showToast('error', 'Error al cargar las estadísticas de caja');
       setEstadisticas({ saldo_inicial: 0, total_entradas: 0, total_salidas: 0, saldo_actual: 0 });
     } finally {
       setLoading(false);

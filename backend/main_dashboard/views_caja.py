@@ -3,7 +3,7 @@
 Vistas para el módulo de Caja y Cuadre de Caja
 """
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.db.models import Q, Sum, Count
@@ -112,6 +112,7 @@ class CajaTenantMixin:
 # ============================================================
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def estadisticas_caja(request):
     try:
         mixin = CajaTenantMixin()
@@ -125,6 +126,7 @@ def estadisticas_caja(request):
             fecha = timezone.now().date()
 
         id_sucursal = request.data.get('id_sucursal')
+        logger.info(f"📊 estadisticas_caja - id_sucursal: {id_sucursal}, fecha: {fecha}")
 
         # ── Saldo inicial: último arqueo filtrado por sucursal ──
         arqueo_qs = ArqueoCaja.objects.using(alias).filter(fecha__lt=fecha)
@@ -151,6 +153,12 @@ def estadisticas_caja(request):
         saldo_actual = saldo_inicial + total_entradas - total_salidas
         total_transacciones = movimientos_dia.count()
 
+        logger.info(f"📊 RESULTADOS ESTADÍSTICAS - Sucursal: {id_sucursal}")
+        logger.info(f"   Saldo inicial: {saldo_inicial}")
+        logger.info(f"   Total entradas: {total_entradas}")
+        logger.info(f"   Total salidas: {total_salidas}")
+        logger.info(f"   Saldo actual: {saldo_actual}")
+
         return Response({
             'success': True,
             'data': {
@@ -171,6 +179,7 @@ def estadisticas_caja(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def listar_movimientos(request):
     try:
         mixin = CajaTenantMixin()
@@ -224,7 +233,9 @@ def listar_movimientos(request):
         return Response({'success': False, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def registrar_movimiento(request):
+    logger.info(f"🔔 Petición recibida en registrar_movimiento desde {request.META.get('REMOTE_ADDR')}")
     try:
         mixin = CajaTenantMixin()
         alias = mixin._resolve_alias(request)
@@ -283,6 +294,7 @@ def registrar_movimiento(request):
         return Response({'success': False, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def cuadre_caja(request):
     """
     Obtiene el cuadre de caja completo para una fecha específica.
@@ -328,9 +340,12 @@ def cuadre_caja(request):
 
         # Filtrar por sucursal si se proporciona
         id_sucursal = request.data.get('id_sucursal')
+        logger.info(f"🔍 id_sucursal recibido: {id_sucursal} (tipo: {type(id_sucursal)})")
+        logger.info(f"📋 Todos los datos recibidos: {request.data}")
         sucursal_filter = {}
         if id_sucursal:
             sucursal_filter['sucursal_id'] = id_sucursal
+            logger.info(f"✅ Filtrando por sucursal_id: {id_sucursal}")
 
         # Obtener saldo inicial
         ultimo_arqueo_query = ArqueoCaja.objects.using(alias).filter(
@@ -360,8 +375,11 @@ def cuadre_caja(request):
 
         saldo_esperado = saldo_inicial + total_entradas - total_salidas
 
-        # Buscar arqueo del día
-        arqueo_dia = ArqueoCaja.objects.using(alias).filter(fecha=fecha).first()
+        # Buscar arqueo del día filtrado por sucursal
+        arqueo_dia_query = ArqueoCaja.objects.using(alias).filter(fecha=fecha)
+        if id_sucursal:
+            arqueo_dia_query = arqueo_dia_query.filter(sucursal_id=id_sucursal)
+        arqueo_dia = arqueo_dia_query.first()
 
         monto_arqueo = arqueo_dia.monto_contado if arqueo_dia else None
         diferencia = arqueo_dia.diferencia if arqueo_dia else Decimal('0')
@@ -394,6 +412,14 @@ def cuadre_caja(request):
         cantidad_entradas = movimientos_dia.filter(tipo='entrada').count()
         cantidad_salidas = movimientos_dia.filter(tipo='salida').count()
 
+        logger.info(f"📊 RESULTADOS CUADRE - Sucursal: {id_sucursal}")
+        logger.info(f"   Saldo inicial: {saldo_inicial}")
+        logger.info(f"   Total entradas: {total_entradas}")
+        logger.info(f"   Total salidas: {total_salidas}")
+        logger.info(f"   Saldo esperado: {saldo_esperado}")
+        logger.info(f"   Monto arqueo: {monto_arqueo}")
+        logger.info(f"   Diferencia: {diferencia}")
+
         return Response({
             'success': True,
             'data': {
@@ -425,6 +451,7 @@ def cuadre_caja(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def realizar_arqueo(request):
     """
     Registra un arqueo de caja para una fecha específica.
@@ -563,6 +590,7 @@ def realizar_arqueo(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def listar_movimientos_caja_menor(request):
     """
     Lista los movimientos de caja menor para una fecha específica.
@@ -622,6 +650,7 @@ def listar_movimientos_caja_menor(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def listar_sucursales_caja(request):
     """
     Lista las sucursales disponibles para filtrado en el módulo de caja.
