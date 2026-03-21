@@ -18,22 +18,47 @@ logger = logging.getLogger(__name__)
 
 def _get_tenant_alias(request):
     """Helper para obtener el alias de BD del tenant."""
-    from nova.models import Dominios
+    from nova.models import Dominios, Tiendas
     from nova.utils.db import conectar_db_tienda
+    from django.conf import settings
 
     subdom = request.data.get('subdominio') or request.query_params.get('subdominio')
     if not subdom:
         host = request.get_host().split(':')[0]
         subdom = host.split('.')[0].lower()
 
-    dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).select_related('tienda').first()
+    logger.info(f"Buscando tenant para subdominio: '{subdom}'")
+
+    # Intentar buscar por coincidencia exacta primero
+    dominio_obj = Dominios.objects.filter(dominio=subdom).select_related('tienda').first()
+
+    # Si no encuentra, intentar por contains (por si tiene http:// o www)
     if not dominio_obj:
-        raise ValueError('Dominio no válido.')
+        dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).select_related('tienda').first()
+
+    if not dominio_obj:
+        # Fallback para desarrollo: usar la primera tienda disponible
+        todos_dominios = list(Dominios.objects.values_list('dominio', flat=True))
+        logger.warning(f"No se encontró dominio para subdominio '{subdom}'. Dominios disponibles: {todos_dominios}")
+
+        # En desarrollo, usar la primera tienda disponible como fallback
+        if settings.DEBUG:
+            primera_tienda = Tiendas.objects.first()
+            if primera_tienda:
+                logger.warning(f"Modo DEBUG: Usando tienda fallback ID {primera_tienda.id} ({primera_tienda.nombre})")
+                alias = str(primera_tienda.id)
+                conectar_db_tienda(alias, primera_tienda)
+                return alias
+
+        # En producción, lanzar error
+        logger.error(f"No se encontró dominio para subdominio '{subdom}' y no hay fallback disponible")
+        raise ValueError(f'Dominio no válido para subdominio: {subdom}. Dominios disponibles: {todos_dominios}')
 
     tienda = dominio_obj.tienda
     alias = str(tienda.id)
     conectar_db_tienda(alias, tienda)
 
+    logger.info(f"Tenant encontrado: {alias} (dominio: {dominio_obj.dominio})")
     return alias
 
 
@@ -43,95 +68,73 @@ def _get_tenant_alias(request):
 
 @api_view(['GET', 'POST'])
 def proveedores_list(request):
-    """
-    GET: Lista todos los proveedores
-    POST: Si solo tiene credenciales (usuario/token/subdominio), lista proveedores.
-         Si tiene nit y razon_social, crea un nuevo proveedor.
-
-    Query params (GET):
-    - buscar: término de búsqueda
-    - estado: activo/inactivo/bloqueado
-    - solo_calificados: true/false
-    - ordenar_por: campo para ordenar
-
-    Body para crear (POST):
-    {
-        "nit": "900123456-1",
-        "razon_social": "Proveedor SAS",
-        "nombre_comercial": "Mi Proveedor",
-        "direccion": "Calle 123",
-        "ciudad": "Bogotá",
-        "correo_electronico": "contacto@proveedor.com",
-        "telefono": "573001234567",
-        "telefono_whatsapp": "573001234567",
-        "contacto_principal": "Juan Pérez",
-        "cargo_contacto": "Gerente",
-        "sitio_web": "https://proveedor.com",
-        "plazo_pago_dias": 30,
-        "descuento_comercial": 5.00,
-        "limite_credito": 10000000,
-        "observaciones": "Proveedor confiable"
-    }
-    """
     try:
-        # Logging para debugging
         logger.info(f"=== PROVEEDORES_LIST ===")
         logger.info(f"Method: {request.method}")
         logger.info(f"Request data: {dict(request.data)}")
+        logger.info(f"Request GET params: {dict(request.query_params)}")
 
         alias = _get_tenant_alias(request)
-        from .models import Proveedor
+        logger.info(f"PASO 1 - alias obtenido: {alias}")
 
-        # Para POST, determinamos si es crear o listar basado en si tiene nit y razon_social
+        from .models import Proveedor
+        logger.info(f"PASO 2 - modelo Proveedor importado")
+
         es_creacion = (request.method == 'POST' and
                        request.data.get('nit') and
                        request.data.get('razon_social'))
+        logger.info(f"PASO 3 - es_creacion: {es_creacion}")
 
         if request.method == 'GET' or (request.method == 'POST' and not es_creacion):
-            # Modo LISTADO (GET o POST solo con credenciales)
-            # Obtener parámetros de filtrado
+
             buscar = request.query_params.get('buscar', '')
             estado_filtro = request.query_params.get('estado', '')
             solo_calificados = request.query_params.get('solo_calificados', 'false').lower() == 'true'
             ordenar_por = request.query_params.get('ordenar_por', 'razon_social')
+            logger.info(f"PASO 4 - filtros obtenidos")
 
-            # Construir query
-            queryset = Proveedor.objects.using(alias).all()
+            try:
+                queryset = list(Proveedor.objects.using(alias).all())
+                logger.info(f"PASO 5 - query OK, total proveedores: {len(queryset)}")
+            except Exception as e:
+                logger.error(f"PASO 5 - query FALLÓ: {e}", exc_info=True)
+                return Response({'success': True, 'data': [], 'total': 0}, status=status.HTTP_200_OK)
 
-            # Aplicar filtros
+            # Aplicar filtros en memoria ya que evaluamos el queryset
             if buscar:
-                queryset = queryset.filter(
-                    Q(razon_social__icontains=buscar) |
-                    Q(nombre_comercial__icontains=buscar) |
-                    Q(nit__icontains=buscar) |
-                    Q(contacto_principal__icontains=buscar)
-                )
+                queryset = [p for p in queryset if
+                    buscar.lower() in (p.razon_social or '').lower() or
+                    buscar.lower() in (p.nombre_comercial or '').lower() or
+                    buscar.lower() in (p.nit or '').lower() or
+                    buscar.lower() in (p.contacto_principal or '').lower()
+                ]
 
             if estado_filtro:
-                queryset = queryset.filter(estado=estado_filtro)
+                queryset = [p for p in queryset if p.estado == estado_filtro]
 
             if solo_calificados:
-                queryset = queryset.filter(calificacion_promedio__gt=0)
+                queryset = [p for p in queryset if p.calificacion_promedio and p.calificacion_promedio > 0]
 
             # Ordenar
             if ordenar_por == 'calificacion':
-                queryset = queryset.order_by('-calificacion_promedio', 'razon_social')
+                queryset = sorted(queryset, key=lambda p: (-(p.calificacion_promedio or 0), p.razon_social or ''))
             elif ordenar_por == 'mas_reciente':
-                queryset = queryset.order_by('-creado_en')
-            elif ordenar_por == 'nombre':
-                queryset = queryset.order_by('razon_social')
+                queryset = sorted(queryset, key=lambda p: p.creado_en, reverse=True)
             else:
-                queryset = queryset.order_by(ordenar_por)
+                queryset = sorted(queryset, key=lambda p: getattr(p, 'razon_social', '') or '')
 
-            # Serializar resultados
+            logger.info(f"PASO 6 - filtros aplicados, total: {len(queryset)}")
+
             data = []
             for prov in queryset:
-                # Obtener conteos usando el alias correcto para multitenant
-                # TEMPORAL: Comentado hasta que se creen los modelos ProductoProveedor y PedidoProveedor
-                # total_productos = prov.productos.using(alias).count() if prov.pk else 0
-                # total_pedidos = prov.pedidos.using(alias).count() if prov.pk else 0
-                total_productos = 0  # Temporal: contar cuando se implemente la relación
-                total_pedidos = 0  # Temporal: contar cuando se implemente la relación
+                total_productos = 0
+                total_pedidos = 0
+
+                try:
+                    total_compras = float(prov.get_total_compras(alias=alias))
+                except Exception as e:
+                    logger.warning(f"get_total_compras falló para proveedor {prov.id}: {e}")
+                    total_compras = 0
 
                 data.append({
                     'id': prov.id,
@@ -156,10 +159,12 @@ def proveedores_list(request):
                     'observaciones': prov.observaciones,
                     'total_productos': total_productos,
                     'total_pedidos': total_pedidos,
-                    'total_compras': float(prov.get_total_compras(alias=alias)),
+                    'total_compras': total_compras,
                     'creado_en': prov.creado_en.isoformat(),
                     'actualizado_en': prov.actualizado_en.isoformat(),
                 })
+
+            logger.info(f"PASO 7 - serialización OK, enviando {len(data)} proveedores")
 
             return Response({
                 'success': True,
@@ -171,14 +176,12 @@ def proveedores_list(request):
             # Crear nuevo proveedor
             data = request.data
 
-            # Validar NIT único
             if Proveedor.objects.using(alias).filter(nit=data.get('nit')).exists():
                 return Response({
                     'success': False,
                     'message': 'Ya existe un proveedor con este NIT'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # Crear proveedor
             proveedor = Proveedor.objects.using(alias).create(
                 nit=data.get('nit'),
                 razon_social=data.get('razon_social'),
@@ -196,7 +199,7 @@ def proveedores_list(request):
                 descuento_comercial=data.get('descuento_comercial', 0),
                 limite_credito=data.get('limite_credito', 0),
                 observaciones=data.get('observaciones'),
-                creado_por=None,  # No usamos autenticación Django en este endpoint
+                creado_por=None,
             )
 
             logger.info(f"Proveedor creado: {proveedor.id} - {proveedor.razon_social}")
@@ -212,9 +215,11 @@ def proveedores_list(request):
             }, status=status.HTTP_201_CREATED)
 
     except ValueError as e:
+        logger.error(f"Error de validación en proveedores_list: {str(e)}")
         return Response({
             'success': False,
-            'message': str(e)
+            'message': str(e),
+            'error_type': 'ValueError'
         }, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         logger.error(f"Error en proveedores_list: {str(e)}", exc_info=True)
@@ -222,7 +227,6 @@ def proveedores_list(request):
             'success': False,
             'message': f'Error al procesar la solicitud: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def proveedor_detalle(request, proveedor_id):

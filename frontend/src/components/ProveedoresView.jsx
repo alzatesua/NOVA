@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { post } from '../services/api';
+import { post, fetchCiudades } from '../services/api';
 import { showToast } from '../utils/toast';
 import {
   Building2,
@@ -43,6 +43,8 @@ export default function ProveedoresView() {
     limite_credito: ''
   });
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [ciudades, setCiudades] = useState([]);
+  const [loadingCiudades, setLoadingCiudades] = useState(false);
 
   useEffect(() => {
     // Detectar modo oscuro
@@ -76,125 +78,139 @@ export default function ProveedoresView() {
     cargarProveedores();
   }, []);
 
-  const cargarProveedores = async () => {
+  const cargarCiudades = async () => {
     try {
-      setLoading(true);
+      setLoadingCiudades(true);
       const token = localStorage.getItem('token_usuario');
-      const usuario = localStorage.getItem('usuario');
-      const subdominio = window.location.hostname.split('.')[0];
-
-      const response = await post('api/proveedores/', {
-        usuario,
-        token,
-        subdominio
-      }, token);
-
-      if (response.json && response.json.success) {
-        setProveedores(response.json.data || []);
-      } else {
-        showToast('error', 'No se pudieron cargar los proveedores');
-      }
+      const data = await fetchCiudades(token);
+      setCiudades(data || []);
     } catch (error) {
-      console.error('Error cargando proveedores:', error);
-      showToast('error', 'Error al cargar proveedores');
+      console.error('Error cargando ciudades:', error);
+      showToast('error', 'Error al cargar ciudades');
     } finally {
-      setLoading(false);
+      setLoadingCiudades(false);
     }
   };
+
+  // Cargar ciudades cuando se abre el formulario
+  useEffect(() => {
+    if (mostrarFormulario && ciudades.length === 0) {
+      cargarCiudades();
+    }
+  }, [mostrarFormulario]);
+
+
+  const cargarProveedores = async () => {
+  try {
+    setLoading(true);
+    const token = localStorage.getItem('token_usuario');
+    const usuario = localStorage.getItem('usuario');
+    const subdominio = window.location.hostname.split('.')[0];
+
+    const response = await post('api/proveedores/', {
+      usuario,
+      token,
+      subdominio
+    }, token);
+
+    // response ya ES el json, no response.json
+    if (response && response.success) {
+      setProveedores(response.data || []);
+    } else {
+      showToast('error', 'No se pudieron cargar los proveedores');
+    }
+  } catch (error) {
+    console.error('Error cargando proveedores:', error);
+    showToast('error', 'Error al cargar proveedores');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const cargarDetalleProveedor = async (proveedorId) => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('token_usuario');
-      const usuario = localStorage.getItem('usuario');
-      const subdominio = window.location.hostname.split('.')[0];
+  try {
+    setLoading(true);
+    const token = localStorage.getItem('token_usuario');
+    const usuario = localStorage.getItem('usuario');
+    const subdominio = window.location.hostname.split('.')[0];
 
-      const response = await post(`api/proveedores/${proveedorId}/`, {
-        usuario,
-        token,
-        subdominio
-      }, token);
+    const response = await post(`api/proveedores/${proveedorId}/`, {
+      usuario,
+      token,
+      subdominio
+    }, token);
 
-      if (response.json && response.json.success) {
-        setProveedorSeleccionado(response.json.data);
-        setVistaActual('detalle');
-      } else {
-        showToast('error', 'No se pudo cargar el detalle del proveedor');
-      }
-    } catch (error) {
-      console.error('Error cargando detalle:', error);
-      showToast('error', 'Error al cargar detalle del proveedor');
-    } finally {
-      setLoading(false);
+    // response ya ES el json
+    if (response && response.success) {
+      setProveedorSeleccionado(response.data);
+      setVistaActual('detalle');
+    } else {
+      showToast('error', 'No se pudo cargar el detalle del proveedor');
     }
-  };
+  } catch (error) {
+    console.error('Error cargando detalle:', error);
+    showToast('error', 'Error al cargar detalle del proveedor');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const crearProveedor = async () => {
-    // Validaciones
-    if (!formData.nit || !formData.razon_social) {
-      showToast('error', 'NIT y Razón Social son obligatorios');
-      return;
+  if (!formData.nit || !formData.razon_social) {
+    showToast('error', 'NIT y Razón Social son obligatorios');
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const token = localStorage.getItem('token_usuario');
+    const usuario = localStorage.getItem('usuario');
+    const subdominio = window.location.hostname.split('.')[0];
+
+    const payload = {
+      usuario,
+      token,
+      subdominio,
+      accion: 'crear',
+      nit: formData.nit,
+      razon_social: formData.razon_social,
+      nombre_comercial: formData.nombre_comercial || '',
+      direccion: formData.direccion || '',
+      ciudad: formData.ciudad || '',
+      correo_electronico: formData.correo_electronico || '',
+      telefono: formData.telefono || '',
+      telefono_whatsapp: formData.telefono_whatsapp || '',
+      contacto_principal: formData.contacto_principal || '',
+      cargo_contacto: formData.cargo_contacto || '',
+      sitio_web: formData.sitio_web || '',
+      plazo_pago_dias: formData.plazo_pago_dias ? parseInt(formData.plazo_pago_dias) : null,
+      descuento_comercial: formData.descuento_comercial ? parseFloat(formData.descuento_comercial) : 0,
+      limite_credito: formData.limite_credito ? parseFloat(formData.limite_credito) : null
+    };
+
+    const response = await post('api/proveedores/', payload, token);
+
+    // ← CORRECCIÓN: response ya ES el json directamente
+    if (response && response.success) {
+      showToast('success', 'Proveedor creado exitosamente');
+      setMostrarFormulario(false);
+      setFormData({
+        nit: '', razon_social: '', nombre_comercial: '', direccion: '',
+        ciudad: '', correo_electronico: '', telefono: '', telefono_whatsapp: '',
+        contacto_principal: '', cargo_contacto: '', sitio_web: '',
+        plazo_pago_dias: '', descuento_comercial: '', limite_credito: ''
+      });
+      cargarProveedores();
+    } else {
+      showToast('error', response?.message || 'Error al crear proveedor');
     }
-
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('token_usuario');
-      const usuario = localStorage.getItem('usuario');
-      const subdominio = window.location.hostname.split('.')[0];
-
-      const payload = {
-        usuario,
-        token,
-        subdominio,
-        accion: 'crear',
-        nit: formData.nit,
-        razon_social: formData.razon_social,
-        nombre_comercial: formData.nombre_comercial || '',
-        direccion: formData.direccion || '',
-        ciudad: formData.ciudad || '',
-        correo_electronico: formData.correo_electronico || '',
-        telefono: formData.telefono || '',
-        telefono_whatsapp: formData.telefono_whatsapp || '',
-        contacto_principal: formData.contacto_principal || '',
-        cargo_contacto: formData.cargo_contacto || '',
-        sitio_web: formData.sitio_web || '',
-        plazo_pago_dias: formData.plazo_pago_dias ? parseInt(formData.plazo_pago_dias) : null,
-        descuento_comercial: formData.descuento_comercial ? parseFloat(formData.descuento_comercial) : 0,
-        limite_credito: formData.limite_credito ? parseFloat(formData.limite_credito) : null
-      };
-
-      const response = await post('api/proveedores/', payload, token);
-
-      if (response.json && response.json.success) {
-        showToast('success', 'Proveedor creado exitosamente');
-        setMostrarFormulario(false);
-        setFormData({
-          nit: '',
-          razon_social: '',
-          nombre_comercial: '',
-          direccion: '',
-          ciudad: '',
-          correo_electronico: '',
-          telefono: '',
-          telefono_whatsapp: '',
-          contacto_principal: '',
-          cargo_contacto: '',
-          sitio_web: '',
-          plazo_pago_dias: '',
-          descuento_comercial: '',
-          limite_credito: ''
-        });
-        cargarProveedores();
-      } else {
-        showToast('error', response.json?.message || 'Error al crear proveedor');
-      }
-    } catch (error) {
-      console.error('Error creando proveedor:', error);
-      showToast('error', 'Error al crear proveedor');
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error('Error creando proveedor:', error);
+    showToast('error', 'Error al crear proveedor');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const proveedoresFiltrados = proveedores.filter(prov => {
     const cumpleBusqueda = !busqueda ||
@@ -512,13 +528,24 @@ export default function ProveedoresView() {
                       <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
                         Ciudad
                       </label>
-                      <input
-                        type="text"
-                        value={formData.ciudad}
-                        onChange={(e) => setFormData({...formData, ciudad: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: Bogotá"
-                      />
+                      {loadingCiudades ? (
+                        <div className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white text-gray-500">
+                          Cargando ciudades...
+                        </div>
+                      ) : (
+                        <select
+                          value={formData.ciudad}
+                          onChange={(e) => setFormData({...formData, ciudad: e.target.value})}
+                          className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        >
+                          <option value="">Seleccione una ciudad</option>
+                          {ciudades.map((ciudad) => (
+                            <option key={ciudad.id} value={ciudad.name}>
+                              {ciudad.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </div>
                   </div>
                 </div>

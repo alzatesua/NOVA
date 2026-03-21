@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/subir/', include('main_dashboard.urls')),
 
     # >>>>> SOLO UNA VEZ montas el API DRF <<<<<
+    path('api/proveedores/', include('main_dashboard.urls_proveedores')),  # Módulo de Proveedores - PRIMERO para evitar conflictos
     path('api/', include(router.urls)),  # Add router before urls_traslados to avoid conflicts
     path('api/', include('main_dashboard.urls')),  # Incluir rutas de productos e-commerce
     path('api/', include('main_dashboard.urls_traslados')),
@@ -36,7 +37,6 @@ urlpatterns = [
     path('api/cupones/', include('main_dashboard.urls_cupones')),
     path('api/auth/', include('main_dashboard.urls_auth')),  # Autenticación e-commerce
     path('api/contacto/', include('main_dashboard.urls_contacto')),  # Formulario de contacto
-    path('api/proveedores/', include('main_dashboard.urls_proveedores')),  # Módulo de Proveedores
 
     path('api/refresh_custom/', views.refresh_token_custom_view),
     path('api/countries/', views.get_countries, name='get_countries'),
