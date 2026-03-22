@@ -7,6 +7,7 @@ from .views_caja import (
     estadisticas_caja,
     listar_movimientos,
     listar_movimientos_caja_menor,
+    balance_caja_menor,
     registrar_movimiento,
     cuadre_caja,
     realizar_arqueo,
@@ -24,6 +25,9 @@ urlpatterns = [
 
     # Listado de movimientos de caja menor
     path('movimientos_caja_menor/', listar_movimientos_caja_menor, name='listar_movimientos_caja_menor'),
+
+    # Balance acumulado de caja menor
+    path('balance_caja_menor/', balance_caja_menor, name='balance_caja_menor'),
 
     # Registrar movimiento (entrada/salida)
     path('registrar_movimiento/', registrar_movimiento, name='registrar_movimiento'),

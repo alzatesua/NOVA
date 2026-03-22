@@ -1461,10 +1461,6 @@ export default function ProveedoresView() {
                     onChange={(e) => setProductoFormData({...productoFormData, codigo_producto: e.target.value})}
                     className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                    Categoría
                   </label>
                   <input
                     type="text"

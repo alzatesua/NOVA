@@ -269,10 +269,15 @@ def proveedor_detalle(request, proveedor_id):
                     'calificacion_promedio': float(proveedor.calificacion_promedio) if proveedor.calificacion_promedio else 0,
                     'numero_calificaciones': proveedor.numero_calificaciones,
                     'observaciones': proveedor.observaciones,
-                    'total_productos': proveedor.productos.using(alias).count() if proveedor.pk else 0,
-                    'total_contactos': proveedor.contactos.using(alias).count() if proveedor.pk else 0,
-                    'total_pedidos': proveedor.pedidos.using(alias).count() if proveedor.pk else 0,
-                    'total_documentos': proveedor.documentos.using(alias).count() if proveedor.pk else 0,
+                    # TEMPORAL: Comentado hasta que se creen los modelos relacionados
+                    # 'total_productos': proveedor.productos.using(alias).count() if proveedor.pk else 0,
+                    # 'total_contactos': proveedor.contactos.using(alias).count() if proveedor.pk else 0,
+                    # 'total_pedidos': proveedor.pedidos.using(alias).count() if proveedor.pk else 0,
+                    # 'total_documentos': proveedor.documentos.using(alias).count() if proveedor.pk else 0,
+                    'total_productos': 0,  # Temporal
+                    'total_contactos': 0,  # Temporal
+                    'total_pedidos': 0,  # Temporal
+                    'total_documentos': 0,  # Temporal
                     'total_compras': float(proveedor.get_total_compras(alias=alias)),
                     'ultimo_pedido': proveedor.get_ultimo_pedido(alias=alias).isoformat() if proveedor.get_ultimo_pedido(alias=alias) else None,
                     'creado_en': proveedor.creado_en.isoformat(),
@@ -283,6 +288,9 @@ def proveedor_detalle(request, proveedor_id):
         elif request.method == 'PUT':
             # Actualizar proveedor
             data = request.data
+
+            # Logging para debugging
+            logger.info(f"Datos recibidos para actualizar: {data}")
 
             # Campos actualizables
             campos_actualizables = [
@@ -296,6 +304,7 @@ def proveedor_detalle(request, proveedor_id):
             for campo in campos_actualizables:
                 if campo in data:
                     setattr(proveedor, campo, data[campo])
+                    logger.info(f"Campo {campo} actualizado a: {data[campo]}")
 
             proveedor.save(using=alias)
 
@@ -311,15 +320,17 @@ def proveedor_detalle(request, proveedor_id):
             }, status=status.HTTP_200_OK)
 
         elif request.method == 'DELETE':
-            # Soft delete: cambiar estado a inactivo
-            proveedor.estado = 'inactivo'
-            proveedor.save(using=alias)
+            # Hard delete: eliminar completamente el proveedor
+            razon_social = proveedor.razon_social
+            proveedor_id = proveedor.id
 
-            logger.info(f"Proveedor desactivado: {proveedor.id} - {proveedor.razon_social}")
+            proveedor.delete(using=alias)
+
+            logger.info(f"Proveedor eliminado: {proveedor_id} - {razon_social}")
 
             return Response({
                 'success': True,
-                'message': 'Proveedor desactivado exitosamente'
+                'message': 'Proveedor eliminado exitosamente'
             }, status=status.HTTP_200_OK)
 
     except Proveedor.DoesNotExist:

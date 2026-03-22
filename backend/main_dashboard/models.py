@@ -8,6 +8,65 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.db.models import Sum
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+import threading
+
+# Thread-local storage para guardar el subdominio durante el request
+_thread_locals = threading.local()
+
+def set_tenant_subdominio(subdominio):
+    """Guarda el subdominio del tenant en thread-local storage"""
+    _thread_locals.subdominio = subdominio
+
+def get_tenant_subdominio():
+    """Obtiene el subdominio del tenant desde thread-local storage"""
+    return getattr(_thread_locals, 'subdominio', None)
+
+def set_es_caja_menor(es_caja_menor):
+    """Guarda si es caja menor en thread-local storage"""
+    _thread_locals.es_caja_menor = es_caja_menor
+
+def get_es_caja_menor():
+    """Obtiene si es caja menor desde thread-local storage"""
+    return getattr(_thread_locals, 'es_caja_menor', False)
+
+def clear_tenant_subdominio():
+    """Limpia el subdominio y es_caja_menor del thread-local storage"""
+    if hasattr(_thread_locals, 'subdominio'):
+        delattr(_thread_locals, 'subdominio')
+    if hasattr(_thread_locals, 'es_caja_menor'):
+        delattr(_thread_locals, 'es_caja_menor')
+
+def upload_soporte_pago(instance, filename):
+    """
+    Genera la ruta para guardar el soporte de pago organizado por tienda.
+    Formato:
+    - Caja normal: {subdominio}/caja/soportes/{filename}
+    - Caja menor: {subdominio}/caja_menor/soportes/{filename}
+    """
+    subdominio = get_tenant_subdominio()
+    if not subdominio:
+        # Fallback: usar un directorio genérico si no hay subdominio
+        subdominio = 'default'
+
+    # Generar nombre único para evitar colisiones
+    from django.utils import timezone
+    import os
+    import uuid
+
+    # Obtener extensión del archivo original
+    ext = os.path.splitext(filename)[1]
+
+    # Generar nombre único con timestamp
+    timestamp = timezone.now().strftime('%Y%m%d_%H%M%S')
+    unique_id = str(uuid.uuid4())[:8]
+    new_filename = f'sop_{timestamp}_{unique_id}{ext}'
+
+    # Determinar si es caja menor usando thread-local storage
+    es_caja_menor = get_es_caja_menor()
+    if es_caja_menor:
+        return f'{subdominio}/caja_menor/soportes/{new_filename}'
+
+    return f'{subdominio}/caja/soportes/{new_filename}'
 
 class Sucursales(models.Model):
     nombre = models.CharField(max_length=100)
@@ -727,11 +786,29 @@ class Cliente(models.Model):
 # =========================
 
 def upload_soporte_abono(instance, filename):
-    """Genera la ruta para guardar el soporte de pago del abono."""
+    """
+    Genera la ruta para guardar el soporte de pago del abono organizado por tienda.
+    Formato: {subdominio}/abonos/soportes/{cliente_id}/{filename}
+    """
+    from django.utils import timezone
+    import os
     import uuid
-    ext = filename.split('.')[-1]
-    filename = f"{uuid.uuid4()}.{ext}"
-    return f"abonos/soportes/{instance.cliente.id}/{filename}"
+
+    # Obtener subdominio del thread-local storage
+    subdominio = get_tenant_subdominio()
+    if not subdominio:
+        # Fallback: usar un directorio genérico si no hay subdominio
+        subdominio = 'default'
+
+    # Obtener extensión del archivo original
+    ext = os.path.splitext(filename)[1]
+
+    # Generar nombre único con timestamp
+    timestamp = timezone.now().strftime('%Y%m%d_%H%M%S')
+    unique_id = str(uuid.uuid4())[:8]
+    new_filename = f'abono_{timestamp}_{unique_id}{ext}'
+
+    return f'{subdominio}/abonos/soportes/{instance.cliente.id}/{new_filename}'
 
 class Abono(models.Model):
     """Abonos o pagos parciales que reducen la deuda de un cliente en mora."""
@@ -1523,7 +1600,7 @@ class MovimientoCaja(models.Model):
 
     # Soporte de pago (para métodos digitales)
     soporte_pago = models.FileField(
-        upload_to='caja/soportes/',
+        upload_to=upload_soporte_pago,
         blank=True,
         null=True,
         help_text='Soporte del pago (transferencia, nequi, tarjeta)'

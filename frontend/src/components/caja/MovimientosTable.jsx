@@ -15,6 +15,19 @@ const RefreshIcon = () => (
   </svg>
 );
 
+const ViewIcon = () => (
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-4 h-4">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-6 h-6">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
 export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursal }) {
   const { usuario, tokenUsuario, subdominio } = useAuth();
   const authData = { usuario, tokenUsuario, subdominio };
@@ -23,6 +36,7 @@ export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursa
   const [movimientos, setMovimientos] = useState([]);
   const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
+  const [modalComprobante, setModalComprobante] = useState({ open: false, url: null });
 
   useEffect(() => {
     cargarMovimientos();
@@ -146,6 +160,7 @@ export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursa
                   <th className="text-left py-3 px-4 font-semibold text-sm">Descripción</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm">Método</th>
                   <th className="text-right py-3 px-4 font-semibold text-sm">Monto</th>
+                  <th className="text-center py-3 px-4 font-semibold text-sm">Comprobante</th>
                   <th className="text-left py-3 px-4 font-semibold text-sm">Usuario</th>
                 </tr>
               </thead>
@@ -164,6 +179,23 @@ export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursa
                       mov.tipo === 'entrada' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                     }`}>
                       {mov.tipo === 'entrada' ? '+' : '-'}{formatCurrency(mov.monto)}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-center">
+                      {mov.soporte_pago_url ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setModalComprobante({ open: true, url: mov.soporte_pago_url })}
+                          className="inline-flex items-center gap-1"
+                        >
+                          <ViewIcon />
+                          Ver
+                        </Button>
+                      ) : mov.metodo_pago !== 'efectivo' ? (
+                        <span className="text-yellow-600 dark:text-yellow-400 text-xs">Pendiente</span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">-</span>
+                      )}
                     </td>
                     <td className="py-3 px-4 text-sm">{mov.usuario_nombre || '-'}</td>
                   </tr>
@@ -198,6 +230,37 @@ export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursa
           </div>
         )}
       </CardContent>
+
+      {/* Modal para ver comprobante */}
+      {modalComprobante.open && (
+        <div
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+          onClick={() => setModalComprobante({ open: false, url: null })}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl max-h-[90vh] overflow-hidden relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
+              <h3 className="text-lg font-semibold">Comprobante de Pago</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setModalComprobante({ open: false, url: null })}
+              >
+                <CloseIcon />
+              </Button>
+            </div>
+            <div className="p-4 overflow-auto max-h-[calc(90vh-80px)]">
+              <img
+                src={modalComprobante.url}
+                alt="Comprobante de pago"
+                className="max-w-full h-auto rounded"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

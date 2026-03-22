@@ -1,454 +1,195 @@
 /**
- * Vista de Caja Menor — Rediseño estilo referencia
+ * Vista de Caja Menor — Diseño Profesional
  */
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { useTheme } from '../../hooks/useTheme';
 import { registrarMovimientoCaja } from '../../services/api';
 import { showToast } from '../../utils/toast';
 import { EyeIcon } from '@heroicons/react/24/outline';
 
-const STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* ─── Paleta ─────────────────────────────────────────────────────────── */
+const C = {
+  blue:        '#2563eb',
+  blueDark:    '#1d4ed8',
+  blueLight:   '#eff6ff',
+  blueBorder:  '#bfdbfe',
+  text:        '#111827',
+  textMid:     '#374151',
+  textSub:     '#6b7280',
+  textMuted:   '#9ca3af',
+  border:      '#e5e7eb',
+  surface:     '#ffffff',
+  bg:          '#f9fafb',
+  green:       '#1d4ed8',
+  greenLight:  '#f0fdf4',
+  greenBorder: '#bbf7d0',
+  red:         '#dc2626',
+  redLight:    '#fef2f2',
+  redBorder:   '#fecaca',
+  // Dark mode
+  dark: {
+    blue:        '#3b82f6',
+    blueDark:    '#2563eb',
+    blueLight:   '#2563eb',
+    blueBorder:  '#2563eb',
+    text:        '#f9fafb',
+    textMid:     '#d1d5db',
+    textSub:     '#9ca3af',
+    textMuted:   '#6b7280',
+    border:      '#374151',
+    surface:     '#1f2937',
+    bg:          '#111827',
+    green:       '#2563eb',
+    greenLight:  '#2563eb',
+    greenBorder: '#2563eb',
+    red:         '#ef4444',
+    redLight:    '#7f1d1d',
+    redBorder:   '#991b1b',
+  }
+};
 
-  .cm-root {
-    font-family: 'Inter', sans-serif;
-    /* Exact colors from reference dashboard */
-    --green:         #0ba86d;
-    --green-dark:    #098f5c;
-    --green-bg:      #edfaf4;
-    --green-border:  #0ba86d;
-    --green-text:    #ffffff;
-    --green-stripe:  #0ba86d;
-
-    --red:           #f25a7b;
-    --red-dark:      #e0355a;
-    --red-bg:        #fdeef2;
-    --red-border:    #f25a7b;
-    --red-text:      #ffffff;
-    --red-stripe:    #f25a7b;
-
-    /* KPI badge sub-text colors (the "+$xxx ingresos" text) */
-    --green-sub-text: #0ba86d;
-    --red-sub-text:   #f25a7b;
-
-    --blue:          #0ea5e9;
-    --blue-bg:       #e0f2fe;
-    --blue-border:   #0ea5e9;
-    --blue-text:     #ffffff;
-    --blue-stripe:   #0ea5e9;
-    --blue-sub-text: #0369a1;
-
-    --teal-stripe:   #06b6d4;
-
-    --surface:       #ffffff;
-    --bg:            #f8fafc;
-    --border:        #e8edf3;
-    --border-light:  #f1f5f9;
-    --text-1:        #1a2233;
-    --text-2:        #4a5568;
-    --text-3:        #a0aec0;
-    --radius-sm:     8px;
-    --radius-md:     10px;
-    --radius-lg:     14px;
-    --shadow-sm:     0 1px 4px rgba(0,0,0,.06);
-    --shadow-md:     0 4px 16px rgba(0,0,0,.08);
-  }
-  .cm-root[data-theme="dark"] {
-    --green:         #0ba86d;
-    --green-dark:    #098f5c;
-    --green-bg:      rgba(11,168,109,.15);
-    --green-border:  #0ba86d;
-    --green-text:    #ffffff;
-    --green-stripe:  #0ba86d;
-    --green-sub-text:#0ba86d;
-
-    --red:           #f25a7b;
-    --red-dark:      #e0355a;
-    --red-bg:        rgba(242,90,123,.15);
-    --red-border:    #f25a7b;
-    --red-text:      #ffffff;
-    --red-stripe:    #f25a7b;
-    --red-sub-text:  #f25a7b;
-
-    --blue:          #0ea5e9;
-    --blue-bg:       rgba(14,165,233,.15);
-    --blue-border:   #0ea5e9;
-    --blue-text:     #ffffff;
-    --blue-stripe:   #0ea5e9;
-    --blue-sub-text: #38bdf8;
-
-    --surface:       #1a2235;
-    --bg:            #111827;
-    --border:        #2d3748;
-    --border-light:  #1f2a3a;
-    --text-1:        #f0f4f8;
-    --text-2:        #94a3b8;
-    --text-3:        #4a5568;
-    --shadow-sm:     0 1px 4px rgba(0,0,0,.3);
-    --shadow-md:     0 4px 16px rgba(0,0,0,.4);
-  }
-
-  .cm-root *, .cm-root *::before, .cm-root *::after { box-sizing: border-box; margin:0; padding:0; }
-  .cm-root { background: var(--bg); min-height: 100vh; padding: 24px; }
-
-  /* ── KPI Cards ── */
-  .cm-kpi-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .cm-kpi-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 20px 22px 18px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-  }
-  .cm-kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    border-radius: 3px 3px 0 0;
-  }
-  .cm-kpi-card--income::before  { background: var(--green-stripe); }
-  .cm-kpi-card--expense::before { background: var(--red-stripe); }
-  .cm-kpi-card--balance::before { background: var(--blue-stripe); }
-
-  .cm-kpi-card__label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--text-3);
-    margin-bottom: 10px;
-  }
-  .cm-kpi-card__amount {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -1px;
-    line-height: 1;
-    color: var(--text-1);
-    margin-bottom: 10px;
-  }
-  .cm-kpi-card__amount span { font-size: 16px; font-weight: 600; margin-right: 2px; opacity: .6; }
-  .cm-kpi-card__badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 9px;
-    border-radius: 20px;
-  }
-  .cm-kpi-card--income  .cm-kpi-card__badge { background: var(--green-bg); color: var(--green-sub-text); }
-  .cm-kpi-card--expense .cm-kpi-card__badge { background: var(--red-bg);   color: var(--red-sub-text);   }
-  .cm-kpi-card--balance .cm-kpi-card__badge { background: var(--blue-bg);  color: var(--blue-sub-text);  }
-  .cm-kpi-card__icon {
-    position: absolute;
-    right: 18px; top: 18px;
-    width: 36px; height: 36px;
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-  }
-  .cm-kpi-card--income  .cm-kpi-card__icon { background: var(--green-bg); color: var(--green); }
-  .cm-kpi-card--expense .cm-kpi-card__icon { background: var(--red-bg);   color: var(--red);   }
-  .cm-kpi-card--balance .cm-kpi-card__icon { background: var(--blue-bg);  color: var(--blue);  }
-
-  /* ── Layout ── */
-  .cm-layout {
-    display: grid;
-    grid-template-columns: 360px 1fr;
-    gap: 20px;
-    align-items: start;
-  }
-  @media (max-width: 840px) { .cm-layout { grid-template-columns: 1fr; } }
-
-  /* ── Panel ── */
-  .cm-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-  }
-  .cm-panel__head {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border-light);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .cm-panel__title { font-size: 14px; font-weight: 700; color: var(--text-1); }
-  .cm-panel__body  { padding: 20px; }
-
-  /* ── Tipo toggle ── */
-  .cm-tipo-toggle {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    margin-bottom: 20px;
-  }
-  .cm-tipo-btn {
-    padding: 11px 16px;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: all .18s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    background: var(--surface);
-    color: var(--text-3);
-  }
-  .cm-tipo-btn + .cm-tipo-btn { border-left: 1px solid var(--border); }
-  .cm-tipo-btn--income.active  { background: var(--green); color: #fff; }
-  .cm-tipo-btn--expense.active { background: var(--red);   color: #fff; }
-  .cm-tipo-btn:not(.active):hover { background: var(--bg); color: var(--text-2); }
-  .cm-tipo-btn__icon {
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 800;
-    background: rgba(255,255,255,.25);
-    line-height: 1;
-  }
-  .cm-tipo-btn:not(.active) .cm-tipo-btn__icon { background: var(--border); color: var(--text-3); }
-
-  /* ── Form fields ── */
-  .cm-form-fields { display: flex; flex-direction: column; gap: 16px; }
-  .cm-field { display: flex; flex-direction: column; gap: 6px; }
-  .cm-label {
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: .09em;
-    text-transform: uppercase;
-    color: var(--text-2);
-    display: flex;
-    align-items: center;
-    gap: 3px;
-  }
-  .cm-label em { color: var(--red); font-style: normal; }
-  .cm-input-wrap { position: relative; }
-  .cm-input-prefix {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-3);
-    pointer-events: none;
-    user-select: none;
-  }
-  .cm-input, .cm-textarea, .cm-select {
-    width: 100%;
-    font-family: 'Inter', sans-serif;
-    font-size: 13.5px;
-    font-weight: 500;
-    color: var(--text-1);
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 10px 14px;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .cm-input--prefix { padding-left: 28px; }
-  .cm-input::placeholder, .cm-textarea::placeholder { color: var(--text-3); }
-  .cm-input:focus, .cm-textarea:focus, .cm-select:focus {
-    border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
-    background: var(--surface);
-  }
-  .cm-textarea { min-height: 90px; resize: vertical; line-height: 1.55; }
-  .cm-select {
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 13px center;
-    padding-right: 36px;
-  }
-
-  /* ── Submit btn ── */
-  .cm-submit-btn {
-    width: 100%;
-    padding: 12px;
-    border-radius: var(--radius-md);
-    font-family: 'Inter', sans-serif;
-    font-size: 13.5px;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all .18s;
-    margin-top: 4px;
-  }
-  .cm-submit-btn--income  { background: var(--green); box-shadow: 0 4px 12px rgba(34,197,94,.3); }
-  .cm-submit-btn--expense { background: var(--red);   box-shadow: 0 4px 12px rgba(244,63,94,.3); }
-  .cm-submit-btn:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
-  .cm-submit-btn:disabled { opacity: .55; cursor: not-allowed; transform: none !important; }
-
-  /* ── Refresh btn ── */
-  .cm-refresh-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-2);
-    cursor: pointer;
-    transition: all .15s;
-  }
-  .cm-refresh-btn:hover:not(:disabled) { background: var(--border-light); color: var(--text-1); }
-  .cm-refresh-btn:disabled { opacity: .5; cursor: not-allowed; }
-
-  /* ── Table ── */
-  .cm-table-scroll { overflow-x: auto; }
-  .cm-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .cm-table thead { border-bottom: 1px solid var(--border); }
-  .cm-table th {
-    padding: 10px 16px;
-    text-align: left;
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--text-3);
-    white-space: nowrap;
-  }
-  .cm-table td {
-    padding: 13px 16px;
-    border-bottom: 1px solid var(--border-light);
-    color: var(--text-2);
-    font-weight: 500;
-    vertical-align: middle;
-  }
-  .cm-table tbody tr:last-child td { border-bottom: none; }
-  .cm-table tbody tr:hover { background: var(--bg); }
-  .cm-td-date  { font-size: 12px; color: var(--text-3); white-space: nowrap; }
-  .cm-td-desc  { max-width: 180px; }
-  .cm-td-desc span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .cm-td-amount { font-weight: 700; font-size: 13.5px; white-space: nowrap; }
-  .cm-td-amount--income  { color: var(--green); }
-  .cm-td-amount--expense { color: var(--red);   }
-
-  /* ── Badge — fondo sólido como en la referencia ── */
-  .cm-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 3px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-    color: #ffffff;
-  }
-  .cm-badge--income  { background: var(--green); }
-  .cm-badge--expense { background: var(--red);   }
-
-  /* ── Cat tag ── */
-  .cm-cat-tag {
-    font-size: 12px; font-weight: 500;
-    color: var(--text-2);
-    background: var(--border-light);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 3px 8px;
-    display: inline-block;
-    white-space: nowrap;
-  }
-
-  /* ── Empty / loading ── */
-  .cm-state {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    padding: 52px 24px;
-    color: var(--text-3); font-size: 13px; font-weight: 500; text-align: center;
-  }
-  .cm-state__icon { font-size: 32px; opacity: .4; }
-  .cm-state__sub  { font-size: 12px; opacity: .7; }
-
-  /* ── Spinner ── */
-  @keyframes cm-spin { to { transform: rotate(360deg); } }
-  .cm-spinner {
-    width: 14px; height: 14px;
-    border: 2px solid rgba(255,255,255,.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: cm-spin .7s linear infinite;
-  }
-  .cm-spinner--gray { border-color: var(--border); border-top-color: var(--text-3); }
-
-  /* ── Animations ── */
-  @keyframes cm-fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes cm-fadeIn { from { opacity:0; } to { opacity:1; } }
-  .cm-kpi-card { animation: cm-fadeUp .3s ease both; }
-  .cm-kpi-card:nth-child(2) { animation-delay: .06s; }
-  .cm-kpi-card:nth-child(3) { animation-delay: .12s; }
-  .cm-panel { animation: cm-fadeUp .3s .1s ease both; }
-`;
-
+/* ─── Datos estáticos ─────────────────────────────────────────────────── */
 const CATEGORIAS = {
   entrada: [
-    { value: 'reembolso_caja_menor', label: 'Reembolso' },
-    { value: 'venta_caja_menor',     label: 'Venta' },
-    { value: 'abono_caja_menor',     label: 'Abono' },
+    { value: 'reembolso_caja_menor',    label: 'Reembolso'    },
+    { value: 'venta_caja_menor',        label: 'Venta'        },
+    { value: 'abono_caja_menor',        label: 'Abono'        },
     { value: 'otra_entrada_caja_menor', label: 'Otra entrada' },
   ],
   salida: [
-    { value: 'compra_caja_menor', label: 'Compra' },
-    { value: 'gasto_caja_menor',  label: 'Gasto' },
-    { value: 'pago_caja_menor',   label: 'Pago' },
-    { value: 'otra_salida_caja_menor', label: 'Otra salida' },
+    { value: 'compra_caja_menor',       label: 'Compra'       },
+    { value: 'gasto_caja_menor',        label: 'Gasto'        },
+    { value: 'pago_caja_menor',         label: 'Pago'         },
+    { value: 'otra_salida_caja_menor',  label: 'Otra salida'  },
   ],
 };
+const CATS_CON_SOPORTE = ['compra_caja_menor', 'pago_caja_menor'];
 
+/* ─── Helpers ─────────────────────────────────────────────────────────── */
 const fmt = (n) =>
-  '$ ' + parseFloat(n || 0).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(parseFloat(n || 0));
 
 const catLabel = (v = '') =>
   v.replace(/_caja_menor$/, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-export default function CajaMenor({ fecha, idSucursal, onRefresh }) {
-  const { usuario, tokenUsuario, subdominio } = useAuth();
-  const { theme } = useTheme();
+const fmtDatetime = (str) => {
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? '—' : d.toLocaleString('es-CO', {
+    day: '2-digit', month: '2-digit', year: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+  });
+};
 
-  const [tipo, setTipo]               = useState('entrada');
-  const [monto, setMonto]             = useState('');
+/* ─── Iconos ──────────────────────────────────────────────────────────── */
+const IcoArrowUp = ({ color }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke={color} width="17" height="17" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+  </svg>
+);
+const IcoArrowDown = ({ color }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke={color} width="17" height="17" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+  </svg>
+);
+const IcoBalance = ({ color }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke={color} width="17" height="17" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+  </svg>
+);
+const IcoRefresh = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="13" height="13" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+  </svg>
+);
+const IcoWarning = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="15" height="15" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+  </svg>
+);
+const IcoPlus = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" width="13" height="13" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10 4v12M4 10h12"/>
+  </svg>
+);
+const IcoMinus = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" width="13" height="13" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 10h12"/>
+  </svg>
+);
+const IcoUpload = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" width="14" height="14" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 16v1a1 1 0 001 1h10a1 1 0 001-1v-1M8 10l4-4m0 0l4 4m-4-4v8"/>
+  </svg>
+);
+const IcoCheck = () => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" width="12" height="12" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 10l3 3 7-7"/>
+  </svg>
+);
+const IcoSpinner = ({ gray }) => (
+  <div style={{
+    width: 13, height: 13, borderRadius: '50%', flexShrink: 0,
+    border: `2px solid ${gray ? C.border : 'rgba(255,255,255,.35)'}`,
+    borderTopColor: gray ? C.textSub : '#fff',
+    animation: 'cm-spin .7s linear infinite',
+  }} />
+);
+
+/* ─── KPI Card ────────────────────────────────────────────────────────── */
+function KpiCard({ label, amount, icon, iconBg, iconColor, accent, badge, badgeUp, badgeNeutral, delay = 0, colors = C }) {
+  return (
+    <div style={{
+      background: colors.surface, borderRadius: 12,
+      border: `1px solid ${colors.border}`,
+      borderLeft: `3px solid ${accent}`,
+      padding: '16px 18px',
+      boxShadow: '0 1px 2px rgba(0,0,0,.04)',
+      animation: `cm-slidein .3s ease ${delay}s both`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: colors.textMuted }}>
+          {label}
+        </span>
+        <div style={{ width: 34, height: 34, borderRadius: 8, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          {React.cloneElement(icon, { color: iconColor })}
+        </div>
+      </div>
+      <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.5px', color: accent, lineHeight: 1.1, marginBottom: 8 }}>
+        {amount}
+      </div>
+      {badge && (
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
+          background: badgeNeutral ? colors.blueLight : badgeUp ? colors.greenLight : colors.redLight,
+          color: badgeNeutral ? colors.blue : badgeUp ? colors.green : colors.red,
+        }}>
+          {badge}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/* ─── Main ────────────────────────────────────────────────────────────── */
+export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false }) {
+  const { usuario, tokenUsuario, subdominio, isAdmin } = useAuth();
+
+  const [tipo,        setTipo]        = useState(isAdmin ? 'entrada' : 'salida');
+  const [monto,       setMonto]       = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [categoria, setCategoria]     = useState('');
-  const [submitting, setSubmitting]   = useState(false);
+  const [categoria,   setCategoria]   = useState('');
+  const [soporte,     setSoporte]     = useState(null);
+  const [previewUrl,  setPreviewUrl]  = useState('');
+  const [submitting,  setSubmitting]  = useState(false);
   const [movimientos, setMovimientos] = useState([]);
-  const [loading, setLoading]         = useState(false);
-  const [balance, setBalance]         = useState({ ingresos: 0, egresos: 0, total: 0 });
-  const [mostrarModalSoporte, setMostrarModalSoporte] = useState(false);
+  const [loading,     setLoading]     = useState(false);
+  const [balance,     setBalance]     = useState({ ingresos: 0, egresos: 0, total: 0 });
+  const [modalSoporte,       setModalSoporte]       = useState(false);
   const [soporteSeleccionado, setSoporteSeleccionado] = useState(null);
+
+  // Dynamic colors
+  const colors = isDark ? C.dark : C;
 
   useEffect(() => { cargar(); }, [fecha, idSucursal]);
   useEffect(() => { setCategoria(''); }, [tipo]);
@@ -456,18 +197,35 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh }) {
   const cargar = async () => {
     setLoading(true);
     try {
-      const res = await fetch('https://dagi.co/api/caja/movimientos_caja_menor/', {
+      // Obtener balance acumulado de caja menor (todos los movimientos históricos)
+      const balanceRes = await fetch('https://dagi.co/api/caja/balance_caja_menor/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: tokenUsuario, usuario, subdominio, id_sucursal: idSucursal || null }),
+      });
+
+      // Obtener movimientos del día actual para la tabla
+      const movsRes = await fetch('https://dagi.co/api/caja/movimientos_caja_menor/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: tokenUsuario, usuario, subdominio, fecha, id_sucursal: idSucursal || null }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        const movs = data.movimientos || [];
+
+      if (balanceRes.ok && movsRes.ok) {
+        const balanceData = await balanceRes.json();
+        const movsData = await movsRes.json();
+
+        const movs = movsData.movimientos || [];
         setMovimientos(movs);
-        const ingresos = movs.filter(m => m.tipo === 'entrada').reduce((s, m) => s + parseFloat(m.monto), 0);
-        const egresos  = movs.filter(m => m.tipo === 'salida').reduce((s, m) => s + parseFloat(m.monto), 0);
-        setBalance({ ingresos, egresos, total: ingresos - egresos });
+
+        // Usar el balance acumulado del endpoint específico
+        if (balanceData.balance) {
+          setBalance({
+            ingresos: parseFloat(balanceData.balance.ingresos),
+            egresos: parseFloat(balanceData.balance.egresos),
+            total: parseFloat(balanceData.balance.total)
+          });
+        }
       }
     } catch (err) {
       console.error(err);
@@ -476,29 +234,43 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh }) {
     }
   };
 
+  const handleFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) { setSoporte(null); setPreviewUrl(''); return; }
+    if (!file.type.startsWith('image/')) { showToast('error', 'Selecciona una imagen válida'); return; }
+    if (file.size > 5 * 1024 * 1024)    { showToast('error', 'La imagen no puede superar 5MB'); return; }
+    setSoporte(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setPreviewUrl(reader.result);
+    reader.readAsDataURL(file);
+  };
+
   const submit = async () => {
     if (!monto || parseFloat(monto) <= 0) return showToast('error', 'Ingresa un monto válido');
     if (!descripcion.trim())              return showToast('error', 'Ingresa una descripción');
     if (!categoria)                       return showToast('error', 'Selecciona una categoría');
+    if (tipo === 'salida' && balance.total <= 0) return showToast('error', 'No hay saldo disponible en caja menor');
+    if (tipo === 'salida' && parseFloat(monto) > balance.total) return showToast('error', `Saldo insuficiente. Disponible: ${fmt(balance.total)}`);
+    if (tipo === 'salida' && !soporte)    return showToast('error', 'El soporte de pago es obligatorio para todas las salidas de caja menor');
 
     setSubmitting(true);
     try {
       const res = await registrarMovimientoCaja({
         token: tokenUsuario, usuario, subdominio, tipo,
-        monto: parseFloat(monto),
-        descripcion: descripcion.trim(),
-        metodo_pago: 'efectivo',
-        categoria,
+        monto: parseFloat(monto), descripcion: descripcion.trim(),
+        metodo_pago: 'efectivo', categoria,
         id_sucursal: idSucursal || null,
         es_caja_menor: true,
+        soporte_pago: soporte,
       });
       if (res.success) {
-        showToast(`${tipo === 'entrada' ? 'Ingreso' : 'Egreso'} registrado exitosamente`, 'success');
+        showToast('success', `${tipo === 'entrada' ? 'Ingreso' : 'Egreso'} registrado exitosamente`);
         setMonto(''); setDescripcion(''); setCategoria('');
+        setSoporte(null); setPreviewUrl('');
         cargar();
         if (onRefresh) onRefresh();
       } else {
-        showToast(res.message || 'Error al registrar', 'error');
+        showToast('error', res.message || 'Error al registrar');
       }
     } catch {
       showToast('error', 'Error al registrar el movimiento');
@@ -507,230 +279,340 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh }) {
     }
   };
 
+  /* ── Shared styles ── */
+  const s = {
+    panel:     { background: colors.surface, borderRadius: 12, border: `1px solid ${colors.border}`, overflow: 'hidden', boxShadow: '0 1px 2px rgba(0,0,0,.04)' },
+    panelHead: { padding: '13px 18px', borderBottom: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+    panelTitle:{ fontSize: 14, fontWeight: 600, color: colors.text, margin: 0 },
+    lbl:       { display: 'block', fontSize: 12, fontWeight: 600, color: colors.textMid, marginBottom: 5 },
+    input:     { width: '100%', padding: '9px 12px', border: `1px solid ${colors.border}`, borderRadius: 8, fontSize: 13, color: colors.text, background: colors.surface, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', transition: 'border-color .15s, box-shadow .15s' },
+    field:     { marginBottom: 13 },
+    btnGhost:  { display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px', background: 'transparent', color: colors.textMid, border: `1px solid ${colors.border}`, borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' },
+  };
+
+  const saldoInsuficiente = tipo === 'salida' && balance.total <= 0;
+  const accentTipo = tipo === 'entrada' ? C.green : C.red;
+
   return (
-    <div className="cm-root" data-theme={theme}>
-      <style>{STYLES}</style>
+    <div style={{ fontFamily: "'Inter', -apple-system, sans-serif" }}>
+      <style>{`
+        @keyframes cm-spin    { to { transform: rotate(360deg); } }
+        @keyframes cm-slidein { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        .cm-row-hover:hover { background: ${C.bg}; }
+        .cm-input-f:focus { border-color: ${C.blue} !important; box-shadow: 0 0 0 3px ${C.blue}22 !important; }
+        .cm-type-btn:hover:not(.cm-type-active) { background: ${C.bg}; color: ${C.textMid}; }
+        .cm-file-zone:hover { border-color: ${C.blue}; background: ${C.blueLight}; }
+        .cm-btn-ghost:hover { background: ${C.blueLight}; border-color: ${C.blue}; color: ${C.blue}; }
+        .cm-submit:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
+        .cm-submit:disabled { opacity: .55; cursor: not-allowed !important; transform: none !important; }
+        @media (max-width: 860px) { .cm-main-grid { grid-template-columns: 1fr !important; } }
+        @media (max-width: 900px) { .cm-kpi-grid { grid-template-columns: repeat(2,1fr) !important; } }
+      `}</style>
 
-      {/* ── KPIs ── */}
-      <div className="cm-kpi-row">
-        <div className="cm-kpi-card cm-kpi-card--income">
-          <div className="cm-kpi-card__icon">↑</div>
-          <div className="cm-kpi-card__label">Total Ingresos</div>
-          <div className="cm-kpi-card__amount">
-            <span>$</span>
-            {balance.ingresos.toLocaleString('es-CO', { minimumFractionDigits: 0 })}
-          </div>
-          <span className="cm-kpi-card__badge">↗ +{fmt(balance.ingresos)} ingresos</span>
-        </div>
-
-        <div className="cm-kpi-card cm-kpi-card--expense">
-          <div className="cm-kpi-card__icon">↓</div>
-          <div className="cm-kpi-card__label">Total Egresos</div>
-          <div className="cm-kpi-card__amount">
-            <span>$</span>
-            {balance.egresos.toLocaleString('es-CO', { minimumFractionDigits: 0 })}
-          </div>
-          <span className="cm-kpi-card__badge">↘ -{fmt(balance.egresos)} egresos</span>
-        </div>
-
-        <div className="cm-kpi-card cm-kpi-card--balance">
-          <div className="cm-kpi-card__icon">◎</div>
-          <div className="cm-kpi-card__label">Saldo Actual</div>
-          <div className="cm-kpi-card__amount">
-            <span>$</span>
-            {balance.total.toLocaleString('es-CO', { minimumFractionDigits: 0 })}
-          </div>
-          <span className="cm-kpi-card__badge">↗ {fmt(balance.total)} vs apertura</span>
-        </div>
+      {/* ── KPI Cards ── */}
+      <div className="cm-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 20 }}>
+        <KpiCard
+          label="Total Ingresos"
+          amount={fmt(balance.ingresos)}
+          icon={<IcoArrowUp />}
+          iconBg={colors.greenLight} iconColor={colors.green} accent={colors.green}
+          badge={`+${fmt(balance.ingresos)} ingresos`} badgeUp
+          delay={0}
+          colors={colors}
+        />
+        <KpiCard
+          label="Total Egresos"
+          amount={fmt(balance.egresos)}
+          icon={<IcoArrowDown />}
+          iconBg={colors.redLight} iconColor={colors.red} accent={colors.red}
+          badge={`-${fmt(balance.egresos)} egresos`} badgeUp={false}
+          delay={0.07}
+          colors={colors}
+        />
+        <KpiCard
+          label="Disponible"
+          amount={fmt(balance.total)}
+          icon={<IcoBalance />}
+          iconBg={balance.total > 0 ? colors.blueLight : colors.redLight}
+          iconColor={balance.total > 0 ? colors.blue : colors.red}
+          accent={balance.total > 0 ? colors.blue : colors.red}
+          badge={balance.total <= 0 ? 'Sin saldo disponible' : `${fmt(balance.total)} disponible`}
+          badgeNeutral={balance.total > 0}
+          badgeUp={false}
+          delay={0.14}
+          colors={colors}
+        />
       </div>
 
-      {/* ── Main layout ── */}
-      <div className="cm-layout">
-
-        {/* ── Form ── */}
-        <div className="cm-panel">
-          <div className="cm-panel__head">
-            <span className="cm-panel__title">Registrar Movimiento</span>
+      {/* ── Advertencia saldo insuficiente ── */}
+      {balance.total <= 0 && (
+        <div style={{
+          display: 'flex', alignItems: 'flex-start', gap: 12,
+          padding: '13px 16px', marginBottom: 18,
+          background: colors.redLight, border: `1px solid ${colors.redBorder}`,
+          borderRadius: 10, color: colors.red,
+        }}>
+          <IcoWarning />
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 700, margin: 0 }}>Saldo insuficiente en Caja Menor</p>
+            <p style={{ fontSize: 12, color: colors.textSub, margin: '3px 0 0' }}>
+              No hay saldo para registrar salidas. Solicita un reabastecimiento al administrador.
+            </p>
           </div>
-          <div className="cm-panel__body">
+        </div>
+      )}
 
-            {/* Toggle Entrada / Salida */}
-            <div className="cm-tipo-toggle">
+      {/* ── Main grid ── */}
+      <div className="cm-main-grid" style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20, alignItems: 'start' }}>
+
+        {/* ── Formulario ── */}
+        <div style={s.panel}>
+          <div style={s.panelHead}>
+            <p style={s.panelTitle}>Registrar Movimiento</p>
+            <span style={{ fontSize: 11, color: C.textMuted }}>Caja Menor</span>
+          </div>
+          <div style={{ padding: 16 }}>
+
+            {/* Toggle tipo */}
+            <div style={{
+              display: 'grid', gridTemplateColumns: isAdmin ? '1fr 1fr' : '1fr',
+              gap: 4, background: colors.bg, border: `1px solid ${colors.border}`,
+              borderRadius: 9, padding: 3, marginBottom: 16,
+            }}>
+              {isAdmin && (
+                <button
+                  type="button"
+                  className={`cm-type-btn${tipo === 'entrada' ? ' cm-type-active' : ''}`}
+                  onClick={() => setTipo('entrada')}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    padding: '8px 12px', borderRadius: 7, border: 'none', cursor: 'pointer',
+                    fontFamily: 'inherit', fontSize: 13, fontWeight: 600, transition: 'all .15s',
+                    background: tipo === 'entrada' ? colors.green : 'transparent',
+                    color: tipo === 'entrada' ? '#fff' : colors.textSub,
+                    boxShadow: tipo === 'entrada' ? '0 2px 8px rgba(22,163,74,.25)' : 'none',
+                  }}
+                >
+                  <span style={{ width: 18, height: 18, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', background: tipo === 'entrada' ? 'rgba(255,255,255,.2)' : `${colors.green}18`, color: tipo === 'entrada' ? '#fff' : colors.green, flexShrink: 0 }}>
+                    <IcoPlus />
+                  </span>
+                  Entrada
+                </button>
+              )}
               <button
                 type="button"
-                className={`cm-tipo-btn cm-tipo-btn--income ${tipo === 'entrada' ? 'active' : ''}`}
-                onClick={() => setTipo('entrada')}
-              >
-                <span className="cm-tipo-btn__icon">+</span>
-                Entrada
-              </button>
-              <button
-                type="button"
-                className={`cm-tipo-btn cm-tipo-btn--expense ${tipo === 'salida' ? 'active' : ''}`}
+                className={`cm-type-btn${tipo === 'salida' ? ' cm-type-active' : ''}`}
                 onClick={() => setTipo('salida')}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  padding: '8px 12px', borderRadius: 7, border: 'none', cursor: 'pointer',
+                  fontFamily: 'inherit', fontSize: 13, fontWeight: 600, transition: 'all .15s',
+                  background: tipo === 'salida' ? colors.red : 'transparent',
+                  color: tipo === 'salida' ? '#fff' : colors.textSub,
+                  boxShadow: tipo === 'salida' ? '0 2px 8px rgba(220,38,38,.25)' : 'none',
+                }}
               >
-                <span className="cm-tipo-btn__icon">−</span>
+                <span style={{ width: 18, height: 18, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', background: tipo === 'salida' ? 'rgba(255,255,255,.2)' : `${colors.red}18`, color: tipo === 'salida' ? '#fff' : colors.red, flexShrink: 0 }}>
+                  <IcoMinus />
+                </span>
                 Salida
               </button>
             </div>
 
-            <div className="cm-form-fields">
-              <div className="cm-field">
-                <label className="cm-label">Monto <em>*</em></label>
-                <div className="cm-input-wrap">
-                  <span className="cm-input-prefix">$</span>
-                  <input
-                    className="cm-input cm-input--prefix"
-                    type="number"
-                    placeholder="0.00"
-                    value={monto}
-                    onChange={e => setMonto(e.target.value)}
-                    min="0"
-                    step="1"
-                  />
-                </div>
+            {/* Aviso no-admin */}
+            {!isAdmin && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 11px', background: colors.redLight, border: `1px solid ${colors.redBorder}`, borderRadius: 8, marginBottom: 14 }}>
+                <IcoWarning />
+                <span style={{ fontSize: 12, color: colors.red, fontWeight: 500 }}>Solo administradores pueden registrar entradas</span>
               </div>
+            )}
 
-              <div className="cm-field">
-                <label className="cm-label">Categoría <em>*</em></label>
-                <select
-                  className="cm-select"
-                  value={categoria}
-                  onChange={e => setCategoria(e.target.value)}
-                >
-                  <option value="">Seleccionar categoría...</option>
-                  {(tipo === 'entrada' ? CATEGORIAS.entrada : CATEGORIAS.salida).map(c => (
-                    <option key={c.value} value={c.value}>{c.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="cm-field">
-                <label className="cm-label">Descripción <em>*</em></label>
-                <textarea
-                  className="cm-textarea"
-                  placeholder="Describe el motivo del movimiento..."
-                  value={descripcion}
-                  onChange={e => setDescripcion(e.target.value)}
+            {/* Monto */}
+            <div style={s.field}>
+              <label style={s.lbl}>Monto <span style={{ color: colors.red }}>*</span></label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <span style={{ position: 'absolute', left: 12, fontSize: 13, fontWeight: 700, color: colors.textSub, pointerEvents: 'none' }}>$</span>
+                <input
+                  type="number" placeholder="0.00" min="0" step="1"
+                  value={monto} onChange={e => setMonto(e.target.value)}
+                  className="cm-input-f"
+                  style={{ ...s.input, paddingLeft: 26, fontSize: 15, fontWeight: 700 }}
                 />
               </div>
-
-              <button
-                type="button"
-                className={`cm-submit-btn cm-submit-btn--${tipo === 'entrada' ? 'income' : 'expense'}`}
-                onClick={submit}
-                disabled={submitting}
-              >
-                {submitting
-                  ? <><span className="cm-spinner" /> Procesando...</>
-                  : tipo === 'entrada' ? '+ Registrar Ingreso' : '− Registrar Egreso'
-                }
-              </button>
+              {tipo === 'salida' && monto && parseFloat(monto) > balance.total && balance.total > 0 && (
+                <p style={{ fontSize: 11, color: colors.red, margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <IcoWarning /> Excede el saldo disponible ({fmt(balance.total)})
+                </p>
+              )}
             </div>
+
+            {/* Categoría */}
+            <div style={s.field}>
+              <label style={s.lbl}>Categoría <span style={{ color: colors.red }}>*</span></label>
+              <select
+                className="cm-input-f"
+                value={categoria} onChange={e => setCategoria(e.target.value)}
+                style={{ ...s.input, cursor: 'pointer', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', paddingRight: 34, appearance: 'none', WebkitAppearance: 'none' }}
+              >
+                <option value="">Seleccionar categoría…</option>
+                {CATEGORIAS[tipo].map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+
+            {/* Descripción */}
+            <div style={s.field}>
+              <label style={s.lbl}>Descripción <span style={{ color: colors.red }}>*</span></label>
+              <textarea
+                rows={3} placeholder="Describe el motivo del movimiento…"
+                value={descripcion} onChange={e => setDescripcion(e.target.value)}
+                className="cm-input-f"
+                style={{ ...s.input, resize: 'vertical', lineHeight: 1.55, minHeight: 76 }}
+              />
+            </div>
+
+            {/* Soporte (solo salidas) */}
+            {tipo === 'salida' && (
+              <div style={s.field}>
+                <label style={s.lbl}>
+                  Soporte de Pago <span style={{ color: colors.red }}>*</span>
+                </label>
+                <input type="file" accept="image/*" id="cm-file" onChange={handleFile} style={{ display: 'none' }} />
+                <label
+                  htmlFor="cm-file"
+                  className="cm-file-zone"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                    width: '100%', padding: '10px 12px', borderRadius: 8, boxSizing: 'border-box',
+                    border: `1px dashed ${soporte ? colors.green : colors.border}`,
+                    background: soporte ? colors.greenLight : colors.surface,
+                    color: soporte ? colors.green : colors.textMuted,
+                    fontSize: 13, fontWeight: soporte ? 600 : 400,
+                    cursor: 'pointer', transition: 'all .15s',
+                  }}
+                >
+                  {soporte ? <><IcoCheck /> {soporte.name}</> : <><IcoUpload /> Subir comprobante</>}
+                </label>
+                {!soporte && (
+                  <p style={{ fontSize: 11, color: colors.red, margin: '4px 0 0', fontWeight: 600 }}>
+                    * El soporte es obligatorio para todas las salidas
+                  </p>
+                )}
+                {previewUrl && (
+                  <div style={{ marginTop: 8, position: 'relative' }}>
+                    <img src={previewUrl} alt="Vista previa" style={{ width: '100%', maxHeight: 160, objectFit: 'contain', borderRadius: 8, border: `1px solid ${colors.border}` }} />
+                    <button
+                      type="button"
+                      onClick={() => { setSoporte(null); setPreviewUrl(''); }}
+                      style={{ position: 'absolute', top: 5, right: 5, width: 22, height: 22, borderRadius: '50%', background: colors.red, border: 'none', color: '#fff', cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >×</button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Submit */}
+            <button
+              type="button"
+              className="cm-submit"
+              onClick={submit}
+              disabled={submitting || saldoInsuficiente}
+              style={{
+                width: '100%', padding: '11px 16px', borderRadius: 9,
+                fontFamily: 'inherit', fontSize: 13, fontWeight: 700, border: 'none',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                background: accentTipo, color: '#fff',
+                boxShadow: `0 3px 10px ${accentTipo}44`,
+                cursor: saldoInsuficiente ? 'not-allowed' : 'pointer',
+                transition: 'all .15s', marginTop: 4,
+              }}
+            >
+              {submitting
+                ? <><IcoSpinner /> Registrando…</>
+                : tipo === 'entrada' ? '+ Registrar Ingreso' : '− Registrar Egreso'
+              }
+            </button>
+
+            {saldoInsuficiente && (
+              <p style={{ fontSize: 11, color: colors.red, textAlign: 'center', marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                <IcoWarning /> Necesitas saldo disponible para registrar egresos
+              </p>
+            )}
           </div>
         </div>
 
-        {/* ── Table ── */}
-        <div className="cm-panel">
-          <div className="cm-panel__head">
-            <span className="cm-panel__title">Movimientos de Caja Menor</span>
-            <button className="cm-refresh-btn" onClick={cargar} disabled={loading}>
-              {loading
-                ? <><span className="cm-spinner cm-spinner--gray" /> Cargando</>
-                : <>↻ Actualizar</>
-              }
+        {/* ── Tabla movimientos ── */}
+        <div style={s.panel}>
+          <div style={s.panelHead}>
+            <p style={s.panelTitle}>Movimientos de Caja Menor</p>
+            <button className="cm-btn-ghost" style={s.btnGhost} onClick={cargar} disabled={loading}>
+              {loading ? <><IcoSpinner gray /> Cargando</> : <><IcoRefresh /> Actualizar</>}
             </button>
           </div>
 
           {loading ? (
-            <div className="cm-state">
-              <span className="cm-spinner cm-spinner--gray" style={{ width: 24, height: 24 }} />
-              <p>Cargando movimientos...</p>
+            <div style={{ textAlign: 'center', padding: '48px 0' }}>
+              <IcoSpinner gray />
+              <p style={{ color: colors.textMuted, fontSize: 13, marginTop: 10 }}>Cargando movimientos…</p>
             </div>
           ) : movimientos.length === 0 ? (
-            <div className="cm-state">
-              <div className="cm-state__icon">📋</div>
-              <p>Sin movimientos registrados</p>
-              <p className="cm-state__sub">Los movimientos aparecerán aquí</p>
+            <div style={{ textAlign: 'center', padding: '52px 0' }}>
+              <div style={{ fontSize: 32, marginBottom: 10, opacity: .35 }}>📋</div>
+              <p style={{ fontSize: 13, color: colors.textMid, fontWeight: 600, margin: 0 }}>Sin movimientos registrados</p>
+              <p style={{ fontSize: 12, color: colors.textMuted, margin: '4px 0 0' }}>Los movimientos aparecerán aquí</p>
             </div>
           ) : (
-            <div className="cm-table-scroll">
-              <table className="cm-table">
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
-                  <tr>
-                    <th>Fecha / Hora</th>
-                    <th>Tipo</th>
-                    <th>Categoría</th>
-                    <th>Descripción</th>
-                    <th>Monto</th>
-                    <th>Soporte</th>
-                    <th>Usuario</th>
+                  <tr style={{ borderBottom: `1px solid ${colors.border}` }}>
+                    {['Fecha / Hora', 'Tipo', 'Categoría', 'Descripción', 'Monto', 'Soporte', 'Usuario'].map(h => (
+                      <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: colors.textMuted, whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {movimientos.map(mov => (
-                    <tr key={mov.id}>
-                      <td className="cm-td-date">
-                        {(() => {
-                          const fecha = new Date(mov.fecha_hora);
-                          return !isNaN(fecha.getTime())
-                            ? fecha.toLocaleString('es-CO', {
-                                day: '2-digit', month: '2-digit', year: '2-digit',
-                                hour: '2-digit', minute: '2-digit',
-                              })
-                            : 'Fecha no disponible';
-                        })()}
+                    <tr key={mov.id} className="cm-row-hover" style={{ borderBottom: `1px solid ${colors.border}` }}>
+                      <td style={{ padding: '12px 14px', fontSize: 12, color: colors.textMuted, whiteSpace: 'nowrap' }}>
+                        {fmtDatetime(mov.fecha_hora)}
                       </td>
-                      <td>
-                        <span className={`cm-badge cm-badge--${mov.tipo}`}>
+                      <td style={{ padding: '12px 14px' }}>
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center',
+                          padding: '3px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+                          background: mov.tipo === 'entrada' ? colors.green : colors.red, color: '#fff',
+                        }}>
                           {mov.tipo === 'entrada' ? 'Entrada' : 'Salida'}
                         </span>
                       </td>
-                      <td>
-                        <span className="cm-cat-tag">{catLabel(mov.categoria)}</span>
+                      <td style={{ padding: '12px 14px' }}>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: colors.textSub, background: colors.bg, border: `1px solid ${colors.border}`, borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap' }}>
+                          {catLabel(mov.categoria)}
+                        </span>
                       </td>
-                      <td className="cm-td-desc">
-                        <span title={mov.descripcion}>{mov.descripcion}</span>
+                      <td style={{ padding: '12px 14px', maxWidth: 180 }}>
+                        <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', color: colors.textMid, fontSize: 13 }} title={mov.descripcion}>
+                          {mov.descripcion}
+                        </span>
                       </td>
-                      <td className={`cm-td-amount cm-td-amount--${mov.tipo}`}>
+                      <td style={{ padding: '12px 14px', fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', color: mov.tipo === 'entrada' ? colors.green : colors.red }}>
                         {mov.tipo === 'entrada' ? '+' : '-'}{fmt(mov.monto)}
                       </td>
-                      <td style={{ textAlign: 'center' }}>
-                        {mov.soporte_pago ? (
+                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                        {mov.soporte_pago_url ? (
                           <button
-                            onClick={() => {
-                              setSoporteSeleccionado(mov.soporte_pago);
-                              setMostrarModalSoporte(true);
-                            }}
-                            style={{
-                              padding: '6px',
-                              background: 'var(--blue-bg)',
-                              border: '1px solid var(--blue-border)',
-                              borderRadius: '6px',
-                              cursor: 'pointer',
-                              color: 'var(--blue)',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              transition: 'all 0.15s',
-                            }}
-                            title="Ver soporte de pago"
-                            onMouseEnter={(e) => {
-                              e.target.style.background = 'var(--blue)';
-                              e.target.style.color = '#fff';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.target.style.background = 'var(--blue-bg)';
-                              e.target.style.color = 'var(--blue)';
-                            }}
+                            onClick={() => { setSoporteSeleccionado(mov.soporte_pago_url); setModalSoporte(true); }}
+                            style={{ background: colors.blueLight, border: `1px solid ${colors.blueBorder}`, borderRadius: 7, padding: '5px 7px', cursor: 'pointer', color: colors.blue, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all .15s' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = colors.blue; e.currentTarget.style.color = '#fff'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = colors.blueLight; e.currentTarget.style.color = colors.blue; }}
                           >
-                            <EyeIcon style={{ width: '16px', height: '16px' }} />
+                            <EyeIcon style={{ width: 14, height: 14 }} />
                           </button>
                         ) : (
-                          <span style={{ fontSize: 12, color: 'var(--text-3)' }}>—</span>
+                          <span style={{ fontSize: 12, color: colors.textMuted }}>—</span>
                         )}
                       </td>
-                      <td style={{ fontSize: 12, color: 'var(--text-3)', whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '12px 14px', fontSize: 12, color: colors.textMuted, whiteSpace: 'nowrap' }}>
                         {(mov.usuario_nombre || mov.usuario || '').split(' ')[0]}
                       </td>
                     </tr>
@@ -740,191 +622,48 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh }) {
             </div>
           )}
         </div>
-
       </div>
 
-      {/* Modal para ver Soporte de Pago */}
-      {mostrarModalSoporte && soporteSeleccionado && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.8)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 50,
-          padding: '16px',
-          animation: 'cm-fadeIn 0.2s ease'
-        }}>
-          <div style={{
-            background: 'var(--surface)',
-            borderRadius: '16px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-            maxWidth: '900px',
-            width: '100%',
-            maxHeight: '90vh',
-            overflow: 'hidden',
-            animation: 'cm-fadeUp 0.3s ease'
-          }}>
+      {/* ── Modal Soporte ── */}
+      {modalSoporte && soporteSeleccionado && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+          <div style={{ background: colors.surface, borderRadius: 14, boxShadow: '0 20px 50px rgba(0,0,0,.16)', maxWidth: 780, width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Header */}
-            <div style={{
-              background: 'var(--blue)',
-              padding: '16px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '32px',
-                  height: '32px',
-                  background: 'rgba(255,255,255,0.2)',
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '16px'
-                }}>📄</div>
+            <div style={{ padding: '16px 20px', borderBottom: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: colors.blueLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: 15 }}>📄</span>
+                </div>
                 <div>
-                  <div style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>Soporte de Pago</div>
-                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>Comprobante del movimiento</div>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: colors.text, margin: 0 }}>Soporte de Pago</p>
+                  <p style={{ fontSize: 12, color: colors.textSub, margin: '1px 0 0' }}>Comprobante del movimiento</p>
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  setMostrarModalSoporte(false);
-                  setSoporteSeleccionado(null);
-                }}
-                style={{
-                  padding: '8px',
-                  background: 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  color: '#fff',
-                  transition: 'all 0.15s'
-                }}
-                onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
-                onMouseLeave={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
-              >✕</button>
+              <button onClick={() => { setModalSoporte(false); setSoporteSeleccionado(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: colors.textMuted, padding: 4, borderRadius: 6 }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="17" height="17" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
             </div>
-
             {/* Body */}
-            <div style={{
-              padding: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              maxHeight: 'calc(90vh - 140px)',
-              overflow: 'auto'
-            }}>
+            <div style={{ flex: 1, overflow: 'auto', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {soporteSeleccionado.toLowerCase().endsWith('.pdf') ? (
-                <div style={{ width: '100%', textAlign: 'center' }}>
-                  <object
-                    data={soporteSeleccionado}
-                    type="application/pdf"
-                    style={{
-                      width: '100%',
-                      height: '500px',
-                      borderRadius: '8px',
-                      border: '1px solid var(--border)'
-                    }}
-                  >
-                    <div style={{ padding: '32px' }}>
-                      <p style={{ color: 'var(--text-2)', marginBottom: '16px' }}>
-                        No se puede previsualizar el PDF directamente
-                      </p>
-                      <a
-                        href={soporteSeleccionado}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          padding: '10px 20px',
-                          background: 'var(--blue)',
-                          color: '#fff',
-                          borderRadius: '8px',
-                          textDecoration: 'none',
-                          fontWeight: 600,
-                          fontSize: '14px'
-                        }}
-                      >
-                        📄 Abrir PDF en nueva pestaña
-                      </a>
-                    </div>
-                  </object>
-                </div>
+                <object data={soporteSeleccionado} type="application/pdf" style={{ width: '100%', minHeight: 500, borderRadius: 9, border: `1px solid ${colors.border}` }}>
+                  <div style={{ textAlign: 'center', padding: 28 }}>
+                    <p style={{ color: colors.textSub, marginBottom: 12 }}>No se puede previsualizar el PDF</p>
+                    <a href={soporteSeleccionado} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', background: colors.blue, color: '#fff', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
+                      Abrir PDF
+                    </a>
+                  </div>
+                </object>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img
-                    src={soporteSeleccionado}
-                    alt="Soporte de pago"
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '100%',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                      border: '1px solid var(--border)'
-                    }}
-                  />
-                </div>
+                <img src={soporteSeleccionado} alt="Soporte" style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 9, border: `1px solid ${colors.border}`, boxShadow: '0 4px 16px rgba(0,0,0,.07)' }} />
               )}
             </div>
-
             {/* Footer */}
-            <div style={{
-              background: 'var(--bg)',
-              padding: '16px 24px',
-              display: 'flex',
-              gap: '12px',
-              justifyContent: 'flex-end'
-            }}>
-              <a
-                href={soporteSeleccionado}
-                download={`soporte_pago_${new Date().getTime()}`}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '10px 20px',
-                  background: 'var(--blue)',
-                  color: '#fff',
-                  borderRadius: '8px',
-                  textDecoration: 'none',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  transition: 'all 0.15s'
-                }}
-                onMouseEnter={(e) => e.target.style.filter = 'brightness(1.1)'}
-                onMouseLeave={(e) => e.target.style.filter = 'brightness(1)'}
-              >
-                📥 Descargar
+            <div style={{ padding: '13px 20px', borderTop: `1px solid ${colors.border}`, display: 'flex', gap: 9, justifyContent: 'flex-end', flexShrink: 0 }}>
+              <a href={soporteSeleccionado} download={`soporte_${Date.now()}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 15px', background: colors.blue, color: '#fff', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
+                Descargar
               </a>
-              <button
-                onClick={() => {
-                  setMostrarModalSoporte(false);
-                  setSoporteSeleccionado(null);
-                }}
-                style={{
-                  padding: '10px 20px',
-                  background: 'var(--border)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: 'var(--text-1)',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s'
-                }}
-                onMouseEnter={(e) => e.target.style.background = 'var(--border-light)'}
-                onMouseLeave={(e) => e.target.style.background = 'var(--border)'}
-              >
+              <button onClick={() => { setModalSoporte(false); setSoporteSeleccionado(null); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 15px', background: 'transparent', color: colors.textMid, border: `1px solid ${colors.border}`, borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                 Cerrar
               </button>
             </div>

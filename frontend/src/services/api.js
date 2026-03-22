@@ -390,6 +390,263 @@ async function patch(endpoint, body, token, skipRefresh = false) {
   return json;
 }
 
+async function _putRaw(endpoint, body, token) {
+  const url = `${BASE_URL}${endpoint}`;
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+    body: JSON.stringify(body),
+  });
+
+  const json = await res.json().catch(() => null);
+  return { res, json };
+}
+
+async function put(endpoint, body, token, skipRefresh = false) {
+  console.log(`PUT ${BASE_URL}${endpoint}`, body);
+
+  // Primera intento
+  let { res, json } = await _putRaw(endpoint, body, token);
+  console.log(`Response ${res.status}:`, json);
+
+  // Si la petición fue exitosa, guardar nuevo_token si está presente en la respuesta
+  if (res.ok && json && json.nuevo_token) {
+    console.log('✅ Nuevo token recibido (PUT), guardando en localStorage...');
+    localStorage.setItem('token_usuario', json.nuevo_token);
+  }
+
+  // Si la petición falló con 401 y NO estamos saltando el refresh (para evitar recursión)
+  if (!res.ok && res.status === 401 && !skipRefresh) {
+    // NO intentar refrescar token para endpoints de auth
+    const isAuthEndpoint = endpoint.includes('api/auth/login') ||
+                           endpoint.includes('api/auth/refresh') ||
+                           endpoint.includes('api/auth/register');
+
+    if (!isAuthEndpoint) {
+      console.warn('⚠️ Error 401 detectado (PUT). Intentando refresh de token...');
+
+      // Obtener refresh token para SimpleJWT
+      const refreshToken = localStorage.getItem('auth_refresh_token');
+
+      if (refreshToken) {
+        try {
+          // Usar _postRaw para evitar recursión
+          // SimpleJWT espera { refresh: refreshToken }
+          const refreshResult = await _postRaw('api/auth/refresh/', {
+            refresh: refreshToken
+          }, null);
+
+          if (refreshResult.res.ok && refreshResult.json.access) {
+            // Guardar nuevo access token en todos los keys
+            const newAccessToken = refreshResult.json.access;
+            localStorage.setItem('auth_access_token', newAccessToken);
+            localStorage.setItem('token_usuario', newAccessToken);
+            localStorage.setItem('accessToken', newAccessToken);
+
+            // Si ROTATE_REFRESH_TOKENS=True, guardar nuevo refresh token
+            if (refreshResult.json.refresh) {
+              const newRefreshToken = refreshResult.json.refresh;
+              localStorage.setItem('auth_refresh_token', newRefreshToken);
+              localStorage.setItem('refresh_token', newRefreshToken);
+            }
+
+            console.log('✅ Token refrescado exitosamente');
+
+            // Reintentar la petición original con el nuevo token
+            const retryResult = await _putRaw(endpoint, body, newAccessToken);
+            if (retryResult.res.ok) {
+              console.log(`✅ Reintento exitoso después de refresh`);
+              // Guardar nuevo_token si está presente en la respuesta del reintento
+              if (retryResult.json && retryResult.json.nuevo_token) {
+                console.log('✅ Nuevo token recibido en reintento, guardando en localStorage...');
+                localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
+              }
+              return retryResult.json;
+            }
+            // Si el reintento falló, continuar con el error normal
+            res = retryResult.res;
+            json = retryResult.json;
+          }
+        } catch (refreshError) {
+          console.error('❌ Error al refrescar token:', refreshError);
+        }
+      }
+    }
+
+    // Si llegamos aquí, no se pudo refrescar el token (o era un endpoint de auth)
+    // Solo limpiar tokens si NO es un endpoint de auth
+    if (!isAuthEndpoint) {
+      console.warn('⚠️ No se pudo refrescar el token. Limpiando tokens de autenticación...');
+      localStorage.removeItem('auth_access_token');
+      localStorage.removeItem('auth_refresh_token');
+      localStorage.removeItem('auth_usuario');
+
+      // Lanzar error especial para que el componente lo capture
+      throw {
+        message: 'SESSION_EXPIRED',
+        isAuthError: true,
+        details: json
+      };
+    }
+  }
+
+  // Manejo normal de errores (no 401, o 401 después de intentar refresh)
+  if (!res.ok) {
+    console.error('API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      responseBody: json
+    });
+
+    // Extraer mensaje de error de diferentes formatos
+    let msg = json?.mensaje || json?.detail || res.statusText;
+
+    // Si es un error de validación de Django REST Framework
+    if (json && typeof json === 'object') {
+      // Buscar errores de campos específicos
+      const firstFieldError = Object.keys(json).find(key => Array.isArray(json[key]) && json[key].length > 0);
+      if (firstFieldError && json[firstFieldError][0]) {
+        msg = json[firstFieldError][0];
+      }
+    }
+
+    throw { message: msg, details: json };
+  }
+
+  return json;
+}
+
+async function _deleteRaw(endpoint, token) {
+  const url = `${BASE_URL}${endpoint}`;
+  const res = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+  });
+
+  const json = await res.json().catch(() => null);
+  return { res, json };
+}
+
+async function del(endpoint, token, skipRefresh = false) {
+  console.log(`DELETE ${BASE_URL}${endpoint}`);
+
+  // Primera intento
+  let { res, json } = await _deleteRaw(endpoint, token);
+  console.log(`Response ${res.status}:`, json);
+
+  // Si la petición fue exitosa, guardar nuevo_token si está presente en la respuesta
+  if (res.ok && json && json.nuevo_token) {
+    console.log('✅ Nuevo token recibido (DELETE), guardando en localStorage...');
+    localStorage.setItem('token_usuario', json.nuevo_token);
+  }
+
+  // Si la petición falló con 401 y NO estamos saltando el refresh (para evitar recursión)
+  if (!res.ok && res.status === 401 && !skipRefresh) {
+    // NO intentar refrescar token para endpoints de auth
+    const isAuthEndpoint = endpoint.includes('api/auth/login') ||
+                           endpoint.includes('api/auth/refresh') ||
+                           endpoint.includes('api/auth/register');
+
+    if (!isAuthEndpoint) {
+      console.warn('⚠️ Error 401 detectado (DELETE). Intentando refresh de token...');
+
+      // Obtener refresh token para SimpleJWT
+      const refreshToken = localStorage.getItem('auth_refresh_token');
+
+      if (refreshToken) {
+        try {
+          // Usar _postRaw para evitar recursión
+          // SimpleJWT espera { refresh: refreshToken }
+          const refreshResult = await _postRaw('api/auth/refresh/', {
+            refresh: refreshToken
+          }, null);
+
+          if (refreshResult.res.ok && refreshResult.json.access) {
+            // Guardar nuevo access token en todos los keys
+            const newAccessToken = refreshResult.json.access;
+            localStorage.setItem('auth_access_token', newAccessToken);
+            localStorage.setItem('token_usuario', newAccessToken);
+            localStorage.setItem('accessToken', newAccessToken);
+
+            // Si ROTATE_REFRESH_TOKENS=True, guardar nuevo refresh token
+            if (refreshResult.json.refresh) {
+              const newRefreshToken = refreshResult.json.refresh;
+              localStorage.setItem('auth_refresh_token', newRefreshToken);
+              localStorage.setItem('refresh_token', newRefreshToken);
+            }
+
+            console.log('✅ Token refrescado exitosamente');
+
+            // Reintentar la petición original con el nuevo token
+            const retryResult = await _deleteRaw(endpoint, newAccessToken);
+            if (retryResult.res.ok) {
+              console.log(`✅ Reintento exitoso después de refresh`);
+              // Guardar nuevo_token si está presente en la respuesta del reintento
+              if (retryResult.json && retryResult.json.nuevo_token) {
+                console.log('✅ Nuevo token recibido en reintento, guardando en localStorage...');
+                localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
+              }
+              return retryResult.json;
+            }
+            // Si el reintento falló, continuar con el error normal
+            res = retryResult.res;
+            json = retryResult.json;
+          }
+        } catch (refreshError) {
+          console.error('❌ Error al refrescar token:', refreshError);
+        }
+      }
+    }
+
+    // Si llegamos aquí, no se pudo refrescar el token (o era un endpoint de auth)
+    // Solo limpiar tokens si NO es un endpoint de auth
+    if (!isAuthEndpoint) {
+      console.warn('⚠️ No se pudo refrescar el token. Limpiando tokens de autenticación...');
+      localStorage.removeItem('auth_access_token');
+      localStorage.removeItem('auth_refresh_token');
+      localStorage.removeItem('auth_usuario');
+
+      // Lanzar error especial para que el componente lo capture
+      throw {
+        message: 'SESSION_EXPIRED',
+        isAuthError: true,
+        details: json
+      };
+    }
+  }
+
+  // Manejo normal de errores (no 401, o 401 después de intentar refresh)
+  if (!res.ok) {
+    console.error('API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      responseBody: json
+    });
+
+    // Extraer mensaje de error de diferentes formatos
+    let msg = json?.mensaje || json?.detail || res.statusText;
+
+    // Si es un error de validación de Django REST Framework
+    if (json && typeof json === 'object') {
+      // Buscar errores de campos específicos
+      const firstFieldError = Object.keys(json).find(key => Array.isArray(json[key]) && json[key].length > 0);
+      if (firstFieldError && json[firstFieldError][0]) {
+        msg = json[firstFieldError][0];
+      }
+    }
+
+    throw { message: msg, details: json };
+  }
+
+  return json;
+}
+
 export function fetchUsers({rol, token, usuario, tokenUsuario, accessToken, nombre, nombreTienda, hostname, tienda, subdominio}) {
   token = tokenUsuario;
   console.log("fetchUsers llamado con:", { usuario, tokenUsuario, subdominio, tabla: 'login_usuario' });
@@ -1435,16 +1692,39 @@ export function fetchMovimientosCaja({
 
 /**
  * Registra un nuevo movimiento de caja (entrada o salida)
+ * Soporta subida de soporte_pago de pago (multipart/form-data)
  */
 export function registrarMovimientoCaja({
   token, usuario, subdominio, tipo, categoria,
-  monto, metodo_pago = 'efectivo', descripcion, id_sucursal
+  monto, metodo_pago = 'efectivo', descripcion, id_sucursal, soporte_pago
 }) {
   token = token || localStorage.getItem('token_usuario');
+
+  // Si hay archivo de soporte_pago, usar FormData
+  if (soporte_pago) {
+    const formData = new FormData();
+    formData.append('usuario', usuario);
+    formData.append('token', token);
+    formData.append('subdominio', subdominio);
+    formData.append('tipo', tipo);
+    formData.append('categoria', categoria);
+    formData.append('monto', monto);
+    formData.append('metodo_pago', metodo_pago);
+    formData.append('descripcion', descripcion);
+    if (id_sucursal) {
+      formData.append('id_sucursal', id_sucursal);
+      formData.append('sucursal', id_sucursal);
+    }
+    formData.append('soporte_pago', soporte_pago);
+
+    return uploadFile('api/caja/registrar_movimiento/', formData, token);
+  }
+
+  // Si no hay archivo, usar el método normal
   return post('api/caja/registrar_movimiento/', {
     usuario, token, subdominio, tipo, categoria,
     monto, metodo_pago, descripcion,
-    ...(id_sucursal && { id_sucursal, sucursal: id_sucursal }) // 👈
+    ...(id_sucursal && { id_sucursal, sucursal: id_sucursal })
   }, token);
 }
 
@@ -1666,8 +1946,21 @@ export function fetchSucursalesCaja({ token, usuario, subdominio }) {
   }, token);
 }
 
+/**
+ * Obtiene el balance acumulado de caja menor (todos los movimientos históricos)
+ */
+export function fetchBalanceCajaMenor({ token, usuario, subdominio, id_sucursal }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/balance_caja_menor/', {
+    usuario,
+    token,
+    subdominio,
+    ...(id_sucursal && { id_sucursal })
+  }, token);
+}
+
 
 // Exportar funciones principales para uso en componentes
-export { post, get, patch };
+export { post, get, patch, put, del };
 
 

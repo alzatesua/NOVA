@@ -181,6 +181,18 @@ def crear_abono(request):
                     'message': 'El archivo de soporte no puede superar los 5MB'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
+        # ── IMPORTANTE: Guardar subdominio en thread-local antes de guardar el archivo ──
+        subdominio = request.data.get('subdominio') or request.query_params.get('subdominio')
+        if not subdominio:
+            # Si no viene en data/queryparams, extraer del host
+            host = request.get_host().split(':')[0]
+            subdominio = host.split('.')[0].lower()
+
+        if subdominio:
+            from .models import set_tenant_subdominio
+            set_tenant_subdominio(subdominio)
+            logger.info(f"🏷️ Subdominio guardado en thread-local para abono: {subdominio}")
+
         # Crear el abono
         abono = Abono.objects.using(alias).create(
             cliente=cliente,
@@ -191,6 +203,11 @@ def crear_abono(request):
             soporte_pago=soporte_pago,
             fecha_abono=fecha_abono or timezone.now().date(),
         )
+
+        # ── Limpiar thread-local storage después de guardar ──
+        from .models import clear_tenant_subdominio
+        clear_tenant_subdominio()
+        logger.info(f"🧹 Thread-local storage limpiado después de crear abono")
 
         # Crear movimiento de caja automático (conexión Abono → Caja)
         from .models import MovimientoCaja

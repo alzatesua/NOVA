@@ -1558,6 +1558,9 @@ class MovimientoCajaSerializer(DbAliasModelSerializer):
     def get_soporte_pago_url(self, obj):
         from django.conf import settings
         if obj.soporte_pago:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(settings.MEDIA_URL + str(obj.soporte_pago))
             return settings.MEDIA_URL + str(obj.soporte_pago)
         return None
 
@@ -1566,7 +1569,7 @@ class MovimientoCajaCreateSerializer(DbAliasModelSerializer):
         model = MovimientoCaja
         fields = [
             'tipo', 'categoria', 'monto', 'metodo_pago',
-            'descripcion', 'factura', 'sucursal', 'es_caja_menor'
+            'descripcion', 'factura', 'sucursal', 'es_caja_menor', 'soporte_pago'
         ]
         extra_kwargs = {
             'tipo': {'required': True},
@@ -1577,6 +1580,7 @@ class MovimientoCajaCreateSerializer(DbAliasModelSerializer):
             'factura': {'required': False, 'allow_null': True},
             'sucursal': {'required': False, 'allow_null': True},
             'es_caja_menor': {'required': False, 'default': False},
+            'soporte_pago': {'required': False, 'allow_null': True},
         }
 
     def validate(self, attrs):
@@ -1625,11 +1629,31 @@ class MovimientoCajaCreateSerializer(DbAliasModelSerializer):
         usuario = self.context.get('usuario')
         request = self.context.get('request')
 
+        # ── IMPORTANTE: Guardar subdominio en thread-local antes de guardar el archivo ──
+        if request:
+            # Obtener subdominio del request
+            subdominio = request.data.get('subdominio') or request.query_params.get('subdominio')
+            if not subdominio:
+                # Si no viene en data/queryparams, extraer del host
+                host = request.get_host().split(':')[0]
+                subdominio = host.split('.')[0].lower()
+
+            if subdominio:
+                from .models import set_tenant_subdominio
+                set_tenant_subdominio(subdominio)
+                logger.info(f"🏷️ Subdominio guardado en thread-local: {subdominio}")
+
         # ── IMPORTANTE: Si es_caja_menor no está en validated_data pero viene en request, agregarlo ──
         if 'es_caja_menor' not in validated_data or validated_data.get('es_caja_menor') is None:
             if request and 'es_caja_menor' in request.data:
                 validated_data['es_caja_menor'] = request.data.get('es_caja_menor')
                 logger.info(f"✅ es_caja_menor agregado desde request.data: {validated_data.get('es_caja_menor')}")
+
+        # ── IMPORTANTE: Guardar es_caja_menor en thread-local antes de guardar el archivo ──
+        es_caja_menor = validated_data.get('es_caja_menor', False)
+        from .models import set_es_caja_menor
+        set_es_caja_menor(es_caja_menor)
+        logger.info(f"🏷️ es_caja_menor guardado en thread-local: {es_caja_menor}")
 
         # ── Resolver sucursal ──────────────────────────────────
         if not validated_data.get('sucursal'):
@@ -1656,6 +1680,11 @@ class MovimientoCajaCreateSerializer(DbAliasModelSerializer):
 
         # ── DEBUG: Log de es_caja_menor después de guardar ──
         logger.info(f"✅ Después de super().create() - movimiento.es_caja_menor: {movimiento.es_caja_menor}")
+
+        # ── Limpiar thread-local storage después de guardar ──
+        from .models import clear_tenant_subdominio
+        clear_tenant_subdominio()
+        logger.info(f"🧹 Thread-local storage limpiado")
 
         return movimiento
 

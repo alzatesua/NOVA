@@ -213,7 +213,7 @@ def listar_movimientos(request):
         paginator = Paginator(queryset, por_pagina)
         page_obj = paginator.get_page(pagina)
 
-        serializer = MovimientoCajaSerializer(page_obj, many=True)
+        serializer = MovimientoCajaSerializer(page_obj, many=True, context={'request': request})
 
         return Response({
             'success': True,
@@ -646,6 +646,72 @@ def listar_movimientos_caja_menor(request):
         return Response({'success': False, 'message': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
     except Exception as e:
         logger.error(f"Error en listar_movimientos_caja_menor: {str(e)}", exc_info=True)
+        return Response({'success': False, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def balance_caja_menor(request):
+    """
+    Obtiene el balance acumulado de caja menor (todos los movimientos históricos).
+
+    Body esperado:
+    {
+        "usuario": "...",
+        "token": "...",
+        "subdominio": "...",
+        "id_sucursal": 1        # opcional, para filtrar por sucursal
+    }
+
+    Retorna:
+    {
+        "success": true,
+        "balance": {
+            "ingresos": 1000.00,
+            "egresos": 500.00,
+            "total": 500.00
+        }
+    }
+    """
+    try:
+        mixin = CajaTenantMixin()
+        alias = mixin._resolve_alias(request)
+
+        id_sucursal = request.data.get('id_sucursal')
+
+        # Filtrar movimientos de caja menor (todos los históricos, sin filtro de fecha)
+        queryset = MovimientoCaja.objects.using(alias).filter(
+            es_caja_menor=True
+        )
+
+        if id_sucursal:
+            queryset = queryset.filter(sucursal_id=id_sucursal)
+
+        # Calcular balance acumulado
+        ingresos = queryset.filter(tipo='entrada').aggregate(
+            total=Sum('monto')
+        )['total'] or Decimal('0')
+
+        egresos = queryset.filter(tipo='salida').aggregate(
+            total=Sum('monto')
+        )['total'] or Decimal('0')
+
+        total = ingresos - egresos
+
+        return Response({
+            'success': True,
+            'balance': {
+                'ingresos': str(ingresos),
+                'egresos': str(egresos),
+                'total': str(total)
+            }
+        }, status=status.HTTP_200_OK)
+
+    except ValueError as e:
+        logger.error(f"Error en balance_caja_menor (ValueError): {str(e)}")
+        return Response({'success': False, 'message': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+    except Exception as e:
+        logger.error(f"Error en balance_caja_menor: {str(e)}", exc_info=True)
         return Response({'success': False, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
