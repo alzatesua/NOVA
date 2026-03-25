@@ -128,17 +128,6 @@ export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursa
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Movimientos de Caja</CardTitle>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setPagina(1);
-              cargarMovimientos();
-            }}
-          >
-            <RefreshIcon />
-            Actualizar
-          </Button>
         </div>
       </CardHeader>
       <CardContent>

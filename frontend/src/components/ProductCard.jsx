@@ -32,7 +32,11 @@ function ProductCard({
     descripcion,
     descripcion_larga,
     imagenUrl,
-    is_active
+    is_active,
+    variantes = [],
+    talla,
+    color,
+    medida
   } = product;
 
   const { usuario, tokenUsuario: token, subdominio } = useAuth();
@@ -232,35 +236,37 @@ function ProductCard({
           )}
 
 
-          {/* Stock editable con botones */}
-          <div className="flex justify-between items-center">
-            <dt className="font-medium">Stock</dt>
-            {editing ? (
-              <div className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    onFieldChange(id, 'stock', Math.max(0, fields.stock - 1))
-                  }
-                  className="px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
-                >
-                  −
-                </button>
-                <span className="w-8 text-center">{fields.stock}</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onFieldChange(id, 'stock', fields.stock + 1)
-                  }
-                  className="px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
-                >
-                  +
-                </button>
-              </div>
-            ) : (
-              <dd className="text-right text-slate-800 dark:!text-slate-200">{fields.stock}</dd>
-            )}
-          </div>
+          {/* Stock editable con botones - OCULTAR si hay variantes */}
+          {!(variantes && variantes.length > 0) && (
+            <div className="flex justify-between items-center">
+              <dt className="font-medium">Stock</dt>
+              {editing ? (
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onFieldChange(id, 'stock', Math.max(0, fields.stock - 1))
+                    }
+                    className="px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
+                  >
+                    −
+                  </button>
+                  <span className="w-8 text-center">{fields.stock}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onFieldChange(id, 'stock', fields.stock + 1)
+                    }
+                    className="px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors duration-200"
+                  >
+                    +
+                  </button>
+                </div>
+              ) : (
+                <dd className="text-right text-slate-800 dark:!text-slate-200">{fields.stock}</dd>
+              )}
+            </div>
+          )}
 
           {/* Precio */}
           <div className="flex justify-between items-center">
@@ -282,6 +288,72 @@ function ProductCard({
             )}
           </div>
         </dl>
+
+        {/* Variantes del producto */}
+        {(variantes && variantes.length > 0) || (talla || color || medida) ? (
+          <div className="mt-4 pt-4 border-t border-slate-200 dark:!border-slate-700">
+            <p className="text-[11px] font-medium uppercase tracking-widest text-slate-400 dark:!text-slate-500 mb-2">
+              Variantes
+            </p>
+
+            {variantes && variantes.length > 0 ? (
+              <div className="flex flex-col gap-1">
+                {variantes.map((variante, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-1.5 flex-wrap bg-slate-50 dark:!bg-slate-800/60 border border-slate-200 dark:!border-slate-700 rounded-lg px-2.5 py-1.5"
+                  >
+                    {variante.talla && (
+                      <span className="inline-flex items-center gap-1 text-[12px] text-slate-600 dark:!text-slate-300 bg-white dark:!bg-slate-700 border border-slate-200 dark:!border-slate-600 rounded-full px-2 py-0.5">
+                        <span className="text-[10px] text-slate-400">Talla</span>
+                        {variante.talla}
+                      </span>
+                    )}
+                    {variante.color && (
+                      <span className="inline-flex items-center gap-1.5 text-[12px] text-slate-600 dark:!text-slate-300 bg-white dark:!bg-slate-700 border border-slate-200 dark:!border-slate-600 rounded-full px-2 py-0.5">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0 border border-slate-300 dark:!border-slate-500"
+                          style={{ backgroundColor: variante.color_hex || variante.color || '#ccc' }}
+                        />
+                        {variante.color_nombre || variante.color}
+                      </span>
+                    )}
+                    {variante.medida && variante.medida !== 'Standard' && (
+                      <span className="inline-flex items-center gap-1 text-[12px] text-slate-600 dark:!text-slate-300 bg-white dark:!bg-slate-700 border border-slate-200 dark:!border-slate-600 rounded-full px-2 py-0.5">
+                        <span className="text-[10px] text-slate-400">Medida</span>
+                        {variante.medida}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+            ) : (
+              /* Producto sin variantes pero con características individuales */
+              <div className="flex flex-wrap gap-1.5">
+                {talla && (
+                  <span className="inline-flex items-center gap-1 text-[12px] text-slate-600 dark:!text-slate-300 bg-slate-100 dark:!bg-slate-800 border border-slate-200 dark:!border-slate-700 rounded-full px-2.5 py-1">
+                    <span className="text-[10px] text-slate-400">Talla</span> {talla}
+                  </span>
+                )}
+                {color && (
+                  <span className="inline-flex items-center gap-1.5 text-[12px] text-slate-600 dark:!text-slate-300 bg-slate-100 dark:!bg-slate-800 border border-slate-200 dark:!border-slate-700 rounded-full px-2.5 py-1">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0 border border-slate-300"
+                      style={{ backgroundColor: typeof color === 'object' ? (color.hex || '#ccc') : '#ccc' }}
+                    />
+                    {typeof color === 'object' ? (color.nombre || color) : color}
+                  </span>
+                )}
+                {medida && (
+                  <span className="inline-flex items-center gap-1 text-[12px] text-slate-600 dark:!text-slate-300 bg-slate-100 dark:!bg-slate-800 border border-slate-200 dark:!border-slate-700 rounded-full px-2.5 py-1">
+                    <span className="text-[10px] text-slate-400">Medida</span> {medida}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        ) : null}
 
         {/* Toggle + precio al final */}
         <div className="mt-6 flex items-center justify-between">

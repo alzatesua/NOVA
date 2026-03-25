@@ -197,18 +197,22 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
   const cargar = async () => {
     setLoading(true);
     try {
+      // Para usuarios no-admin, siempre usar su sucursal asignada
+      // Para admin, usar la sucursal seleccionada o null para ver todas
+      const sucursalId = isAdmin ? (idSucursal || null) : (idSucursal);
+
       // Obtener balance acumulado de caja menor (todos los movimientos históricos)
       const balanceRes = await fetch('https://dagi.co/api/caja/balance_caja_menor/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: tokenUsuario, usuario, subdominio, id_sucursal: idSucursal || null }),
+        body: JSON.stringify({ token: tokenUsuario, usuario, subdominio, id_sucursal: sucursalId }),
       });
 
       // Obtener movimientos del día actual para la tabla
       const movsRes = await fetch('https://dagi.co/api/caja/movimientos_caja_menor/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: tokenUsuario, usuario, subdominio, fecha, id_sucursal: idSucursal || null }),
+        body: JSON.stringify({ token: tokenUsuario, usuario, subdominio, fecha, id_sucursal: sucursalId }),
       });
 
       if (balanceRes.ok && movsRes.ok) {
@@ -555,11 +559,19 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
               <p style={{ color: colors.textMuted, fontSize: 13, marginTop: 10 }}>Cargando movimientos…</p>
             </div>
           ) : movimientos.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '52px 0' }}>
-              <div style={{ fontSize: 32, marginBottom: 10, opacity: .35 }}>📋</div>
-              <p style={{ fontSize: 13, color: colors.textMid, fontWeight: 600, margin: 0 }}>Sin movimientos registrados</p>
-              <p style={{ fontSize: 12, color: colors.textMuted, margin: '4px 0 0' }}>Los movimientos aparecerán aquí</p>
-            </div>
+              <div style={{ textAlign: 'center', padding: '52px 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+                  <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.35 }}>
+                    <rect x="6" y="4" width="24" height="28" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                    <rect x="13" y="2" width="10" height="5" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                    <line x1="11" y1="14" x2="25" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="11" y1="19" x2="25" y2="19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="11" y1="24" x2="19" y2="24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <p style={{ fontSize: 13, color: colors.textMid, fontWeight: 600, margin: 0 }}>Sin movimientos registrados</p>
+                <p style={{ fontSize: 12, color: colors.textMuted, margin: '4px 0 0' }}>Los movimientos aparecerán aquí</p>
+              </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>

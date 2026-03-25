@@ -12,8 +12,89 @@ from django.db.models import Q, Sum, Avg, Count, F, FloatField
 from django.db.models.functions import Round
 import logging
 import os
+import requests
+from urllib.parse import urljoin, urlparse
 
 logger = logging.getLogger(__name__)
+
+
+def extraer_logo_desde_sitio_web(sitio_web):
+    """
+    Extrae la URL del logo/favicon desde la página web del proveedor.
+    Busca en este orden:
+    1. apple-touch-icon
+    2. favicon con tamaños grandes
+    3. Open Graph image
+    4. favicon estándar
+    """
+    if not sitio_web:
+        return None
+
+    try:
+        # Asegurar que la URL tenga protocolo
+        if not sitio_web.startswith(('http://', 'https://')):
+            sitio_web = 'https://' + sitio_web
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+
+        response = requests.get(sitio_web, headers=headers, timeout=10, allow_redirects=True)
+        if response.status_code != 200:
+            logger.warning(f"No se pudo acceder a {sitio_web}: status {response.status_code}")
+            return None
+
+        html = response.text
+        parsed_url = urlparse(sitio_web)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+
+        # Buscar diferentes tipos de iconos en orden de prioridad
+        iconos_encontrados = []
+
+        # 1. Buscar apple-touch-icon (usualmente es el logo de mejor calidad)
+        import re
+        apple_touch_icon = re.search(r'<link[^>]+rel=["\']apple-touch-icon["\'][^>]*href=["\']([^"\']+)["\']', html, re.IGNORECASE)
+        if apple_touch_icon:
+            iconos_encontrados.append(('apple-touch-icon', apple_touch_icon.group(1)))
+
+        # 2. Buscar favicon con tamaño grande (preferiblemente 192x192 o mayor)
+        favicon_large = re.search(r'<link[^>]+rel=["\'](?:shortcut )?icon["\'][^>]*sizes=["\'][^"\']*192[^"\']*["\'][^>]*href=["\']([^"\']+)["\']', html, re.IGNORECASE)
+        if favicon_large:
+            iconos_encontrados.append(('favicon-large', favicon_large.group(1)))
+
+        # 3. Buscar Open Graph image
+        og_image = re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']', html, re.IGNORECASE)
+        if og_image:
+            iconos_encontrados.append(('og:image', og_image.group(1)))
+
+        # 4. Buscar favicon estándar
+        favicon = re.search(r'<link[^>]+rel=["\'](?:shortcut )?icon["\'][^>]*href=["\']([^"\']+)["\']', html, re.IGNORECASE)
+        if favicon:
+            iconos_encontrados.append(('favicon', favicon.group(1)))
+
+        if not iconos_encontrados:
+            logger.info(f"No se encontraron iconos en {sitio_web}")
+            return None
+
+        # Usar el primer icono encontrado (prioridad por orden de búsqueda)
+        logo_url = iconos_encontrados[0][1]
+
+        # Convertir URL relativa a absoluta
+        if logo_url.startswith('//'):
+            logo_url = f"{parsed_url.scheme}:{logo_url}"
+        elif not logo_url.startswith(('http://', 'https://')):
+            logo_url = urljoin(base_url, logo_url)
+
+        logger.info(f"Logo encontrado para {sitio_web}: {logo_url} (tipo: {iconos_encontrados[0][0]})")
+
+        return logo_url
+
+    except requests.RequestException as e:
+        logger.warning(f"Error al acceder a {sitio_web}: {str(e)}")
+        return None
+    except Exception as e:
+        logger.error(f"Error inesperado al extraer logo de {sitio_web}: {str(e)}", exc_info=True)
+        return None
 
 
 def _get_tenant_alias(request):
@@ -136,6 +217,20 @@ def proveedores_list(request):
                     logger.warning(f"get_total_compras falló para proveedor {prov.id}: {e}")
                     total_compras = 0
 
+                # Extraer logo automáticamente si el proveedor tiene sitio web pero no logo
+                logo_url = prov.logo_url
+                if prov.sitio_web and not prov.logo_url:
+                    try:
+                        logger.info(f"Extrayendo logo automáticamente para proveedor {prov.id}: {prov.razon_social}")
+                        logo_url = extraer_logo_desde_sitio_web(prov.sitio_web)
+                        if logo_url:
+                            # Actualizar el proveedor en segundo plano
+                            prov.logo_url = logo_url
+                            prov.save(using=alias)
+                            logger.info(f"Logo extraído y guardado para proveedor {prov.id}")
+                    except Exception as e:
+                        logger.warning(f"No se pudo extraer logo para {prov.razon_social}: {str(e)}")
+
                 data.append({
                     'id': prov.id,
                     'nit': prov.nit,
@@ -149,7 +244,7 @@ def proveedores_list(request):
                     'contacto_principal': prov.contacto_principal,
                     'cargo_contacto': prov.cargo_contacto,
                     'sitio_web': prov.sitio_web,
-                    'logo_url': prov.logo_url,
+                    'logo_url': logo_url,
                     'plazo_pago_dias': prov.plazo_pago_dias,
                     'descuento_comercial': float(prov.descuento_comercial) if prov.descuento_comercial else 0,
                     'limite_credito': float(prov.limite_credito) if prov.limite_credito else 0,
@@ -182,6 +277,15 @@ def proveedores_list(request):
                     'message': 'Ya existe un proveedor con este NIT'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
+            # Extraer logo automáticamente si se proporciona sitio web
+            logo_url = data.get('logo_url')
+            sitio_web = data.get('sitio_web')
+            if sitio_web and not logo_url:
+                logger.info(f"Extrayendo logo desde sitio web: {sitio_web}")
+                logo_url = extraer_logo_desde_sitio_web(sitio_web)
+                if logo_url:
+                    logger.info(f"Logo extraído exitosamente: {logo_url}")
+
             proveedor = Proveedor.objects.using(alias).create(
                 nit=data.get('nit'),
                 razon_social=data.get('razon_social'),
@@ -194,7 +298,8 @@ def proveedores_list(request):
                 telefono_whatsapp=data.get('telefono_whatsapp'),
                 contacto_principal=data.get('contacto_principal'),
                 cargo_contacto=data.get('cargo_contacto'),
-                sitio_web=data.get('sitio_web'),
+                sitio_web=sitio_web,
+                logo_url=logo_url,
                 plazo_pago_dias=data.get('plazo_pago_dias'),
                 descuento_comercial=data.get('descuento_comercial', 0),
                 limite_credito=data.get('limite_credito', 0),
@@ -291,6 +396,25 @@ def proveedor_detalle(request, proveedor_id):
 
             # Logging para debugging
             logger.info(f"Datos recibidos para actualizar: {data}")
+
+            # Extraer logo automáticamente si se actualiza el sitio web y no hay logo_url
+            logo_url = data.get('logo_url')
+            sitio_web = data.get('sitio_web')
+
+            # Si se actualiza el sitio web y no hay logo_url proporcionado, extraer logo
+            if sitio_web and sitio_web != proveedor.sitio_web and not logo_url:
+                logger.info(f"Sitio web actualizado, extrayendo logo desde: {sitio_web}")
+                logo_url = extraer_logo_desde_sitio_web(sitio_web)
+                if logo_url:
+                    logger.info(f"Logo extraído exitosamente: {logo_url}")
+                    data['logo_url'] = logo_url
+            # Si no hay logo pero sí hay sitio web y el proveedor no tiene logo, extraer
+            elif sitio_web and not proveedor.logo_url and not logo_url:
+                logger.info(f"Proveedor sin logo, extrayendo desde: {sitio_web}")
+                logo_url = extraer_logo_desde_sitio_web(sitio_web)
+                if logo_url:
+                    logger.info(f"Logo extraído exitosamente: {logo_url}")
+                    data['logo_url'] = logo_url
 
             # Campos actualizables
             campos_actualizables = [
@@ -1020,4 +1144,118 @@ def proveedores_reportes(request):
         return Response({
             'success': False,
             'message': f'Error al generar reporte: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def proveedor_actualizar_logo(request, proveedor_id):
+    """
+    Actualiza el logo de un proveedor extrayéndolo desde su sitio web
+    URL: /api/proveedores/{proveedor_id}/actualizar-logo/
+    """
+    try:
+        alias = _get_tenant_alias(request)
+        from .models import Proveedor
+
+        proveedor = Proveedor.objects.using(alias).get(id=proveedor_id)
+
+        if not proveedor.sitio_web:
+            return Response({
+                'success': False,
+                'message': 'El proveedor no tiene un sitio web configurado'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        logger.info(f"Extrayendo logo para proveedor {proveedor.id} desde {proveedor.sitio_web}")
+
+        logo_url = extraer_logo_desde_sitio_web(proveedor.sitio_web)
+
+        if logo_url:
+            proveedor.logo_url = logo_url
+            proveedor.save(using=alias)
+
+            logger.info(f"Logo actualizado exitosamente para proveedor {proveedor.id}: {logo_url}")
+
+            return Response({
+                'success': True,
+                'message': 'Logo actualizado exitosamente',
+                'data': {
+                    'logo_url': logo_url
+                }
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'success': False,
+                'message': 'No se pudo extraer el logo desde el sitio web'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    except Proveedor.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'Proveedor no encontrado'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        logger.error(f"Error en proveedor_actualizar_logo: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': f'Error al actualizar logo: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def actualizar_logos_proveedores(request):
+    """
+    Actualiza automáticamente los logos de todos los proveedores que tienen sitio web pero no logo
+    URL: /api/proveedores/actualizar-logos/
+    """
+    try:
+        alias = _get_tenant_alias(request)
+        from .models import Proveedor
+
+        # Buscar proveedores con sitio web pero sin logo
+        proveedores_sin_logo = Proveedor.objects.using(alias).filter(
+            sitio_web__isnull=False,
+            sitio_web__ne='',
+            logo_url__isnull=True
+        ) | Proveedor.objects.using(alias).filter(
+            sitio_web__isnull=False,
+            sitio_web__ne='',
+            logo_url=''
+        )
+
+        total = len(proveedores_sin_logo)
+        actualizados = 0
+        fallidos = 0
+
+        logger.info(f"Actualizando logos para {total} proveedores")
+
+        for proveedor in proveedores_sin_logo:
+            try:
+                logo_url = extraer_logo_desde_sitio_web(proveedor.sitio_web)
+                if logo_url:
+                    proveedor.logo_url = logo_url
+                    proveedor.save(using=alias)
+                    actualizados += 1
+                    logger.info(f"Logo actualizado para proveedor {proveedor.id}: {proveedor.razon_social}")
+                else:
+                    fallidos += 1
+                    logger.warning(f"No se pudo extraer logo para {proveedor.razon_social}")
+            except Exception as e:
+                fallidos += 1
+                logger.error(f"Error actualizando logo para {proveedor.razon_social}: {str(e)}")
+
+        return Response({
+            'success': True,
+            'message': f'Proceso completado. Actualizados: {actualizados}, Fallidos: {fallidos}',
+            'data': {
+                'total': total,
+                'actualizados': actualizados,
+                'fallidos': fallidos
+            }
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error en actualizar_logos_proveedores: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': f'Error al actualizar logos: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

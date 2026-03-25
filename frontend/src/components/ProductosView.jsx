@@ -36,6 +36,80 @@ import {
 } from '@heroicons/react/24/solid';
 import Modal from '../components/Modal';
 
+// Paleta de colores predefinidos
+const COLORES_PALETA = [
+  { nombre: 'Rojo', hex: '#EF4444' },
+  { nombre: 'Rojo Oscuro', hex: '#B91C1C' },
+  { nombre: 'Naranja', hex: '#F97316' },
+  { nombre: 'Amarillo', hex: '#EAB308' },
+  { nombre: 'Verde Lima', hex: '#84CC16' },
+  { nombre: 'Verde', hex: '#22C55E' },
+  { nombre: 'Verde Oscuro', hex: '#15803D' },
+  { nombre: 'Cian', hex: '#06B6D4' },
+  { nombre: 'Azul Claro', hex: '#0EA5E9' },
+  { nombre: 'Azul', hex: '#3B82F6' },
+  { nombre: 'Azul Oscuro', hex: '#1D4ED8' },
+  { nombre: 'Índigo', hex: '#6366F1' },
+  { nombre: 'Violeta', hex: '#8B5CF6' },
+  { nombre: 'Púrpura', hex: '#A855F7' },
+  { nombre: 'Fucsia', hex: '#D946EF' },
+  { nombre: 'Rosa', hex: '#EC4899' },
+  { nombre: 'Blanco', hex: '#FFFFFF' },
+  { nombre: 'Gris Claro', hex: '#F3F4F6' },
+  { nombre: 'Gris', hex: '#9CA3AF' },
+  { nombre: 'Gris Oscuro', hex: '#4B5563' },
+  { nombre: 'Negro', hex: '#000000' },
+  { nombre: 'Beige', hex: '#D4B483' },
+  { nombre: 'Marrón', hex: '#92400E' },
+  { nombre: 'Dorado', hex: '#F59E0B' },
+  { nombre: 'Plata', hex: '#C0C0C0' },
+  { nombre: 'Bronce', hex: '#CD7F32' },
+  { nombre: 'Turquesa', hex: '#40E0D0' },
+  { nombre: 'Coral', hex: '#FF7F50' },
+  { nombre: 'Terracota', hex: '#E2725B' },
+  { nombre: 'Oliva', hex: '#808000' },
+];
+
+// Componente de paleta de colores
+const ColorPicker = ({ selectedColor, onSelectColor, isDark }) => {
+  return (
+    <div className="space-y-2">
+      <div className="grid grid-cols-9 gap-1.5">
+        {COLORES_PALETA.map((color) => (
+          <button
+            key={color.hex}
+            type="button"
+            onClick={() => onSelectColor(color)}
+            className={`w-7 h-7 rounded-md border transition-all duration-150 ${
+              selectedColor?.hex === color.hex
+                ? 'border-blue-500 ring-2 ring-blue-300 scale-110 shadow-md'
+                : 'border-gray-300 dark:border-gray-600 hover:scale-105 hover:shadow-sm'
+            }`}
+            style={{ backgroundColor: color.hex }}
+            title={color.nombre}
+          />
+        ))}
+      </div>
+
+      {selectedColor && (
+        <div className="flex items-center gap-2">
+          <span
+            className="w-5 h-5 rounded border border-gray-300 dark:border-gray-600"
+            style={{ backgroundColor: selectedColor.hex }}
+          />
+          <span className="text-xs text-gray-700 dark:text-gray-300">{selectedColor.nombre}</span>
+          <button
+            type="button"
+            onClick={() => onSelectColor(null)}
+            className="text-red-500 hover:text-red-700"
+          >
+            <XMarkIcon className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function ProductsView({
   products: initialProducts = [],
@@ -342,11 +416,21 @@ export default function ProductsView({
       precio: '',
       previewImage: null,
       file: null,
+      // Campos de variante
+      talla: '',
+      color: null, // { nombre: string, hex: string }
+      medida: '',
+      variantes: [], // Array de variantes adicionales
+      conVariantes: false, // Indica si el producto tendrá variantes
     },
   ]);
   const [previewImage, setPreviewImage] = useState(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [creating, setCreating] = useState(false);
+
+  // Estado para el formulario de variantes
+  const [showVariantForm, setShowVariantForm] = useState({});
+  const [tempVariant, setTempVariant] = useState({});
 
   // ——— Handlers "Nuevo Producto" ———
  const handleNewFieldChange = useCallback((index, e) => {
@@ -427,10 +511,10 @@ export default function ProductsView({
           stock: Number(p.stock),
           precio: Number(p.precio),
           descuento: Number(p.descuento),
-          tipo_medida: Number(p.tipo_medida)
+          tipo_medida: Number(p.tipo_medida),
+          // Incluir variantes si existen
+          variantes: p.variantes && p.variantes.length > 0 ? p.variantes : undefined
         }));
-
-        console.log("productosDatos", productosDatos)
 
         const response = await createProduct({
           usuario,
@@ -449,8 +533,18 @@ export default function ProductsView({
           const productoLocal = newProducts[i];
           const categoria = Number(productoLocal.categoria);
 
+          console.log('Producto local:', productoLocal);
+          console.log('Categoría:', productoLocal.categoria, 'Convertida:', categoria);
+
           if (productoLocal.file) {
             setIsUploadingImage(true);
+
+            // Verificar que categoria sea válido
+            if (!categoria || isNaN(categoria)) {
+              console.error('Categoría inválida:', productoLocal.categoria);
+              showToast('error', 'La categoría es inválida. Por favor selecciona una categoría.');
+              continue;
+            }
 
             const imagenUrl = await uploadImageProducto({
               id: productoCreado.id,
@@ -1140,9 +1234,9 @@ export default function ProductsView({
         <Modal onClose={() => setShowCreateForm(false)}>
           <h4 className="text-2xl font-semibold text-slate-800 dark:!text-slate-100 mb-4 transition-colors duration-200">Crear Productos</h4>
           <form onSubmit={handleSubmitNew} className="space-y-6">
-            <div className="space-y-8">
+            <div className="space-y-8 max-w-7xl mx-auto">
               {newProducts.map((product, index) => (
-                <div key={index} className="grid grid-cols-1 lg:grid-cols-2 gap-6 border border-slate-200 dark:!border-slate-800 p-4 rounded-lg transition-colors duration-200">
+                <div key={index} className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 border border-slate-200 dark:!border-slate-800 p-5 lg:p-6 rounded-lg transition-colors duration-200">
                   {/* Columna Izquierda: Imagen */}
                   <div className="flex flex-col items-center">
                     <label className="block text-sm font-medium text-slate-700 dark:!text-slate-300 mb-2 transition-colors duration-200">
@@ -1196,7 +1290,7 @@ export default function ProductsView({
                   </div>
 
                   {/* Columna Derecha: Campos */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
                     {/* Nombre */}
                     <div className="sm:col-span-2">
                       <label className="block text-sm font-medium text-slate-700 dark:!text-slate-300 mb-1 transition-colors duration-200">Nombre</label>
@@ -1626,6 +1720,221 @@ export default function ProductsView({
                           El precio excede el máximo permitido (8 dígitos enteros, 2 decimales).
                         </p>
                       )}
+                    </div>
+
+                    {/* Sección de Variantes */}
+                    <div className="sm:col-span-2 border-t border-slate-200 dark:!border-slate-700 pt-5 mt-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-base font-semibold text-slate-800 dark:!text-slate-100">
+                          Características del Producto
+                        </h4>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={product.conVariantes || false}
+                            onChange={e => {
+                              setNewProducts(prev => {
+                                const updated = [...prev];
+                                updated[index].conVariantes = e.target.checked;
+                                return updated;
+                              });
+                            }}
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-400"
+                          />
+                          <span className="text-sm text-slate-700 dark:!text-slate-300">
+                            Habilitar variantes (talla/color/medida)
+                          </span>
+                        </label>
+                      </div>
+
+                      {product.conVariantes && (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
+                          {/* Talla */}
+                          <div>
+                            <label className="block text-sm font-medium text-slate-700 dark:!text-slate-300 mb-1 transition-colors duration-200">
+                              Talla
+                            </label>
+                            <input
+                              name="talla"
+                              type="text"
+                              placeholder="S, M, L, XL, 38, 40..."
+                              value={product.talla || ''}
+                              onChange={e => {
+                                setNewProducts(prev => {
+                                  const updated = [...prev];
+                                  updated[index].talla = e.target.value;
+                                  return updated;
+                                });
+                              }}
+                              className="w-full px-3 py-2 bg-slate-50 dark:!bg-slate-800 border border-slate-200 dark:!border-slate-700 rounded-lg text-sm dark:!text-slate-100
+                                        focus:outline-none focus:ring-2 focus:ring-blue-400 transition transition-colors duration-200"
+                            />
+                          </div>
+
+                          {/* Medida */}
+                          <div>
+                            <label className="block text-sm font-medium text-slate-700 dark:!text-slate-300 mb-1 transition-colors duration-200">
+                              Medida
+                            </label>
+                            <input
+                              name="medida"
+                              type="text"
+                              placeholder="10x20cm, 500ml, 1kg..."
+                              value={product.medida || ''}
+                              onChange={e => {
+                                setNewProducts(prev => {
+                                  const updated = [...prev];
+                                  updated[index].medida = e.target.value;
+                                  return updated;
+                                });
+                              }}
+                              className="w-full px-3 py-2 bg-slate-50 dark:!bg-slate-800 border border-slate-200 dark:!border-slate-700 rounded-lg text-sm dark:!text-slate-100
+                                        focus:outline-none focus:ring-2 focus:ring-blue-400 transition transition-colors duration-200"
+                            />
+                          </div>
+
+                          {/* Color */}
+                          <div className="sm:col-span-3">
+                            <label className="block text-sm font-medium text-slate-700 dark:!text-slate-300 mb-1 transition-colors duration-200">
+                              Color
+                            </label>
+                            <ColorPicker
+                              selectedColor={product.color}
+                              onSelectColor={(color) => {
+                                setNewProducts(prev => {
+                                  const updated = [...prev];
+                                  updated[index].color = color;
+                                  return updated;
+                                });
+                              }}
+                              isDark={isDark}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Lista de variantes */}
+                      {product.conVariantes && product.variantes && product.variantes.length > 0 && (
+                        <div className="mt-4 space-y-2.5">
+                          <h5 className="text-sm font-semibold text-slate-700 dark:!text-slate-300 flex items-center gap-2">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            Variantes agregadas ({product.variantes.length})
+                          </h5>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
+                            {product.variantes.map((variante, vIndex) => (
+                              <div
+                                key={vIndex}
+                                className="relative group bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-700 rounded-xl border-2 border-slate-200 dark:border-slate-600 p-4 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-200"
+                              >
+                                {/* Badge de eliminar */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setNewProducts(prev => {
+                                      const updated = [...prev];
+                                      updated[index].variantes = updated[index].variantes.filter((_, i) => i !== vIndex);
+                                      return updated;
+                                    });
+                                  }}
+                                  className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200"
+                                  title="Eliminar variante"
+                                >
+                                  <XMarkIcon className="h-4 w-4" />
+                                </button>
+
+                                {/* Contenido de la variante */}
+                                <div className="space-y-3">
+                                  {/* SKU */}
+                                  <div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">SKU</p>
+                                    <p className="text-sm font-mono font-semibold text-slate-800 dark:text-slate-200">{variante.sku_variante || 'N/A'}</p>
+                                  </div>
+
+                                  {/* Características */}
+                                  <div className="flex flex-wrap gap-2">
+                                    {variante.talla && (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium">
+                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        {variante.talla}
+                                      </span>
+                                    )}
+                                    {variante.color && (
+                                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white dark:bg-slate-600 rounded-full text-xs font-medium border border-slate-200 dark:border-slate-500">
+                                        <span
+                                          className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-500"
+                                          style={{ backgroundColor: variante.color.hex }}
+                                        />
+                                        {variante.color.nombre}
+                                      </span>
+                                    )}
+                                    {variante.medida && (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">
+                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
+                                        {variante.medida}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Botón agregar variante */}
+                      {product.conVariantes && (
+                        <div className="mt-4">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const variante = {
+                                talla: product.talla || null,
+                                color: product.color?.nombre || null,  // Extraer solo el nombre
+                                color_hex: product.color?.hex || null,
+                                medida: product.medida || null,
+                                sku_variante: `${product.sku || 'SKU'}-${(product.variantes?.length || 0) + 1}`,
+                                precio: null,
+                              };
+
+                              // Validar que al menos una característica esté definida
+                              if (!variante.talla && !variante.color && !variante.medida) {
+                                showToast('error', 'Debes especificar al menos una característica (talla, color o medida)');
+                                return;
+                              }
+
+                              setNewProducts(prev => {
+                                const updated = [...prev];
+                                if (!updated[index].variantes) {
+                                  updated[index].variantes = [];
+                                }
+                                updated[index].variantes = [...updated[index].variantes, variante];
+
+                                // Limpiar campos después de agregar
+                                updated[index].talla = '';
+                                updated[index].color = null;
+                                updated[index].medida = '';
+                                return updated;
+                              });
+
+                              showToast('success', 'Variante agregada correctamente');
+                            }}
+                            className="w-full py-2.5 px-4 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-2 border-dashed border-blue-300 dark:border-blue-600 rounded-lg font-medium text-sm transition-all duration-200 flex items-center justify-center gap-2"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Agregar Variante
+                          </button>
+                        </div>
+                      )}
+
+
                     </div>
 
 

@@ -499,697 +499,6 @@ export default function ProveedoresView() {
     return <div className="flex items-center gap-1">{estrellas}</div>;
   };
 
-  // VISTA: LISTA DE PROVEEDORES
-  if (vistaActual === 'lista') {
-    return (
-      <div className="w-full max-w-7xl mx-auto p-6">
-        {/* Header con estadísticas */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:!text-white">
-                Proveedores
-              </h1>
-              <p className="text-gray-600 dark:!text-slate-400 mt-1">
-                Gestión de proveedores y productos
-              </p>
-            </div>
-            <button
-              onClick={() => setMostrarFormulario(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus size={20} strokeWidth={2} />
-              <span>Nuevo Proveedor</span>
-            </button>
-          </div>
-
-          {/* Estadísticas rápidas */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 shadow-sm ring-1 ring-slate-200 dark:!ring-slate-700">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:!text-slate-400">Total Proveedores</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:!text-white">
-                    {proveedores.length}
-                  </p>
-                </div>
-                <Building2 className="text-blue-600" size={32} strokeWidth={2} />
-              </div>
-            </div>
-            <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 shadow-sm ring-1 ring-slate-200 dark:!ring-slate-700">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:!text-slate-400">Activos</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {proveedores.filter(p => p.estado === 'activo').length}
-                  </p>
-                </div>
-                <Package className="text-green-600" size={32} strokeWidth={2} />
-              </div>
-            </div>
-            <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 shadow-sm ring-1 ring-slate-200 dark:!ring-slate-700">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:!text-slate-400">Productos Totales</p>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {proveedores.reduce((sum, p) => sum + (p.total_productos || 0), 0)}
-                  </p>
-                </div>
-                <FileText className="text-purple-600" size={32} strokeWidth={2} />
-              </div>
-            </div>
-            <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 shadow-sm ring-1 ring-slate-200 dark:!ring-slate-700">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:!text-slate-400">Calificación Promedio</p>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    {proveedores.length > 0
-                      ? (proveedores.reduce((sum, p) => sum + (p.calificacion_promedio || 0), 0) / proveedores.length).toFixed(1)
-                      : '0.0'}
-                  </p>
-                </div>
-                <Star className="text-yellow-600" size={32} strokeWidth={2} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filtros y búsqueda */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} strokeWidth={2} />
-            <input
-              type="text"
-              placeholder="Buscar por nombre o NIT..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:!bg-slate-800 dark:!text-white"
-            />
-          </div>
-          <div className="flex gap-2">
-            <select
-              value={filtroEstado}
-              onChange={(e) => setFiltroEstado(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:!bg-slate-800 dark:!text-white"
-            >
-              <option value="todos">Todos los estados</option>
-              <option value="activo">Activos</option>
-              <option value="inactivo">Inactivos</option>
-              <option value="bloqueado">Bloqueados</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Lista de proveedores */}
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        ) : proveedoresFiltrados.length === 0 ? (
-          <div className="text-center py-12">
-            <Building2 className="mx-auto text-gray-400 mb-4" size={48} strokeWidth={2} />
-            <p className="text-gray-500 dark:!text-slate-400 text-lg">
-              {proveedores.length === 0
-                ? 'No hay proveedores registrados'
-                : 'No se encontraron proveedores con los filtros actuales'}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {proveedoresFiltrados.map((proveedor) => (
-              <div
-                key={proveedor.id}
-                onClick={() => cargarDetalleProveedor(proveedor.id)}
-                className="bg-white dark:!bg-slate-900 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer p-5 ring-1 ring-slate-200 dark:!ring-slate-700"
-              >
-                {/* Header de la tarjeta */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:!text-white mb-1">
-                      {proveedor.razon_social}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:!text-slate-400">
-                      NIT: {proveedor.nit}
-                    </p>
-                  </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getEstadoColor(proveedor.estado)}`}>
-                    {getEstadoLabel(proveedor.estado)}
-                  </span>
-                </div>
-
-                {/* Información de contacto */}
-                <div className="space-y-2 mb-4">
-                  {proveedor.telefono_contacto && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:!text-slate-400">
-                      <Phone size={16} strokeWidth={2} />
-                      <span>{proveedor.telefono_contacto}</span>
-                    </div>
-                  )}
-                  {proveedor.correo && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:!text-slate-400">
-                      <Mail size={16} strokeWidth={2} />
-                      <span className="truncate">{proveedor.correo}</span>
-                    </div>
-                  )}
-                  {proveedor.ciudad && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:!text-slate-400">
-                      <MapPin size={16} strokeWidth={2} />
-                      <span>{proveedor.ciudad}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Estadísticas del proveedor */}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:!border-slate-700">
-                  <div className="flex items-center gap-2">
-                    <Package size={16} strokeWidth={2} className="text-gray-400" />
-                    <span className="text-sm text-gray-600 dark:!text-slate-400">
-                      {proveedor.total_productos || 0} productos
-                    </span>
-                  </div>
-                  {renderStars(proveedor.calificacion_promedio)}
-                </div>
-
-                {/* Botones de acción rápida */}
-                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-200 dark:!border-slate-700">
-                  {proveedor.telefono_whatsapp && (
-                    <a
-                      href={`https://wa.me/${proveedor.telefono_whatsapp}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
-                      title="Contactar por WhatsApp"
-                    >
-                      <svg width={16} height={16} viewBox="0 0 24 24" fill="currentColor" strokeWidth={2}>
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.871-.233-1.063-.312-.293-.122-.629-.322-.997-.485-.319-.145-.692-.257-1.063-.375-.447-.137-.99-.397-1.425-.146-.532-.483-.753-.734-.532-.57-1.158-1.073-1.557-.592-.585-1.002-1.07-1.334-.733-.616-1.175-1.224-1.332-.973-.272-1.596-.035-2.44.323-1.047.556-1.797 1.138-2.184 1.238-.247.06-.699.198-1.002-.163-.303-.165-.725-.405-1.228-.28-.806-.407-1.596-.16-1.035.167-1.58.244-2.082.678-.843.966-1.68 1.032-2.48.115-.65.13-1.25.223-1.628.511-.366.282-.932.523-1.485.542-.998.13-1.874.633-2.12 1.292-.21 2.527.063 3.485.388.349.334.592.605.896.786 1.323.208 1.399.388.646.388 1.14 0 .654-.244.92-.592.28-.858.482-1.574.766-2.214.288-.637.915-.973 1.484-1.274 1.879-.295.393-.703.84-1.083.984-.358.141-.973.414-1.316.016-.343.075-.531.383-.592.814.135-.433.333-.703.675-.868.34-.162.685-.499 1.235-.824 1.823-.117.388-.32.885-.563 1.415-.572.54-.01 1.068.015 1.557.035.604.276 1.066.542 1.555.74.17.267.531.523.827.665.148.19.344.296.536.374.862.408.624.823.853 1.236.547 2.484.483 1.893.968 3.558.872.358 1.392.794 2.005.66 2.433-.402.137-.719.325-1.234.457-.506.126-1.063.208-1.529.509-.434.503-.815 1.063-.826 1.686-.013 1.266-.158 2.346-.472 3.05-.603.91-.225 1.626-.612 2.154-.679.517-.068.986-.074 1.474-.036 1.474-.001.026.072-1.99.145-2.87.339-1.237.269-.556.42-1.286.573-1.639.449-.355.297-.995.352-1.632.164-.625.88-1.37 1.08-2.227 1.292-.365.369-.685.707-.93 1.097-.24.35-.636.59-.953.937-1.065.56-.079.965-.348 1.861-.78 2.663-.419.676-.978.637-1.426.648-.42.02-.951.155-1.388.384-.227.08-.591.178-1.055.504-.46.424-.97.74-1.096 1.462-.951 2.747-1.915 4.293-1.659 1.077.457 2.242.722 3.253.91.152.593 2.411.902 4.087 1.35 1.532.602 2.903 1.195 4.286-.413.44-.783.91-1.021 1.396-.238.472-.562.863-.85 1.442-.292.578-.873.946-1.34.71-.474.527-.88 1.19-1.059 1.968-.179.806-.592 1.482-1.139 2.238-.535.818-.924 1.665-1.066 2.484-.139.824-.122 1.61-.538 2.238-.412.64-.84 1.016-1.092 1.597-.246.571-.628 1.246-.482 1.923.146 1.862.122 2.857.277 1.009.603 2.059 1.117 2.994.08.725.356 1.79.776 2.667 1.33 3.92.137.749.247 1.403.657 2.053 1.087 2.99.654.248 1.096.395 2.247.906 3.282.182.908.425 1.996.814 3.548.457 1.16.895 1.769 1.436 2.461.537.95.266.082 1.539.137 2.17.267.873.974 1.864 1.077 2.843.197 3.878.299.81.557 1.115 2.823 1.339 4.094.144.948.001 1.786.048 3.322.197.631 1.186.001 1.99.164.082.97.837.397.95 1.483 1.791.497 2.537 1.664.89.072 2.213.608.965 2.734.088.804.354.375.788.868.275.784.868.639.388.872.844 1.352 1.531 2.067 1.588 2.555.428.148 1.963.537.487 1.963.537.487 1.963.537.487 2.126.929.537.487 1.963.537.487 1.963.537.487.537.487 2.126.929 1.963.537.487 1.963.537.487.537 1.963.537.487 1.963.537.487 1.963.537.487 1.963.537.487.1.963.537.487.537 14.458 2.229 14.458 0 0 14.458-2.23c0-3.982-1.249-7.494-3.164-10.39-1.037-1.467-2.837-2.262-4.712-1.017-1.916-1.532-4.102-1.532-6.645 0-3.536 1.333-6.646 3.521-7.388 1.738-.631 2.711-1.994 3.984-2.882 1.069-.952 1.913-1.513 2.755-1.678 1.584-.743 3.293-.888 4.802-.111 1.934-.504 3.895-1.111 5.274-.607.08-.785.904-.856 1.789-.775 2.671-.078.926.062 1.869-.188 2.775-.273.909-.606 1.818-.773 2.667-.369.701-.636 1.387-.735 1.959-.198.597-.447 1.159-.485 1.758-.088.613-.208 1.26-.327 1.902-.254.838-.539 1.648-.807 2.419-.531.722-.907 1.418-1.014 2.048-.108.583-.159 1.185-.194 1.749-.034.646-.105 1.314-.168 1.938-.061.665.363-1.457.819-1.959.831-.489.198-.931.299-1.339.537-.405.238-.666.578-.783.847-.117.649-.504.096-1.08.146-1.636-.051-.584.072-1.165.086-1.735.028-.705.257-1.418.373-2.074.367-.646.085-1.295.134-1.908.169-.612.267-1.225.494-1.778.728-.553.237-1.112.478-1.622.867-.688.088-1.377.176-2.03.556-.182.654-.359 1.312-.578 1.941-.219.643-.609.983-.931 1.484-.318.636-.743 1.143-.986 1.738-.238.431.463-.931.617-1.418.239-.489.975-.784 1.952-.837 2.918-.05.628.23-1.264.403-1.837.724-.571.085-1.137.183-1.629.479-.488.617-.739.894-.941 1.455-.201.548.473-1.089.744-1.597.524-.507.628-.758 1.062-.786 1.594-.027.813.138-1.626.386-2.359.247-.733.11-1.446.352-2.072.632-.623.11-.132.234-.399.123-.592.193-.006.725.225-1.447.363-2.057.567-.612.099-1.22.224-1.808.31-.548.092-.523.066-.931.749-1.332.183-.303.307-.636.565-.993.777-.357.211-.726.381-1.063.496-.34.586-.067-1.197.077-1.788.135-.592.19-1.177.386-1.723.574-.539.172-.799.476-.954.905-.151.437-.283.855-.425 1.275-.139.592-.264 1.188-.37 1.767-.101.59-.061 1.211.074 1.806.225 2.582.395.487.06.987.763 1.465.892 2.191.385 1.635 1.121.695.531 2.416.582.735.905.34.182.56.527.587.828.757.868.568.568.568.568.568.568.568.568.568.568.568.568.568.568 15 12c0 3.196-1.268 6.355-3.596 8.906-.715.794-1.732 1.272-2.858 1.607-1.127.336-2.853 1.596-4.154 1.571-1.399.297-2.805.592-4.137 1.572-.736.743-1.765 1.283-2.837 1.695-1.077.297-2.853 1.592-4.154 1.572-1.399.297-2.805.592-4.137 1.572-.736.743-1.765 1.283-2.837 1.695-1.077.297-2.853 1.592-4.154 1.572z"/>
-                      </svg>
-                    </a>
-                  )}
-                  {proveedor.sitio_web && (
-                    <a
-                      href={proveedor.sitio_web}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                      title="Visitar sitio web"
-                    >
-                      <Globe size={16} strokeWidth={2} />
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Modal Nuevo Proveedor */}
-        {mostrarFormulario && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-            <div className="bg-white dark:!bg-slate-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto ring-1 ring-slate-200 dark:!ring-slate-700">
-              {/* Header */}
-              <div className="sticky top-0 bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700 px-6 py-4 rounded-t-lg">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:!text-white">
-                    Nuevo Proveedor
-                  </h2>
-                  <button
-                    onClick={() => setMostrarFormulario(false)}
-                    className="text-gray-400 hover:text-gray-600 dark:!hover:text-slate-300"
-                  >
-                    <X size={24} strokeWidth={2} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Form */}
-              <div className="p-6 space-y-6">
-                {/* Datos Básicos */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 dark:!text-white">Datos Básicos</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        NIT/RUT * <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.nit}
-                        onChange={(e) => setFormData({...formData, nit: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: 900123456-7"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        Razón Social * <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.razon_social}
-                        onChange={(e) => setFormData({...formData, razon_social: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: Mi Empresa SAS"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        Nombre Comercial
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.nombre_comercial}
-                        onChange={(e) => setFormData({...formData, nombre_comercial: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: MiMarca"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        Ciudad
-                      </label>
-                      {loadingCiudades ? (
-                        <div className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white text-gray-500">
-                          Cargando ciudades...
-                        </div>
-                      ) : (
-                        <select
-                          value={formData.ciudad}
-                          onChange={(e) => setFormData({...formData, ciudad: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        >
-                          <option value="">Seleccione una ciudad</option>
-                          {ciudades.map((ciudad) => (
-                            <option key={ciudad.id} value={ciudad.name}>
-                              {ciudad.name}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Información de Contacto */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 dark:!text-white">Información de Contacto</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        Teléfono
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.telefono}
-                        onChange={(e) => setFormData({...formData, telefono: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: +57 1 1234567"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        WhatsApp
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.telefono_whatsapp}
-                        onChange={(e) => setFormData({...formData, telefono_whatsapp: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: +57 3001234567"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        Correo Electrónico
-                      </label>
-                      <input
-                        type="email"
-                        value={formData.correo_electronico}
-                        onChange={(e) => setFormData({...formData, correo_electronico: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: contacto@empresa.com"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        Dirección
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.direccion}
-                        onChange={(e) => setFormData({...formData, direccion: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: Calle 123 # 45-67"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Persona de Contacto */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 dark:!text-white">Persona de Contacto</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        Nombre del Contacto
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.contacto_principal}
-                        onChange={(e) => setFormData({...formData, contacto_principal: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: Juan Pérez"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        Cargo del Contacto
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.cargo_contacto}
-                        onChange={(e) => setFormData({...formData, cargo_contacto: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: Gerente de Ventas"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sitio Web */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 dark:!text-white">Sitio Web</h3>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                      URL del Sitio Web
-                    </label>
-                    <input
-                      type="url"
-                      value={formData.sitio_web}
-                      onChange={(e) => setFormData({...formData, sitio_web: e.target.value})}
-                      className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                      placeholder="Ej: https://www.miempresa.com"
-                    />
-                  </div>
-                </div>
-
-                {/* Condiciones Comerciales */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 dark:!text-white">Condiciones Comerciales</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        Plazo de Pago (días)
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.plazo_pago_dias}
-                        onChange={(e) => setFormData({...formData, plazo_pago_dias: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: 30"
-                        min="0"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        Descuento Comercial (%)
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.descuento_comercial}
-                        onChange={(e) => setFormData({...formData, descuento_comercial: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: 5"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
-                        Límite de Crédito
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.limite_credito}
-                        onChange={(e) => setFormData({...formData, limite_credito: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
-                        placeholder="Ej: 10000000"
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="sticky bottom-0 bg-white dark:!bg-slate-900 border-t border-gray-200 dark:!border-slate-700 px-6 py-4 rounded-b-lg">
-                <div className="flex items-center justify-end gap-3">
-                  <button
-                    onClick={() => setMostrarFormulario(false)}
-                    className="px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:!bg-slate-800 dark:!text-white"
-                    disabled={loading}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={crearProveedor}
-                    disabled={loading}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? 'Guardando...' : 'Crear Proveedor'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // VISTA: DETALLE DEL PROVEEDOR
-  if (vistaActual === 'detalle' && proveedorSeleccionado) {
-    return (
-      <div className="w-full max-w-7xl mx-auto p-6">
-        {/* Botón volver */}
-        <button
-          onClick={() => setVistaActual('lista')}
-          className="flex items-center gap-2 mb-6 text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:!text-white"
-        >
-          <X size={20} strokeWidth={2} />
-          <span>Volver a la lista</span>
-        </button>
-
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        ) : (
-          <div className="bg-white dark:!bg-slate-900 rounded-lg shadow-sm p-6 ring-1 ring-slate-200 dark:!ring-slate-700">
-            {/* Header del proveedor */}
-            <div className="flex items-start justify-between mb-6 pb-6 border-b border-gray-200 dark:!border-slate-700">
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 dark:!text-white mb-2">
-                  {proveedorSeleccionado.razon_social}
-                </h1>
-                <p className="text-gray-600 dark:!text-slate-400 mb-4">
-                  NIT: {proveedorSeleccionado.nit}
-                </p>
-                <div className="flex items-center gap-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getEstadoColor(proveedorSeleccionado.estado)}`}>
-                    {getEstadoLabel(proveedorSeleccionado.estado)}
-                  </span>
-                  {renderStars(proveedorSeleccionado.calificacion_promedio)}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleEditar}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:!bg-slate-800 transition-colors dark:!text-white"
-                >
-                  <Edit size={18} strokeWidth={2} />
-                  <span>Editar</span>
-                </button>
-                <button
-                  onClick={handleEliminar}
-                  className="flex items-center gap-2 px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 dark:hover:!bg-red-900/20 transition-colors"
-                >
-                  <Trash2 size={18} strokeWidth={2} />
-                  <span>Eliminar</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Información de contacto */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:!text-white mb-3">
-                  Información de Contacto
-                </h3>
-                <div className="space-y-3">
-                  {proveedorSeleccionado.telefono_contacto && (
-                    <div className="flex items-center gap-3">
-                      <Phone className="text-gray-400" size={20} strokeWidth={2} />
-                      <span className="text-gray-700 dark:!text-slate-300">
-                        {proveedorSeleccionado.telefono_contacto}
-                      </span>
-                    </div>
-                  )}
-                  {proveedorSeleccionado.telefono_whatsapp && (
-                    <div className="flex items-center gap-3">
-                      <a
-                        href={`https://wa.me/${proveedorSeleccionado.telefono_whatsapp}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                      >
-                        <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor" strokeWidth={2}>
-                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.871-.233-1.063-.312-.293-.122-.629-.322-.997-.485-.319-.145-.692-.257-1.063-.375-.447-.137-.99-.397-1.425-.146-.532-.483-.753-.734-.532-.57-1.158-1.073-1.557-.592-.585-1.002-1.07-1.334-.733-.616-1.175-1.224-1.332-.973-.272-1.596-.035-2.44.323-1.047.556-1.797 1.138-2.184 1.238-.247.06-.699.198-1.002-.163-.303-.165-.725-.405-1.228-.28-.806-.407-1.596-.16-1.035.167-1.58.244-2.082.678-.843.966-1.68 1.032-2.48.115-.65.13-1.25.223-1.628.511-.366.282-.932.523-1.485.542-.998.13-1.874.633-2.12 1.292-.21 2.527.063 3.485.388.349.334.592.605.896.786 1.323.208 1.399.388.646.388 1.14 0 .654-.244.92-.592.28-.858.482-1.574.766-2.214.288-.637.915-.973 1.484-1.274 1.879-.295.393-.703.84-1.083.984-.358.141-.973.414-1.316.016-.343.075-.531.383-.592.814.135-.433.333-.703.675-.868.34-.162.685-.499 1.235-.824 1.823-.117.388-.32.885-.563 1.415-.572.54-.01 1.068.015 1.557.035.604.276 1.066.542 1.555.74.17.267.531.523.827.665.148.19.344.296.536.374.862.408.624.823.853 1.236.547 2.484.483 1.893.968 3.558.872.358 1.392.794 2.005.66 2.433-.402.137-.719.325-1.234.457-.506.126-1.063.208-1.529.509-.434.503-.815 1.063-.826 1.686-.013 1.266-.158 2.346-.472 3.05-.603.91-.225 1.626-.612 2.154-.679.517-.068.986-.074 1.474-.036 1.474-.001.026.072-1.99.145-2.87.339-1.237.269-.556.42-1.286.573-1.639.449-.355.297-.995.352-1.632.164-.625.88-1.37 1.08-2.227 1.292-.365.369-.685.707-.93 1.097-.24.35-.636.59-.953.937-1.065.56-.079.965-.348 1.861-.78 2.663-.419.676-.978.637-1.426.648-.42.02-.951.155-1.388.384-.227.08-.591.178-1.055.504-.46.424-.97.74-1.096 1.462-.951 2.747-1.915 4.293-1.659 1.077.457 2.242.722 3.253.91.152.593 2.411.902 4.087 1.35 1.532.602 2.903 1.195 4.286-.413.44-.783.91-1.021 1.396-.238.472-.562.863-.85 1.442-.292.578-.873.946-1.34.71-.474.527-.88 1.19-1.059 1.968-.179.806-.592 1.482-1.139 2.238-.535.818-.924 1.665-1.066 2.484-.139.824-.122 1.61-.538 2.238-.412.64-.84 1.016-1.092 1.597-.246.571-.628 1.246-.482 1.923.146 1.862.122 2.857.277 1.009.603 2.059 1.117 2.994.08.725.356 1.79.776 2.667 1.33 3.92.137.749.247 1.403.657 2.053 1.087 2.99.654.248.1.096.395 2.247.906 3.282.182.908.425 1.996.814 3.548.457 1.16.895 1.769 1.436 2.461.537.95.266.082 1.539.137 2.17.267.873.974 1.864 1.077 2.843.197 3.878.299.81.557 1.115 2.823 1.339 4.094.144.948.001 1.786.048 3.322.197.631 1.186.001 1.99.164.082.97.837.397.95 1.483 1.791.497 2.537 1.664.89.072 2.213.608.965 2.734.088.804.354.375.788.868.275.784.868.639.388.872.844 1.352 1.531 2.067 1.588 2.555.428.148 1.963.537.487 1.963.537.487 1.963.537.487 2.126.929.537.487 1.963.537.487 1.963.537.487.537.487 2.126.929 1.963.537.487 1.963.537.487.537 1.963.537.487 1.963.537.487 1.963.537.487 1.963.537.487 1.963.537.487.537.487.537 14.458 2.229 14.458 0 0 14.458-2.23c0-3.982-1.249-7.494-3.164-10.39-1.037-1.467-2.837-2.262-4.712-1.017-1.916-1.532-4.102-1.532-6.645 0-3.536 1.333-6.646 3.521-7.388 1.738-.631 2.711-1.994 3.984-2.882 1.069-.952 1.913-1.513 2.755-1.678 1.584-.743 3.293-.888 4.802-.111 1.934-.504 3.895-1.111 5.274-.607.08-.785.904-.856 1.789-.775 2.671-.078.926.062 1.869-.188 2.775-.273.909-.606 1.818-.773 2.667-.369.701-.636 1.387-.735 1.959-.198.597-.447 1.159-.485 1.758-.088.613-.208 1.26-.327 1.902-.254.838-.539 1.648-.807 2.419-.531.722-.907 1.418-1.014 2.048-.108.583-.159 1.185-.194 1.749-.034.646-.105 1.314-.168 1.938-.061.665.363-1.457.819-1.959.831-.489.198-.931.299-1.339.537-.405.238-.666.578-.783.847-.117.649-.504.096-1.08.146-1.636-.051-.584.072-1.165.086-1.735.028-.705.257-1.418.373-2.074.367-.646.085-1.295.134-1.908.169-.612.267-1.225.494-1.778.728-.553.237-1.112.478-1.622.867-.688.088-1.377.176-2.03.556-.182.654-.359 1.312-.578 1.941-.219.643-.609.983-.931 1.484-.318.636-.743 1.143-.986 1.738-.238.431.463-.931.617-1.418.239-.489.975-.784 1.952-.837 2.918-.05.628.23-1.264.403-1.837.724-.571.085-1.137.183-1.629.479-.488.617-.739.894-.941 1.455-.201.548.473-1.089.744-1.597.524-.507.628-.758 1.062-.786 1.594-.027.813.138-1.626.386-2.359.247-.733.11-1.446.352-2.072.632-.623.11-.132.234-.399.399.123-.592.193-.006.725.225-1.447.363-2.057.567-.612.099-1.22.224-1.808.31-.548.092-.523.066-.931.749-1.332.183-.303.307-.636.565-.993.777-.357.211-.726.381-1.063.496-.34.586-.067-1.197.077-1.788.135-.592.19-1.177.386-1.723.574-.539.172-.799.476-.954.905-.151.437-.283.855-.425 1.275-.139.592-.264 1.188-.37 1.767-.101.59-.061 1.211.074 1.806.225 2.582.395.487.06.987.763 1.465.892 2.191.385 1.635 1.121.695.531 2.416.582.735.905.34.182.56.527.587.828.757.868.568.568.568.568.568.568.568.568.568.568.568.568 15 12c0 3.196-1.268 6.355-3.596 8.906-.715.794-1.732 1.272-2.858 1.607-1.127.336-2.853 1.596-4.154 1.571-1.399.297-2.805.592-4.137 1.572-.736.743-1.765 1.283-2.837 1.695-1.077.297-2.853 1.592-4.154 1.572-1.399.297-2.805.592-4.137 1.572-.736.743-1.765 1.283-2.837 1.695-1.077.297-2.853 1.592-4.154 1.572z"/>
-                        </svg>
-                        <span>Contactar</span>
-                      </a>
-                    </div>
-                  )}
-                  {proveedorSeleccionado.correo && (
-                    <div className="flex items-center gap-3">
-                      <Mail className="text-gray-400" size={20} strokeWidth={2} />
-                      <span className="text-gray-700 dark:!text-slate-300">
-                        {proveedorSeleccionado.correo}
-                      </span>
-                    </div>
-                  )}
-                  {proveedorSeleccionado.ciudad && (
-                    <div className="flex items-center gap-3">
-                      <MapPin className="text-gray-400" size={20} strokeWidth={2} />
-                      <span className="text-gray-700 dark:!text-slate-300">
-                        {proveedorSeleccionado.ciudad}
-                      </span>
-                    </div>
-                  )}
-                  {proveedorSeleccionado.sitio_web && (
-                    <div className="flex items-center gap-3">
-                      <a
-                        href={proveedorSeleccionado.sitio_web}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 border border-gray-300 dark:!border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:!bg-slate-800 transition-colors"
-                        title="Visitar sitio web"
-                      >
-                        <Globe size={18} strokeWidth={2} />
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Condiciones comerciales */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:!text-white mb-3">
-                  Condiciones Comerciales
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:!text-slate-400">Plazo de pago:</span>
-                    <span className="font-medium text-gray-900 dark:!text-white">
-                      {proveedorSeleccionado.plazo_pago_dias} días
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:!text-slate-400">Descuento comercial:</span>
-                    <span className="font-medium text-gray-900 dark:!text-white">
-                      {proveedorSeleccionado.descuento_comercial}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Productos */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="text-lg font-semibold text-gray-900 dark:!text-white">
-                  Productos ({productosProveedor.length || 0})
-                </h3>
-                <button
-                  onClick={() => setMostrarModalProducto(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                >
-                  <Plus size={16} strokeWidth={2} />
-                  <span>Agregar Producto</span>
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {productosProveedor && productosProveedor.length > 0 ? (
-                  productosProveedor.map((producto) => (
-                    <div
-                      key={producto.id}
-                      className="p-4 border border-gray-200 dark:!border-slate-700 dark:!bg-slate-800 rounded-lg hover:shadow-md transition-shadow"
-                    >
-                      <h4 className="font-medium text-gray-900 dark:!text-white mb-2">
-                        {producto.nombre_producto}
-                      </h4>
-                      {producto.codigo_producto && (
-                        <p className="text-xs text-gray-500 dark:!text-slate-400 mb-2">
-                          Código: {producto.codigo_producto}
-                        </p>
-                      )}
-                      <div className="space-y-1 text-sm">
-                        <p className="text-gray-600 dark:!text-slate-400">
-                          Precio: ${parseFloat(producto.precio_unitario).toFixed(2)} {producto.moneda}
-                        </p>
-                        {producto.tiempo_entrega_dias && (
-                          <p className="text-gray-600 dark:!text-slate-400">
-                            Entrega: {producto.tiempo_entrega_dias} días
-                          </p>
-                        )}
-                        <p className="text-gray-600 dark:!text-slate-400">
-                          Disponible: <span className={`font-medium ${producto.disponible ? 'text-green-600' : 'text-red-600'}`}>
-                            {producto.disponible ? 'Sí' : 'No'}
-                          </span>
-                        </p>
-                        {producto.stock_actual !== null && producto.stock_actual !== undefined && (
-                          <p className="text-gray-600 dark:!text-slate-400">
-                            Stock: {producto.stock_actual}
-                          </p>
-                        )}
-                        {producto.categoria && (
-                          <p className="text-gray-600 dark:!text-slate-400">
-                            Categoría: {producto.categoria}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="col-span-full text-center py-8 text-gray-500 dark:!text-slate-400">
-                    No hay productos registrados. Haz clic en "Agregar Producto" para añadir uno.
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Pedidos */}
-            {proveedorSeleccionado.total_pedidos > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:!text-white mb-3">
-                  Pedidos ({proveedorSeleccionado.total_pedidos})
-                </h3>
-                <div className="text-center py-8 text-gray-500 dark:!text-slate-400">
-                  Historial de pedidos disponible próximamente
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  }
-
   // MODAL DE EDICIÓN DE PROVEEDOR
   if (mostrarModalEdicion) {
     return (
@@ -1606,6 +915,735 @@ export default function ProveedoresView() {
       </div>
     );
   }
+  // VISTA: LISTA DE PROVEEDORES
+  if (vistaActual === 'lista') {
+    return (
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        {/* Header con estadísticas */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:!text-white">
+                Proveedores
+              </h1>
+              <p className="text-gray-600 dark:!text-slate-400 mt-1">
+                Gestión de proveedores y productos
+              </p>
+            </div>
+            <button
+              onClick={() => setMostrarFormulario(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus size={20} strokeWidth={2} />
+              <span>Nuevo Proveedor</span>
+            </button>
+          </div>
+
+          {/* Estadísticas rápidas */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 shadow-sm ring-1 ring-slate-200 dark:!ring-slate-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:!text-slate-400">Total Proveedores</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:!text-white">
+                    {proveedores.length}
+                  </p>
+                </div>
+                <Building2 className="text-blue-600" size={32} strokeWidth={2} />
+              </div>
+            </div>
+            <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 shadow-sm ring-1 ring-slate-200 dark:!ring-slate-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:!text-slate-400">Activos</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {proveedores.filter(p => p.estado === 'activo').length}
+                  </p>
+                </div>
+                <Package className="text-green-600" size={32} strokeWidth={2} />
+              </div>
+            </div>
+            <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 shadow-sm ring-1 ring-slate-200 dark:!ring-slate-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:!text-slate-400">Productos Totales</p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {proveedores.reduce((sum, p) => sum + (p.total_productos || 0), 0)}
+                  </p>
+                </div>
+                <FileText className="text-purple-600" size={32} strokeWidth={2} />
+              </div>
+            </div>
+            <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 shadow-sm ring-1 ring-slate-200 dark:!ring-slate-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:!text-slate-400">Calificación Promedio</p>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {proveedores.length > 0
+                      ? (proveedores.reduce((sum, p) => sum + (p.calificacion_promedio || 0), 0) / proveedores.length).toFixed(1)
+                      : '0.0'}
+                  </p>
+                </div>
+                <Star className="text-yellow-600" size={32} strokeWidth={2} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtros y búsqueda */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} strokeWidth={2} />
+            <input
+              type="text"
+              placeholder="Buscar por nombre o NIT..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:!bg-slate-800 dark:!text-white"
+            />
+          </div>
+          <div className="flex gap-2">
+            <select
+              value={filtroEstado}
+              onChange={(e) => setFiltroEstado(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:!bg-slate-800 dark:!text-white"
+            >
+              <option value="todos">Todos los estados</option>
+              <option value="activo">Activos</option>
+              <option value="inactivo">Inactivos</option>
+              <option value="bloqueado">Bloqueados</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Lista de proveedores */}
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : proveedoresFiltrados.length === 0 ? (
+          <div className="text-center py-12">
+            <Building2 className="mx-auto text-gray-400 mb-4" size={48} strokeWidth={2} />
+            <p className="text-gray-500 dark:!text-slate-400 text-lg">
+              {proveedores.length === 0
+                ? 'No hay proveedores registrados'
+                : 'No se encontraron proveedores con los filtros actuales'}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {proveedoresFiltrados.map((proveedor) => (
+              <div
+                key={proveedor.id}
+                onClick={() => cargarDetalleProveedor(proveedor.id)}
+                className="bg-white dark:!bg-slate-900 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer p-5 ring-1 ring-slate-200 dark:!ring-slate-700"
+              >
+                {/* Header de la tarjeta */}
+                <div className="flex items-start gap-3 mb-3">
+                  {/* Logo del proveedor */}
+                  {proveedor.logo_url ? (
+                    <div className="flex-shrink-0">
+                      <img
+                        src={proveedor.logo_url}
+                        alt={`Logo de ${proveedor.razon_social}`}
+                        className="w-14 h-14 object-contain rounded bg-white dark:!bg-slate-800 p-1 border border-gray-200 dark:!border-slate-700"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex-shrink-0 w-14 h-14 rounded bg-gray-100 dark:!bg-slate-800 flex items-center justify-center">
+                      <Building2 size={24} className="text-gray-400 dark:!text-slate-600" />
+                    </div>
+                  )}
+
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:!text-white mb-1 truncate">
+                      {proveedor.razon_social}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:!text-slate-400">
+                      NIT: {proveedor.nit}
+                    </p>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getEstadoColor(proveedor.estado)}`}>
+                    {getEstadoLabel(proveedor.estado)}
+                  </span>
+                </div>
+
+                {/* Información de contacto */}
+                <div className="space-y-2 mb-4">
+                  {proveedor.telefono_contacto && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:!text-slate-400">
+                      <Phone size={16} strokeWidth={2} />
+                      <span>{proveedor.telefono_contacto}</span>
+                    </div>
+                  )}
+                  {proveedor.correo && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:!text-slate-400">
+                      <Mail size={16} strokeWidth={2} />
+                      <span className="truncate">{proveedor.correo}</span>
+                    </div>
+                  )}
+                  {proveedor.ciudad && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:!text-slate-400">
+                      <MapPin size={16} strokeWidth={2} />
+                      <span>{proveedor.ciudad}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Estadísticas del proveedor */}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:!border-slate-700">
+                  <div className="flex items-center gap-2">
+                    <Package size={16} strokeWidth={2} className="text-gray-400" />
+                    <span className="text-sm text-gray-600 dark:!text-slate-400">
+                      {proveedor.total_productos || 0} productos
+                    </span>
+                  </div>
+                  {renderStars(proveedor.calificacion_promedio)}
+                </div>
+
+                {/* Botones de acción rápida */}
+                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-200 dark:!border-slate-700">
+                  {proveedor.telefono_whatsapp && (
+                    <a
+                      href={`https://wa.me/${proveedor.telefono_whatsapp}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                      title="Contactar por WhatsApp"
+                    >
+                      <svg width={16} height={16} viewBox="0 0 24 24" fill="currentColor" strokeWidth={2}>
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.871-.233-1.063-.312-.293-.122-.629-.322-.997-.485-.319-.145-.692-.257-1.063-.375-.447-.137-.99-.397-1.425-.146-.532-.483-.753-.734-.532-.57-1.158-1.073-1.557-.592-.585-1.002-1.07-1.334-.733-.616-1.175-1.224-1.332-.973-.272-1.596-.035-2.44.323-1.047.556-1.797 1.138-2.184 1.238-.247.06-.699.198-1.002-.163-.303-.165-.725-.405-1.228-.28-.806-.407-1.596-.16-1.035.167-1.58.244-2.082.678-.843.966-1.68 1.032-2.48.115-.65.13-1.25.223-1.628.511-.366.282-.932.523-1.485.542-.998.13-1.874.633-2.12 1.292-.21 2.527.063 3.485.388.349.334.592.605.896.786 1.323.208 1.399.388.646.388 1.14 0 .654-.244.92-.592.28-.858.482-1.574.766-2.214.288-.637.915-.973 1.484-1.274 1.879-.295.393-.703.84-1.083.984-.358.141-.973.414-1.316.016-.343.075-.531.383-.592.814.135-.433.333-.703.675-.868.34-.162.685-.499 1.235-.824 1.823-.117.388-.32.885-.563 1.415-.572.54-.01 1.068.015 1.557.035.604.276 1.066.542 1.555.74.17.267.531.523.827.665.148.19.344.296.536.374.862.408.624.823.853 1.236.547 2.484.483 1.893.968 3.558.872.358 1.392.794 2.005.66 2.433-.402.137-.719.325-1.234.457-.506.126-1.063.208-1.529.509-.434.503-.815 1.063-.826 1.686-.013 1.266-.158 2.346-.472 3.05-.603.91-.225 1.626-.612 2.154-.679.517-.068.986-.074 1.474-.036 1.474-.001.026.072-1.99.145-2.87.339-1.237.269-.556.42-1.286.573-1.639.449-.355.297-.995.352-1.632.164-.625.88-1.37 1.08-2.227 1.292-.365.369-.685.707-.93 1.097-.24.35-.636.59-.953.937-1.065.56-.079.965-.348 1.861-.78 2.663-.419.676-.978.637-1.426.648-.42.02-.951.155-1.388.384-.227.08-.591.178-1.055.504-.46.424-.97.74-1.096 1.462-.951 2.747-1.915 4.293-1.659 1.077.457 2.242.722 3.253.91.152.593 2.411.902 4.087 1.35 1.532.602 2.903 1.195 4.286-.413.44-.783.91-1.021 1.396-.238.472-.562.863-.85 1.442-.292.578-.873.946-1.34.71-.474.527-.88 1.19-1.059 1.968-.179.806-.592 1.482-1.139 2.238-.535.818-.924 1.665-1.066 2.484-.139.824-.122 1.61-.538 2.238-.412.64-.84 1.016-1.092 1.597-.246.571-.628 1.246-.482 1.923.146 1.862.122 2.857.277 1.009.603 2.059 1.117 2.994.08.725.356 1.79.776 2.667 1.33 3.92.137.749.247 1.403.657 2.053 1.087 2.99.654.248 1.096.395 2.247.906 3.282.182.908.425 1.996.814 3.548.457 1.16.895 1.769 1.436 2.461.537.95.266.082 1.539.137 2.17.267.873.974 1.864 1.077 2.843.197 3.878.299.81.557 1.115 2.823 1.339 4.094.144.948.001 1.786.048 3.322.197.631 1.186.001 1.99.164.082.97.837.397.95 1.483 1.791.497 2.537 1.664.89.072 2.213.608.965 2.734.088.804.354.375.788.868.275.784.868.639.388.872.844 1.352 1.531 2.067 1.588 2.555.428.148 1.963.537.487 1.963.537.487 1.963.537.487 2.126.929.537.487 1.963.537.487 1.963.537.487.537.487 2.126.929 1.963.537.487 1.963.537.487.537 1.963.537.487 1.963.537.487 1.963.537.487 1.963.537.487.1.963.537.487.537 14.458 2.229 14.458 0 0 14.458-2.23c0-3.982-1.249-7.494-3.164-10.39-1.037-1.467-2.837-2.262-4.712-1.017-1.916-1.532-4.102-1.532-6.645 0-3.536 1.333-6.646 3.521-7.388 1.738-.631 2.711-1.994 3.984-2.882 1.069-.952 1.913-1.513 2.755-1.678 1.584-.743 3.293-.888 4.802-.111 1.934-.504 3.895-1.111 5.274-.607.08-.785.904-.856 1.789-.775 2.671-.078.926.062 1.869-.188 2.775-.273.909-.606 1.818-.773 2.667-.369.701-.636 1.387-.735 1.959-.198.597-.447 1.159-.485 1.758-.088.613-.208 1.26-.327 1.902-.254.838-.539 1.648-.807 2.419-.531.722-.907 1.418-1.014 2.048-.108.583-.159 1.185-.194 1.749-.034.646-.105 1.314-.168 1.938-.061.665.363-1.457.819-1.959.831-.489.198-.931.299-1.339.537-.405.238-.666.578-.783.847-.117.649-.504.096-1.08.146-1.636-.051-.584.072-1.165.086-1.735.028-.705.257-1.418.373-2.074.367-.646.085-1.295.134-1.908.169-.612.267-1.225.494-1.778.728-.553.237-1.112.478-1.622.867-.688.088-1.377.176-2.03.556-.182.654-.359 1.312-.578 1.941-.219.643-.609.983-.931 1.484-.318.636-.743 1.143-.986 1.738-.238.431.463-.931.617-1.418.239-.489.975-.784 1.952-.837 2.918-.05.628.23-1.264.403-1.837.724-.571.085-1.137.183-1.629.479-.488.617-.739.894-.941 1.455-.201.548.473-1.089.744-1.597.524-.507.628-.758 1.062-.786 1.594-.027.813.138-1.626.386-2.359.247-.733.11-1.446.352-2.072.632-.623.11-.132.234-.399.123-.592.193-.006.725.225-1.447.363-2.057.567-.612.099-1.22.224-1.808.31-.548.092-.523.066-.931.749-1.332.183-.303.307-.636.565-.993.777-.357.211-.726.381-1.063.496-.34.586-.067-1.197.077-1.788.135-.592.19-1.177.386-1.723.574-.539.172-.799.476-.954.905-.151.437-.283.855-.425 1.275-.139.592-.264 1.188-.37 1.767-.101.59-.061 1.211.074 1.806.225 2.582.395.487.06.987.763 1.465.892 2.191.385 1.635 1.121.695.531 2.416.582.735.905.34.182.56.527.587.828.757.868.568.568.568.568.568.568.568.568.568.568.568.568.568.568 15 12c0 3.196-1.268 6.355-3.596 8.906-.715.794-1.732 1.272-2.858 1.607-1.127.336-2.853 1.596-4.154 1.571-1.399.297-2.805.592-4.137 1.572-.736.743-1.765 1.283-2.837 1.695-1.077.297-2.853 1.592-4.154 1.572-1.399.297-2.805.592-4.137 1.572-.736.743-1.765 1.283-2.837 1.695-1.077.297-2.853 1.592-4.154 1.572z"/>
+                      </svg>
+                    </a>
+                  )}
+                  {proveedor.sitio_web && (
+                    <a
+                      href={proveedor.sitio_web}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                      title="Visitar sitio web"
+                    >
+                      <Globe size={16} strokeWidth={2} />
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Modal Nuevo Proveedor */}
+        {mostrarFormulario && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+            <div className="bg-white dark:!bg-slate-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto ring-1 ring-slate-200 dark:!ring-slate-700">
+              {/* Header */}
+              <div className="sticky top-0 bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700 px-6 py-4 rounded-t-lg">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-gray-900 dark:!text-white">
+                    Nuevo Proveedor
+                  </h2>
+                  <button
+                    onClick={() => setMostrarFormulario(false)}
+                    className="text-gray-400 hover:text-gray-600 dark:!hover:text-slate-300"
+                  >
+                    <X size={24} strokeWidth={2} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Form */}
+              <div className="p-6 space-y-6">
+                {/* Datos Básicos */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 dark:!text-white">Datos Básicos</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        NIT/RUT * <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.nit}
+                        onChange={(e) => setFormData({...formData, nit: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        placeholder="Ej: 900123456-7"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        Razón Social * <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.razon_social}
+                        onChange={(e) => setFormData({...formData, razon_social: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        placeholder="Ej: Mi Empresa SAS"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        Nombre Comercial
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.nombre_comercial}
+                        onChange={(e) => setFormData({...formData, nombre_comercial: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        placeholder="Ej: MiMarca"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        Ciudad
+                      </label>
+                      {loadingCiudades ? (
+                        <div className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white text-gray-500">
+                          Cargando ciudades...
+                        </div>
+                      ) : (
+                        <select
+                          value={formData.ciudad}
+                          onChange={(e) => setFormData({...formData, ciudad: e.target.value})}
+                          className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        >
+                          <option value="">Seleccione una ciudad</option>
+                          {ciudades.map((ciudad) => (
+                            <option key={ciudad.id} value={ciudad.name}>
+                              {ciudad.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Información de Contacto */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 dark:!text-white">Información de Contacto</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        Teléfono
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.telefono}
+                        onChange={(e) => setFormData({...formData, telefono: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        placeholder="Ej: +57 1 1234567"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        WhatsApp
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.telefono_whatsapp}
+                        onChange={(e) => setFormData({...formData, telefono_whatsapp: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        placeholder="Ej: +57 3001234567"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        Correo Electrónico
+                      </label>
+                      <input
+                        type="email"
+                        value={formData.correo_electronico}
+                        onChange={(e) => setFormData({...formData, correo_electronico: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        placeholder="Ej: contacto@empresa.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        Dirección
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.direccion}
+                        onChange={(e) => setFormData({...formData, direccion: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        placeholder="Ej: Calle 123 # 45-67"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Persona de Contacto */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 dark:!text-white">Persona de Contacto</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        Nombre del Contacto
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.contacto_principal}
+                        onChange={(e) => setFormData({...formData, contacto_principal: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        placeholder="Ej: Juan Pérez"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        Cargo del Contacto
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.cargo_contacto}
+                        onChange={(e) => setFormData({...formData, cargo_contacto: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        placeholder="Ej: Gerente de Ventas"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sitio Web */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 dark:!text-white">Sitio Web</h3>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                      URL del Sitio Web
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.sitio_web}
+                      onChange={(e) => setFormData({...formData, sitio_web: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                      placeholder="Ej: https://www.miempresa.com"
+                    />
+                  </div>
+                </div>
+
+                {/* Condiciones Comerciales */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 dark:!text-white">Condiciones Comerciales</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        Plazo de Pago (días)
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.plazo_pago_dias}
+                        onChange={(e) => setFormData({...formData, plazo_pago_dias: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        placeholder="Ej: 30"
+                        min="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        Descuento Comercial (%)
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.descuento_comercial}
+                        onChange={(e) => setFormData({...formData, descuento_comercial: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        placeholder="Ej: 5"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:!text-slate-300 mb-1">
+                        Límite de Crédito
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.limite_credito}
+                        onChange={(e) => setFormData({...formData, limite_credito: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg dark:!bg-slate-800 dark:!text-white"
+                        placeholder="Ej: 10000000"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="sticky bottom-0 bg-white dark:!bg-slate-900 border-t border-gray-200 dark:!border-slate-700 px-6 py-4 rounded-b-lg">
+                <div className="flex items-center justify-end gap-3">
+                  <button
+                    onClick={() => setMostrarFormulario(false)}
+                    className="px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:!bg-slate-800 dark:!text-white"
+                    disabled={loading}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={crearProveedor}
+                    disabled={loading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Guardando...' : 'Crear Proveedor'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // VISTA: DETALLE DEL PROVEEDOR
+  if (vistaActual === 'detalle' && proveedorSeleccionado) {
+    return (
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        {/* Botón volver */}
+        <button
+          onClick={() => setVistaActual('lista')}
+          className="flex items-center gap-2 mb-6 text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:!text-white"
+        >
+          <X size={20} strokeWidth={2} />
+          <span>Volver a la lista</span>
+        </button>
+
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <div className="bg-white dark:!bg-slate-900 rounded-lg shadow-sm p-6 ring-1 ring-slate-200 dark:!ring-slate-700">
+            {/* Header del proveedor */}
+            <div className="flex items-start justify-between mb-6 pb-6 border-b border-gray-200 dark:!border-slate-700">
+              <div className="flex items-start gap-6 flex-1">
+                {/* Logo del proveedor */}
+                {proveedorSeleccionado.logo_url ? (
+                  <div className="flex-shrink-0">
+                    <img
+                      src={proveedorSeleccionado.logo_url}
+                      alt={`Logo de ${proveedorSeleccionado.razon_social}`}
+                      className="w-24 h-24 object-contain rounded-lg bg-white dark:!bg-slate-800 p-2 border border-gray-200 dark:!border-slate-700"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                ) : proveedorSeleccionado.sitio_web ? (
+                  <div className="flex-shrink-0 w-24 h-24 rounded-lg bg-gray-100 dark:!bg-slate-800 flex items-center justify-center border border-gray-200 dark:!border-slate-700">
+                    <Building2 size={40} className="text-gray-400 dark:!text-slate-600" />
+                  </div>
+                ) : null}
+
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold text-gray-900 dark:!text-white mb-2">
+                    {proveedorSeleccionado.razon_social}
+                  </h1>
+                  <p className="text-gray-600 dark:!text-slate-400 mb-4">
+                    NIT: {proveedorSeleccionado.nit}
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getEstadoColor(proveedorSeleccionado.estado)}`}>
+                      {getEstadoLabel(proveedorSeleccionado.estado)}
+                    </span>
+                    {renderStars(proveedorSeleccionado.calificacion_promedio)}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleEditar}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:!bg-slate-800 transition-colors dark:!text-white"
+                >
+                  <Edit size={18} strokeWidth={2} />
+                  <span>Editar</span>
+                </button>
+                <button
+                  onClick={handleEliminar}
+                  className="flex items-center gap-2 px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 dark:hover:!bg-red-900/20 transition-colors"
+                >
+                  <Trash2 size={18} strokeWidth={2} />
+                  <span>Eliminar</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Información de contacto */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:!text-white mb-3">
+                  Información de Contacto
+                </h3>
+                <div className="space-y-3">
+                  {proveedorSeleccionado.telefono_contacto && (
+                    <div className="flex items-center gap-3">
+                      <Phone className="text-gray-400" size={20} strokeWidth={2} />
+                      <span className="text-gray-700 dark:!text-slate-300">
+                        {proveedorSeleccionado.telefono_contacto}
+                      </span>
+                    </div>
+                  )}
+                  {proveedorSeleccionado.telefono_whatsapp && (
+                    <div className="flex items-center gap-3">
+                      <a
+                        href={`https://wa.me/${proveedorSeleccionado.telefono_whatsapp}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor" strokeWidth={2}>
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.871-.233-1.063-.312-.293-.122-.629-.322-.997-.485-.319-.145-.692-.257-1.063-.375-.447-.137-.99-.397-1.425-.146-.532-.483-.753-.734-.532-.57-1.158-1.073-1.557-.592-.585-1.002-1.07-1.334-.733-.616-1.175-1.224-1.332-.973-.272-1.596-.035-2.44.323-1.047.556-1.797 1.138-2.184 1.238-.247.06-.699.198-1.002-.163-.303-.165-.725-.405-1.228-.28-.806-.407-1.596-.16-1.035.167-1.58.244-2.082.678-.843.966-1.68 1.032-2.48.115-.65.13-1.25.223-1.628.511-.366.282-.932.523-1.485.542-.998.13-1.874.633-2.12 1.292-.21 2.527.063 3.485.388.349.334.592.605.896.786 1.323.208 1.399.388.646.388 1.14 0 .654-.244.92-.592.28-.858.482-1.574.766-2.214.288-.637.915-.973 1.484-1.274 1.879-.295.393-.703.84-1.083.984-.358.141-.973.414-1.316.016-.343.075-.531.383-.592.814.135-.433.333-.703.675-.868.34-.162.685-.499 1.235-.824 1.823-.117.388-.32.885-.563 1.415-.572.54-.01 1.068.015 1.557.035.604.276 1.066.542 1.555.74.17.267.531.523.827.665.148.19.344.296.536.374.862.408.624.823.853 1.236.547 2.484.483 1.893.968 3.558.872.358 1.392.794 2.005.66 2.433-.402.137-.719.325-1.234.457-.506.126-1.063.208-1.529.509-.434.503-.815 1.063-.826 1.686-.013 1.266-.158 2.346-.472 3.05-.603.91-.225 1.626-.612 2.154-.679.517-.068.986-.074 1.474-.036 1.474-.001.026.072-1.99.145-2.87.339-1.237.269-.556.42-1.286.573-1.639.449-.355.297-.995.352-1.632.164-.625.88-1.37 1.08-2.227 1.292-.365.369-.685.707-.93 1.097-.24.35-.636.59-.953.937-1.065.56-.079.965-.348 1.861-.78 2.663-.419.676-.978.637-1.426.648-.42.02-.951.155-1.388.384-.227.08-.591.178-1.055.504-.46.424-.97.74-1.096 1.462-.951 2.747-1.915 4.293-1.659 1.077.457 2.242.722 3.253.91.152.593 2.411.902 4.087 1.35 1.532.602 2.903 1.195 4.286-.413.44-.783.91-1.021 1.396-.238.472-.562.863-.85 1.442-.292.578-.873.946-1.34.71-.474.527-.88 1.19-1.059 1.968-.179.806-.592 1.482-1.139 2.238-.535.818-.924 1.665-1.066 2.484-.139.824-.122 1.61-.538 2.238-.412.64-.84 1.016-1.092 1.597-.246.571-.628 1.246-.482 1.923.146 1.862.122 2.857.277 1.009.603 2.059 1.117 2.994.08.725.356 1.79.776 2.667 1.33 3.92.137.749.247 1.403.657 2.053 1.087 2.99.654.248.1.096.395 2.247.906 3.282.182.908.425 1.996.814 3.548.457 1.16.895 1.769 1.436 2.461.537.95.266.082 1.539.137 2.17.267.873.974 1.864 1.077 2.843.197 3.878.299.81.557 1.115 2.823 1.339 4.094.144.948.001 1.786.048 3.322.197.631 1.186.001 1.99.164.082.97.837.397.95 1.483 1.791.497 2.537 1.664.89.072 2.213.608.965 2.734.088.804.354.375.788.868.275.784.868.639.388.872.844 1.352 1.531 2.067 1.588 2.555.428.148 1.963.537.487 1.963.537.487 1.963.537.487 2.126.929.537.487 1.963.537.487 1.963.537.487.537.487 2.126.929 1.963.537.487 1.963.537.487.537 1.963.537.487 1.963.537.487 1.963.537.487 1.963.537.487 1.963.537.487.537.487.537 14.458 2.229 14.458 0 0 14.458-2.23c0-3.982-1.249-7.494-3.164-10.39-1.037-1.467-2.837-2.262-4.712-1.017-1.916-1.532-4.102-1.532-6.645 0-3.536 1.333-6.646 3.521-7.388 1.738-.631 2.711-1.994 3.984-2.882 1.069-.952 1.913-1.513 2.755-1.678 1.584-.743 3.293-.888 4.802-.111 1.934-.504 3.895-1.111 5.274-.607.08-.785.904-.856 1.789-.775 2.671-.078.926.062 1.869-.188 2.775-.273.909-.606 1.818-.773 2.667-.369.701-.636 1.387-.735 1.959-.198.597-.447 1.159-.485 1.758-.088.613-.208 1.26-.327 1.902-.254.838-.539 1.648-.807 2.419-.531.722-.907 1.418-1.014 2.048-.108.583-.159 1.185-.194 1.749-.034.646-.105 1.314-.168 1.938-.061.665.363-1.457.819-1.959.831-.489.198-.931.299-1.339.537-.405.238-.666.578-.783.847-.117.649-.504.096-1.08.146-1.636-.051-.584.072-1.165.086-1.735.028-.705.257-1.418.373-2.074.367-.646.085-1.295.134-1.908.169-.612.267-1.225.494-1.778.728-.553.237-1.112.478-1.622.867-.688.088-1.377.176-2.03.556-.182.654-.359 1.312-.578 1.941-.219.643-.609.983-.931 1.484-.318.636-.743 1.143-.986 1.738-.238.431.463-.931.617-1.418.239-.489.975-.784 1.952-.837 2.918-.05.628.23-1.264.403-1.837.724-.571.085-1.137.183-1.629.479-.488.617-.739.894-.941 1.455-.201.548.473-1.089.744-1.597.524-.507.628-.758 1.062-.786 1.594-.027.813.138-1.626.386-2.359.247-.733.11-1.446.352-2.072.632-.623.11-.132.234-.399.399.123-.592.193-.006.725.225-1.447.363-2.057.567-.612.099-1.22.224-1.808.31-.548.092-.523.066-.931.749-1.332.183-.303.307-.636.565-.993.777-.357.211-.726.381-1.063.496-.34.586-.067-1.197.077-1.788.135-.592.19-1.177.386-1.723.574-.539.172-.799.476-.954.905-.151.437-.283.855-.425 1.275-.139.592-.264 1.188-.37 1.767-.101.59-.061 1.211.074 1.806.225 2.582.395.487.06.987.763 1.465.892 2.191.385 1.635 1.121.695.531 2.416.582.735.905.34.182.56.527.587.828.757.868.568.568.568.568.568.568.568.568.568.568.568.568 15 12c0 3.196-1.268 6.355-3.596 8.906-.715.794-1.732 1.272-2.858 1.607-1.127.336-2.853 1.596-4.154 1.571-1.399.297-2.805.592-4.137 1.572-.736.743-1.765 1.283-2.837 1.695-1.077.297-2.853 1.592-4.154 1.572-1.399.297-2.805.592-4.137 1.572-.736.743-1.765 1.283-2.837 1.695-1.077.297-2.853 1.592-4.154 1.572z"/>
+                        </svg>
+                        <span>Contactar</span>
+                      </a>
+                    </div>
+                  )}
+                  {proveedorSeleccionado.correo && (
+                    <div className="flex items-center gap-3">
+                      <Mail className="text-gray-400" size={20} strokeWidth={2} />
+                      <span className="text-gray-700 dark:!text-slate-300">
+                        {proveedorSeleccionado.correo}
+                      </span>
+                    </div>
+                  )}
+                  {proveedorSeleccionado.ciudad && (
+                    <div className="flex items-center gap-3">
+                      <MapPin className="text-gray-400" size={20} strokeWidth={2} />
+                      <span className="text-gray-700 dark:!text-slate-300">
+                        {proveedorSeleccionado.ciudad}
+                      </span>
+                    </div>
+                  )}
+                  {proveedorSeleccionado.sitio_web && (
+                    <div className="flex items-center gap-3">
+                      <a
+                        href={proveedorSeleccionado.sitio_web}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 border border-gray-300 dark:!border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:!bg-slate-800 transition-colors"
+                        title="Visitar sitio web"
+                      >
+                        <Globe size={18} strokeWidth={2} />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Condiciones comerciales */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:!text-white mb-3">
+                  Condiciones Comerciales
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:!text-slate-400">Plazo de pago:</span>
+                    <span className="font-medium text-gray-900 dark:!text-white">
+                      {proveedorSeleccionado.plazo_pago_dias} días
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:!text-slate-400">Descuento comercial:</span>
+                    <span className="font-medium text-gray-900 dark:!text-white">
+                      {proveedorSeleccionado.descuento_comercial}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Productos */}
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-lg font-semibold text-gray-900 dark:!text-white">
+                  Productos ({productosProveedor.length || 0})
+                </h3>
+                <button
+                  onClick={() => setMostrarModalProducto(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                >
+                  <Plus size={16} strokeWidth={2} />
+                  <span>Agregar Producto</span>
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {productosProveedor && productosProveedor.length > 0 ? (
+                  productosProveedor.map((producto) => (
+                    <div
+                      key={producto.id}
+                      className="p-4 border border-gray-200 dark:!border-slate-700 dark:!bg-slate-800 rounded-lg hover:shadow-md transition-shadow"
+                    >
+                      <h4 className="font-medium text-gray-900 dark:!text-white mb-2">
+                        {producto.nombre_producto}
+                      </h4>
+                      {producto.codigo_producto && (
+                        <p className="text-xs text-gray-500 dark:!text-slate-400 mb-2">
+                          Código: {producto.codigo_producto}
+                        </p>
+                      )}
+                      <div className="space-y-1 text-sm">
+                        <p className="text-gray-600 dark:!text-slate-400">
+                          Precio: ${parseFloat(producto.precio_unitario).toFixed(2)} {producto.moneda}
+                        </p>
+                        {producto.tiempo_entrega_dias && (
+                          <p className="text-gray-600 dark:!text-slate-400">
+                            Entrega: {producto.tiempo_entrega_dias} días
+                          </p>
+                        )}
+                        <p className="text-gray-600 dark:!text-slate-400">
+                          Disponible: <span className={`font-medium ${producto.disponible ? 'text-green-600' : 'text-red-600'}`}>
+                            {producto.disponible ? 'Sí' : 'No'}
+                          </span>
+                        </p>
+                        {producto.stock_actual !== null && producto.stock_actual !== undefined && (
+                          <p className="text-gray-600 dark:!text-slate-400">
+                            Stock: {producto.stock_actual}
+                          </p>
+                        )}
+                        {producto.categoria && (
+                          <p className="text-gray-600 dark:!text-slate-400">
+                            Categoría: {producto.categoria}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-8 text-gray-500 dark:!text-slate-400">
+                    No hay productos registrados. Haz clic en "Agregar Producto" para añadir uno.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Pedidos */}
+            {proveedorSeleccionado.total_pedidos > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:!text-white mb-3">
+                  Pedidos ({proveedorSeleccionado.total_pedidos})
+                </h3>
+                <div className="text-center py-8 text-gray-500 dark:!text-slate-400">
+                  Historial de pedidos disponible próximamente
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
 
   return null;
 }

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import (
-    Sucursales, Categoria, Marca, Iva, Producto, Descuento, TipoMedida,
+    Sucursales, Categoria, Marca, Iva, Producto, ProductoVariante, Descuento, TipoMedida,
     Bodega, Existencia, Traslado, TrasladoLinea,
     Cliente, FormaPago, Factura, FacturaDetalle, Pago, ConfiguracionFactura,
     Cupon, ClienteCupon, ClienteTienda, Contacto,
@@ -25,6 +25,51 @@ class SucursalSerializer(serializers.ModelSerializer):
         model = Sucursales
         fields = ['id', 'nombre', 'direccion', 'ciudad', 'pais', 'fecha_creacion', 'estatus']
         read_only_fields = ['id', 'fecha_creacion']
+
+
+class ProductoVarianteSerializer(serializers.ModelSerializer):
+    """Serializer para variantes de producto"""
+    producto_nombre = serializers.CharField(source='producto.nombre', read_only=True)
+    producto_sku = serializers.CharField(source='producto.sku', read_only=True)
+
+    class Meta:
+        model = ProductoVariante
+        fields = [
+            'id', 'producto', 'producto_nombre', 'producto_sku',
+            'talla', 'color', 'color_hex', 'medida', 'sku_variante',
+            'precio', 'activo', 'es_predeterminado',
+            'imagen_variante', 'observaciones', 'creado_en', 'actualizado_en'
+        ]
+        read_only_fields = ['id', 'creado_en', 'actualizado_en']
+
+    def validate(self, attrs):
+        """Validar que al menos una característica esté definida"""
+        from rest_framework import serializers
+
+        talla = attrs.get('talla')
+        color = attrs.get('color')
+        medida = attrs.get('medida')
+
+        if not talla and not color and not medida:
+            raise serializers.ValidationError(
+                'Al menos una característica (talla, color o medida) debe estar definida para la variante.'
+            )
+
+        # Validar SKU único
+        sku_variante = attrs.get('sku_variante')
+        if sku_variante:
+            alias = self.context.get('db_alias', 'default')
+            existing = ProductoVariante.objects.using(alias).filter(
+                sku_variante=sku_variante
+            )
+            if self.instance:
+                existing = existing.exclude(pk=self.instance.pk)
+            if existing.exists():
+                raise serializers.ValidationError({
+                    'sku_variante': 'Ya existe una variante con este SKU.'
+                })
+
+        return attrs
 
 
 
@@ -83,6 +128,9 @@ class ProductoSerializer(serializers.ModelSerializer):
     descuento_porcentaje = serializers.CharField(source='descuento_id.porcentaje', read_only=True)
     tipo_medida_nombre = serializers.CharField(source='tipo_medida_id.nombre', read_only=True)
 
+    # Variantes del producto
+    variantes = ProductoVarianteSerializer(many=True, read_only=True)
+
     class Meta:
         model = Producto
         fields = [
@@ -119,6 +167,7 @@ class ProductoSerializer(serializers.ModelSerializer):
             'atributo',
             'valor_atributo',
             'creado_en',
+            'variantes',
         ]
         read_only_fields = ['id', 'creado_en']
 

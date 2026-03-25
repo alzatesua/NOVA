@@ -594,6 +594,7 @@ def realizar_arqueo(request):
 def listar_movimientos_caja_menor(request):
     """
     Lista los movimientos de caja menor para una fecha específica.
+    Cada sede ve solo su propia caja menor. Solo admin puede filtrar por otras sedes.
 
     Body esperado:
     {
@@ -601,7 +602,7 @@ def listar_movimientos_caja_menor(request):
         "token": "...",
         "subdominio": "...",
         "fecha": "2024-01-15",  # opcional, por defecto hoy
-        "id_sucursal": 1        # opcional, para filtrar por sucursal
+        "id_sucursal": 1        # opcional, solo admin puede especificar
     }
 
     Retorna:
@@ -613,6 +614,7 @@ def listar_movimientos_caja_menor(request):
     try:
         mixin = CajaTenantMixin()
         alias = mixin._resolve_alias(request)
+        user = mixin._tenant_user
 
         fecha_str = request.data.get('fecha')
         if fecha_str:
@@ -629,8 +631,19 @@ def listar_movimientos_caja_menor(request):
             es_caja_menor=True
         )
 
-        if id_sucursal:
-            queryset = queryset.filter(sucursal_id=id_sucursal)
+        # Filtrar por sucursal según rol del usuario
+        if user.rol == 'admin':
+            # Admin puede filtrar por cualquier sucursal o ver todas
+            if id_sucursal:
+                queryset = queryset.filter(sucursal_id=id_sucursal)
+            # Si id_sucursal es null, admin ve todas las sucursales
+        else:
+            # Usuario no-admin SOLO ve su sucursal asignada
+            if user.id_sucursal_default:
+                queryset = queryset.filter(sucursal_id=user.id_sucursal_default_id)
+            else:
+                # Si no tiene sucursal asignada, no ve nada
+                queryset = queryset.none()
 
         queryset = queryset.order_by('-fecha_hora')
 
@@ -654,13 +667,14 @@ def listar_movimientos_caja_menor(request):
 def balance_caja_menor(request):
     """
     Obtiene el balance acumulado de caja menor (todos los movimientos históricos).
+    Cada sede ve solo su propia caja menor. Solo admin puede filtrar por otras sedes.
 
     Body esperado:
     {
         "usuario": "...",
         "token": "...",
         "subdominio": "...",
-        "id_sucursal": 1        # opcional, para filtrar por sucursal
+        "id_sucursal": 1        # opcional, solo admin puede especificar
     }
 
     Retorna:
@@ -676,6 +690,7 @@ def balance_caja_menor(request):
     try:
         mixin = CajaTenantMixin()
         alias = mixin._resolve_alias(request)
+        user = mixin._tenant_user
 
         id_sucursal = request.data.get('id_sucursal')
 
@@ -684,8 +699,19 @@ def balance_caja_menor(request):
             es_caja_menor=True
         )
 
-        if id_sucursal:
-            queryset = queryset.filter(sucursal_id=id_sucursal)
+        # Filtrar por sucursal según rol del usuario
+        if user.rol == 'admin':
+            # Admin puede filtrar por cualquier sucursal o ver todas
+            if id_sucursal:
+                queryset = queryset.filter(sucursal_id=id_sucursal)
+            # Si id_sucursal es null, admin ve todas las sucursales
+        else:
+            # Usuario no-admin SOLO ve su sucursal asignada
+            if user.id_sucursal_default:
+                queryset = queryset.filter(sucursal_id=user.id_sucursal_default_id)
+            else:
+                # Si no tiene sucursal asignada, no ve nada
+                queryset = queryset.none()
 
         # Calcular balance acumulado
         ingresos = queryset.filter(tipo='entrada').aggregate(

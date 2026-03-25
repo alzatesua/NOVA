@@ -9,6 +9,8 @@ urlpatterns = [
     # Proveedores - CRUD básico
     path('', views_proveedores.proveedores_list, name='proveedores_list'),
     path('<int:proveedor_id>/', views_proveedores.proveedor_detalle, name='proveedor_detalle'),
+    path('<int:proveedor_id>/actualizar-logo/', views_proveedores.proveedor_actualizar_logo, name='proveedor_actualizar_logo'),
+    path('actualizar-logos/', views_proveedores.actualizar_logos_proveedores, name='actualizar_logos_proveedores'),
 
     # Productos de proveedor
     path('<int:proveedor_id>/productos/', views_proveedores.proveedor_productos, name='proveedor_productos'),

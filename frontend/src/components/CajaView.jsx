@@ -187,7 +187,14 @@ export default function CajaView() {
     } finally { setLoadingSucursales(false); }
   };
 
-  const getSucursalFilter     = () => isAdmin ? sucursalSeleccionada : idSucursal;
+  // Para usuarios no-admin, siempre usar su sucursal asignada
+  // Para admin, usar la sucursal seleccionada o null para ver todas
+  const getSucursalFilter     = () => {
+    if (isAdmin) {
+      return sucursalSeleccionada || null; // Admin puede ver todas o filtrar
+    }
+    return idSucursal; // No-admin solo ve su sucursal
+  };
   const handleRegistroExitoso = () => setRefreshKey(k => k + 1);
   const handleRefresh         = () => setRefreshKey(k => k + 1);
 
@@ -360,7 +367,6 @@ export default function CajaView() {
                 {/* Movimientos */}
                 <div style={s.panel}>
                   <div style={s.panelHead}>
-                    <p style={s.panelTitle}>Movimientos de Caja</p>
                     <button className="caja-btn-ghost" style={s.btnGhost} onClick={handleRefresh}>
                       <IcoRefresh /> Actualizar
                     </button>

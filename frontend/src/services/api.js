@@ -782,12 +782,9 @@ export function fetchProducts({
 }) {
   const token = tokenUsuario;
   return post(
-    'api/obtener/datos/info-tienda/',
+    'api/productos/list/',
     {
-      usuario,
-      token,
       subdominio,
-      tabla: 'productos',
     },
     token
   );
@@ -1011,6 +1008,8 @@ async function uploadFile(endpoint, formData, token) {
 export async function subirImagenProducto({
   id, usuario, token, subdominio, categoriaId, imagen
 }) {
+  console.log('subirImagenProducto recibió:', { id, categoriaId, imagen });
+
   const formData = new FormData();
   formData.append('usuario',      usuario);
   formData.append('token',        token);
@@ -1020,8 +1019,6 @@ export async function subirImagenProducto({
 
   // ← URL sin duplicar "api"
   const endpoint = `/api/subir/${id}/imagen-producto/`;
-  console.log(endpoint);
-  console.log('Subiendo imagen a', endpoint);
 
   const res = await fetch(endpoint, {
     method: 'POST',

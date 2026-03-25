@@ -1198,3 +1198,76 @@ INSERT INTO proveedor_calificaciones (
 -- ============================================================================
 -- FIN DEL SCRIPT SQL
 -- ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- Crear tabla de variantes de productos
+CREATE TABLE producto_variantes (
+    id SERIAL PRIMARY KEY,
+    producto_id INTEGER REFERENCES productos(id) ON DELETE CASCADE NOT NULL,
+    
+    -- Características de la variante
+    talla VARCHAR(50),
+    color VARCHAR(100),
+    color_hex VARCHAR(7),
+    medida VARCHAR(100),
+    
+    -- SKU único para la variante
+    sku_variante VARCHAR(50) UNIQUE NOT NULL,
+    
+    -- Stock y precio
+    stock INTEGER DEFAULT 0 NOT NULL,
+    precio DECIMAL(10, 2) NULL,
+    
+    -- Estado
+    activo BOOLEAN DEFAULT TRUE NOT NULL,
+    es_predeterminado BOOLEAN DEFAULT FALSE NOT NULL,
+    
+    -- Imagen específica
+    imagen_variante VARCHAR(255) NULL,
+    
+    -- Observaciones
+    observaciones TEXT NULL,
+    
+    -- Timestamps
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    actualizado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Crear índices para mejor rendimiento
+CREATE INDEX idx_variante_producto ON producto_variantes(producto_id);
+CREATE INDEX idx_variante_color ON producto_variantes(producto_id, color);
+CREATE INDEX idx_variante_talla ON producto_variantes(producto_id, talla);
+CREATE INDEX idx_variante_sku ON producto_variantes(sku_variante);
+CREATE INDEX idx_variante_activo ON producto_variantes(activo);
+
+-- Comentario en la tabla
+COMMENT ON TABLE producto_variantes IS 'Variantes de productos con diferentes tallas, colores y medidas';
+
+-- Comentarios en las columnas
+COMMENT ON COLUMN producto_variantes.producto_id IS 'Producto base al que pertenece la variante';
+COMMENT ON COLUMN producto_variantes.talla IS 'Talla de la variante (S, M, L, XL, 38, 40, etc.)';
+COMMENT ON COLUMN producto_variantes.color IS 'Nombre del color (Rojo, Azul, etc.)';
+COMMENT ON COLUMN producto_variantes.color_hex IS 'Código HEX del color (#FF5733)';
+COMMENT ON COLUMN producto_variantes.medida IS 'Medida de la variante (10x20cm, 500ml, 1kg, etc.)';
+COMMENT ON COLUMN producto_variantes.sku_variante IS 'SKU único para identificar la variante';
+COMMENT ON COLUMN producto_variantes.stock IS 'Stock específico de esta variante';
+COMMENT ON COLUMN producto_variantes.precio IS 'Precio diferencial de la variante (si es null usa el precio del producto base)';
+COMMENT ON COLUMN producto_variantes.activo IS 'Indica si la variante está activa';
+COMMENT ON COLUMN producto_variantes.es_predeterminado IS 'Marcar como variante por defecto';
+COMMENT ON COLUMN producto_variantes.imagen_variante IS 'URL de imagen específica de esta variante';
+

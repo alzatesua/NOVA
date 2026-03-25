@@ -20,9 +20,10 @@ export default function Modal({ children, onClose }) {
           shadow-lg
           w-full
           max-w-sm
-          sm:max-w-xl
-          md:max-w-3xl
-          lg:max-w-screen-lg
+          sm:max-w-2xl
+          md:max-w-5xl
+          lg:max-w-screen-xl
+          xl:max-w-screen-2xl
           max-h-[85vh]
           overflow-y-auto
           p-6

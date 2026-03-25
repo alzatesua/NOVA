@@ -8,7 +8,7 @@ import logging
 from nova.utils.db import conectar_db_tienda
 from nova.models import Dominios
 from django.conf import settings
-from main_dashboard.models import Producto
+from main_dashboard.models import Producto, ProductoVariante
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +108,7 @@ class ProductoView(SubdomainMixin, APIView):
                     'iva_id',
                     'descuento'
                 )
+                .prefetch_related('variantes')
             )
         except Exception as e:
             return Response(
@@ -122,7 +123,7 @@ class ProductoView(SubdomainMixin, APIView):
                 "sku": producto.sku,
                 "nombre": producto.nombre,
                 "descripcion": producto.descripcion,
-                "precio": str(producto.precio),
+                "precio": float(producto.precio),
                 "stock": producto.stock,
                 "estado": "Disponible" if producto.stock > 0 else "Agotado",
 
@@ -158,6 +159,21 @@ class ProductoView(SubdomainMixin, APIView):
                 "imagen_producto": producto.imagen_producto,
                 "atributo": producto.atributo,
                 "valor_atributo": producto.valor_atributo,
+                "variantes": [
+                    {
+                        "id": v.id,
+                        "talla": v.talla,
+                        "color": v.color,
+                        "color_hex": v.color_hex,
+                        "medida": v.medida,
+                        "sku_variante": v.sku_variante,
+                        "precio": float(v.precio) if v.precio else None,
+                        "activo": v.activo,
+                        "es_predeterminado": v.es_predeterminado,
+                        "imagen_variante": v.imagen_variante,
+                    }
+                    for v in producto.variantes.all()
+                ],
                 "creado_en": producto.creado_en,
             })
 
@@ -167,5 +183,5 @@ class ProductoView(SubdomainMixin, APIView):
             "ok": True,
             "mensaje": "Listado de productos con ficha técnica",
             "total_productos": len(data),
-            "data": data
+            "datos": data
         }, status=status.HTTP_200_OK)

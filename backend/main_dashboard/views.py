@@ -51,7 +51,7 @@ from django.db.models import F, Sum, Value
 from django.db.models.functions import Coalesce
 
 # tus modelos
-from .models import Existencia, Producto, Bodega
+from .models import Existencia, Producto, ProductoVariante, Bodega
 
 from rest_framework.exceptions import ValidationError
 # (si también necesitas el de Django en el mismo archivo)
@@ -951,6 +951,53 @@ def crear_producto_tienda(request):
                                 )
                             else:
                                 raise insert_err
+
+        # ✅ NUEVO: Crear variantes si se enviaron
+        import logging
+        logger = logging.getLogger(__name__)
+
+        with transaction.atomic(using=alias):
+            if multiple:
+                for idx, producto in enumerate(productos_creados):
+                    variantes_data = datos[idx].get('variantes')
+                    if variantes_data and isinstance(variantes_data, list):
+                        for variante_data in variantes_data:
+                            # Si color es un objeto, extraer el nombre
+                            color_value = variante_data.get('color')
+                            if isinstance(color_value, dict):
+                                color_value = color_value.get('nombre')
+
+                            ProductoVariante.objects.using(alias).create(
+                                producto=producto,
+                                talla=variante_data.get('talla'),
+                                color=color_value,
+                                color_hex=variante_data.get('color_hex'),
+                                medida=variante_data.get('medida'),
+                                sku_variante=variante_data.get('sku_variante'),
+                                precio=variante_data.get('precio'),
+                                activo=True,
+                                es_predeterminado=False
+                            )
+            else:
+                variantes_data = datos.get('variantes')
+                if variantes_data and isinstance(variantes_data, list):
+                    for variante_data in variantes_data:
+                        # Si color es un objeto, extraer el nombre
+                        color_value = variante_data.get('color')
+                        if isinstance(color_value, dict):
+                            color_value = color_value.get('nombre')
+
+                        ProductoVariante.objects.using(alias).create(
+                            producto=productos_creados,
+                            talla=variante_data.get('talla'),
+                            color=color_value,
+                            color_hex=variante_data.get('color_hex'),
+                            medida=variante_data.get('medida'),
+                            sku_variante=variante_data.get('sku_variante'),
+                            precio=variante_data.get('precio'),
+                            activo=True,
+                            es_predeterminado=False
+                        )
 
         return Response(serializer.data, status=201)
 

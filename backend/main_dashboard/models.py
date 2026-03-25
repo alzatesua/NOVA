@@ -298,6 +298,78 @@ class Producto(models.Model):
         return self.existencias.select_related('bodega', 'bodega__sucursal')
 
 
+class ProductoVariante(models.Model):
+    """
+    Variantes de un producto (talla, color, medida).
+    Permite gestionar diferentes versiones del mismo producto base.
+    """
+    producto = models.ForeignKey(
+        Producto,
+        on_delete=models.CASCADE,
+        related_name='variantes',
+        db_column='producto_id'
+    )
+
+    # Características de la variante
+    talla = models.CharField("Talla", max_length=50, blank=True, null=True, help_text="Ej: S, M, L, XL, 38, 40, etc.")
+    color = models.CharField("Color", max_length=100, blank=True, null=True, help_text="Nombre del color")
+    color_hex = models.CharField("Código HEX", max_length=7, blank=True, null=True, help_text="Ej: #FF5733 para colores personalizados")
+    medida = models.CharField("Medida", max_length=100, blank=True, null=True, help_text="Ej: 10x20cm, 500ml, 1kg, etc.")
+
+    # SKU único para esta variante
+    sku_variante = models.CharField("SKU Variante", max_length=50, unique=True, db_index=True)
+
+    # Precio diferencial (opcional, si null usa el precio del producto base)
+    precio = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, help_text="Precio diferencial de esta variante")
+
+    # Estado
+    activo = models.BooleanField(default=True)
+    es_predeterminado = models.BooleanField(default=False, help_text="Marcar como variante por defecto")
+
+    # Imagen específica de la variante (opcional)
+    imagen_variante = models.CharField(max_length=255, blank=True, null=True, help_text="URL de imagen específica de esta variante")
+
+    # Observaciones
+    observaciones = models.TextField(blank=True, null=True)
+
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'producto_variantes'
+        verbose_name = 'Variante de Producto'
+        verbose_name_plural = 'Variantes de Productos'
+        ordering = ('producto', 'color', 'talla', 'medida')
+        indexes = [
+            models.Index(fields=['producto', 'color']),
+            models.Index(fields=['producto', 'talla']),
+            models.Index(fields=['sku_variante']),
+            models.Index(fields=['activo']),
+        ]
+
+    def __str__(self):
+        variantes = []
+        if self.color:
+            variantes.append(self.color)
+        if self.talla:
+            variantes.append(f"Talla {self.talla}")
+        if self.medida:
+            variantes.append(f"{self.medida}")
+
+        variantes_str = " | ".join(variantes) if variantes else "Base"
+        return f'{self.producto.nombre} - {variantes_str} ({self.sku_variante})'
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        # Validar que al menos una característica esté definida
+        if not self.talla and not self.color and not self.medida:
+            raise ValidationError('Al menos una característica (talla, color o medida) debe estar definida para la variante.')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
 
 
 
