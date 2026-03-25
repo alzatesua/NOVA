@@ -4,6 +4,115 @@
 const BASE_URL = 'https://dagi.co/';
 const id_sucursal = localStorage.getItem("id_sucursal");
 
+// Sistema de refresh mejorado
+let isRefreshing = false;
+let failedQueue = [];
+
+/**
+ * Procesa la cola de peticiones fallidas después de un refresh exitoso
+ */
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
+/**
+ * Refresca el token de acceso usando el refresh token
+ * @returns {Promise<string>} Nuevo access token
+ * @throws {Error} Si no se puede refrescar el token
+ */
+async function refreshAccessToken() {
+  // Si ya hay un refresh en progreso, esperar a que termine
+  if (isRefreshing) {
+    return new Promise((resolve, reject) => {
+      failedQueue.push({ resolve, reject });
+    });
+  }
+
+  isRefreshing = true;
+
+  try {
+    const refreshToken = localStorage.getItem('auth_refresh_token');
+
+    if (!refreshToken) {
+      throw new Error('No hay refresh token disponible');
+    }
+
+    const response = await fetch(`${BASE_URL}api/auth/refresh/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refresh: refreshToken })
+    });
+
+    if (!response.ok) {
+      // Si el refresh token también expiró o es inválido
+      if (response.status === 401) {
+        throw new Error('REFRESH_TOKEN_EXPIRED');
+      }
+      throw new Error('Error al refrescar token');
+    }
+
+    const data = await response.json();
+
+    if (data.access) {
+      // Guardar nuevo access token en todos los keys
+      localStorage.setItem('auth_access_token', data.access);
+      localStorage.setItem('token_usuario', data.access);
+      localStorage.setItem('accessToken', data.access);
+
+      console.log('✅ Token refrescado exitosamente');
+
+      // Si ROTATE_REFRESH_TOKENS=True, guardar nuevo refresh token
+      if (data.refresh) {
+        localStorage.setItem('auth_refresh_token', data.refresh);
+        localStorage.setItem('refresh_token', data.refresh);
+        console.log('✅ Refresh token rotado exitosamente');
+      }
+
+      // Procesar cola de peticiones pendientes
+      processQueue(null, data.access);
+
+      return data.access;
+    }
+
+    throw new Error('Respuesta de refresh inválida');
+  } catch (error) {
+    // Procesar cola con error
+    processQueue(error, null);
+
+    // Si el refresh token expiró, limpiar todo y disparar evento
+    if (error.message === 'REFRESH_TOKEN_EXPIRED') {
+      console.warn('⚠️ Refresh token expirado. Limpiando tokens...');
+
+      // Limpiar todos los tokens
+      localStorage.removeItem('auth_access_token');
+      localStorage.removeItem('auth_refresh_token');
+      localStorage.removeItem('auth_usuario');
+      localStorage.removeItem('token_usuario');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refresh_token');
+
+      // Disparar evento de sesión expirada
+      window.dispatchEvent(new CustomEvent('session:expired', {
+        detail: { message: 'SESSION_EXPIRED', isAuthError: true }
+      }));
+    }
+
+    throw error;
+  } finally {
+    isRefreshing = false;
+  }
+}
+
 // Funciones internas que hacen la petición SIN lógica de refresh (para evitar recursión)
 async function _postRaw(endpoint, body, token) {
   const url = `${BASE_URL}${endpoint}`;
@@ -37,8 +146,18 @@ async function _getRaw(endpoint, token) {
 async function post(endpoint, body, token, skipRefresh = false) {
   console.log(`POST ${BASE_URL}${endpoint}`, body);
 
+  // Verificar si es un endpoint de auth (no intentar refresh en estos casos)
+  const isAuthEndpoint = endpoint.includes('api/auth/login') ||
+                         endpoint.includes('api/auth/refresh') ||
+                         endpoint.includes('api/auth/register');
+
+  // Función para intentar la petición
+  const attemptRequest = async (accessToken) => {
+    return await _postRaw(endpoint, body, accessToken);
+  };
+
   // Primera intento
-  let { res, json } = await _postRaw(endpoint, body, token);
+  let { res, json } = await attemptRequest(token);
   console.log(`Response ${res.status}:`, json);
 
   // Si la petición fue exitosa, guardar nuevo_token si está presente en la respuesta
@@ -47,85 +166,46 @@ async function post(endpoint, body, token, skipRefresh = false) {
     localStorage.setItem('token_usuario', json.nuevo_token);
   }
 
-  // Si la petición falló con 401 y NO estamos saltando el refresh (para evitar recursión)
-  // Y NO es un endpoint de login/refresh (no tiene sentido refrescar en esos casos)
-  if (!res.ok && res.status === 401 && !skipRefresh) {
-    // NO intentar refrescar token para endpoints de auth
-    const isAuthEndpoint = endpoint.includes('api/auth/login') ||
-                           endpoint.includes('api/auth/refresh') ||
-                           endpoint.includes('api/auth/register');
+  // Si la petición falló con 401 y NO estamos saltando el refresh
+  if (!res.ok && res.status === 401 && !skipRefresh && !isAuthEndpoint) {
+    console.warn('⚠️ Error 401 detectado. Intentando refresh de token...');
 
-    if (!isAuthEndpoint) {
-      console.warn('⚠️ Error 401 detectado. Intentando refresh de token...');
+    try {
+      // Intentar refrescar el token usando el nuevo sistema centralizado
+      const newToken = await refreshAccessToken();
 
-      // Obtener refresh token para SimpleJWT
-      const refreshToken = localStorage.getItem('auth_refresh_token');
+      // Reintentar la petición original con el nuevo token
+      const retryResult = await attemptRequest(newToken);
+      console.log(`Response ${retryResult.res.status}:`, retryResult.json);
 
-      if (refreshToken) {
-        try {
-          // Usar _postRaw para evitar recursión
-          // SimpleJWT espera { refresh: refreshToken }
-          const refreshResult = await _postRaw('api/auth/refresh/', {
-            refresh: refreshToken
-          }, null);
+      if (retryResult.res.ok) {
+        console.log(`✅ Reintento exitoso después de refresh`);
 
-          if (refreshResult.res.ok && refreshResult.json.access) {
-            // Guardar nuevo access token en todos los keys
-            const newAccessToken = refreshResult.json.access;
-            localStorage.setItem('auth_access_token', newAccessToken);
-            localStorage.setItem('token_usuario', newAccessToken);
-            localStorage.setItem('accessToken', newAccessToken);
-
-            // Si ROTATE_REFRESH_TOKENS=True, guardar nuevo refresh token
-            if (refreshResult.json.refresh) {
-              const newRefreshToken = refreshResult.json.refresh;
-              localStorage.setItem('auth_refresh_token', newRefreshToken);
-              localStorage.setItem('refresh_token', newRefreshToken);
-            }
-
-            console.log('✅ Token refrescado exitosamente');
-
-            // Reintentar la petición original con el nuevo token
-            const retryResult = await _postRaw(endpoint, body, newAccessToken);
-            if (retryResult.res.ok) {
-              console.log(`✅ Reintento exitoso después de refresh`);
-              // Guardar nuevo_token si está presente en la respuesta del reintento
-              if (retryResult.json && retryResult.json.nuevo_token) {
-                console.log('✅ Nuevo token recibido en reintento, guardando en localStorage...');
-                localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
-              }
-              return retryResult.json;
-            }
-            // Si el reintento falló, continuar con el error normal
-            res = retryResult.res;
-            json = retryResult.json;
-          }
-        } catch (refreshError) {
-          console.error('❌ Error al refrescar token:', refreshError);
+        // Guardar nuevo_token si está presente en la respuesta del reintento
+        if (retryResult.json && retryResult.json.nuevo_token) {
+          console.log('✅ Nuevo token recibido en reintento, guardando en localStorage...');
+          localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
         }
+
+        return retryResult.json;
       }
-    }
 
-    // Si llegamos aquí, no se pudo refrescar el token (o era un endpoint de auth)
-    // Solo limpiar tokens si NO es un endpoint de auth
-    if (!isAuthEndpoint) {
-      console.warn('⚠️ No se pudo refrescar el token. Limpiando tokens de autenticación...');
-      localStorage.removeItem('auth_access_token');
-      localStorage.removeItem('auth_refresh_token');
-      localStorage.removeItem('auth_usuario');
-      localStorage.removeItem('token_usuario');
+      // Si el reintento falló, continuar con el error normal
+      res = retryResult.res;
+      json = retryResult.json;
+    } catch (refreshError) {
+      console.error('❌ Error al refrescar token:', refreshError);
 
-      // Disparar evento de sesión expirada
-      window.dispatchEvent(new CustomEvent('session:expired', {
-        detail: { message: 'SESSION_EXPIRED', isAuthError: true, details: json }
-      }));
+      // Si el error es SESSION_EXPIRED, lanzar el error para que el componente lo maneje
+      if (refreshError.message === 'REFRESH_TOKEN_EXPIRED') {
+        throw {
+          message: 'SESSION_EXPIRED',
+          isAuthError: true,
+          details: json
+        };
+      }
 
-      // Lanzar error especial para que el componente lo capture
-      throw {
-        message: 'SESSION_EXPIRED',
-        isAuthError: true,
-        details: json
-      };
+      // Para otros errores, continuar con el error original de la petición
     }
   }
 
@@ -156,8 +236,18 @@ async function post(endpoint, body, token, skipRefresh = false) {
 }
 
 async function get(endpoint, token, skipRefresh = false) {
+  // Verificar si es un endpoint de auth
+  const isAuthEndpoint = endpoint.includes('api/auth/login') ||
+                         endpoint.includes('api/auth/refresh') ||
+                         endpoint.includes('api/auth/register');
+
+  // Función para intentar la petición
+  const attemptRequest = async (accessToken) => {
+    return await _getRaw(endpoint, accessToken);
+  };
+
   // Primer intento
-  let { res, json } = await _getRaw(endpoint, token);
+  let { res, json } = await attemptRequest(token);
 
   // Si la petición fue exitosa, guardar nuevo_token si está presente en la respuesta
   if (res.ok && json && json.nuevo_token) {
@@ -165,85 +255,43 @@ async function get(endpoint, token, skipRefresh = false) {
     localStorage.setItem('token_usuario', json.nuevo_token);
   }
 
-  // Si la petición falló con 401 y NO estamos saltando el refresh (para evitar recursión)
-  // Y NO es un endpoint de login/refresh (no tiene sentido refrescar en esos casos)
-  if (!res.ok && res.status === 401 && !skipRefresh) {
-    // NO intentar refrescar token para endpoints de auth
-    const isAuthEndpoint = endpoint.includes('api/auth/login') ||
-                           endpoint.includes('api/auth/refresh') ||
-                           endpoint.includes('api/auth/register');
+  // Si la petición falló con 401 y NO estamos saltando el refresh
+  if (!res.ok && res.status === 401 && !skipRefresh && !isAuthEndpoint) {
+    console.warn('⚠️ Error 401 detectado (GET). Intentando refresh de token...');
 
-    if (!isAuthEndpoint) {
-      console.warn('⚠️ Error 401 detectado (GET). Intentando refresh de token...');
+    try {
+      // Intentar refrescar el token usando el nuevo sistema centralizado
+      const newToken = await refreshAccessToken();
 
-      // Obtener refresh token para SimpleJWT
-      const refreshToken = localStorage.getItem('auth_refresh_token');
+      // Reintentar la petición original con el nuevo token
+      const retryResult = await attemptRequest(newToken);
 
-      if (refreshToken) {
-        try {
-          // Usar _postRaw para evitar recursión
-          // SimpleJWT espera { refresh: refreshToken }
-          const refreshResult = await _postRaw('api/auth/refresh/', {
-            refresh: refreshToken
-          }, null);
+      if (retryResult.res.ok) {
+        console.log(`✅ Reintento exitoso después de refresh (GET)`);
 
-          if (refreshResult.res.ok && refreshResult.json.access) {
-            // Guardar nuevo access token en todos los keys
-            const newAccessToken = refreshResult.json.access;
-            localStorage.setItem('auth_access_token', newAccessToken);
-            localStorage.setItem('token_usuario', newAccessToken);
-            localStorage.setItem('accessToken', newAccessToken);
-
-            // Si ROTATE_REFRESH_TOKENS=True, guardar nuevo refresh token
-            if (refreshResult.json.refresh) {
-              const newRefreshToken = refreshResult.json.refresh;
-              localStorage.setItem('auth_refresh_token', newRefreshToken);
-              localStorage.setItem('refresh_token', newRefreshToken);
-            }
-
-            console.log('✅ Token refrescado exitosamente (GET)');
-
-            // Reintentar la petición original con el nuevo token
-            const retryResult = await _getRaw(endpoint, newAccessToken);
-            if (retryResult.res.ok) {
-              console.log(`✅ Reintento exitoso después de refresh (GET)`);
-              // Guardar nuevo_token si está presente en la respuesta del reintento
-              if (retryResult.json && retryResult.json.nuevo_token) {
-                console.log('✅ Nuevo token recibido en reintento (GET), guardando en localStorage...');
-                localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
-              }
-              return retryResult.json;
-            }
-            // Si el reintento falló, continuar con el error normal
-            res = retryResult.res;
-            json = retryResult.json;
-          }
-        } catch (refreshError) {
-          console.error('❌ Error al refrescar token (GET):', refreshError);
+        // Guardar nuevo_token si está presente en la respuesta del reintento
+        if (retryResult.json && retryResult.json.nuevo_token) {
+          console.log('✅ Nuevo token recibido en reintento (GET), guardando en localStorage...');
+          localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
         }
+
+        return retryResult.json;
       }
-    }
 
-    // Si llegamos aquí, no se pudo refrescar el token (o era un endpoint de auth)
-    // Solo limpiar tokens si NO es un endpoint de auth
-    if (!isAuthEndpoint) {
-      console.warn('⚠️ No se pudo refrescar el token (GET). Limpiando tokens de autenticación...');
-      localStorage.removeItem('auth_access_token');
-      localStorage.removeItem('auth_refresh_token');
-      localStorage.removeItem('auth_usuario');
-      localStorage.removeItem('token_usuario');
+      // Si el reintento falló, continuar con el error normal
+      res = retryResult.res;
+      json = retryResult.json;
+    } catch (refreshError) {
+      console.error('❌ Error al refrescar token (GET):', refreshError);
 
-      // Disparar evento de sesión expirada
-      window.dispatchEvent(new CustomEvent('session:expired', {
-        detail: { message: 'SESSION_EXPIRED', isAuthError: true, details: json }
-      }));
-
-      // Lanzar error especial para que el componente lo capture
-      throw {
-        message: 'SESSION_EXPIRED',
-        isAuthError: true,
-        details: json
-      };
+      // Si el error es SESSION_EXPIRED, lanzar el error para que el componente lo maneje
+      if (refreshError.message === 'REFRESH_TOKEN_EXPIRED') {
+        throw {
+          message: 'SESSION_EXPIRED',
+          isAuthError: true,
+          details: json
+        };
+      }
     }
   }
 
@@ -280,8 +328,18 @@ async function _patchRaw(endpoint, body, token) {
 async function patch(endpoint, body, token, skipRefresh = false) {
   console.log(`PATCH ${BASE_URL}${endpoint}`, body);
 
+  // Verificar si es un endpoint de auth
+  const isAuthEndpoint = endpoint.includes('api/auth/login') ||
+                         endpoint.includes('api/auth/refresh') ||
+                         endpoint.includes('api/auth/register');
+
+  // Función para intentar la petición
+  const attemptRequest = async (accessToken) => {
+    return await _patchRaw(endpoint, body, accessToken);
+  };
+
   // Primera intento
-  let { res, json } = await _patchRaw(endpoint, body, token);
+  let { res, json } = await attemptRequest(token);
   console.log(`Response ${res.status}:`, json);
 
   // Si la petición fue exitosa, guardar nuevo_token si está presente en la respuesta
@@ -290,77 +348,44 @@ async function patch(endpoint, body, token, skipRefresh = false) {
     localStorage.setItem('token_usuario', json.nuevo_token);
   }
 
-  // Si la petición falló con 401 y NO estamos saltando el refresh (para evitar recursión)
-  if (!res.ok && res.status === 401 && !skipRefresh) {
-    // NO intentar refrescar token para endpoints de auth
-    const isAuthEndpoint = endpoint.includes('api/auth/login') ||
-                           endpoint.includes('api/auth/refresh') ||
-                           endpoint.includes('api/auth/register');
+  // Si la petición falló con 401 y NO estamos saltando el refresh
+  if (!res.ok && res.status === 401 && !skipRefresh && !isAuthEndpoint) {
+    console.warn('⚠️ Error 401 detectado. Intentando refresh de token...');
 
-    if (!isAuthEndpoint) {
-      console.warn('⚠️ Error 401 detectado. Intentando refresh de token...');
+    try {
+      // Intentar refrescar el token usando el nuevo sistema centralizado
+      const newToken = await refreshAccessToken();
 
-      const refreshToken = localStorage.getItem('auth_refresh_token');
+      // Reintentar la petición original con el nuevo token
+      const retryResult = await attemptRequest(newToken);
+      console.log(`Response ${retryResult.res.status}:`, retryResult.json);
 
-      if (refreshToken) {
-        try {
-          // Usar _postRaw para evitar recursión
-          // SimpleJWT espera { refresh: refreshToken }
-          const refreshResult = await _postRaw('api/auth/refresh/', {
-            refresh: refreshToken
-          }, null);
+      if (retryResult.res.ok) {
+        console.log(`✅ Reintento exitoso después de refresh`);
 
-          if (refreshResult.res.ok && refreshResult.json.access) {
-            // Guardar nuevo access token en todos los keys
-            const newAccessToken = refreshResult.json.access;
-            localStorage.setItem('auth_access_token', newAccessToken);
-            localStorage.setItem('token_usuario', newAccessToken);
-            localStorage.setItem('accessToken', newAccessToken);
-
-            // Si ROTATE_REFRESH_TOKENS=True, guardar nuevo refresh token
-            if (refreshResult.json.refresh) {
-              const newRefreshToken = refreshResult.json.refresh;
-              localStorage.setItem('auth_refresh_token', newRefreshToken);
-              localStorage.setItem('refresh_token', newRefreshToken);
-            }
-
-            console.log('✅ Token refrescado exitosamente');
-
-            // Reintentar la petición original con el nuevo token
-            const retryResult = await _patchRaw(endpoint, body, newAccessToken);
-            if (retryResult.res.ok) {
-              console.log(`✅ Reintento exitoso después de refresh`);
-              // Guardar nuevo_token si está presente en la respuesta del reintento
-              if (retryResult.json && retryResult.json.nuevo_token) {
-                console.log('✅ Nuevo token recibido en reintento, guardando en localStorage...');
-                localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
-              }
-              return retryResult.json;
-            }
-            // Si el reintento falló, continuar con el error normal
-            res = retryResult.res;
-            json = retryResult.json;
-          }
-        } catch (refreshError) {
-          console.error('❌ Error al refrescar token:', refreshError);
+        // Guardar nuevo_token si está presente en la respuesta del reintento
+        if (retryResult.json && retryResult.json.nuevo_token) {
+          console.log('✅ Nuevo token recibido en reintento, guardando en localStorage...');
+          localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
         }
+
+        return retryResult.json;
       }
-    }
 
-    // Si llegamos aquí, no se pudo refrescar el token (o era un endpoint de auth)
-    // Solo limpiar tokens si NO es un endpoint de auth
-    if (!isAuthEndpoint) {
-      console.warn('⚠️ No se pudo refrescar el token. Limpiando tokens de autenticación...');
-      localStorage.removeItem('auth_access_token');
-      localStorage.removeItem('auth_refresh_token');
-      localStorage.removeItem('auth_usuario');
+      // Si el reintento falló, continuar con el error normal
+      res = retryResult.res;
+      json = retryResult.json;
+    } catch (refreshError) {
+      console.error('❌ Error al refrescar token:', refreshError);
 
-      // Lanzar error especial para que el componente lo capture
-      throw {
-        message: 'SESSION_EXPIRED',
-        isAuthError: true,
-        details: json
-      };
+      // Si el error es SESSION_EXPIRED, lanzar el error para que el componente lo maneje
+      if (refreshError.message === 'REFRESH_TOKEN_EXPIRED') {
+        throw {
+          message: 'SESSION_EXPIRED',
+          isAuthError: true,
+          details: json
+        };
+      }
     }
   }
 
@@ -408,8 +433,18 @@ async function _putRaw(endpoint, body, token) {
 async function put(endpoint, body, token, skipRefresh = false) {
   console.log(`PUT ${BASE_URL}${endpoint}`, body);
 
+  // Verificar si es un endpoint de auth
+  const isAuthEndpoint = endpoint.includes('api/auth/login') ||
+                         endpoint.includes('api/auth/refresh') ||
+                         endpoint.includes('api/auth/register');
+
+  // Función para intentar la petición
+  const attemptRequest = async (accessToken) => {
+    return await _putRaw(endpoint, body, accessToken);
+  };
+
   // Primera intento
-  let { res, json } = await _putRaw(endpoint, body, token);
+  let { res, json } = await attemptRequest(token);
   console.log(`Response ${res.status}:`, json);
 
   // Si la petición fue exitosa, guardar nuevo_token si está presente en la respuesta
@@ -418,78 +453,44 @@ async function put(endpoint, body, token, skipRefresh = false) {
     localStorage.setItem('token_usuario', json.nuevo_token);
   }
 
-  // Si la petición falló con 401 y NO estamos saltando el refresh (para evitar recursión)
-  if (!res.ok && res.status === 401 && !skipRefresh) {
-    // NO intentar refrescar token para endpoints de auth
-    const isAuthEndpoint = endpoint.includes('api/auth/login') ||
-                           endpoint.includes('api/auth/refresh') ||
-                           endpoint.includes('api/auth/register');
+  // Si la petición falló con 401 y NO estamos saltando el refresh
+  if (!res.ok && res.status === 401 && !skipRefresh && !isAuthEndpoint) {
+    console.warn('⚠️ Error 401 detectado (PUT). Intentando refresh de token...');
 
-    if (!isAuthEndpoint) {
-      console.warn('⚠️ Error 401 detectado (PUT). Intentando refresh de token...');
+    try {
+      // Intentar refrescar el token usando el nuevo sistema centralizado
+      const newToken = await refreshAccessToken();
 
-      // Obtener refresh token para SimpleJWT
-      const refreshToken = localStorage.getItem('auth_refresh_token');
+      // Reintentar la petición original con el nuevo token
+      const retryResult = await attemptRequest(newToken);
+      console.log(`Response ${retryResult.res.status}:`, retryResult.json);
 
-      if (refreshToken) {
-        try {
-          // Usar _postRaw para evitar recursión
-          // SimpleJWT espera { refresh: refreshToken }
-          const refreshResult = await _postRaw('api/auth/refresh/', {
-            refresh: refreshToken
-          }, null);
+      if (retryResult.res.ok) {
+        console.log(`✅ Reintento exitoso después de refresh`);
 
-          if (refreshResult.res.ok && refreshResult.json.access) {
-            // Guardar nuevo access token en todos los keys
-            const newAccessToken = refreshResult.json.access;
-            localStorage.setItem('auth_access_token', newAccessToken);
-            localStorage.setItem('token_usuario', newAccessToken);
-            localStorage.setItem('accessToken', newAccessToken);
-
-            // Si ROTATE_REFRESH_TOKENS=True, guardar nuevo refresh token
-            if (refreshResult.json.refresh) {
-              const newRefreshToken = refreshResult.json.refresh;
-              localStorage.setItem('auth_refresh_token', newRefreshToken);
-              localStorage.setItem('refresh_token', newRefreshToken);
-            }
-
-            console.log('✅ Token refrescado exitosamente');
-
-            // Reintentar la petición original con el nuevo token
-            const retryResult = await _putRaw(endpoint, body, newAccessToken);
-            if (retryResult.res.ok) {
-              console.log(`✅ Reintento exitoso después de refresh`);
-              // Guardar nuevo_token si está presente en la respuesta del reintento
-              if (retryResult.json && retryResult.json.nuevo_token) {
-                console.log('✅ Nuevo token recibido en reintento, guardando en localStorage...');
-                localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
-              }
-              return retryResult.json;
-            }
-            // Si el reintento falló, continuar con el error normal
-            res = retryResult.res;
-            json = retryResult.json;
-          }
-        } catch (refreshError) {
-          console.error('❌ Error al refrescar token:', refreshError);
+        // Guardar nuevo_token si está presente en la respuesta del reintento
+        if (retryResult.json && retryResult.json.nuevo_token) {
+          console.log('✅ Nuevo token recibido en reintento, guardando en localStorage...');
+          localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
         }
+
+        return retryResult.json;
       }
-    }
 
-    // Si llegamos aquí, no se pudo refrescar el token (o era un endpoint de auth)
-    // Solo limpiar tokens si NO es un endpoint de auth
-    if (!isAuthEndpoint) {
-      console.warn('⚠️ No se pudo refrescar el token. Limpiando tokens de autenticación...');
-      localStorage.removeItem('auth_access_token');
-      localStorage.removeItem('auth_refresh_token');
-      localStorage.removeItem('auth_usuario');
+      // Si el reintento falló, continuar con el error normal
+      res = retryResult.res;
+      json = retryResult.json;
+    } catch (refreshError) {
+      console.error('❌ Error al refrescar token:', refreshError);
 
-      // Lanzar error especial para que el componente lo capture
-      throw {
-        message: 'SESSION_EXPIRED',
-        isAuthError: true,
-        details: json
-      };
+      // Si el error es SESSION_EXPIRED, lanzar el error para que el componente lo maneje
+      if (refreshError.message === 'REFRESH_TOKEN_EXPIRED') {
+        throw {
+          message: 'SESSION_EXPIRED',
+          isAuthError: true,
+          details: json
+        };
+      }
     }
   }
 
@@ -536,8 +537,18 @@ async function _deleteRaw(endpoint, token) {
 async function del(endpoint, token, skipRefresh = false) {
   console.log(`DELETE ${BASE_URL}${endpoint}`);
 
+  // Verificar si es un endpoint de auth
+  const isAuthEndpoint = endpoint.includes('api/auth/login') ||
+                         endpoint.includes('api/auth/refresh') ||
+                         endpoint.includes('api/auth/register');
+
+  // Función para intentar la petición
+  const attemptRequest = async (accessToken) => {
+    return await _deleteRaw(endpoint, accessToken);
+  };
+
   // Primera intento
-  let { res, json } = await _deleteRaw(endpoint, token);
+  let { res, json } = await attemptRequest(token);
   console.log(`Response ${res.status}:`, json);
 
   // Si la petición fue exitosa, guardar nuevo_token si está presente en la respuesta
@@ -546,78 +557,44 @@ async function del(endpoint, token, skipRefresh = false) {
     localStorage.setItem('token_usuario', json.nuevo_token);
   }
 
-  // Si la petición falló con 401 y NO estamos saltando el refresh (para evitar recursión)
-  if (!res.ok && res.status === 401 && !skipRefresh) {
-    // NO intentar refrescar token para endpoints de auth
-    const isAuthEndpoint = endpoint.includes('api/auth/login') ||
-                           endpoint.includes('api/auth/refresh') ||
-                           endpoint.includes('api/auth/register');
+  // Si la petición falló con 401 y NO estamos saltando el refresh
+  if (!res.ok && res.status === 401 && !skipRefresh && !isAuthEndpoint) {
+    console.warn('⚠️ Error 401 detectado (DELETE). Intentando refresh de token...');
 
-    if (!isAuthEndpoint) {
-      console.warn('⚠️ Error 401 detectado (DELETE). Intentando refresh de token...');
+    try {
+      // Intentar refrescar el token usando el nuevo sistema centralizado
+      const newToken = await refreshAccessToken();
 
-      // Obtener refresh token para SimpleJWT
-      const refreshToken = localStorage.getItem('auth_refresh_token');
+      // Reintentar la petición original con el nuevo token
+      const retryResult = await attemptRequest(newToken);
+      console.log(`Response ${retryResult.res.status}:`, retryResult.json);
 
-      if (refreshToken) {
-        try {
-          // Usar _postRaw para evitar recursión
-          // SimpleJWT espera { refresh: refreshToken }
-          const refreshResult = await _postRaw('api/auth/refresh/', {
-            refresh: refreshToken
-          }, null);
+      if (retryResult.res.ok) {
+        console.log(`✅ Reintento exitoso después de refresh`);
 
-          if (refreshResult.res.ok && refreshResult.json.access) {
-            // Guardar nuevo access token en todos los keys
-            const newAccessToken = refreshResult.json.access;
-            localStorage.setItem('auth_access_token', newAccessToken);
-            localStorage.setItem('token_usuario', newAccessToken);
-            localStorage.setItem('accessToken', newAccessToken);
-
-            // Si ROTATE_REFRESH_TOKENS=True, guardar nuevo refresh token
-            if (refreshResult.json.refresh) {
-              const newRefreshToken = refreshResult.json.refresh;
-              localStorage.setItem('auth_refresh_token', newRefreshToken);
-              localStorage.setItem('refresh_token', newRefreshToken);
-            }
-
-            console.log('✅ Token refrescado exitosamente');
-
-            // Reintentar la petición original con el nuevo token
-            const retryResult = await _deleteRaw(endpoint, newAccessToken);
-            if (retryResult.res.ok) {
-              console.log(`✅ Reintento exitoso después de refresh`);
-              // Guardar nuevo_token si está presente en la respuesta del reintento
-              if (retryResult.json && retryResult.json.nuevo_token) {
-                console.log('✅ Nuevo token recibido en reintento, guardando en localStorage...');
-                localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
-              }
-              return retryResult.json;
-            }
-            // Si el reintento falló, continuar con el error normal
-            res = retryResult.res;
-            json = retryResult.json;
-          }
-        } catch (refreshError) {
-          console.error('❌ Error al refrescar token:', refreshError);
+        // Guardar nuevo_token si está presente en la respuesta del reintento
+        if (retryResult.json && retryResult.json.nuevo_token) {
+          console.log('✅ Nuevo token recibido en reintento, guardando en localStorage...');
+          localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
         }
+
+        return retryResult.json;
       }
-    }
 
-    // Si llegamos aquí, no se pudo refrescar el token (o era un endpoint de auth)
-    // Solo limpiar tokens si NO es un endpoint de auth
-    if (!isAuthEndpoint) {
-      console.warn('⚠️ No se pudo refrescar el token. Limpiando tokens de autenticación...');
-      localStorage.removeItem('auth_access_token');
-      localStorage.removeItem('auth_refresh_token');
-      localStorage.removeItem('auth_usuario');
+      // Si el reintento falló, continuar con el error normal
+      res = retryResult.res;
+      json = retryResult.json;
+    } catch (refreshError) {
+      console.error('❌ Error al refrescar token:', refreshError);
 
-      // Lanzar error especial para que el componente lo capture
-      throw {
-        message: 'SESSION_EXPIRED',
-        isAuthError: true,
-        details: json
-      };
+      // Si el error es SESSION_EXPIRED, lanzar el error para que el componente lo maneje
+      if (refreshError.message === 'REFRESH_TOKEN_EXPIRED') {
+        throw {
+          message: 'SESSION_EXPIRED',
+          isAuthError: true,
+          details: json
+        };
+      }
     }
   }
 

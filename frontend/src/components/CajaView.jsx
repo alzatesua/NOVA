@@ -7,6 +7,7 @@ import CajaDashboard from './caja/CajaDashboard';
 import MovimientosTable from './caja/MovimientosTable';
 import RegistroMovimiento from './caja/RegistroMovimiento';
 import CuadreCaja from './caja/CuadreCaja';
+import ArqueoCaja from './caja/ArqueoCaja';
 import CajaMenor from './caja/CajaMenor';
 import { fetchSucursalesCaja } from '../services/api';
 import { showToast } from '../utils/toast';
@@ -229,6 +230,7 @@ export default function CajaView() {
     { value: 'general',    label: 'Vista General'  },
     { value: 'movimientos',label: 'Movimientos'    },
     { value: 'cuadre',     label: 'Cuadre de Caja' },
+    { value: 'arqueo',     label: 'Arqueo de Caja' },
     { value: 'caja_menor', label: 'Caja Menor'     },
   ];
   const filtroOptions = [
@@ -420,6 +422,17 @@ export default function CajaView() {
           {vista === 'cuadre' && (
             <div className="caja-section" key={`cuadre-${refreshKey}`}>
               <CuadreCaja
+                fecha={fecha}
+                isAdmin={isAdmin}
+                idSucursal={getSucursalFilter()}
+              />
+            </div>
+          )}
+
+          {/* Arqueo de Caja */}
+          {vista === 'arqueo' && (
+            <div className="caja-section" key={`arqueo-${refreshKey}`}>
+              <ArqueoCaja
                 fecha={fecha}
                 isAdmin={isAdmin}
                 idSucursal={getSucursalFilter()}

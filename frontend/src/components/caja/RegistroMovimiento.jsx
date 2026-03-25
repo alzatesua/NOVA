@@ -234,8 +234,14 @@ export default function RegistroMovimiento({ idSucursal, onRegistroExitoso, isDa
         showToast('error', msg);
       }
     } catch (err) {
+      // Si es un error de sesión expirada, no mostrar toast (el hook useSessionExpired se encarga)
+      if (err?.isAuthError || err?.message === 'SESSION_EXPIRED') {
+        console.warn('Sesión expirada, redirigiendo al login...');
+        return;
+      }
+
       const d = err.response?.data;
-      let msg = d?.message || d?.detail || 'Error al registrar el movimiento';
+      let msg = d?.message || d?.detail || err?.message || 'Error al registrar el movimiento';
       if (!msg && d && typeof d === 'object') {
         msg = Object.entries(d).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join('. ');
       }

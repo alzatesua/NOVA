@@ -49,6 +49,7 @@ function getTimeUntilExpiry(token) {
 
 /**
  * Refresca el token usando el refresh token
+ * @returns {Promise<boolean>} True si el refresh fue exitoso, False en caso contrario
  */
 async function refreshAccessToken() {
   const refreshToken = localStorage.getItem('auth_refresh_token');
@@ -68,6 +69,26 @@ async function refreshAccessToken() {
     });
 
     if (!response.ok) {
+      // Si el refresh token también expiró o es inválido
+      if (response.status === 401) {
+        console.error('❌ Refresh token expirado o inválido');
+
+        // Limpiar todos los tokens
+        localStorage.removeItem('auth_access_token');
+        localStorage.removeItem('auth_refresh_token');
+        localStorage.removeItem('auth_usuario');
+        localStorage.removeItem('token_usuario');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refresh_token');
+
+        // Disparar evento de sesión expirada
+        window.dispatchEvent(new CustomEvent('session:expired', {
+          detail: { message: 'SESSION_EXPIRED', isAuthError: true }
+        }));
+
+        return false;
+      }
+
       console.error('❌ Error al refrescar token:', response.status);
       return false;
     }
@@ -95,6 +116,9 @@ async function refreshAccessToken() {
     return false;
   } catch (error) {
     console.error('❌ Error al refrescar token (proactivo):', error);
+
+    // Si hay un error de red, no limpiar los tokens
+    // El sistema reactivo intentará refrescar en la próxima petición
     return false;
   }
 }
@@ -129,7 +153,11 @@ function scheduleNextRefresh() {
   // Si ya expiró, refrescar inmediatamente
   if (timeUntilExpiry === 0) {
     console.warn('⚠️ Token ya expirado, refrescando inmediatamente...');
-    refreshAccessToken();
+    refreshAccessToken().then(success => {
+      if (success) {
+        scheduleNextRefresh();
+      }
+    });
     return;
   }
 
@@ -146,11 +174,10 @@ function scheduleNextRefresh() {
       // Reprogramar el próximo refresh después de un refresh exitoso
       scheduleNextRefresh();
     } else {
-      // Si falló el refresh, esperar 1 minuto y reintentar
-      console.warn('⚠️ Refresh falló, reintentando en 1 minuto...');
-      refreshTimer = setTimeout(() => {
-        scheduleNextRefresh();
-      }, 60 * 1000);
+      // Si falló el refresh, detener el refresh proactivo
+      // El sistema reactivo se encargará de refrescar cuando sea necesario
+      console.warn('⚠️ Refresh falló, deteniendo refresh proactivo. El sistema reactivo se encargará.');
+      stopAutoRefresh();
     }
   }, timeUntilRefresh);
 }

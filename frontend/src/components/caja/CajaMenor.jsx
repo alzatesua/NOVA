@@ -230,8 +230,27 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
             total: parseFloat(balanceData.balance.total)
           });
         }
+      } else if (balanceRes.status === 401 || movsRes.status === 401) {
+        // Si es un error 401, limpiar tokens y disparar evento de sesión expirada
+        console.warn('Error 401 detectado en CajaMenor');
+        localStorage.removeItem('auth_access_token');
+        localStorage.removeItem('auth_refresh_token');
+        localStorage.removeItem('auth_usuario');
+        localStorage.removeItem('token_usuario');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refresh_token');
+
+        window.dispatchEvent(new CustomEvent('session:expired', {
+          detail: { message: 'SESSION_EXPIRED', isAuthError: true }
+        }));
+        return;
       }
     } catch (err) {
+      // Si es un error de sesión expirada, no mostrar toast
+      if (err?.isAuthError || err?.message === 'SESSION_EXPIRED') {
+        console.warn('Sesión expirada, redirigiendo al login...');
+        return;
+      }
       console.error(err);
     } finally {
       setLoading(false);
@@ -276,8 +295,14 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
       } else {
         showToast('error', res.message || 'Error al registrar');
       }
-    } catch {
-      showToast('error', 'Error al registrar el movimiento');
+    } catch (err) {
+      // Si es un error de sesión expirada, no mostrar toast (el hook useSessionExpired se encarga)
+      if (err?.isAuthError || err?.message === 'SESSION_EXPIRED') {
+        console.warn('Sesión expirada, redirigiendo al login...');
+        return;
+      }
+
+      showToast('error', err?.message || 'Error al registrar el movimiento');
     } finally {
       setSubmitting(false);
     }

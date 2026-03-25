@@ -72,8 +72,14 @@ export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursa
         console.error('❌ Error en respuesta:', response);
       }
     } catch (error) {
+      // Si es un error de sesión expirada, no mostrar toast (el hook useSessionExpired se encarga)
+      if (error?.isAuthError || error?.message === 'SESSION_EXPIRED') {
+        console.warn('Sesión expirada, redirigiendo al login...');
+        return;
+      }
+
       console.error('Error al cargar movimientos:', error);
-      showToast('error', 'Error al cargar los movimientos');
+      showToast('error', error?.message || 'Error al cargar los movimientos');
       setMovimientos([]);
     } finally {
       setLoading(false);

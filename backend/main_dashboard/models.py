@@ -2488,3 +2488,173 @@ class CalificacionProveedor(models.Model):
 # ============================================================================
 # FIN DEL MÓDULO DE PROVEEDORES
 # ============================================================================
+
+
+# ============================================================================
+# KARDEX DE INVENTARIO
+# ============================================================================
+# Kardex choices - Module level for reuse
+KARDEX_ESTADO_CHOICES = [
+    ('pendiente', 'Pendiente de Validación'),
+    ('validado', 'Validado'),
+    ('aplicado', 'Aplicado'),
+    ('rechazado', 'Rechazado'),
+]
+
+KARDEX_TIPO_DIFERENCIA_CHOICES = [
+    ('faltante', 'Faltante'),
+    ('sobrante', 'Sobrante'),
+    ('cuadrado', 'Cuadrado'),
+]
+
+class KardexAjuste(models.Model):
+    """Registro de ajustes de inventario realizados mediante Kardex"""
+
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente de Validación'),
+        ('validado', 'Validado'),
+        ('aplicado', 'Aplicado'),
+        ('rechazado', 'Rechazado'),
+    ]
+
+    sucursal = models.ForeignKey(
+        'Sucursales',
+        on_delete=models.CASCADE,
+        db_column='sucursal_id'
+    )
+
+    fecha_conteo = models.DateTimeField(
+        "Fecha del Conteo",
+        auto_now_add=True,
+        db_index=True
+    )
+
+    usuario_registro = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='kardex_registrados'
+    )
+
+    # Resumen del ajuste
+    total_productos = models.IntegerField(default=0)
+    productos_contados = models.IntegerField(default=0)
+    productos_cuadrados = models.IntegerField(default=0)
+    productos_con_diferencia = models.IntegerField(default=0)
+
+    porcentaje_precision = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0
+    )
+
+    valor_total_diferencias = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=0
+    )
+
+    sugerencia = models.TextField(blank=True, null=True)
+
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='pendiente'
+    )
+
+    usuario_valido = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='kardex_validados'
+    )
+
+    fecha_validacion = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    observaciones = models.TextField(blank=True, null=True)
+
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'kardex_ajustes'
+        verbose_name = 'Ajuste de Kardex'
+        verbose_name_plural = 'Ajustes de Kardex'
+        ordering = ('-fecha_conteo',)
+        indexes = [
+            models.Index(fields=['sucursal', '-fecha_conteo']),
+            models.Index(fields=['estado']),
+            models.Index(fields=['fecha_conteo']),
+        ]
+
+    def __str__(self):
+        return f"Kardex {self.fecha_conteo.strftime('%Y-%m-%d')} - {self.sucursal.nombre}"
+
+
+class KardexDiferencia(models.Model):
+    """Detalle de diferencias por producto en un ajuste de Kardex"""
+
+    kardex = models.ForeignKey(
+        KardexAjuste,
+        on_delete=models.CASCADE,
+        related_name='diferencias'
+    )
+
+    producto = models.ForeignKey(
+        'Producto',
+        on_delete=models.CASCADE,
+        related_name='diferencias_kardex'
+    )
+
+    cantidad_sistema = models.IntegerField(default=0)
+    cantidad_fisica = models.IntegerField(default=0)
+    diferencia = models.IntegerField(default=0)
+
+    tipo_diferencia = models.CharField(
+        max_length=20,
+        choices=KARDEX_TIPO_DIFERENCIA_CHOICES,
+        default='cuadrado'
+    )
+
+    valor_diferencia = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=0
+    )
+
+    # Información del producto al momento del ajuste (snapshot)
+    snapshot_nombre_producto = models.CharField(max_length=255)
+    snapshot_sku = models.CharField(max_length=100, blank=True, null=True)
+    snapshot_precio = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True
+    )
+
+    # Estado de revisión
+    revisado = models.BooleanField(default=False)
+    justificacion = models.TextField(blank=True, null=True)
+
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'kardex_diferencias'
+        verbose_name = 'Diferencia de Kardex'
+        verbose_name_plural = 'Diferencias de Kardex'
+        ordering = ['kardex', '-id']
+        indexes = [
+            models.Index(fields=['kardex', 'producto']),
+            models.Index(fields=['tipo_diferencia']),
+        ]
+
+    def __str__(self):
+        return f"{self.producto.nombre}: {self.diferencia} ({self.tipo_diferencia})"
+
+
+# ============================================================================
+# FIN DEL MÓDULO DE KARDEX
+# ============================================================================

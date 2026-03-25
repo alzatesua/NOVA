@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import ProductsTable from './ProductsTable';
 import ProductCard from './ProductCard';
+import KardexInline from './KardexInline';
 import {
   actualizarfila,
   createProduct,
@@ -33,6 +34,7 @@ import {
   TruckIcon,
   ArrowUpTrayIcon,
   XMarkIcon,
+  ClipboardDocumentListIcon,
 } from '@heroicons/react/24/solid';
 import Modal from '../components/Modal';
 
@@ -122,6 +124,7 @@ export default function ProductsView({
   const usuario = localStorage.getItem('usuario');
 
   // ——— Estados búsqueda & filtros ———
+  const [activeTab, setActiveTab] = useState('inventario'); // 'inventario' o 'kardex'
   const [searchTerm, setSearchTerm] = useState('');
   const [quickFilter, setQuickFilter] = useState('todos');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -207,6 +210,7 @@ export default function ProductsView({
         const productosMapeados = response.datos.map(p => ({
           ...p,
           id: p.id,
+          id_categoria: p.id_categoria,
           nombre: p.nombre,
           sku: p.sku,
           precio: p.precio,
@@ -960,6 +964,35 @@ export default function ProductsView({
         }
       `}</style>
       <section className="productos-root space-y-1">
+
+      {/* ——— Pestañas de navegación ——— */}
+      <div className="flex gap-2 border-b border-slate-200 dark:!border-slate-700 mb-6">
+        <button
+          onClick={() => setActiveTab('inventario')}
+          className={`px-6 py-3 font-semibold text-sm transition-colors ${
+            activeTab === 'inventario'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+          }`}
+        >
+          Inventario
+        </button>
+        <button
+          onClick={() => setActiveTab('kardex')}
+          className={`px-6 py-3 font-semibold text-sm transition-colors flex items-center gap-2 ${
+            activeTab === 'kardex'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+          }`}
+        >
+          <ClipboardDocumentListIcon style={{ width: 18, height: 18 }} />
+          Kardex
+        </button>
+      </div>
+
+      {/* ——— Contenido de Inventario ——— */}
+      {activeTab === 'inventario' && (
+        <>
       {/* ——— Cabecera: search + filtros rápidos + "Nuevo" ——— */}
       <div className="productos-header" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
         {/* Búsqueda + chips rápidos */}
@@ -2047,6 +2080,14 @@ export default function ProductsView({
       ) : (
         <ProductsTable products={filteredProducts} loading={loading} />
       )}
+        </>
+      )}
+
+      {/* ——— Contenido de Kardex ——— */}
+      {activeTab === 'kardex' && (
+        <KardexInline productos={products} />
+      )}
+
     </section>
     </>
   );

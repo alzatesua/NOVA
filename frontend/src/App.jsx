@@ -10,9 +10,18 @@ import TiendaPage from "./tienda/TiendaPage";
 // Importar servicio de refresh proactivo
 import { startAutoRefresh, stopAutoRefresh } from './services/tokenRefresh';
 
+// Importar hook de sesión expirada
+import { useSessionExpired } from './hooks/useSessionExpired';
+
 //estilos de notificacion
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+// Componente wrapper para manejar sesión expirada en rutas protegidas
+function SessionExpiredWrapper({ children }) {
+  useSessionExpired();
+  return children;
+}
 
 // Componente wrapper para verificar autenticación
 function RequireAuth({ children }) {
@@ -143,7 +152,9 @@ function App() {
           path="/dashboard"
           element={
             <RequireAuth>
-              <Dashboard />
+              <SessionExpiredWrapper>
+                <Dashboard />
+              </SessionExpiredWrapper>
             </RequireAuth>
           }
         />

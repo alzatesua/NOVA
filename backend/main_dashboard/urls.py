@@ -1,6 +1,6 @@
 # main_dashboard/urls.py
 
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
@@ -36,6 +36,9 @@ from .views import (
 # Importar vista de productos e-commerce
 from .views_productosEcomerce import ProductoView
 
+# Importar URLs de Kardex
+from .urls_kardex import urlpatterns as kardex_urlpatterns
+
 # Router DRF
 router = DefaultRouter()
 # REMOVER esta línea:
@@ -69,6 +72,9 @@ urlpatterns = [
 
     # NOTA: Las rutas de facturación están en urls_facturacion.py
     # y se incluyen en nova/urls.py con el prefijo 'api/facturacion/'
+
+    # Kardex de Inventario
+    path('kardex/', include((kardex_urlpatterns, 'kardex'))),
 ]
 
 # Agregar rutas del ViewSet (si tienes otros ViewSets)

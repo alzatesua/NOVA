@@ -189,7 +189,14 @@ export default function CajaDashboard({ fecha, isAdmin, idSucursal, isDark = fal
       const response = await fetchEstadisticasCaja(params);
       if (response?.success) setEstadisticas(response.data);
     } catch (error) {
-      showToast('error', 'Error al cargar las estadísticas de caja');
+      // Si es un error de sesión expirada, no mostrar toast (el hook useSessionExpired se encarga)
+      if (error?.isAuthError || error?.message === 'SESSION_EXPIRED') {
+        console.warn('Sesión expirada, redirigiendo al login...');
+        return;
+      }
+
+      // Para otros errores, mostrar el toast
+      showToast('error', error?.message || 'Error al cargar las estadísticas de caja');
       setEstadisticas({ saldo_inicial: 0, total_entradas: 0, total_salidas: 0, saldo_actual: 0 });
     } finally {
       setLoading(false);

@@ -31,6 +31,30 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
   const [mostrarModalArqueo, setMostrarModalArqueo] = useState(false);
   const [montoArqueo, setMontoArqueo] = useState('');
   const [submittingArqueo, setSubmittingArqueo] = useState(false);
+  const [vistaArqueo, setVistaArqueo] = useState('simple'); // 'simple' o 'detallado'
+
+  // Estados para arqueo detallado
+  const [denominaciones, setDenominaciones] = useState({
+    billetes: {
+      100000: { cantidad: '', valor: 100000 },
+      50000: { cantidad: '', valor: 50000 },
+      20000: { cantidad: '', valor: 20000 },
+      10000: { cantidad: '', valor: 10000 },
+      5000: { cantidad: '', valor: 5000 },
+      2000: { cantidad: '', valor: 2000 },
+      1000: { cantidad: '', valor: 1000 },
+    },
+    monedas: {
+      1000: { cantidad: '', valor: 1000 },
+      500: { cantidad: '', valor: 500 },
+      200: { cantidad: '', valor: 200 },
+      100: { cantidad: '', valor: 100 },
+    }
+  });
+  const [otrosMetodos, setOtrosMetodos] = useState({
+    targeta_regalo: '',
+    comprobantes_pago: ''
+  });
 
   useEffect(() => {
     cargarCuadre();
@@ -65,17 +89,103 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
         console.error('❌ Error en respuesta:', response);
       }
     } catch (error) {
+      // Si es un error de sesión expirada, no mostrar toast (el hook useSessionExpired se encarga)
+      if (error?.isAuthError || error?.message === 'SESSION_EXPIRED') {
+        console.warn('Sesión expirada, redirigiendo al login...');
+        return;
+      }
+
       console.error('Error al cargar cuadre de caja:', error);
-      showToast('error', 'Error al cargar el cuadre de caja');
+      showToast('error', error?.message || 'Error al cargar el cuadre de caja');
     } finally {
       setLoading(false);
     }
   };
 
+  // Calcular total del arqueo detallado
+  const calcularTotalArqueoDetallado = () => {
+    let total = 0;
+
+    // Sumar billetes
+    Object.entries(denominaciones.billetes).forEach(([denom, data]) => {
+      const cantidad = parseInt(data.cantidad) || 0;
+      total += cantidad * data.valor;
+    });
+
+    // Sumar monedas
+    Object.entries(denominaciones.monedas).forEach(([denom, data]) => {
+      const cantidad = parseInt(data.cantidad) || 0;
+      total += cantidad * data.valor;
+    });
+
+    // Sumar otros métodos
+    const targetaRegalo = parseFloat(otrosMetodos.targeta_regalo) || 0;
+    const comprobantes = parseFloat(otrosMetodos.comprobantes_pago) || 0;
+    total += targetaRegalo + comprobantes;
+
+    return total;
+  };
+
+  const actualizarDenominacion = (tipo, denominacion, valor) => {
+    setDenominaciones(prev => ({
+      ...prev,
+      [tipo]: {
+        ...prev[tipo],
+        [denominacion]: {
+          ...prev[tipo][denominacion],
+          cantidad: valor
+        }
+      }
+    }));
+  };
+
+  const actualizarOtroMetodo = (metodo, valor) => {
+    setOtrosMetodos(prev => ({
+      ...prev,
+      [metodo]: valor
+    }));
+  };
+
+  const limpiarArqueoDetallado = () => {
+    setDenominaciones({
+      billetes: {
+        100000: { cantidad: '', valor: 100000 },
+        50000: { cantidad: '', valor: 50000 },
+        20000: { cantidad: '', valor: 20000 },
+        10000: { cantidad: '', valor: 10000 },
+        5000: { cantidad: '', valor: 5000 },
+        2000: { cantidad: '', valor: 2000 },
+        1000: { cantidad: '', valor: 1000 },
+      },
+      monedas: {
+        1000: { cantidad: '', valor: 1000 },
+        500: { cantidad: '', valor: 500 },
+        200: { cantidad: '', valor: 200 },
+        100: { cantidad: '', valor: 100 },
+      }
+    });
+    setOtrosMetodos({
+      targeta_regalo: '',
+      comprobantes_pago: ''
+    });
+  };
+
   const realizarArqueo = async () => {
-    if (!montoArqueo || parseFloat(montoArqueo) < 0) {
-      showToast('error', 'Por favor ingresa un monto válido');
-      return;
+    let montoFinal = 0;
+
+    if (vistaArqueo === 'simple') {
+      if (!montoArqueo || parseFloat(montoArqueo) < 0) {
+        showToast('error', 'Por favor ingresa un monto válido');
+        return;
+      }
+      montoFinal = parseFloat(montoArqueo);
+    } else {
+      // Arqueo detallado
+      montoFinal = calcularTotalArqueoDetallado();
+      if (montoFinal <= 0) {
+        showToast('error', 'Por favor ingresa al menos una denominación');
+        return;
+      }
     }
 
     setSubmittingArqueo(true);
@@ -85,7 +195,7 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
         usuario: authData.usuario,
         subdominio: authData.subdominio,
         fecha: fecha,
-        monto_contado: parseFloat(montoArqueo),
+        monto_contado: montoFinal,
       };
 
       // Solo agregar id_sucursal si tiene un valor válido
@@ -99,13 +209,20 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
         showToast('success', 'Arqueo realizado exitosamente');
         setMostrarModalArqueo(false);
         setMontoArqueo('');
+        limpiarArqueoDetallado();
         cargarCuadre();
       } else {
         showToast(response.message || 'Error al realizar el arqueo', 'error');
       }
     } catch (error) {
+      // Si es un error de sesión expirada, no mostrar toast (el hook useSessionExpired se encarga)
+      if (error?.isAuthError || error?.message === 'SESSION_EXPIRED') {
+        console.warn('Sesión expirada, redirigiendo al login...');
+        return;
+      }
+
       console.error('Error al realizar arqueo:', error);
-      showToast('error', 'Error al realizar el arqueo');
+      showToast('error', error?.message || 'Error al realizar el arqueo');
     } finally {
       setSubmittingArqueo(false);
     }
@@ -223,10 +340,26 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
       </html>
     `;
 
-    const ventana = window.open('', '_blank');
-    ventana.document.write(contenido);
-    ventana.document.close();
-    ventana.print();
+    // Crear un Blob con el contenido HTML
+    const blob = new Blob([contenido], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+
+    // Abrir la nueva ventana con el contenido
+    const ventana = window.open(url, '_blank');
+
+    // Liberar la URL del objeto después de abrir la ventana
+    if (ventana) {
+      ventana.print();
+
+      // Limpiar la URL después de imprimir
+      ventana.addEventListener('afterprint', () => {
+        URL.revokeObjectURL(url);
+      }, { once: true });
+    } else {
+      // Si el popup fue bloqueado, limpiar la URL inmediatamente
+      URL.revokeObjectURL(url);
+      showToast('error', 'El popup fue bloqueado. Por favor permite los popups para esta función.');
+    }
   };
 
   return (
@@ -236,14 +369,7 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
           <div className="flex items-center justify-between">
             <CardTitle>Cuadre de Caja</CardTitle>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setMostrarModalArqueo(true)}
-              >
-                <CheckIcon className="mr-2" />
-                Realizar Arqueo
-              </Button>
+              
               <Button
                 variant="outline"
                 size="sm"
@@ -373,74 +499,7 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
         </CardContent>
       </Card>
 
-      {/* Modal para realizar arqueo */}
-      {mostrarModalArqueo && (
-        <Modal onClose={() => setMostrarModalArqueo(false)}>
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">Realizar Arqueo de Caja</h2>
-            <p className="text-muted-foreground">
-              Ingresa el monto real que tienes en caja. El sistema calculará la diferencia.
-            </p>
-
-            <div className="space-y-2">
-              <label htmlFor="montoArqueo" className="text-sm font-medium">
-                Monto Contado *
-              </label>
-              <input
-                id="montoArqueo"
-                type="number"
-                placeholder="0.00"
-                value={montoArqueo}
-                onChange={(e) => setMontoArqueo(e.target.value)}
-                min="0"
-                step="0.01"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-            </div>
-
-            {cuadre && (
-              <div className="p-4 rounded-lg bg-muted/50 space-y-2">
-                <div className="flex justify-between">
-                  <span>Saldo Esperado:</span>
-                  <span className="font-bold">{formatCurrency(cuadre.saldo_esperado)}</span>
-                </div>
-                {montoArqueo && (
-                  <div className="flex justify-between">
-                    <span>Diferencia:</span>
-                    <span className={`font-bold ${
-                      (parseFloat(montoArqueo) - cuadre.saldo_esperado) >= 0
-                        ? 'text-green-600 dark:text-green-400'
-                        : 'text-red-600 dark:text-red-400'
-                    }`}>
-                      {(parseFloat(montoArqueo) - cuadre.saldo_esperado) >= 0 ? '+' : ''}
-                      {formatCurrency(parseFloat(montoArqueo) - cuadre.saldo_esperado)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setMostrarModalArqueo(false);
-                  setMontoArqueo('');
-                }}
-                disabled={submittingArqueo}
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={realizarArqueo}
-                disabled={submittingArqueo || !montoArqueo}
-              >
-                {submittingArqueo ? 'Guardando...' : 'Confirmar Arqueo'}
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+     
     </>
   );
 }

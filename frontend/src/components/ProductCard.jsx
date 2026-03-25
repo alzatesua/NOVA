@@ -28,6 +28,7 @@ function ProductCard({
 }) {
   const {
     id,
+    id_categoria,
     categoria_nombre,
     descripcion,
     descripcion_larga,
@@ -51,6 +52,14 @@ function ProductCard({
   useEffect(() => {
     let mounted = true;
     setImageError(false);
+
+    // Si no hay imagenUrl, no intentar cargar — mostrar placeholder directo
+    if (!imagenUrl) {
+      setIsLoadingImage(false);
+      setImageError(true);
+      return;
+    }
+
     (async () => {
       try {
         const [url] = await obtenerImagenProducto({
@@ -62,7 +71,8 @@ function ProductCard({
         if (!mounted) return;
         setPreviewImage(`${url}?t=${Date.now()}`);
       } catch (err) {
-        if (mounted) showToast('error', err.message);
+        // No mostrar toast aquí — se llama por cada tarjeta visible y satura la UI
+        if (mounted) setImageError(true);
       } finally {
         if (mounted) setIsLoadingImage(false);
       }
@@ -74,6 +84,18 @@ function ProductCard({
   const handleImageChange = async e => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Resolver categoriaId desde múltiples posibles estructuras del producto
+    const categoriaId =
+      product.id_categoria ??
+      product.categoria?.id ??
+      product.categoria;
+
+    if (!categoriaId) {
+      showToast('error', 'Este producto no tiene categoría asignada');
+      return;
+    }
+
     setPreviewImage(URL.createObjectURL(file));
     setIsUploading(true);
     try {
@@ -82,11 +104,12 @@ function ProductCard({
         usuario,
         token,
         subdominio,
-        categoriaId: product.id_categoria,
+        categoriaId: Number(categoriaId), // forzar número para evitar "1" vs 1
         imagen: file
       });
       const imageUrl = `${newUrl}?t=${Date.now()}`;
       setPreviewImage(imageUrl);
+      setImageError(false);
       // Notificar al padre para actualizar el producto en la lista
       if (onImageUpdate) {
         onImageUpdate(id, imageUrl);
@@ -94,6 +117,9 @@ function ProductCard({
       showToast('success', 'Imagen subida con éxito');
     } catch (err) {
       showToast('error', err.message);
+      // Revertir el preview si falla
+      setPreviewImage(imagenUrl || null);
+      setImageError(!imagenUrl);
     } finally {
       setIsUploading(false);
     }

@@ -11,7 +11,7 @@ import { showToast } from '../utils/toast';
 import {
   ExclamationTriangleIcon, UserIcon, XMarkIcon, CheckIcon,
   CurrencyDollarIcon, CalendarIcon, DocumentTextIcon,
-  ChartBarIcon, UsersIcon, EyeIcon, PhotoIcon, ArrowPathIcon
+  ChartBarIcon, UsersIcon, EyeIcon, PhotoIcon, ArrowPathIcon, MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
 /* ─── Paleta ─────────────────────────────────────────────────────────── */
@@ -48,6 +48,33 @@ const Badge = ({ children, color = C.blue }) => (
 
 export default function MoraView() {
   const { usuario, tokenUsuario, subdominio } = useAuth();
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Detectar modo oscuro
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const isDark = document.documentElement.classList.contains('dark') ||
+                     document.body.classList.contains('dark-mode') ||
+                     localStorage.getItem('darkMode') === 'true';
+      setIsDarkMode(isDark);
+    };
+
+    checkDarkMode();
+
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+    const handleStorageChange = () => checkDarkMode();
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('darkModeChange', handleStorageChange);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('darkModeChange', handleStorageChange);
+    };
+  }, []);
 
   const [tabActiva, setTabActiva]           = useState('mora');
   const [clientesEnMora, setClientesEnMora] = useState([]);
@@ -60,6 +87,7 @@ export default function MoraView() {
   const [mostrarModalSoporte, setMostrarModalSoporte] = useState(false);
   const [soporteSeleccionado, setSoporteSeleccionado] = useState(null);
   const [procesando, setProcesando]         = useState(false);
+  const [busqueda, setBusqueda]             = useState('');
   const [formularioAbono, setFormularioAbono] = useState({
     monto: '', metodo_pago: 'efectivo', referencia: '', observaciones: '', soporte_pago: null
   });
@@ -136,51 +164,39 @@ export default function MoraView() {
     finally { setProcesando(false); }
   };
 
-  const lista = tabActiva === 'mora' ? clientesEnMora : clientesConDeuda;
-
-  /* ── Styles object ── */
-  const s = {
-    page:      { fontFamily: "'Inter', -apple-system, sans-serif", background: C.bg, minHeight: '100vh', display: 'flex', flexDirection: 'column' },
-    header:    { background: C.surface, borderBottom: `1px solid ${C.border}`, padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' },
-    tabBar:    { display: 'flex', gap: 2, background: C.bg, borderRadius: 8, padding: 3, border: `1px solid ${C.border}` },
-    tab: (on) => ({ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, transition: 'all .15s', background: on ? C.surface : 'transparent', color: on ? C.blue : C.textSub, boxShadow: on ? '0 1px 3px rgba(0,0,0,.07)' : 'none' }),
-    statGrid:  { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, padding: '16px 28px', background: C.surface, borderBottom: `1px solid ${C.border}` },
-    statCard: (accent) => ({ background: C.bg, borderRadius: 10, padding: '14px 16px', border: `1px solid ${C.border}`, borderLeft: `3px solid ${accent}` }),
-    main:      { flex: 1, padding: '20px 28px', display: 'grid', gap: 20, alignItems: 'start' },
-    panel:     { background: C.surface, borderRadius: 12, border: `1px solid ${C.border}`, overflow: 'hidden', boxShadow: '0 1px 2px rgba(0,0,0,.04)' },
-    panelHead: { padding: '13px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 10 },
-    card: (on) => ({ padding: '13px 15px', borderRadius: 10, cursor: 'pointer', border: `1px solid ${on ? C.blue : C.border}`, background: on ? C.blueLight : C.surface, transition: 'all .15s' }),
-    btnBlue:    { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 15px', background: C.blue, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' },
-    btnGreen:   { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 15px', background: C.green, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' },
-    btnGhost:   { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 15px', background: 'transparent', color: C.textMid, border: `1px solid ${C.border}`, borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' },
-    input:      { width: '100%', padding: '9px 12px', border: `1px solid ${C.border}`, borderRadius: 8, fontSize: 13, color: C.text, background: C.surface, outline: 'none', boxSizing: 'border-box' },
-    lbl:        { display: 'block', fontSize: 12, fontWeight: 600, color: C.textMid, marginBottom: 5 },
-  };
+  const lista = (tabActiva === 'mora' ? clientesEnMora : clientesConDeuda).filter(cliente => {
+    if (!busqueda) return true;
+    const searchTerm = busqueda.toLowerCase().trim();
+    return (
+      cliente.nombre?.toLowerCase().includes(searchTerm) ||
+      cliente.numero_documento?.toLowerCase().includes(searchTerm)
+    );
+  });
 
   return (
-    <div style={s.page}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}} .mora-card:hover{border-color:${C.blue}!important;box-shadow:0 2px 8px rgba(37,99,235,.1)}`}</style>
+    <div className="font-sans bg-gray-50 dark:!bg-slate-900 min-h-screen flex flex-col">
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}} .mora-card:hover{border-color:#2563eb!important;box-shadow:0 2px 8px rgba(37,99,235,.1)}`}</style>
 
       {/* ── HEADER ── */}
-      <div style={s.header}>
+      <div className="bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700 px-7 py-3 flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h2 style={{ fontSize: 17, fontWeight: 700, color: C.text, margin: 0 }}>Gestión de Crédito y Mora</h2>
-          <p style={{ fontSize: 12, color: C.textSub, margin: '2px 0 0' }}>Administra clientes en mora y control de deuda</p>
+          <h2 className="text-base font-bold text-gray-900 dark:!text-white m-0">Gestión de Crédito y Mora</h2>
+          <p className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5">Administra clientes en mora y control de deuda</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={s.tabBar}>
-            <button style={s.tab(tabActiva === 'mora')} onClick={() => setTabActiva('mora')}>
+        <div className="flex items-center gap-2">
+          <div className="flex gap-0.5 bg-gray-50 dark:!bg-slate-800 rounded-lg p-0.5 border border-gray-200 dark:!border-slate-700">
+            <button className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md border-0 cursor-pointer text-xs font-semibold transition-all ${tabActiva === 'mora' ? 'bg-white dark:!bg-slate-700 text-blue-600 dark:!text-blue-400 shadow-sm' : 'bg-transparent text-gray-500 dark:!text-slate-400'}`} onClick={() => setTabActiva('mora')}>
               <ExclamationTriangleIcon style={{ width: 14, height: 14 }} />
               Clientes en Mora
-              {clientesEnMora.length > 0 && <Badge color={C.blue}>{clientesEnMora.length}</Badge>}
+              {clientesEnMora.length > 0 && <Badge>{clientesEnMora.length}</Badge>}
             </button>
-            <button style={s.tab(tabActiva === 'deuda')} onClick={() => setTabActiva('deuda')}>
+            <button className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md border-0 cursor-pointer text-xs font-semibold transition-all ${tabActiva === 'deuda' ? 'bg-white dark:!bg-slate-700 text-blue-600 dark:!text-blue-400 shadow-sm' : 'bg-transparent text-gray-500 dark:!text-slate-400'}`} onClick={() => setTabActiva('deuda')}>
               <ChartBarIcon style={{ width: 14, height: 14 }} />
               Deuda General
-              {clientesConDeuda.length > 0 && <Badge color={C.blue}>{clientesConDeuda.length}</Badge>}
+              {clientesConDeuda.length > 0 && <Badge>{clientesConDeuda.length}</Badge>}
             </button>
           </div>
-          <button style={s.btnGhost} onClick={() => tabActiva === 'mora' ? cargarClientesEnMora() : cargarClientesConDeuda()}>
+          <button className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-transparent text-gray-700 dark:!text-slate-300 border border-gray-300 dark:!border-slate-600 rounded-lg text-xs font-semibold cursor-pointer hover:bg-gray-50 dark:hover:!bg-slate-800" onClick={() => tabActiva === 'mora' ? cargarClientesEnMora() : cargarClientesConDeuda()}>
             <ArrowPathIcon style={{ width: 13, height: 13 }} /> Actualizar
           </button>
         </div>
@@ -188,87 +204,118 @@ export default function MoraView() {
 
       {/* ── STAT CARDS ── */}
       {tabActiva === 'deuda' && resumenDeuda && (
-        <div style={s.statGrid}>
+        <div className="grid grid-cols-4 gap-3.5 px-7 py-4 bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700">
           {[
-            { label: 'Clientes con Deuda',  value: resumenDeuda.total_clientes_con_deuda,          accent: C.blue,  icon: UsersIcon },
-            { label: 'Deuda Total',          value: fmt(resumenDeuda.total_deuda_general),           accent: '#7c3aed', icon: CurrencyDollarIcon },
-            { label: 'En Mora',              value: fmt(resumenDeuda.total_deuda_mora),               accent: C.red,   icon: ExclamationTriangleIcon, sub: `${resumenDeuda.clientes_en_mora} clientes` },
-            { label: 'Crédito Vigente',      value: fmt(resumenDeuda.total_deuda_credito_vigente),    accent: C.green, icon: CheckIcon, sub: `${resumenDeuda.clientes_con_credito_vigente} clientes` },
+            { label: 'Clientes con Deuda',  value: resumenDeuda.total_clientes_con_deuda,          accent: 'bg-blue-600',  icon: UsersIcon },
+            { label: 'Deuda Total',          value: fmt(resumenDeuda.total_deuda_general),           accent: 'bg-purple-600', icon: CurrencyDollarIcon },
+            { label: 'En Mora',              value: fmt(resumenDeuda.total_deuda_mora),               accent: 'bg-red-600',   icon: ExclamationTriangleIcon, sub: `${resumenDeuda.clientes_en_mora} clientes` },
+            { label: 'Crédito Vigente',      value: fmt(resumenDeuda.total_deuda_credito_vigente),    accent: 'bg-green-600', icon: CheckIcon, sub: `${resumenDeuda.clientes_con_credito_vigente} clientes` },
           ].map((st, i) => (
-            <div key={i} style={s.statCard(st.accent)}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
-                <st.icon style={{ width: 14, height: 14, color: st.accent }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: C.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{st.label}</span>
+            <div key={i} className="bg-gray-50 dark:!bg-slate-800 rounded-lg p-3.5 border border-gray-200 dark:!border-slate-700 border-l-4" style={{ borderLeftColor: st.accent.replace('bg-', '').replace('-600', '') === 'blue' ? '#2563eb' : st.accent.replace('bg-', '').replace('-600', '') === 'purple' ? '#7c3aed' : st.accent.replace('bg-', '').replace('-600', '') === 'red' ? '#dc2626' : '#16a34a' }}>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <st.icon style={{ width: 14, height: 14 }} className={st.accent.replace('bg-', 'text-')} />
+                <span className="text-xs font-semibold text-gray-500 dark:!text-slate-400 uppercase tracking-wider">{st.label}</span>
               </div>
-              <div style={{ fontSize: 19, fontWeight: 700, color: C.text }}>{st.value}</div>
-              {st.sub && <div style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>{st.sub}</div>}
+              <div className="text-lg font-bold text-gray-900 dark:!text-white">{st.value}</div>
+              {st.sub && <div className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5">{st.sub}</div>}
             </div>
           ))}
         </div>
       )}
 
+      {/* ── BARRA DE BÚSQUEDA ── */}
+      <div className="px-7 py-3 bg-gray-50 dark:!bg-slate-800 border-b border-gray-200 dark:!border-slate-700">
+        <div className="relative">
+          <MagnifyingGlassIcon style={{ width: 18, height: 18 }} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Buscar por nombre o número de documento..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:!bg-slate-900 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+          />
+          {busqueda && (
+            <button
+              onClick={() => setBusqueda('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:!text-slate-300"
+            >
+              <XMarkIcon style={{ width: 16, height: 16 }} />
+            </button>
+          )}
+        </div>
+        {(tabActiva === 'deuda' ? clientesConDeuda : clientesEnMora).length > 0 && (
+          <p className="text-xs text-gray-500 dark:!text-slate-400 mt-2">
+            Mostrando {lista.length} de {(tabActiva === 'deuda' ? clientesConDeuda : clientesEnMora).length} clientes
+            {busqueda && ` (filtrado por "${busqueda}")`}
+          </p>
+        )}
+      </div>
+
       {/* ── CONTENT ── */}
-      <div style={{ ...s.main, gridTemplateColumns: clienteSeleccionado && resumenCliente ? '1fr 355px' : '1fr' }}>
+      <div className="flex-1 px-7 py-5 grid gap-5 items-start" style={{ gridTemplateColumns: clienteSeleccionado && resumenCliente ? '1fr 340px' : '1fr' }}>
 
         {/* Lista */}
-        <div style={s.panel}>
-          <div style={s.panelHead}>
-            <div style={{ width: 30, height: 30, borderRadius: 8, background: C.blueLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div className="bg-white dark:!bg-slate-900 rounded-xl border border-gray-200 dark:!border-slate-700 overflow-hidden shadow-sm">
+          <div className="px-4.5 py-3 border-b border-gray-200 dark:!border-slate-700 flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:!bg-blue-900/20 flex items-center justify-center flex-shrink-0">
               {tabActiva === 'mora'
-                ? <ExclamationTriangleIcon style={{ width: 15, height: 15, color: C.blue }} />
-                : <ChartBarIcon style={{ width: 15, height: 15, color: C.blue }} />
+                ? <ExclamationTriangleIcon style={{ width: 16, height: 16 }} className="text-blue-600 dark:!text-blue-400" />
+                : <ChartBarIcon style={{ width: 16, height: 16 }} className="text-blue-600 dark:!text-blue-400" />
               }
             </div>
             <div>
-              <p style={{ fontSize: 14, fontWeight: 600, color: C.text, margin: 0 }}>{tabActiva === 'mora' ? 'Clientes en Mora' : 'Clientes con Deuda'}</p>
-              <p style={{ fontSize: 12, color: C.textSub, margin: '1px 0 0' }}>{lista.length} {tabActiva === 'mora' ? 'pendientes' : 'con deuda'}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:!text-white m-0">{tabActiva === 'mora' ? 'Clientes en Mora' : 'Clientes con Deuda'}</p>
+              <p className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5">{lista.length} {tabActiva === 'mora' ? 'pendientes' : 'con deuda'}</p>
             </div>
           </div>
 
-          <div style={{ padding: 14 }}>
+          <div className="p-3.5">
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '48px 0' }}>
-                <div style={{ width: 28, height: 28, border: `2px solid ${C.border}`, borderTopColor: C.blue, borderRadius: '50%', animation: 'spin .7s linear infinite', margin: '0 auto 10px' }} />
-                <p style={{ color: C.textMuted, fontSize: 13 }}>Cargando…</p>
+              <div className="text-center py-12">
+                <div className="w-7 h-7 border-2 border-gray-300 dark:!border-slate-600 border-t-blue-600 rounded-full animate-spin mx-auto mb-2.5"></div>
+                <p className="text-gray-500 dark:!text-slate-400 text-sm">Cargando…</p>
               </div>
             ) : lista.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '52px 0' }}>
-                <div style={{ width: 52, height: 52, borderRadius: '50%', background: C.greenLight, border: `1px solid ${C.greenBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-                  <CheckIcon style={{ width: 26, height: 26, color: C.green }} />
+              <div className="text-center py-13">
+                <div className="w-13 h-13 rounded-full bg-green-50 dark:!bg-green-900/20 border border-green-200 dark:!border-green-800 flex items-center justify-center mx-auto mb-3">
+                  <CheckIcon style={{ width: 26, height: 26 }} className="text-green-600 dark:!text-green-400" />
                 </div>
-                <p style={{ fontSize: 14, fontWeight: 600, color: C.textMid, margin: 0 }}>{tabActiva === 'mora' ? '¡Sin clientes en mora!' : '¡Sin clientes con deuda!'}</p>
-                <p style={{ fontSize: 12, color: C.textMuted, margin: '4px 0 0' }}>{tabActiva === 'mora' ? 'Todos los clientes están al día' : 'Todos han pagado'}</p>
+                <p className="text-sm font-semibold text-gray-700 dark:!text-slate-300 m-0">{tabActiva === 'mora' ? '¡Sin clientes en mora!' : '¡Sin clientes con deuda!'}</p>
+                <p className="text-xs text-gray-500 dark:!text-slate-400 mt-1">{tabActiva === 'mora' ? 'Todos los clientes están al día' : 'Todos han pagado'}</p>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+              <div className="flex flex-col gap-2">
                 {lista.map((cl) => {
                   const sel = clienteSeleccionado?.cliente_id === cl.cliente_id;
                   return (
-                    <div key={cl.cliente_id} className="mora-card" style={s.card(sel)} onClick={() => verDetallesCliente(cl)}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 11 }}>
-                        <div style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, background: sel ? '#dbeafe' : C.bg, border: `1px solid ${sel ? C.blueBorder : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <UserIcon style={{ width: 16, height: 16, color: sel ? C.blue : C.textSub }} />
+                    <div key={cl.cliente_id} className="mora-card p-3 rounded-lg cursor-pointer border transition-all"
+                      className={sel ? 'bg-blue-50 dark:!bg-blue-900/20 border-blue-500 dark:!border-blue-500' : 'bg-white dark:!bg-slate-900 border-gray-200 dark:!border-slate-700 hover:border-blue-500 dark:hover:!border-blue-500'}
+                      onClick={() => verDetallesCliente(cl)}>
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center"
+                          className={sel ? 'bg-blue-100 dark:!bg-blue-800 border-blue-200 dark:!border-blue-700' : 'bg-gray-50 dark:!bg-slate-800 border-gray-200 dark:!border-slate-700'}>
+                          <UserIcon style={{ width: 16, height: 16 }} className={sel ? 'text-blue-600 dark:!text-blue-400' : 'text-gray-500 dark:!text-slate-400'} />
                         </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 2 }}>
-                            <span style={{ fontWeight: 600, fontSize: 14, color: C.text }}>{cl.nombre}</span>
-                            {cl.en_mora && <Badge color={C.red}>MORA</Badge>}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="font-semibold text-sm text-gray-900 dark:!text-white">{cl.nombre}</span>
+                            {cl.en_mora && <Badge color="#dc2626">MORA</Badge>}
                           </div>
-                          <p style={{ fontSize: 12, color: C.textSub, margin: '0 0 7px' }}>{cl.numero_documento}</p>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                          <p className="text-xs text-gray-500 dark:!text-slate-400 mb-2">{cl.numero_documento}</p>
+                          <div className="flex items-center gap-3 flex-wrap">
                             {tabActiva === 'mora' ? (
                               <>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, color: cl.dias_mora > 60 ? C.red : C.amber }}>
+                                <span className={`flex items-center gap-1 text-xs font-semibold ${cl.dias_mora > 60 ? 'text-red-600 dark:!text-red-400' : 'text-amber-600 dark:!text-amber-400'}`}>
                                   <CalendarIcon style={{ width: 12, height: 12 }} />{cl.dias_mora} días en mora
                                 </span>
-                                {cl.fecha_ultimo_pago && <span style={{ fontSize: 12, color: C.textMuted }}>Último pago: {fmtDate(cl.fecha_ultimo_pago)}</span>}
+                                {cl.fecha_ultimo_pago && <span className="text-xs text-gray-500 dark:!text-slate-400">Último pago: {fmtDate(cl.fecha_ultimo_pago)}</span>}
                               </>
                             ) : (
                               <>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: C.blue }}>
+                                <span className="flex items-center gap-1 text-sm font-bold text-blue-600 dark:!text-blue-400">
                                   <CurrencyDollarIcon style={{ width: 12, height: 12 }} />{fmt(cl.deuda_total)}
                                 </span>
-                                {cl.total_facturas_credito !== '0' && <span style={{ fontSize: 12, color: C.textMuted }}>Facturas: {fmt(cl.total_facturas_credito)}</span>}
+                                {cl.total_facturas_credito !== '0' && <span className="text-xs text-gray-500 dark:!text-slate-400">Facturas: {fmt(cl.total_facturas_credito)}</span>}
                                 {cl.total_productos_fiados > 0 && <Badge color="#7c3aed">{cl.total_productos_fiados} productos</Badge>}
                               </>
                             )}
@@ -285,42 +332,42 @@ export default function MoraView() {
 
         {/* Panel Detalles */}
         {clienteSeleccionado && resumenCliente && (
-          <div style={{ ...s.panel, position: 'sticky', top: 20 }}>
-            <div style={{ ...s.panelHead, justifyContent: 'space-between' }}>
+          <div className="bg-white dark:!bg-slate-900 rounded-xl border border-gray-200 dark:!border-slate-700 overflow-hidden shadow-sm sticky top-5">
+            <div className="px-4.5 py-3 border-b border-gray-200 dark:!border-slate-700 flex justify-between items-center">
               <div>
-                <p style={{ fontSize: 13, fontWeight: 600, color: C.text, margin: 0 }}>Detalle del Cliente</p>
-                <p style={{ fontSize: 12, color: C.textSub, margin: '1px 0 0', maxWidth: 220, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{resumenCliente.cliente.nombre}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:!text-white m-0">Detalle del Cliente</p>
+                <p className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5 max-w-[220px] whitespace-nowrap overflow-hidden text-ellipsis">{resumenCliente.cliente.nombre}</p>
               </div>
-              <button onClick={cerrarDetalles} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: C.textMuted, borderRadius: 6 }}>
-                <XMarkIcon style={{ width: 17, height: 17 }} />
+              <button onClick={cerrarDetalles} className="bg-transparent border-0 cursor-pointer p-1 text-gray-500 dark:!text-slate-400 rounded-md hover:bg-gray-100 dark:hover:!bg-slate-800">
+                <XMarkIcon style={{ width: 18, height: 18 }} />
               </button>
             </div>
 
-            <div style={{ padding: 14, maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="p-3.5 max-h-[calc(100vh-200px)] overflow-y-auto flex flex-col gap-3">
 
               {/* Resumen */}
-              <div style={{ background: C.bg, borderRadius: 9, padding: '11px 13px', border: `1px solid ${C.border}` }}>
+              <div className="bg-gray-50 dark:!bg-slate-800 rounded-lg p-3 border border-gray-200 dark:!border-slate-700">
                 {[
-                  resumenCliente.cliente.dias_mora !== undefined && { label: 'Días en mora', value: `${resumenCliente.cliente.dias_mora} días`, color: resumenCliente.cliente.dias_mora > 30 ? C.red : C.green },
-                  resumenCliente.deuda && { label: 'Deuda total', value: fmt(resumenCliente.deuda.deuda_total), color: C.blue, bold: true },
-                  resumenCliente.deuda && { label: 'Facturas crédito', value: fmt(resumenCliente.deuda.total_facturas_credito) },
-                  resumenCliente.deuda && { label: 'Total abonado', value: fmt(resumenCliente.deuda.total_abonos) },
-                  resumenCliente.cliente.fecha_ultimo_pago && { label: 'Último pago', value: fmtDate(resumenCliente.cliente.fecha_ultimo_pago) },
+                  resumenCliente.cliente.dias_mora !== undefined && { label: 'Días en mora', value: `${resumenCliente.cliente.dias_mora} días`, color: resumenCliente.cliente.dias_mora > 30 ? 'text-red-600 dark:!text-red-400' : 'text-green-600 dark:!text-green-400' },
+                  resumenCliente.deuda && { label: 'Deuda total', value: fmt(resumenCliente.deuda.deuda_total), color: 'text-blue-600 dark:!text-blue-400', bold: true },
+                  resumenCliente.deuda && { label: 'Facturas crédito', value: fmt(resumenCliente.deuda.total_facturas_credito), color: 'text-gray-900 dark:!text-white' },
+                  resumenCliente.deuda && { label: 'Total abonado', value: fmt(resumenCliente.deuda.total_abonos), color: 'text-gray-900 dark:!text-white' },
+                  resumenCliente.cliente.fecha_ultimo_pago && { label: 'Último pago', value: fmtDate(resumenCliente.cliente.fecha_ultimo_pago), color: 'text-gray-900 dark:!text-white' },
                 ].filter(Boolean).map((row, i, arr) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: i < arr.length - 1 ? `1px solid ${C.border}` : 'none' }}>
-                    <span style={{ fontSize: 12, color: C.textSub }}>{row.label}</span>
-                    <span style={{ fontSize: 13, fontWeight: row.bold ? 700 : 600, color: row.color || C.text }}>{row.value}</span>
+                  <div key={i} className="flex justify-between items-center py-1.5 border-b last:border-0 border-gray-200 dark:!border-slate-700">
+                    <span className="text-xs text-gray-600 dark:!text-slate-400">{row.label}</span>
+                    <span className={`text-sm ${row.bold ? 'font-bold' : 'font-semibold'} ${row.color}`}>{row.value}</span>
                   </div>
                 ))}
               </div>
 
               {/* Acciones */}
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button style={{ ...s.btnGreen, flex: 1, justifyContent: 'center' }} onClick={() => setMostrarModalAbono(true)} disabled={procesando}>
+              <div className="flex gap-2">
+                <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 text-white border-0 rounded-lg text-xs font-semibold cursor-pointer hover:bg-blue-700 disabled:opacity-60" onClick={() => setMostrarModalAbono(true)} disabled={procesando}>
                   <CurrencyDollarIcon style={{ width: 14, height: 14 }} /> Registrar Abono
                 </button>
                 {tabActiva === 'mora' && resumenCliente.cliente.dias_mora > 30 && (
-                  <button style={{ ...s.btnBlue, flex: 1, justifyContent: 'center' }} onClick={handleQuitarMora} disabled={procesando}>
+                  <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-green-600 text-white border-0 rounded-lg text-xs font-semibold cursor-pointer hover:bg-green-700 disabled:opacity-60" onClick={handleQuitarMora} disabled={procesando}>
                     <CheckIcon style={{ width: 14, height: 14 }} /> Quitar Mora
                   </button>
                 )}
@@ -328,74 +375,74 @@ export default function MoraView() {
 
               {/* Abonos */}
               <div>
-                <p style={{ fontSize: 13, fontWeight: 600, color: C.text, margin: '0 0 7px' }}>Historial de Abonos</p>
+                <p className="text-sm font-semibold text-gray-900 dark:!text-white mb-2">Historial de Abonos</p>
                 {resumenCliente.abonos?.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  <div className="flex flex-col gap-1.5">
                     {resumenCliente.abonos.map((ab) => (
-                      <div key={ab.abono_id || ab.id} style={{ background: C.greenLight, border: `1px solid ${C.greenBorder}`, borderRadius: 8, padding: '9px 11px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div key={ab.abono_id || ab.id} className="bg-green-50 dark:!bg-green-900/20 border border-green-200 dark:!border-green-800 rounded-lg p-2.5">
+                        <div className="flex justify-between items-center">
                           <div>
-                            <p style={{ fontWeight: 700, color: C.green, fontSize: 13, margin: 0 }}>{fmt(ab.monto)}</p>
-                            <p style={{ fontSize: 11, color: C.textMuted, margin: '1px 0 0' }}>{fmtDate(ab.fecha_abono)}</p>
+                            <p className="font-bold text-green-600 dark:!text-green-400 text-sm m-0">{fmt(ab.monto)}</p>
+                            <p className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5">{fmtDate(ab.fecha_abono)}</p>
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <Badge color={C.green}>{ab.metodo_pago}</Badge>
+                          <div className="flex items-center gap-1.5">
+                            <Badge color="#16a34a">{ab.metodo_pago}</Badge>
                             {ab.soporte_pago && (
                               <button onClick={() => { setSoporteSeleccionado(ab.soporte_pago); setMostrarModalSoporte(true); }}
-                                style={{ background: C.blueLight, border: 'none', borderRadius: 6, padding: '3px 5px', cursor: 'pointer', color: C.blue }}>
+                                className="bg-blue-50 dark:!bg-blue-900/20 border-0 rounded-md p-1 cursor-pointer text-blue-600 dark:!text-blue-400 hover:bg-blue-100 dark:hover:!bg-blue-900/30">
                                 <EyeIcon style={{ width: 12, height: 12 }} />
                               </button>
                             )}
                           </div>
                         </div>
-                        {ab.observaciones && <p style={{ fontSize: 11, color: C.textSub, margin: '5px 0 0', fontStyle: 'italic' }}>"{ab.observaciones}"</p>}
-                        {ab.registrado_por && <p style={{ fontSize: 11, color: C.textMuted, margin: '2px 0 0' }}>Por: {ab.registrado_por}</p>}
+                        {ab.observaciones && <p className="text-xs text-gray-600 dark:!text-slate-400 mt-1 italic">"{ab.observaciones}"</p>}
+                        {ab.registrado_por && <p className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5">Por: {ab.registrado_por}</p>}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div style={{ textAlign: 'center', padding: 14, background: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
-                    <p style={{ fontSize: 12, color: C.textMuted, margin: 0 }}>Sin abonos registrados</p>
+                  <div className="text-center p-3.5 bg-gray-50 dark:!bg-slate-800 rounded-lg border border-gray-200 dark:!border-slate-700">
+                    <p className="text-xs text-gray-500 dark:!text-slate-400 m-0">Sin abonos registrados</p>
                   </div>
                 )}
               </div>
 
               {/* Productos fiados */}
               <div>
-                <p style={{ fontSize: 13, fontWeight: 600, color: C.text, margin: '0 0 7px' }}>Productos a Crédito</p>
+                <p className="text-sm font-semibold text-gray-900 dark:!text-white mb-2">Productos a Crédito</p>
                 {resumenCliente.productos_fiados?.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  <div className="flex flex-col gap-1.5">
                     {resumenCliente.productos_fiados.map((pr, i) => (
-                      <div key={`${pr.factura_id}-${i}`} style={{ background: C.blueLight, border: `1px solid ${C.blueBorder}`, borderRadius: 8, padding: '9px 11px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                          <div style={{ flex: 1 }}>
-                            <p style={{ fontWeight: 600, color: C.text, fontSize: 13, margin: 0 }}>{pr.producto_nombre}</p>
-                            <div style={{ display: 'flex', gap: 8, marginTop: 3, flexWrap: 'wrap' }}>
-                              <span style={{ fontSize: 11, color: C.textSub }}>SKU: {pr.producto_sku || '—'}</span>
-                              <span style={{ fontSize: 11, color: C.textSub }}>x{pr.cantidad}</span>
-                              <span style={{ fontSize: 11, color: C.textSub }}>{fmt(pr.valor_unitario)} c/u</span>
+                      <div key={`${pr.factura_id}-${i}`} className="bg-blue-50 dark:!bg-blue-900/20 border border-blue-200 dark:!border-blue-800 rounded-lg p-2.5">
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="flex-1">
+                            <p className="font-semibold text-gray-900 dark:!text-white text-sm m-0">{pr.producto_nombre}</p>
+                            <div className="flex gap-2 mt-1 flex-wrap">
+                              <span className="text-xs text-gray-600 dark:!text-slate-400">SKU: {pr.producto_sku || '—'}</span>
+                              <span className="text-xs text-gray-600 dark:!text-slate-400">x{pr.cantidad}</span>
+                              <span className="text-xs text-gray-600 dark:!text-slate-400">{fmt(pr.valor_unitario)} c/u</span>
                             </div>
                           </div>
-                          <p style={{ fontWeight: 700, color: C.blue, fontSize: 13, margin: 0 }}>{fmt(pr.valor_total)}</p>
+                          <p className="font-bold text-blue-600 dark:!text-blue-400 text-sm m-0">{fmt(pr.valor_total)}</p>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 7, paddingTop: 7, borderTop: `1px solid ${C.blueBorder}` }}>
-                          <span style={{ fontSize: 11, color: C.textMuted }}>Factura: {pr.numero_factura}</span>
-                          <span style={{ fontSize: 11, color: C.textMuted }}>{fmtDate(pr.fecha_venta)}</span>
+                        <div className="flex justify-between mt-2 pt-2 border-t border-blue-200 dark:!border-blue-800">
+                          <span className="text-xs text-gray-500 dark:!text-slate-400">Factura: {pr.numero_factura}</span>
+                          <span className="text-xs text-gray-500 dark:!text-slate-400">{fmtDate(pr.fecha_venta)}</span>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div style={{ textAlign: 'center', padding: 14, background: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
-                    <p style={{ fontSize: 12, color: C.textMuted, margin: 0 }}>Sin productos a crédito</p>
+                  <div className="text-center p-3.5 bg-gray-50 dark:!bg-slate-800 rounded-lg border border-gray-200 dark:!border-slate-700">
+                    <p className="text-xs text-gray-500 dark:!text-slate-400 m-0">Sin productos a crédito</p>
                   </div>
                 )}
               </div>
 
               {resumenCliente.total_abonado && resumenCliente.total_abonado !== '0' && (
-                <div style={{ background: C.greenLight, border: `1px solid ${C.greenBorder}`, borderRadius: 9, padding: '11px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: C.green }}>Total Abonado</span>
-                  <span style={{ fontSize: 17, fontWeight: 800, color: C.green }}>{fmt(resumenCliente.total_abonado)}</span>
+                <div className="bg-green-50 dark:!bg-green-900/20 border border-green-200 dark:!border-green-800 rounded-lg p-3 flex justify-between items-center">
+                  <span className="text-sm font-semibold text-green-600 dark:!text-green-400">Total Abonado</span>
+                  <span className="text-base font-extrabold text-green-600 dark:!text-green-400">{fmt(resumenCliente.total_abonado)}</span>
                 </div>
               )}
             </div>
@@ -405,34 +452,34 @@ export default function MoraView() {
 
       {/* ── MODAL ABONO ── */}
       {mostrarModalAbono && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,.45)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
-          <div style={{ background: C.surface, borderRadius: 14, boxShadow: '0 20px 50px rgba(0,0,0,.14)', maxWidth: 450, width: '100%', overflow: 'hidden' }}>
-            <div style={{ padding: '16px 20px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="fixed inset-0 bg-gray-900/45 dark:!bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:!bg-slate-900 rounded-xl shadow-2xl max-w-sm w-full overflow-hidden">
+            <div className="px-5 py-4 border-b border-gray-200 dark:!border-slate-700 flex justify-between items-center">
               <div>
-                <p style={{ fontSize: 15, fontWeight: 700, color: C.text, margin: 0 }}>Registrar Abono</p>
-                <p style={{ fontSize: 12, color: C.textSub, margin: '2px 0 0' }}>{clienteSeleccionado?.nombre}</p>
+                <p className="text-sm font-bold text-gray-900 dark:!text-white m-0">Registrar Abono</p>
+                <p className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5">{clienteSeleccionado?.nombre}</p>
               </div>
-              <button onClick={() => setMostrarModalAbono(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.textMuted, padding: 4, borderRadius: 6 }}>
-                <XMarkIcon style={{ width: 17, height: 17 }} />
+              <button onClick={() => setMostrarModalAbono(false)} className="bg-transparent border-0 cursor-pointer p-1 text-gray-500 dark:!text-slate-400 rounded-md hover:bg-gray-100 dark:hover:!bg-slate-800">
+                <XMarkIcon style={{ width: 18, height: 18 }} />
               </button>
             </div>
 
-            <form onSubmit={handleCrearAbono} style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{ background: C.blueLight, border: `1px solid ${C.blueBorder}`, borderRadius: 9, padding: '10px 13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: C.blue }}>Deuda Total</span>
-                <span style={{ fontSize: 16, fontWeight: 800, color: C.blueDark }}>{fmt(resumenCliente?.deuda?.deuda_total || 0)}</span>
+            <form onSubmit={handleCrearAbono} className="p-5 flex flex-col gap-3.5">
+              <div className="bg-blue-50 dark:!bg-blue-900/20 border border-blue-200 dark:!border-blue-800 rounded-lg p-2.5 flex justify-between items-center">
+                <span className="text-xs font-semibold text-blue-600 dark:!text-blue-400">Deuda Total</span>
+                <span className="text-base font-extrabold text-blue-700 dark:!text-blue-300">{fmt(resumenCliente?.deuda?.deuda_total || 0)}</span>
               </div>
 
               <div>
-                <label style={s.lbl}>Monto del Abono *</label>
-                <input type="number" step="0.01" min="0" max={resumenCliente?.deuda?.deuda_total || ''} placeholder="0" required style={s.input}
+                <label className="block text-xs font-semibold text-gray-700 dark:!text-slate-300 mb-1">Monto del Abono *</label>
+                <input type="number" step="0.01" min="0" max={resumenCliente?.deuda?.deuda_total || ''} placeholder="0" required className="w-full px-3 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white bg-white dark:!bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={formularioAbono.monto} onChange={e => setFormularioAbono({ ...formularioAbono, monto: e.target.value })} />
-                <p style={{ fontSize: 11, color: C.textMuted, margin: '3px 0 0' }}>Máximo: {fmt(resumenCliente?.deuda?.deuda_total || 0)}</p>
+                <p className="text-xs text-gray-500 dark:!text-slate-400 mt-1">Máximo: {fmt(resumenCliente?.deuda?.deuda_total || 0)}</p>
               </div>
 
               <div>
-                <label style={s.lbl}>Método de Pago</label>
-                <select style={s.input} value={formularioAbono.metodo_pago}
+                <label className="block text-xs font-semibold text-gray-700 dark:!text-slate-300 mb-1">Método de Pago</label>
+                <select className="w-full px-3 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white bg-white dark:!bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" value={formularioAbono.metodo_pago}
                   onChange={e => setFormularioAbono({ ...formularioAbono, metodo_pago: e.target.value, soporte_pago: null })}>
                   {['efectivo','transferencia','nequi','tarjeta','otro'].map(m => (
                     <option key={m} value={m}>{m.charAt(0).toUpperCase() + m.slice(1)}</option>
@@ -442,35 +489,35 @@ export default function MoraView() {
 
               {['transferencia','nequi','tarjeta','otro'].includes(formularioAbono.metodo_pago) && (
                 <div>
-                  <label style={s.lbl}>Soporte de Pago *</label>
-                  <input type="file" accept="image/*,.pdf" required style={{ ...s.input, paddingTop: 7 }}
+                  <label className="block text-xs font-semibold text-gray-700 dark:!text-slate-300 mb-1">Soporte de Pago *</label>
+                  <input type="file" accept="image/*,.pdf" required className="w-full px-3 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white bg-white dark:!bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 pt-1.5"
                     onChange={e => {
                       const file = e.target.files[0];
                       if (file?.size > 5 * 1024 * 1024) { showToast('error', 'Máximo 5MB'); e.target.value = ''; return; }
                       if (file) setFormularioAbono({ ...formularioAbono, soporte_pago: file });
                     }} />
-                  {formularioAbono.soporte_pago && <p style={{ fontSize: 11, color: C.green, margin: '3px 0 0' }}>✓ {formularioAbono.soporte_pago.name}</p>}
-                  <p style={{ fontSize: 11, color: C.textMuted, margin: '3px 0 0' }}>JPG, PNG, PDF — máx. 5 MB</p>
+                  {formularioAbono.soporte_pago && <p className="text-xs text-green-600 dark:!text-green-400 mt-1">✓ {formularioAbono.soporte_pago.name}</p>}
+                  <p className="text-xs text-gray-500 dark:!text-slate-400 mt-1">JPG, PNG, PDF — máx. 5 MB</p>
                 </div>
               )}
 
               <div>
-                <label style={s.lbl}>Referencia (opcional)</label>
-                <input type="text" placeholder="Número de recibo" style={s.input}
+                <label className="block text-xs font-semibold text-gray-700 dark:!text-slate-300 mb-1">Referencia (opcional)</label>
+                <input type="text" placeholder="Número de recibo" className="w-full px-3 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white bg-white dark:!bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={formularioAbono.referencia} onChange={e => setFormularioAbono({ ...formularioAbono, referencia: e.target.value })} />
               </div>
 
               <div>
-                <label style={s.lbl}>Observaciones (opcional)</label>
-                <textarea rows={2} placeholder="Notas sobre el abono…" style={{ ...s.input, resize: 'none' }}
+                <label className="block text-xs font-semibold text-gray-700 dark:!text-slate-300 mb-1">Observaciones (opcional)</label>
+                <textarea rows={2} placeholder="Notas sobre el abono…" className="w-full px-3 py-2 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white bg-white dark:!bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   value={formularioAbono.observaciones} onChange={e => setFormularioAbono({ ...formularioAbono, observaciones: e.target.value })} />
               </div>
 
-              <div style={{ display: 'flex', gap: 9, paddingTop: 2 }}>
-                <button type="button" style={{ ...s.btnGhost, flex: 1, justifyContent: 'center' }} onClick={() => setMostrarModalAbono(false)} disabled={procesando}>Cancelar</button>
-                <button type="submit" style={{ ...s.btnGreen, flex: 1, justifyContent: 'center', opacity: procesando ? .6 : 1 }} disabled={procesando}>
+              <div className="flex gap-2 pt-0.5">
+                <button type="button" className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-transparent text-gray-700 dark:!text-slate-300 border border-gray-300 dark:!border-slate-600 rounded-lg text-xs font-semibold cursor-pointer hover:bg-gray-50 dark:hover:!bg-slate-800" onClick={() => setMostrarModalAbono(false)} disabled={procesando}>Cancelar</button>
+                <button type="submit" className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 text-white border-0 rounded-lg text-xs font-semibold cursor-pointer hover:bg-blue-700 disabled:opacity-60" disabled={procesando}>
                   {procesando
-                    ? <><div style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> Procesando…</>
+                    ? <><div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Procesando…</>
                     : <><CheckIcon style={{ width: 14, height: 14 }} /> Registrar Abono</>
                   }
                 </button>
@@ -482,46 +529,46 @@ export default function MoraView() {
 
       {/* ── MODAL SOPORTE ── */}
       {mostrarModalSoporte && soporteSeleccionado && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
-          <div style={{ background: C.surface, borderRadius: 14, boxShadow: '0 20px 50px rgba(0,0,0,.16)', maxWidth: 780, width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <div style={{ padding: '16px 20px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: C.blueLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <PhotoIcon style={{ width: 15, height: 15, color: C.blue }} />
+        <div className="fixed inset-0 bg-gray-900/50 dark:!bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:!bg-slate-900 rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="px-5 py-4 border-b border-gray-200 dark:!border-slate-700 flex justify-between items-center flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:!bg-blue-900/20 flex items-center justify-center">
+                  <PhotoIcon style={{ width: 16, height: 16 }} className="text-blue-600 dark:!text-blue-400" />
                 </div>
                 <div>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: C.text, margin: 0 }}>Soporte de Pago</p>
-                  <p style={{ fontSize: 12, color: C.textSub, margin: '1px 0 0' }}>Comprobante del abono</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:!text-white m-0">Soporte de Pago</p>
+                  <p className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5">Comprobante del abono</p>
                 </div>
               </div>
               <button onClick={() => { setMostrarModalSoporte(false); setSoporteSeleccionado(null); }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.textMuted, padding: 4, borderRadius: 6 }}>
-                <XMarkIcon style={{ width: 17, height: 17 }} />
+                className="bg-transparent border-0 cursor-pointer p-1 text-gray-500 dark:!text-slate-400 rounded-md hover:bg-gray-100 dark:hover:!bg-slate-800">
+                <XMarkIcon style={{ width: 18, height: 18 }} />
               </button>
             </div>
 
-            <div style={{ flex: 1, overflow: 'auto', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="flex-1 overflow-auto p-5 flex items-center justify-center">
               {soporteSeleccionado.toLowerCase().endsWith('.pdf') ? (
-                <object data={soporteSeleccionado} type="application/pdf" style={{ width: '100%', minHeight: 500, borderRadius: 9, border: `1px solid ${C.border}` }}>
-                  <div style={{ textAlign: 'center', padding: 28 }}>
-                    <p style={{ color: C.textSub, marginBottom: 12 }}>No se puede previsualizar el PDF</p>
-                    <a href={soporteSeleccionado} target="_blank" rel="noopener noreferrer" style={{ ...s.btnBlue, textDecoration: 'none', display: 'inline-flex' }}>
+                <object data={soporteSeleccionado} type="application/pdf" className="w-full min-h-[500px] rounded-lg border border-gray-200 dark:!border-slate-700">
+                  <div className="text-center p-7">
+                    <p className="text-gray-600 dark:!text-slate-400 mb-3">No se puede previsualizar el PDF</p>
+                    <a href={soporteSeleccionado} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white border-0 rounded-lg text-xs font-semibold cursor-pointer hover:bg-blue-700 no-underline">
                       <DocumentTextIcon style={{ width: 14, height: 14 }} /> Abrir PDF
                     </a>
                   </div>
                 </object>
               ) : (
                 <img src={soporteSeleccionado} alt="Soporte de pago"
-                  style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 9, border: `1px solid ${C.border}`, boxShadow: '0 4px 16px rgba(0,0,0,.07)' }}
+                  className="max-w-full max-h-full rounded-lg border border-gray-200 dark:!border-slate-700 shadow-sm"
                   onError={e => { e.target.src = '/placeholder-image.png'; }} />
               )}
             </div>
 
-            <div style={{ padding: '13px 20px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 9, justifyContent: 'flex-end', flexShrink: 0 }}>
-              <a href={soporteSeleccionado} download={`soporte_${Date.now()}`} style={{ ...s.btnBlue, textDecoration: 'none' }}>
+            <div className="px-5 py-3 border-t border-gray-200 dark:!border-slate-700 flex gap-2 justify-end flex-shrink-0">
+              <a href={soporteSeleccionado} download={`soporte_${Date.now()}`} className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white border-0 rounded-lg text-xs font-semibold cursor-pointer hover:bg-blue-700 no-underline">
                 <DocumentTextIcon style={{ width: 14, height: 14 }} /> Descargar
               </a>
-              <button style={s.btnGhost} onClick={() => { setMostrarModalSoporte(false); setSoporteSeleccionado(null); }}>Cerrar</button>
+              <button className="inline-flex items-center gap-1.5 px-3 py-2 bg-transparent text-gray-700 dark:!text-slate-300 border border-gray-300 dark:!border-slate-600 rounded-lg text-xs font-semibold cursor-pointer hover:bg-gray-50 dark:hover:!bg-slate-800" onClick={() => { setMostrarModalSoporte(false); setSoporteSeleccionado(null); }}>Cerrar</button>
             </div>
           </div>
         </div>
