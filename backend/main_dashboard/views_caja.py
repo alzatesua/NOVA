@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.db import transaction
 from decimal import Decimal
 
-from .models import MovimientoCaja, ArqueoCaja, Factura, Pago, Sucursales
+from .models import MovimientoCaja, ArqueoCaja, Factura, Pago, Sucursales, SolicitudAperturaCaja
 from .serializers import (
     MovimientoCajaSerializer,
     MovimientoCajaCreateSerializer,
@@ -241,6 +241,30 @@ def registrar_movimiento(request):
         alias = mixin._resolve_alias(request)
         user = mixin._tenant_user
 
+        # ── VALIDACIÓN: Verificar que la caja esté abierta ──
+        from datetime import datetime
+        fecha_movimiento = request.data.get('fecha')
+        if fecha_movimiento:
+            fecha = datetime.strptime(fecha_movimiento, '%Y-%m-%d').date()
+        else:
+            fecha = timezone.now().date()
+
+        id_sucursal = request.data.get('id_sucursal')
+
+        # Si no hay sucursal especificada, usar la del usuario
+        if not id_sucursal and user and user.id_sucursal_default:
+            id_sucursal = user.id_sucursal_default_id
+
+        # Verificar si la caja está cerrada
+        if id_sucursal:
+            if not ArqueoCaja.caja_esta_abierta(id_sucursal, fecha, alias):
+                logger.warning(f"⚠️ Intento de registrar movimiento en caja cerrada - Sucursal: {id_sucursal}, Fecha: {fecha}")
+                return Response({
+                    'success': False,
+                    'message': 'La caja está cerrada para esta fecha. No se pueden registrar movimientos.',
+                    'error_code': 'CAJA_CERRADA'
+                }, status=status.HTTP_403_FORBIDDEN)
+
         # ── DEBUG: Log de datos recibidos ──
         logger.info(f"📥 Datos recibidos en registrar_movimiento: {request.data}")
         logger.info(f"📥 es_caja_menor en request.data: {request.data.get('es_caja_menor')}")
@@ -338,14 +362,16 @@ def cuadre_caja(request):
 
         logger.info(f"Generando cuadre de caja para fecha: {fecha}")
 
-        # Filtrar por sucursal si se proporciona
+        # Obtener sucursal (usar la del usuario si no se proporciona)
         id_sucursal = request.data.get('id_sucursal')
-        print(f"DEBUG CUADRE - id_sucursal recibido: {id_sucursal} (tipo: {type(id_sucursal)})")
-        print(f"DEBUG CUADRE - Todos los datos: {request.data}")
+        if not id_sucursal and user and user.id_sucursal_default:
+            id_sucursal = user.id_sucursal_default_id
+            logger.info(f"Usando sucursal por defecto del usuario: {id_sucursal}")
+
         sucursal_filter = {}
         if id_sucursal:
             sucursal_filter['sucursal_id'] = id_sucursal
-            print(f"DEBUG CUADRE - Filtrando por sucursal_id: {id_sucursal}")
+            logger.info(f"Filtrando por sucursal_id: {id_sucursal}")
 
         # Obtener saldo inicial
         ultimo_arqueo_query = ArqueoCaja.objects.using(alias).filter(
@@ -495,11 +521,16 @@ def realizar_arqueo(request):
 
         logger.info(f"Realizando arqueo de caja para fecha: {fecha}, monto: {monto_contado}")
 
-        # Filtrar por sucursal si se proporciona
+        # Obtener sucursal (usar la del usuario si no se proporciona)
         id_sucursal = request.data.get('id_sucursal')
+        if not id_sucursal and user and user.id_sucursal_default:
+            id_sucursal = user.id_sucursal_default_id
+            logger.info(f"Realizar arqueo - Usando sucursal por defecto del usuario: {id_sucursal}")
+
         sucursal_filter = {}
         if id_sucursal:
             sucursal_filter['sucursal_id'] = id_sucursal
+            logger.info(f"Realizar arqueo - Filtrando por sucursal_id: {id_sucursal}")
 
         # Obtener saldo inicial
         ultimo_arqueo_query = ArqueoCaja.objects.using(alias).filter(
@@ -552,9 +583,12 @@ def realizar_arqueo(request):
             if sucursal_obj:
                 arqueo_existente.sucursal = sucursal_obj
             arqueo_existente.save(using=alias)
+
+            # Cerrar la caja automáticamente
+            arqueo_existente.cerrar_caja(user)
             arqueo = arqueo_existente
         else:
-            # Crear nuevo arqueo
+            # Crear nuevo arqueo con caja cerrada
             arqueo = ArqueoCaja.objects.using(alias).create(
                 fecha=fecha,
                 saldo_inicial=saldo_inicial,
@@ -563,8 +597,14 @@ def realizar_arqueo(request):
                 saldo_esperado=saldo_esperado,
                 monto_contado=monto_contado,
                 usuario=user,
-                sucursal=sucursal_obj
+                sucursal=sucursal_obj,
+                estado_caja='cerrada'  # CERRAR LA CAJA automáticamente
             )
+
+            # Cerrar la caja estableciendo fecha y usuario
+            arqueo.cerrar_caja(user)
+
+        logger.info(f"✅ Arqueo realizado y caja cerrada - Fecha: {fecha}, Sucursal: {id_sucursal or 'default'}, Usuario: {user.usuario if user else 'N/A'}")
 
         # Serializar y retornar
         serializer = ArqueoCajaSerializer(arqueo)
@@ -830,3 +870,574 @@ def listar_sucursales_caja(request):
             'success': False,
             'message': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verificar_estado_caja(request):
+    """
+    Verifica si la caja está abierta o cerrada para una fecha y sucursal específicas.
+
+    Body esperado:
+    {
+        "usuario": "...",
+        "token": "...",
+        "subdominio": "...",
+        "fecha": "2024-01-15",     # opcional, por defecto hoy
+        "id_sucursal": 1            # opcional, usa sucursal del usuario
+    }
+
+    Retorna:
+    {
+        "success": true,
+        "caja_abierta": true/false,
+        "estado": "abierta"/"cerrada",
+        "fecha_cierre": "2024-01-15T18:30:00"  # si está cerrada
+    }
+    """
+    try:
+        mixin = CajaTenantMixin()
+        alias = mixin._resolve_alias(request)
+        user = mixin._tenant_user
+
+        fecha_str = request.data.get('fecha')
+        if fecha_str:
+            from datetime import datetime
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        else:
+            fecha = timezone.now().date()
+
+        id_sucursal = request.data.get('id_sucursal')
+
+        # Si no hay sucursal especificada, usar la del usuario
+        if not id_sucursal and user and user.id_sucursal_default:
+            id_sucursal = user.id_sucursal_default_id
+            logger.info(f"Usando sucursal por defecto del usuario: {id_sucursal}")
+
+        if not id_sucursal:
+            return Response({
+                'success': False,
+                'message': 'No se pudo determinar la sucursal. El usuario no tiene sucursal por defecto.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Buscar el arqueo más reciente para esta fecha y sucursal
+        logger.info(f"🔍 Buscando arqueo para sucursal_id={id_sucursal}, fecha={fecha}")
+
+        arqueo = ArqueoCaja.objects.using(alias).filter(
+            sucursal_id=id_sucursal,
+            fecha=fecha
+        ).order_by('-fecha_hora_registro').first()
+
+        logger.info(f"🔍 Resultado búsqueda arqueo: {arqueo}")
+        if arqueo:
+            logger.info(f"   - ID: {arqueo.id}")
+            logger.info(f"   - estado_caja: {arqueo.estado_caja}")
+            logger.info(f"   - sucursal_id: {arqueo.sucursal_id}")
+            logger.info(f"   - fecha_hora_registro: {arqueo.fecha_hora_registro}")
+
+        # Si no hay arqueo con sucursal, intentar buscar ANY arqueo de esa fecha (fallback)
+        if not arqueo:
+            logger.warning(f"⚠️ No se encontró arqueo con sucursal_id={id_sucursal}, buscando sin filtro de sucursal...")
+            todos_los_arqueos = ArqueoCaja.objects.using(alias).filter(
+                fecha=fecha
+            ).order_by('-fecha_hora_registro')
+
+            logger.info(f"🔍 Total de arqueos para fecha {fecha}: {todos_los_arqueos.count()}")
+            for a in todos_los_arqueos[:5]:  # Mostrar primeros 5
+                logger.info(f"   - Arqueo ID={a.id}, sucursal_id={a.sucursal_id}, estado={a.estado_caja}")
+
+            # Si solo hay un arqueo para esa fecha, usarlo aunque no tenga sucursal
+            if todos_los_arqueos.count() == 1:
+                arqueo = todos_los_arqueos.first()
+                logger.info(f"✅ Usando único arqueo disponible (sin sucursal): ID={arqueo.id}, estado={arqueo.estado_caja}")
+
+        if not arqueo:
+            # No hay arqueo, la caja está abierta
+            logger.info(f"✅ No hay arqueo - Caja ABIERTA (por defecto)")
+            return Response({
+                'success': True,
+                'caja_abierta': True,
+                'estado': 'abierta',
+                'message': 'No hay arqueo registrado para esta fecha'
+            }, status=status.HTTP_200_OK)
+
+        caja_abierta = arqueo.estado_caja == 'abierta'
+        logger.info(f"{'✅ Caja ABIERTA' if caja_abierta else '🔒 Caja CERRADA'} - estado: {arqueo.estado_caja}")
+
+        response_data = {
+            'success': True,
+            'caja_abierta': caja_abierta,
+            'estado': arqueo.estado_caja,
+        }
+
+        if not caja_abierta:
+            response_data['fecha_cierre'] = arqueo.fecha_hora_cierre.isoformat() if arqueo.fecha_hora_cierre else None
+            response_data['cerrado_por'] = arqueo.cerrado_por.usuario if arqueo.cerrado_por else None
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    except ValueError as e:
+        logger.error(f"Error en verificar_estado_caja (ValueError): {str(e)}")
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_401_UNAUTHORIZED)
+    except Exception as e:
+        logger.error(f"Error en verificar_estado_caja: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def abrir_caja(request):
+    """
+    Abre la caja para una fecha y sucursal específicas.
+    Solo administradores pueden reabrir una caja cerrada.
+
+    Body esperado:
+    {
+        "usuario": "...",
+        "token": "...",
+        "subdominio": "...",
+        "fecha": "2024-01-15",     # opcional, por defecto hoy
+        "id_sucursal": 1            # requerido
+    }
+
+    Retorna:
+    {
+        "success": true,
+        "message": "Caja abierta exitosamente"
+    }
+    """
+    try:
+        mixin = CajaTenantMixin()
+        alias = mixin._resolve_alias(request)
+        user = mixin._tenant_user
+
+        # Verificar que el usuario sea administrador
+        if user.rol != 'admin':
+            return Response({
+                'success': False,
+                'message': 'Solo los administradores pueden reabrir la caja'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        fecha_str = request.data.get('fecha')
+        if fecha_str:
+            from datetime import datetime
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        else:
+            fecha = timezone.now().date()
+
+        id_sucursal = request.data.get('id_sucursal')
+        if not id_sucursal:
+            return Response({
+                'success': False,
+                'message': 'El id_sucursal es requerido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Buscar el arqueo más reciente para esta fecha y sucursal
+        arqueo = ArqueoCaja.objects.using(alias).filter(
+            sucursal_id=id_sucursal,
+            fecha=fecha
+        ).order_by('-fecha_hora_registro').first()
+
+        if not arqueo:
+            return Response({
+                'success': False,
+                'message': 'No hay arqueo para esta fecha'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Abrir la caja
+        arqueo.abrir_caja(user)
+
+        logger.info(f"✅ Caja reabierta - Sucursal: {id_sucursal}, Fecha: {fecha}, Por: {user.usuario}")
+
+        return Response({
+            'success': True,
+            'message': 'Caja abierta exitosamente'
+        }, status=status.HTTP_200_OK)
+
+    except ValueError as e:
+        logger.error(f"Error en abrir_caja (ValueError): {str(e)}")
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_401_UNAUTHORIZED)
+    except Exception as e:
+        logger.error(f"Error en abrir_caja: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ============================================================================
+# SOLICITUDES DE APERTURA DE CAJA
+# ============================================================================
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def crear_solicitud_apertura(request):
+    """
+    Crea una solicitud de apertura de caja.
+    Los usuarios no-admin pueden solicitar que se abra una caja cerrada.
+
+    Body esperado:
+    {
+        "usuario": "...",
+        "token": "...",
+        "subdominio": "...",
+        "id_sucursal": 1,
+        "fecha": "2024-01-15",
+        "motivo": "Necesito facturar una venta"
+    }
+
+    Retorna:
+    {
+        "success": true,
+        "solicitud": {...}
+    }
+    """
+    try:
+        from .serializers import SolicitudAperturaCajaCreateSerializer, SolicitudAperturaCajaSerializer
+
+        mixin = CajaTenantMixin()
+        alias = mixin._resolve_alias(request)
+        user = mixin._tenant_user
+
+        # No admins - ellos pueden abrir directamente
+        if user.rol == 'admin':
+            return Response({
+                'success': False,
+                'message': 'Los administradores pueden abrir la caja directamente'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        fecha_str = request.data.get('fecha')
+        if fecha_str:
+            from datetime import datetime
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        else:
+            fecha = timezone.now().date()
+
+        id_sucursal = request.data.get('id_sucursal')
+        motivo = request.data.get('motivo')
+
+        if not id_sucursal:
+            return Response({
+                'success': False,
+                'message': 'El id_sucursal es requerido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if not motivo:
+            return Response({
+                'success': False,
+                'message': 'El motivo es requerido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verificar que la caja esté cerrada
+        if ArqueoCaja.caja_esta_abierta(id_sucursal, fecha, alias):
+            return Response({
+                'success': False,
+                'message': 'La caja ya está abierta para esta fecha'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Buscar la sucursal
+        from .models import Sucursales
+        try:
+            sucursal = Sucursales.objects.using(alias).get(id=id_sucursal)
+        except Sucursales.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Sucursal no encontrada'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Verificar si ya existe una solicitud pendiente para esta caja y fecha
+        from .models import SolicitudAperturaCaja
+        solicitud_existente = SolicitudAperturaCaja.objects.using(alias).filter(
+            sucursal=sucursal,
+            fecha=fecha,
+            estado='pendiente'
+        ).first()
+
+        if solicitud_existente:
+            return Response({
+                'success': False,
+                'message': 'Ya existe una solicitud pendiente para esta fecha y sucursal',
+                'solicitud_existente': SolicitudAperturaCajaSerializer(solicitud_existente).data
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Crear la solicitud
+        solicitud = SolicitudAperturaCaja.objects.using(alias).create(
+            solicitante=user,
+            sucursal=sucursal,
+            fecha=fecha,
+            motivo=motivo
+        )
+
+        logger.info(f"📤 Solicitud de apertura creada - ID: {solicitud.id}, Sucursal: {sucursal.nombre}, Fecha: {fecha}, Solicitante: {user.usuario}")
+
+        return Response({
+            'success': True,
+            'message': 'Solicitud creada exitosamente',
+            'solicitud': SolicitudAperturaCajaSerializer(solicitud).data
+        }, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        logger.error(f"Error en crear_solicitud_apertura: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def listar_solicitudes_pendientes(request):
+    """
+    Lista las solicitudes de apertura pendientes.
+    Solo administradores pueden ver estas solicitudes.
+
+    Query params:
+    - subdominio: requerido
+    - usuario: requerido
+    - token: requerido
+
+    Retorna:
+    {
+        "success": true,
+        "solicitudes": [...]
+    }
+    """
+    try:
+        from .serializers import SolicitudAperturaCajaSerializer
+
+        mixin = CajaTenantMixin()
+        alias = mixin._resolve_alias(request)
+        user = mixin._tenant_user
+
+        # Solo admins
+        if user.rol != 'admin':
+            return Response({
+                'success': False,
+                'message': 'Solo los administradores pueden ver las solicitudes'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        from .models import SolicitudAperturaCaja
+        solicitudes = SolicitudAperturaCaja.objects.using(alias).filter(
+            estado='pendiente'
+        ).select_related('solicitante', 'sucursal', 'aprobado_por').order_by('-creada_en')
+
+        serializer = SolicitudAperturaCajaSerializer(solicitudes, many=True)
+
+        return Response({
+            'success': True,
+            'solicitudes': serializer.data
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error en listar_solicitudes_pendientes: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def aprobar_solicitud(request):
+    """
+    Aprueba una solicitud de apertura de caja.
+    Solo administradores pueden aprobar solicitudes.
+
+    Body esperado:
+    {
+        "usuario": "...",
+        "token": "...",
+        "subdominio": "...",
+        "solicitud_id": 1
+    }
+
+    Retorna:
+    {
+        "success": true,
+        "message": "Solicitud aprobada y caja abierta"
+    }
+    """
+    try:
+        mixin = CajaTenantMixin()
+        alias = mixin._resolve_alias(request)
+        user = mixin._tenant_user
+
+        # Solo admins
+        if user.rol != 'admin':
+            return Response({
+                'success': False,
+                'message': 'Solo los administradores pueden aprobar solicitudes'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        solicitud_id = request.data.get('solicitud_id')
+        if not solicitud_id:
+            return Response({
+                'success': False,
+                'message': 'El solicitud_id es requerido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        from .models import SolicitudAperturaCaja
+        try:
+            solicitud = SolicitudAperturaCaja.objects.using(alias).get(id=solicitud_id)
+        except SolicitudAperturaCaja.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Solicitud no encontrada'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        if solicitud.estado != 'pendiente':
+            return Response({
+                'success': False,
+                'message': f'La solicitud ya fue {solicitud.get_estado_display()}'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Aprobar la solicitud (esto también abre la caja)
+        solicitud.aprobar(user)
+
+        logger.info(f"✅ Solicitud de apertura aprobada - ID: {solicitud.id}, Sucursal: {solicitud.sucursal.nombre}, Fecha: {solicitud.fecha}, Por: {user.usuario}")
+
+        return Response({
+            'success': True,
+            'message': 'Solicitud aprobada y caja abierta exitosamente'
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error en aprobar_solicitud: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def rechazar_solicitud(request):
+    """
+    Rechaza una solicitud de apertura de caja.
+    Solo administradores pueden rechazar solicitudes.
+
+    Body esperado:
+    {
+        "usuario": "...",
+        "token": "...",
+        "subdominio": "...",
+        "solicitud_id": 1,
+        "observaciones": "No se puede abrir porque..."  // opcional
+    }
+
+    Retorna:
+    {
+        "success": true,
+        "message": "Solicitud rechazada"
+    }
+    """
+    try:
+        mixin = CajaTenantMixin()
+        alias = mixin._resolve_alias(request)
+        user = mixin._tenant_user
+
+        # Solo admins
+        if user.rol != 'admin':
+            return Response({
+                'success': False,
+                'message': 'Solo los administradores pueden rechazar solicitudes'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        solicitud_id = request.data.get('solicitud_id')
+        if not solicitud_id:
+            return Response({
+                'success': False,
+                'message': 'El solicitud_id es requerido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        observaciones = request.data.get('observaciones', '')
+
+        from .models import SolicitudAperturaCaja
+        try:
+            solicitud = SolicitudAperturaCaja.objects.using(alias).get(id=solicitud_id)
+        except SolicitudAperturaCaja.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Solicitud no encontrada'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        if solicitud.estado != 'pendiente':
+            return Response({
+                'success': False,
+                'message': f'La solicitud ya fue {solicitud.get_estado_display()}'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Rechazar la solicitud
+        solicitud.rechazar(user, observaciones)
+
+        logger.info(f"❌ Solicitud de apertura rechazada - ID: {solicitud.id}, Sucursal: {solicitud.sucursal.nombre}, Fecha: {solicitud.fecha}, Por: {user.usuario}")
+
+        return Response({
+            'success': True,
+            'message': 'Solicitud rechazada'
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error en rechazar_solicitud: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def listar_solicitudes_usuario(request):
+    """
+    Lista las solicitudes del usuario actual (para ver el estado de sus solicitudes).
+
+    Query params:
+    - subdominio: requerido
+    - usuario: requerido
+    - token: requerido
+
+    Retorna:
+    {
+        "success": true,
+        "solicitudes": [...]
+    }
+    """
+    try:
+        from .serializers import SolicitudAperturaCajaSerializer
+
+        mixin = CajaTenantMixin()
+        alias = mixin._resolve_alias(request)
+        user = mixin._tenant_user
+
+        from .models import SolicitudAperturaCaja
+        solicitudes = SolicitudAperturaCaja.objects.using(alias).filter(
+            solicitante=user
+        ).select_related('sucursal', 'aprobado_por').order_by('-creada_en')
+
+        serializer = SolicitudAperturaCajaSerializer(solicitudes, many=True)
+
+        return Response({
+            'success': True,
+            'solicitudes': serializer.data
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error en listar_solicitudes_usuario: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ============================================================================
+# FIN DE SOLICITUDES DE APERTURA DE CAJA
+# ============================================================================

@@ -411,6 +411,42 @@ class FacturaViewSet(FacturacionTenantMixin, viewsets.ModelViewSet):
             ).first() if usuario_str else None
             logger.info(f"Usuario resuelto al inicio: {usuario_obj.usuario if usuario_obj else 'None'}")
 
+            # VALIDACIÓN: Verificar que la caja esté abierta antes de crear factura
+            from .models import ArqueoCaja
+
+            # Obtener sucursal de la factura
+            id_sucursal = request.data.get('sucursal')
+            if not id_sucursal and usuario_obj:
+                id_sucursal = getattr(usuario_obj, 'id_sucursal_default_id', None)
+
+            if id_sucursal:
+                fecha_factura = timezone.now().date()
+
+                # Verificar si la caja está cerrada
+                if not ArqueoCaja.caja_esta_abierta(id_sucursal, fecha_factura, alias):
+                    logger.warning(f"Intento de crear factura con caja cerrada - Sucursal: {id_sucursal}, Fecha: {fecha_factura}")
+
+                    # Obtener información del estado de la caja para el mensaje
+                    arqueo = ArqueoCaja.objects.using(alias).filter(
+                        sucursal_id=id_sucursal,
+                        fecha=fecha_factura
+                    ).order_by('-fecha_hora_registro').first()
+
+                    error_data = {
+                        'success': False,
+                        'message': 'La caja está cerrada. No se pueden crear facturas.',
+                        'error_code': 'CAJA_CERRADA',
+                        'sucursal_id': id_sucursal,
+                        'fecha': fecha_factura.isoformat()
+                    }
+
+                    if arqueo and arqueo.fecha_hora_cierre:
+                        error_data['cerrada_el'] = arqueo.fecha_hora_cierre.isoformat()
+                        if arqueo.cerrado_por:
+                            error_data['cerrado_por'] = arqueo.cerrado_por.usuario
+
+                    return Response(error_data, status=status.HTTP_403_FORBIDDEN)
+
             # Log valores específicos para debug
             logger.info(f"total_iva valor: {request.data.get('total_iva')} (tipo: {type(request.data.get('total_iva')).__name__})")
             detalles = request.data.get('detalles', [])

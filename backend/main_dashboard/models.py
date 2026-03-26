@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 import threading
 
@@ -1743,6 +1743,46 @@ class ArqueoCaja(models.Model):
     # Observaciones
     observaciones = models.TextField(blank=True, null=True)
 
+    # Control de estado de caja
+    ESTADO_CAJA_CHOICES = [
+        ('abierta', 'Caja Abierta'),
+        ('cerrada', 'Caja Cerrada'),
+    ]
+
+    estado_caja = models.CharField(
+        max_length=20,
+        choices=ESTADO_CAJA_CHOICES,
+        default='abierta',
+        db_index=True,
+        help_text='Estado de la caja después del arqueo'
+    )
+
+    fecha_hora_cierre = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text='Fecha y hora en que se cerró la caja'
+    )
+
+    cerrado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='cajas_cerradas',
+        help_text='Usuario que cerró la caja'
+    )
+
+    detalle_conteo = models.JSONField(
+        blank=True,
+        null=True,
+        help_text='Detalle del conteo de billetes, monedas y otros métodos'
+    )
+
+    modificado_despues_cierre = models.BooleanField(
+        default=False,
+        help_text='Indica si el arqueo fue modificado después de cerrar la caja'
+    )
+
     class Meta:
         db_table = 'caja_arqueos'
         verbose_name = 'Arqueo de Caja'
@@ -1750,6 +1790,14 @@ class ArqueoCaja(models.Model):
         ordering = ('-fecha', '-fecha_hora_registro')
         indexes = [
             models.Index(fields=['fecha', '-fecha_hora_registro']),
+            models.Index(fields=['estado_caja']),
+            models.Index(fields=['sucursal', 'fecha', 'estado_caja']),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                check=Q(estado_caja__in=['abierta', 'cerrada']),
+                name='check_estado_caja_valido'
+            )
         ]
 
     def __str__(self):
@@ -1763,6 +1811,60 @@ class ArqueoCaja(models.Model):
         # Calcular diferencia automáticamente
         self.diferencia = self.calcular_diferencia()
         super().save(*args, **kwargs)
+
+    def cerrar_caja(self, usuario):
+        """Cierra la caja para este arqueo"""
+        from django.utils import timezone
+        if self.estado_caja == 'cerrada':
+            raise ValueError('La caja ya está cerrada')
+        self.estado_caja = 'cerrada'
+        self.fecha_hora_cierre = timezone.now()
+        self.cerrado_por = usuario
+        self.save(update_fields=['estado_caja', 'fecha_hora_cierre', 'cerrado_por'])
+
+    def abrir_caja(self, usuario):
+        """Abre la caja - Solo administradores"""
+        if self.estado_caja == 'abierta':
+            raise ValueError('La caja ya está abierta')
+        self.estado_caja = 'abierta'
+        self.fecha_hora_cierre = None
+        self.cerrado_por = None
+        self.modificado_despues_cierre = True
+        self.save(update_fields=['estado_caja', 'fecha_hora_cierre', 'cerrado_por', 'modificado_despues_cierre'])
+
+    @classmethod
+    def caja_esta_abierta(cls, sucursal_id, fecha, db_alias='default'):
+        """
+        Verifica si la caja está abierta para una sucursal y fecha específicas.
+
+        Returns:
+            bool: True si la caja está abierta, False si está cerrada
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        # Primero buscar con el sucursal_id específico
+        arqueo = cls.objects.using(db_alias).filter(
+            sucursal_id=sucursal_id,
+            fecha=fecha
+        ).order_by('-fecha_hora_registro').first()
+
+        # Si no hay arqueo con esa sucursal, buscar sin filtro (fallback)
+        if not arqueo:
+            todos_los_arqueos = cls.objects.using(db_alias).filter(
+                fecha=fecha
+            ).order_by('-fecha_hora_registro')
+
+            # Si solo hay un arqueo para esa fecha, usarlo aunque no tenga sucursal
+            if todos_los_arqueos.count() == 1:
+                arqueo = todos_los_arqueos.first()
+                logger.warning(f"⚠️ Arqueo sin sucursal_id para fecha {fecha}, usando como fallback: ID={arqueo.id}, estado={arqueo.estado_caja}")
+
+        # Si no hay arqueo, la caja está abierta por defecto
+        if not arqueo:
+            return True
+
+        return arqueo.estado_caja == 'abierta'
 
 
 # ============================================================================
@@ -2657,4 +2759,122 @@ class KardexDiferencia(models.Model):
 
 # ============================================================================
 # FIN DEL MÓDULO DE KARDEX
+# ============================================================================
+
+# ============================================================================
+# MODELO: Solicitudes de Apertura de Caja
+# ============================================================================
+
+class SolicitudAperturaCaja(models.Model):
+    """
+    Solicitud de un usuario no-admin para abrir una caja cerrada.
+    El administrador debe aprobar la solicitud.
+    """
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente de Aprobación'),
+        ('aprobada', 'Aprobada'),
+        ('rechazada', 'Rechazada'),
+    ]
+
+    # Usuario que solicita la apertura
+    solicitante = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='solicitudes_apertura_caja'
+    )
+
+    # Sucursal para la cual se solicita la apertura
+    sucursal = models.ForeignKey(
+        'Sucursales',
+        on_delete=models.CASCADE,
+        related_name='solicitudes_apertura_caja'
+    )
+
+    # Fecha de la caja a abrir
+    fecha = models.DateField(db_index=True)
+
+    # Estado de la solicitud
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='pendiente',
+        db_index=True
+    )
+
+    # Motivo de la solicitud
+    motivo = models.TextField(
+        help_text='Razón por la que necesita abrir la caja'
+    )
+
+    # Administrador que aprobó/rechazó
+    aprobado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='aprobaciones_apertura_caja',
+        help_text='Admin que procesó la solicitud'
+    )
+
+    # Fecha y hora de procesamiento
+    fecha_procesamiento = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text='Cuándo se procesó la solicitud'
+    )
+
+    # Observaciones del admin (si rechaza)
+    observaciones_admin = models.TextField(
+        blank=True,
+        null=True,
+        help_text='Comentarios del admin al rechazar la solicitud'
+    )
+
+    # Metadatos
+    creada_en = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        db_table = 'solicitudes_apertura_caja'
+        verbose_name = 'Solicitud de Apertura de Caja'
+        verbose_name_plural = 'Solicitudes de Apertura de Caja'
+        ordering = ('-creada_en', '-fecha')
+        indexes = [
+            models.Index(fields=['estado', '-creada_en']),
+            models.Index(fields=['sucursal', 'fecha', 'estado']),
+            models.Index(fields=['solicitante', 'estado']),
+        ]
+
+    def __str__(self):
+        return f'Solicitud #{self.id} - {self.sucursal.nombre} ({self.fecha}) - {self.get_estado_display()}'
+
+    def aprobar(self, admin):
+        """Aprueba la solicitud y abre la caja"""
+        from django.utils import timezone
+
+        # Buscar el arqueo de esta fecha y sucursal
+        arqueo = ArqueoCaja.objects.filter(
+            sucursal=self.sucursal,
+            fecha=self.fecha
+        ).order_by('-fecha_hora_registro').first()
+
+        if arqueo:
+            arqueo.abrir_caja(admin)
+
+        self.estado = 'aprobada'
+        self.aprobado_por = admin
+        self.fecha_procesamiento = timezone.now()
+        self.save(update_fields=['estado', 'aprobado_por', 'fecha_procesamiento'])
+
+    def rechazar(self, admin, observaciones=''):
+        """Rechaza la solicitud sin abrir la caja"""
+        from django.utils import timezone
+
+        self.estado = 'rechazada'
+        self.aprobado_por = admin
+        self.fecha_procesamiento = timezone.now()
+        self.observaciones_admin = observaciones
+        self.save(update_fields=['estado', 'aprobado_por', 'fecha_procesamiento', 'observaciones_admin'])
+
+# ============================================================================
+# FIN DEL MODELO DE SOLICITUDES
 # ============================================================================

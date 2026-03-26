@@ -584,7 +584,30 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
       setPasoActual(1);
 
     } catch (error) {
-      showToast('error', error.message || 'Error al crear factura');
+      // Manejar específicamente el error de caja cerrada
+      if (error?.response?.data?.error_code === 'CAJA_CERRADA' || error?.message?.includes('CAJA_CERRADA')) {
+        const errorData = error.response?.data || {};
+        const mensaje = errorData.message || 'La caja está cerrada. No se pueden crear facturas.';
+
+        // Mostrar mensaje detallado
+        showToast('error', mensaje);
+
+        // Información adicional
+        if (errorData.cerrada_el) {
+          const fechaCierre = new Date(errorData.cerrada_el);
+          showToast('info', `Caja cerrada el: ${fechaCierre.toLocaleString('es-CO')}`);
+        }
+        if (errorData.cerrado_por) {
+          showToast('info', `Cerrada por: ${errorData.cerrado_por}`);
+        }
+
+        // Si el usuario no es admin, sugerir solicitar apertura
+        if (usuario?.rol !== 'admin') {
+          showToast('warning', 'Solicita a un administrador que abra la caja');
+        }
+      } else {
+        showToast('error', error.message || 'Error al crear factura');
+      }
     } finally {
       setLoading(false);
     }

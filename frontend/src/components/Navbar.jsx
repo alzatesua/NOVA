@@ -130,6 +130,48 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
         }
         .anim-mobile { animation: slideDown 0.25s ease forwards; overflow: hidden; }
 
+        @keyframes grid-move {
+          0% { background-position: 0 0; }
+          100% { background-position: 50px 50px; }
+        }
+
+        @keyframes glow {
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        @keyframes gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        @keyframes orb1 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(30px, -30px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        @keyframes orb2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(-30px, 30px) scale(0.9); }
+          66% { transform: translate(20px, -20px) scale(1.1); }
+        }
+
+        @keyframes orb3 {
+          0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+          50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); }
+        }
+
+        .animate-glow { animation: glow 3s ease-in-out infinite; }
+        .animate-gradient {
+          background-size: 200% 200%;
+          animation: gradient 5s ease infinite;
+        }
+        .animate-orb1 { animation: orb1 15s ease-in-out infinite; }
+        .animate-orb2 { animation: orb2 18s ease-in-out infinite; }
+        .animate-orb3 { animation: orb3 20s linear infinite; }
+
         .nav-btn {
           position: relative; border: none; cursor: pointer;
           transition: color 0.2s, background 0.2s;
@@ -169,30 +211,62 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0 24px',
+          position: 'relative',
         }}
       >
+        {/* Animated background elements */}
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, overflow: 'visible' }}>
+        {/* Animated background grid */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `
+              linear-gradient(rgba(14, 165, 233, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(14, 165, 233, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+            transform: 'perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px)',
+            animation: 'grid-move 20s linear infinite'
+          }}></div>
+        </div>
+
+        {/* Animated gradient orbs */}
+        <div className="absolute inset-0">
+          <div className="absolute -top-20 -right-20 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl animate-orb1"></div>
+          <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl animate-orb2"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-cyan-500/5 rounded-full blur-3xl animate-orb3"></div>
+        </div>
+        </div>
+
         {/* Logo */}
-        <span
-          style={{
-            background: T.logoBg,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            fontWeight: 800,
-            fontSize: '20px',
-            letterSpacing: '-0.5px',
-            cursor: 'pointer',
-            userSelect: 'none',
-            flexShrink: 0,
-          }}
-        >
-          ◈ Logo
-        </span>
+        <div className="relative z-10" style={{
+          flexShrink: 0,
+        }}>
+          <div className="relative inline-block">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-cyan-500 to-purple-500 rounded-lg blur-lg animate-glow"></div>
+            <span
+              className="relative z-10 inline-block animate-gradient"
+              style={{
+                background: 'linear-gradient(to right, #0ea5e9, #38bdf8, #8b5cf6, #0ea5e9)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundSize: '300% 300%',
+                fontWeight: 800,
+                fontSize: '24px',
+                letterSpacing: '-0.5px',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              NOVA
+            </span>
+          </div>
+        </div>
 
         <InfoSucursal />
 
         {/* Desktop nav */}
         <div
-          className="navbar-desktop"
+          className="navbar-desktop relative z-10"
           style={{
             display: 'flex',
             alignItems: 'stretch',
@@ -215,6 +289,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
                   letterSpacing: '0.02em',
                   color: isActive ? T.textActive : T.textDefault,
                   background: isActive ? T.activeBg : 'transparent',
+                  transition: 'all 0.2s',
                 }}
                 onMouseEnter={e => {
                   if (!isActive) {
@@ -245,7 +320,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
         </div>
 
         {/* Right side */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+        <div className="relative z-10" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
 
           {/* Profile — desktop */}
           <div className="navbar-profile-desktop" ref={profileRef} style={{ position: 'relative' }}>
@@ -285,14 +360,14 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
 
             {profileOpen && (
               <div className="anim-fade" style={{
-                position: 'absolute', right: 0, top: 'calc(100% + 10px)',
+                position: 'fixed', right: '24px', top: 'calc(68px + 10px)',
                 width: '220px',
                 background: T.dropBg,
                 border: `1px solid ${T.dropBorder}`,
                 borderRadius: '14px',
                 boxShadow: T.dropShadow,
-                overflow: 'hidden',
-                zIndex: 100,
+                overflow: 'visible',
+                zIndex: 9999,
               }}>
                 <div style={{ padding: '14px 18px', borderBottom: `1px solid ${T.divider}` }}>
                   <p style={{ color: T.userNameColor, fontWeight: 700, fontSize: '14px', margin: 0 }}>{usuario}</p>

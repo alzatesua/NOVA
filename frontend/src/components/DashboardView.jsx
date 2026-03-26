@@ -243,26 +243,79 @@ export default function DashboardView() {
         }
         .period-select:focus { outline: none; }
 
-        @media (max-width: 640px) {
-          .store-card { padding: 20px !important; }
-          .store-card-inner { flex-direction: column !important; gap: 16px !important; align-items: flex-start !important; }
-          .store-btn-group { flex-direction: row !important; width: 100% !important; }
-          .store-btn { flex: 1; justify-content: center; padding: 10px 16px !important; font-size: 12px !important; }
-          .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+        /* Desktop */
+        @media (min-width: 1025px) {
+          .dash-chart-grid { grid-template-columns: 2fr 1fr !important; }
         }
-        @media (max-width: 400px) {
-          .store-card { padding: 16px !important; }
-          .store-card-inner { padding: 4px !important; }
-          .store-btn-group { flex-direction: column !important; width: 100% !important; }
+
+        /* Tablet */
+        @media (max-width: 1024px) {
+          .dash-chart-grid { grid-template-columns: 1fr !important; }
+          .kpi-grid { grid-template-columns: repeat(4, 1fr) !important; }
+        }
+
+        /* Small tablet */
+        @media (max-width: 768px) {
+          .dash-root { width: 100% !important; padding-left: 12px !important; padding-right: 12px !important; }
+          .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+          .store-card { padding: 18px !important; width: 100% !important; box-sizing: border-box !important; }
+          .store-card-inner { flex-direction: column !important; gap: 16px !important; }
+          .store-card-inner > div:first-child { flex-direction: column !important; align-items: center !important; text-align: center !important; gap: 12px !important; width: 100% !important; }
+          .store-card-inner > div:first-child > div:last-child { width: 100% !important; display: flex !important; justify-content: center !important; }
+          .store-card-inner > div:first-child > div:last-child span { font-size: 11px !important; word-break: break-all !important; white-space: normal !important; }
+          .store-btn-group { flex-direction: column !important; width: 100% !important; gap: 8px !important; }
           .store-btn { width: 100% !important; }
+          .dash-chart-grid { gap: 16px !important; }
+        }
+
+        /* Mobile */
+        @media (max-width: 640px) {
+          .dash-root { padding-left: 10px !important; padding-right: 10px !important; padding-top: 12px !important; }
+          .store-card { padding: 16px !important; margin-bottom: 16px !important; }
+          .store-card-inner { gap: 14px !important; }
+          .store-card-inner > div:first-child h3 { font-size: 16px !important; line-height: 1.3 !important; }
+          .store-card-inner > div:first-child p { font-size: 12px !important; line-height: 1.4 !important; }
+          .store-card-inner > div:first-child > div:last-child { padding: 6px 10px !important; }
+          .store-card-inner > div:first-child > div:last-child span { font-size: 10px !important; }
+          .store-btn { padding: 11px 14px !important; font-size: 12px !important; }
+          .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+          .dash-chart-grid { gap: 12px !important; }
+          .period-select { flex: 1 !important; min-width: 0 !important; font-size: 12px !important; padding: 8px 32px 8px 10px !important; }
+        }
+
+        /* Small mobile */
+        @media (max-width: 480px) {
+          .dash-root { padding-left: 8px !important; padding-right: 8px !important; }
+          .store-card { padding: 14px !important; }
+          .store-card-inner { gap: 12px !important; }
+          .store-card-inner > div:first-child > div:first-child { width: 44px !important; height: 44px !important; }
+          .store-card-inner > div:first-child > div:first-child svg { width: 22px !important; height: 22px !important; }
+          .store-card-inner > div:first-child h3 { font-size: 15px !important; }
+          .store-card-inner > div:first-child p { font-size: 11px !important; }
+          .store-btn { font-size: 11px !important; padding: 10px 12px !important; }
+          .store-btn svg { width: 14px !important; height: 14px !important; }
+          .kpi-grid { gap: 8px !important; }
+        }
+
+        /* Very small mobile */
+        @media (max-width: 380px) {
+          .dash-root { padding-left: 6px !important; padding-right: 6px !important; }
+          .store-card { padding: 12px !important; }
+          .store-card-inner > div:first-child h3 { font-size: 14px !important; }
+          .store-card-inner > div:first-child p { font-size: 10px !important; }
+          .store-btn { font-size: 10px !important; padding: 9px 10px !important; }
+        }
+
+        /* Extra small mobile - single column KPI */
+        @media (max-width: 340px) {
           .kpi-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
-      <div className="dash-root" style={{ paddingTop: '16px' }}>
+      <div className="dash-root" style={{ paddingTop: '16px', width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
 
         {/* ── Header / Período ──────────────────────────── */}
-        <div className="dash-fade" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+        <div className="dash-fade" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
           <label style={{ fontSize: '13px', fontWeight: 600, color: T.labelColor, letterSpacing: '0.02em' }}>
             Período:
           </label>
@@ -363,7 +416,7 @@ export default function DashboardView() {
         {/* ── KPIs ─────────────────────────────────────────── */}
         <div
           className="kpi-grid dash-fade-2"
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '20px' }}
         >
           <StatCard
             title="Ventas Totales"
@@ -399,14 +452,17 @@ export default function DashboardView() {
           />
         </div>
 
-        {/* ── Gráfico de tendencia ───────────────────────── */}
-        <div className="dash-fade-3" style={{ marginBottom: '24px' }}>
-          <TrendChart data={tendencia} loading={loading} />
-        </div>
+        {/* ── Gráfico y Top Productos ───────────────────────── */}
+        <div className="dash-chart-grid dash-fade-3" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '16px', marginBottom: '20px' }}>
+          {/* ── Gráfico de tendencia ───────────────────────── */}
+          <div>
+            <TrendChart data={tendencia} loading={loading} />
+          </div>
 
-        {/* ── Top Productos ──────────────────────────────── */}
-        <div className="dash-fade-4" style={{ marginBottom: '24px' }}>
-          <TopProductsTable products={topProductos} loading={loading} />
+          {/* ── Top Productos ──────────────────────────────── */}
+          <div>
+            <TopProductsTable products={topProductos} loading={loading} />
+          </div>
         </div>
 
         {/* ── Alerta stock bajo ──────────────────────────── */}

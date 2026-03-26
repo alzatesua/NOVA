@@ -1933,6 +1933,100 @@ export function fetchBalanceCajaMenor({ token, usuario, subdominio, id_sucursal 
   }, token);
 }
 
+/**
+ * Verifica si la caja está abierta para una fecha y sucursal específicas
+ */
+export function verificarEstadoCaja({ token, usuario, subdominio, fecha, id_sucursal }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/verificar_estado/', {
+    usuario,
+    token,
+    subdominio,
+    ...(fecha && { fecha }),
+    id_sucursal
+  }, token);
+}
+
+/**
+ * Abre la caja para una fecha y sucursal específicas (solo admin)
+ */
+export function abrirCaja({ token, usuario, subdominio, fecha, id_sucursal }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/abrir_caja/', {
+    usuario,
+    token,
+    subdominio,
+    ...(fecha && { fecha }),
+    id_sucursal
+  }, token);
+}
+
+/**
+ * Crea una solicitud de apertura de caja (usuarios no-admin)
+ */
+export function crearSolicitudApertura({ token, usuario, subdominio, id_sucursal, fecha, motivo }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/solicitudes/crear/', {
+    usuario,
+    token,
+    subdominio,
+    id_sucursal,
+    fecha,
+    motivo
+  }, token);
+}
+
+/**
+ * Lista las solicitudes pendientes (solo admins)
+ */
+export function listarSolicitudesPendientes({ token, usuario, subdominio }) {
+  token = token || localStorage.getItem('token_usuario');
+  return get('api/caja/solicitudes/pendientes/', {
+    usuario,
+    token,
+    subdominio
+  }, token);
+}
+
+/**
+ * Aprueba una solicitud de apertura (solo admins)
+ */
+export function aprobarSolicitud({ token, usuario, subdominio, solicitud_id }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/solicitudes/aprobar/', {
+    usuario,
+    token,
+    subdominio,
+    solicitud_id
+  }, token);
+}
+
+/**
+ * Rechaza una solicitud de apertura (solo admins)
+ */
+export function rechazarSolicitud({ token, usuario, subdominio, solicitud_id, observaciones }) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/solicitudes/rechazar/', {
+    usuario,
+    token,
+    subdominio,
+    solicitud_id,
+    observaciones
+  }, token);
+}
+
+/**
+ * Lista las solicitudes del usuario actual
+ */
+export function listarMisSolicitudes({ token, usuario, subdominio }) {
+  token = token || localStorage.getItem('token_usuario');
+  return get('api/caja/solicitudes/mis_solicitudes/', {
+    usuario,
+    token,
+    subdominio
+  }, token);
+}
+
 
 // Exportar funciones principales para uso en componentes
 export { post, get, patch, put, del };

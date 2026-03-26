@@ -33,6 +33,7 @@ function ProductCard({
     descripcion,
     descripcion_larga,
     imagenUrl,
+    imagen_producto,
     is_active,
     variantes = [],
     talla,
@@ -41,7 +42,7 @@ function ProductCard({
   } = product;
 
   const { usuario, tokenUsuario: token, subdominio } = useAuth();
-  const [previewImage, setPreviewImage] = useState(imagenUrl);
+  const [previewImage, setPreviewImage] = useState(imagenUrl || imagen_producto);
   const [isLoadingImage, setIsLoadingImage] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -53,8 +54,8 @@ function ProductCard({
     let mounted = true;
     setImageError(false);
 
-    // Si no hay imagenUrl, no intentar cargar — mostrar placeholder directo
-    if (!imagenUrl) {
+    // Si no hay imagenUrl ni imagen_producto, no intentar cargar — mostrar placeholder directo
+    if (!imagenUrl && !imagen_producto) {
       setIsLoadingImage(false);
       setImageError(true);
       return;
@@ -70,6 +71,7 @@ function ProductCard({
         });
         if (!mounted) return;
         setPreviewImage(`${url}?t=${Date.now()}`);
+        setImageError(false); // Importante: marcar que no hay error cuando la carga es exitosa
       } catch (err) {
         // No mostrar toast aquí — se llama por cada tarjeta visible y satura la UI
         if (mounted) setImageError(true);

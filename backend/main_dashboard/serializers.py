@@ -4,7 +4,7 @@ from .models import (
     Bodega, Existencia, Traslado, TrasladoLinea,
     Cliente, FormaPago, Factura, FacturaDetalle, Pago, ConfiguracionFactura,
     Cupon, ClienteCupon, ClienteTienda, Contacto,
-    MovimientoCaja, ArqueoCaja
+    MovimientoCaja, ArqueoCaja, SolicitudAperturaCaja
 )
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
@@ -1739,9 +1739,11 @@ class MovimientoCajaCreateSerializer(DbAliasModelSerializer):
 
 class ArqueoCajaSerializer(DbAliasModelSerializer):
     """Serializer para ArqueoCaja"""
-    usuario_nombre = serializers.CharField(source='usuario.nombre', read_only=True)
+    usuario_nombre = serializers.CharField(source='usuario.usuario', read_only=True)
     usuario_email = serializers.CharField(source='usuario.email', read_only=True)
     sucursal_nombre = serializers.CharField(source='sucursal.nombre', read_only=True)
+    cerrado_por_nombre = serializers.CharField(source='cerrado_por.usuario', read_only=True)
+    estado_caja_display = serializers.CharField(source='get_estado_caja_display', read_only=True)
 
     class Meta:
         model = ArqueoCaja
@@ -1749,10 +1751,15 @@ class ArqueoCajaSerializer(DbAliasModelSerializer):
             'id', 'fecha', 'fecha_hora_registro',
             'saldo_inicial', 'total_entradas', 'total_salidas',
             'saldo_esperado', 'monto_contado', 'diferencia',
-            'observaciones', 'usuario_nombre', 'usuario_email', 'sucursal', 'sucursal_nombre'
+            'observaciones', 'usuario_nombre', 'usuario_email',
+            'sucursal', 'sucursal_nombre',
+            'estado_caja', 'estado_caja_display',
+            'fecha_hora_cierre', 'cerrado_por', 'cerrado_por_nombre',
+            'detalle_conteo', 'modificado_despues_cierre'
         ]
         read_only_fields = [
-            'id', 'fecha_hora_registro', 'diferencia'
+            'id', 'fecha_hora_registro', 'diferencia', 'fecha_hora_cierre',
+            'cerrado_por', 'modificado_despues_cierre'
         ]
 
 
@@ -1801,4 +1808,74 @@ class ArqueoCajaCreateSerializer(DbAliasModelSerializer):
         if usuario and ('sucursal' not in validated_data or not validated_data['sucursal']):
             validated_data['sucursal'] = usuario.id_sucursal_default
 
+        return super().create(validated_data)
+
+
+class SolicitudAperturaCajaSerializer(DbAliasModelSerializer):
+    """Serializer para solicitudes de apertura de caja"""
+    solicitante_nombre = serializers.CharField(source='solicitante.usuario', read_only=True)
+    solicitante_email = serializers.CharField(source='solicitante.email', read_only=True)
+    sucursal_nombre = serializers.CharField(source='sucursal.nombre', read_only=True)
+    aprobado_por_nombre = serializers.CharField(source='aprobado_por.usuario', read_only=True)
+    estado_display = serializers.CharField(source='get_estado_display', read_only=True)
+
+    class Meta:
+        model = SolicitudAperturaCaja
+        fields = [
+            'id', 'solicitante', 'solicitante_nombre', 'solicitante_email',
+            'sucursal', 'sucursal_nombre', 'fecha', 'estado', 'estado_display',
+            'motivo', 'aprobado_por', 'aprobado_por_nombre',
+            'fecha_procesamiento', 'observaciones_admin', 'creada_en'
+        ]
+        read_only_fields = [
+            'id', 'solicitante', 'aprobado_por', 'fecha_procesamiento',
+            'observaciones_admin', 'creada_en'
+        ]
+
+
+class SolicitudAperturaCajaCreateSerializer(DbAliasModelSerializer):
+    """Serializer para crear solicitudes de apertura de caja"""
+    class Meta:
+        model = SolicitudAperturaCaja
+        fields = ['sucursal', 'fecha', 'motivo']
+        extra_kwargs = {
+            'sucursal': {'required': True},
+            'fecha': {'required': True},
+            'motivo': {'required': True}
+        }
+
+    def validate(self, attrs):
+        from datetime import datetime
+        from .models import ArqueoCaja
+
+        # Verificar que la caja esté cerrada
+        sucursal = attrs['sucursal']
+        fecha = attrs['fecha']
+
+        # Usar el alias del contexto
+        db_alias = self.context.get('db_alias', 'default')
+
+        if ArqueoCaja.caja_esta_abierta(sucursal.id, fecha, db_alias):
+            raise serializers.ValidationError(
+                'La caja ya está abierta para esta fecha y sucursal'
+            )
+
+        return attrs
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        usuario = None
+        if request and hasattr(request, 'usuario'):
+            usuario = request.usuario
+
+        if not usuario:
+            raise serializers.ValidationError('Usuario no autenticado')
+
+        # No permitir que admins creen solicitudes (ellos pueden abrir directamente)
+        if usuario.rol == 'admin':
+            raise serializers.ValidationError(
+                'Los administradores pueden abrir la caja directamente sin solicitar'
+            )
+
+        validated_data['solicitante'] = usuario
         return super().create(validated_data)

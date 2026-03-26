@@ -86,10 +86,10 @@ export default function Dashboard() {
         currentView={view}
       />
 
-      <main className="pt-16 flex-grow flex flex-col items-center px-4 pb-10 w-full">
+      <main className="pt-16 flex-grow flex flex-col px-4 pb-10 w-full">
         {/* VISTA DE DASHBOARD - Nuevas gráficas y métricas */}
         {view === 'dashboard' && (
-          <div className="relative w-full max-w-7xl">
+          <div className="relative w-full">
             <DashboardView />
           </div>
         )}
