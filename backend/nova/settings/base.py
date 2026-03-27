@@ -165,3 +165,17 @@ LOGGING = {
 # API prefix - ELIMINADO: causaba doble /api/api/ en las URLs
 # El frontend ya maneja las rutas con /api correctamente
 USE_X_FORWARDED_HOST = True
+
+# ✅ Configuración adicional para endpoints de exportación (archivos binarios)
+# Headers adicionales necesarios para CORS con archivos binarios
+CORS_ALLOW_HEADERS += [
+    'accept',
+    'content-disposition',
+    'x-requested-with',
+]
+
+# Exponer headers necesarios para que el frontend pueda leer Content-Disposition
+CORS_EXPOSE_HEADERS = [
+    'content-disposition',
+    'content-type',
+]

@@ -10,6 +10,7 @@ from django.db.models import Q, Sum, Count
 from django.utils import timezone
 from django.db import transaction
 from decimal import Decimal
+import datetime
 
 from .models import MovimientoCaja, ArqueoCaja, Factura, Pago, Sucursales, SolicitudAperturaCaja
 from .serializers import (
@@ -1438,6 +1439,387 @@ def listar_solicitudes_usuario(request):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def historial_arqueos(request):
+    """
+    Obtiene el historial de arqueos de caja.
+
+    Query params:
+    - subdominio: requerido
+    - usuario: requerido
+    - token: requerido
+    - id_sucursal: opcional (filtra por sucursal)
+    - fecha_desde: opcional (YYYY-MM-DD)
+    - fecha_hasta: opcional (YYYY-MM-DD)
+    - limite: opcional (default 50)
+
+    Retorna:
+    {
+        "success": true,
+        "arqueos": [...]
+    }
+    """
+    try:
+        mixin = CajaTenantMixin()
+        alias = mixin._resolve_alias(request)
+        user = mixin._tenant_user
+
+        # Obtener parámetros de filtro
+        id_sucursal = request.data.get('id_sucursal')
+        fecha_desde = request.data.get('fecha_desde')
+        fecha_hasta = request.data.get('fecha_hasta')
+        limite = int(request.data.get('limite', 50))
+
+        # Si no hay sucursal especificada, usar la del usuario
+        if not id_sucursal and user and user.id_sucursal_default:
+            id_sucursal = user.id_sucursal_default_id
+            logger.info(f"Historial arqueos - Usando sucursal por defecto del usuario: {id_sucursal}")
+
+        # Construir filtros
+        filtros = {}
+        if id_sucursal:
+            filtros['sucursal_id'] = id_sucursal
+        if fecha_desde:
+            filtros['fecha__gte'] = fecha_desde
+        if fecha_hasta:
+            filtros['fecha__lte'] = fecha_hasta
+
+        # Obtener arqueos
+        arqueos = ArqueoCaja.objects.using(alias).filter(
+            **filtros
+        ).select_related(
+            'usuario', 'sucursal', 'cerrado_por'
+        ).order_by('-fecha', '-fecha_hora_registro')[:limite]
+
+        # Serializar
+        from .serializers import ArqueoCajaSerializer
+        serializer = ArqueoCajaSerializer(arqueos, many=True)
+
+        logger.info(f"Historial arqueos - Encontrados {len(arqueos)} registros")
+
+        return Response({
+            'success': True,
+            'arqueos': serializer.data,
+            'total': len(arqueos)
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error en historial_arqueos: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
 # ============================================================================
 # FIN DE SOLICITUDES DE APERTURA DE CAJA
 # ============================================================================
+
+
+# ============================================================================
+# EXPORTACIÓN DE ARQUEOS
+# ============================================================================
+
+from django.http import HttpResponse, StreamingHttpResponse  # ✅ Agregado StreamingHttpResponse
+from urllib.parse import quote
+from django.views.decorators.csrf import csrf_exempt  # ✅ Agregado csrf_exempt
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@csrf_exempt  # ✅ Eximir de CSRF para descargas de archivos
+def exportar_historial_arqueos_excel(request):
+    """
+    Exporta el historial de arqueos a Excel.
+
+    Body esperado:
+    {
+        "usuario": "...",
+        "token": "...",
+        "subdominio": "...",
+        "id_sucursal": 1,          # opcional
+        "fecha_desde": "2024-01-01",  # opcional
+        "fecha_hasta": "2024-01-31",  # opcional
+        "modo_exportacion": true    # clave: sin límites
+    }
+
+    Retorna: Archivo Excel (.xlsx)
+    """
+    try:
+        from .exportadores import exportar_arqueos_excel
+
+        mixin = CajaTenantMixin()
+        alias = mixin._resolve_alias(request)
+        user = mixin._tenant_user
+
+        # Obtener parámetros
+        id_sucursal = request.data.get('id_sucursal')
+        fecha_desde = request.data.get('fecha_desde')
+        fecha_hasta = request.data.get('fecha_hasta')
+        modo_exportacion = request.data.get('modo_exportacion', False)
+
+        # Si no hay sucursal, usar la del usuario
+        if not id_sucursal and user and user.id_sucursal_default:
+            id_sucursal = user.id_sucursal_default_id
+
+        # Construir filtros
+        filtros = {}
+        if id_sucursal:
+            filtros['sucursal_id'] = id_sucursal
+        if fecha_desde:
+            filtros['fecha__gte'] = fecha_desde
+        if fecha_hasta:
+            filtros['fecha__lte'] = fecha_hasta
+
+        # MODO EXPORTACIÓN: Sin límites PERO con hard-cap defensivo
+        if not modo_exportacion:
+            # Fallback: si no se especifica modo exportación, usar límite grande
+            limite = 10000
+        else:
+            # ✅ HARD-CAP DEFENSIVO: Evitar ataques de exportación masiva
+            MAX_EXPORT_ROWS = 200000
+            limite = None
+
+        # Obtener arqueos base QuerySet
+        arqueos_qs_base = ArqueoCaja.objects.using(alias).filter(
+            **filtros
+        )
+
+        # ✅ VALIDACIÓN DEFENSIVA: Verificar hard-cap antes de procesar
+        if modo_exportacion:
+            count = arqueos_qs_base.count()
+            if count > MAX_EXPORT_ROWS:
+                logger.warning(
+                    "⚠️ Exportación rechazada por exceder límite máximo",
+                    extra={
+                        "requested_rows": count,
+                        "max_rows": MAX_EXPORT_ROWS,
+                        "user": user.usuario
+                    }
+                )
+                return Response({
+                    'success': False,
+                    'message': f'La exportación excede el límite máximo de {MAX_EXPORT_ROWS:,} registros. Por favor aplique filtros más específicos.'
+                }, status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
+
+        # Obtener arqueos con select_related
+        arqueos_qs = arqueos_qs_base.select_related(
+            'usuario', 'sucursal', 'cerrado_por'
+        ).order_by('-fecha', '-fecha_hora_registro')
+
+        # Aplicar límite solo si no es modo exportación
+        if limite:
+            arqueos_qs = arqueos_qs[:limite]
+
+        # Obtener nombre de sucursal
+        sucursal_nombre = None
+        if id_sucursal:
+            try:
+                from .models import Sucursales
+                sucursal = Sucursales.objects.using(alias).get(id=id_sucursal)
+                sucursal_nombre = sucursal.nombre
+            except Sucursales.DoesNotExist:
+                pass
+
+        # Convertir fechas a objetos date si son strings
+        if fecha_desde:
+            fecha_desde = datetime.datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+        if fecha_hasta:
+            fecha_hasta = datetime.datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+
+        # Exportar
+        excel_buffer = exportar_arqueos_excel(
+            arqueos_qs,
+            fecha_desde=fecha_desde,
+            fecha_hasta=fecha_hasta,
+            sucursal_nombre=sucursal_nombre,
+            usuario_nombre=user.usuario if user else None
+        )
+
+        # Generar nombre de archivo
+        from django.utils.timezone import now
+        fecha_archivo = now().strftime('%Y%m%d_%H%M%S')
+        filename = f'historial_arqueos_{fecha_archivo}.xlsx'
+
+        # Crear respuesta HTTP con Streaming (mejor para archivos grandes)
+        excel_buffer.seek(0)
+        response = StreamingHttpResponse(
+            excel_buffer,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename*=UTF-8\'\'{quote(filename)}'
+        response['Access-Control-Expose-Headers'] = 'Content-Disposition'
+
+        logger.info(
+            "✅ Excel exportado",
+            extra={
+                "records": len(arqueos_qs),
+                "user": user.usuario,
+                "sucursal": sucursal_nombre,
+                "file_name": filename
+            }
+        )
+
+        return response
+
+    except ValueError as e:
+        logger.error(f"Error en exportar_historial_arqueos_excel (ValueError): {str(e)}")
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_401_UNAUTHORIZED)
+    except Exception as e:
+        logger.error(f"Error en exportar_historial_arqueos_excel: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@csrf_exempt  # ✅ Eximir de CSRF para descargas de archivos
+def exportar_historial_arqueos_pdf(request):
+    """
+    Exporta el historial de arqueos a PDF.
+
+    Body esperado:
+    {
+        "usuario": "...",
+        "token": "...",
+        "subdominio": "...",
+        "id_sucursal": 1,          # opcional
+        "fecha_desde": "2024-01-01",  # opcional
+        "fecha_hasta": "2024-01-31",  # opcional
+        "modo_exportacion": true    # clave: sin límites
+    }
+
+    Retorna: Archivo PDF (.pdf)
+    """
+    try:
+        from .exportadores import exportar_arqueos_pdf
+
+        mixin = CajaTenantMixin()
+        alias = mixin._resolve_alias(request)
+        user = mixin._tenant_user
+
+        # Obtener parámetros
+        id_sucursal = request.data.get('id_sucursal')
+        fecha_desde = request.data.get('fecha_desde')
+        fecha_hasta = request.data.get('fecha_hasta')
+        modo_exportacion = request.data.get('modo_exportacion', False)
+
+        # Si no hay sucursal, usar la del usuario
+        if not id_sucursal and user and user.id_sucursal_default:
+            id_sucursal = user.id_sucursal_default_id
+
+        # Construir filtros
+        filtros = {}
+        if id_sucursal:
+            filtros['sucursal_id'] = id_sucursal
+        if fecha_desde:
+            filtros['fecha__gte'] = fecha_desde
+        if fecha_hasta:
+            filtros['fecha__lte'] = fecha_hasta
+
+        # MODO EXPORTACIÓN: Sin límites PERO con hard-cap defensivo
+        if not modo_exportacion:
+            limite = 10000
+        else:
+            # ✅ HARD-CAP DEFENSIVO: Evitar ataques de exportación masiva
+            MAX_EXPORT_ROWS = 200000
+            limite = None
+
+        # Obtener arqueos base QuerySet
+        arqueos_qs_base = ArqueoCaja.objects.using(alias).filter(
+            **filtros
+        )
+
+        # ✅ VALIDACIÓN DEFENSIVA: Verificar hard-cap antes de procesar
+        if modo_exportacion:
+            count = arqueos_qs_base.count()
+            if count > MAX_EXPORT_ROWS:
+                logger.warning(
+                    "⚠️ Exportación rechazada por exceder límite máximo",
+                    extra={
+                        "requested_rows": count,
+                        "max_rows": MAX_EXPORT_ROWS,
+                        "user": user.usuario
+                    }
+                )
+                return Response({
+                    'success': False,
+                    'message': f'La exportación excede el límite máximo de {MAX_EXPORT_ROWS:,} registros. Por favor aplique filtros más específicos.'
+                }, status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
+
+        # Obtener arqueos con select_related
+        arqueos_qs = arqueos_qs_base.select_related(
+            'usuario', 'sucursal', 'cerrado_por'
+        ).order_by('-fecha', '-fecha_hora_registro')
+
+        if limite:
+            arqueos_qs = arqueos_qs[:limite]
+
+        # Obtener nombre de sucursal
+        sucursal_nombre = None
+        if id_sucursal:
+            try:
+                from .models import Sucursales
+                sucursal = Sucursales.objects.using(alias).get(id=id_sucursal)
+                sucursal_nombre = sucursal.nombre
+            except Sucursales.DoesNotExist:
+                pass
+
+        # Convertir fechas
+        if fecha_desde:
+            fecha_desde = datetime.datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+        if fecha_hasta:
+            fecha_hasta = datetime.datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+
+        # Exportar
+        pdf_buffer = exportar_arqueos_pdf(
+            arqueos_qs,
+            fecha_desde=fecha_desde,
+            fecha_hasta=fecha_hasta,
+            sucursal_nombre=sucursal_nombre,
+            usuario_nombre=user.usuario if user else None
+        )
+
+        # Generar nombre de archivo
+        from django.utils.timezone import now
+        fecha_archivo = now().strftime('%Y%m%d_%H%M%S')
+        filename = f'historial_arqueos_{fecha_archivo}.pdf'
+
+        # Crear respuesta HTTP con Streaming (mejor para archivos grandes)
+        pdf_buffer.seek(0)
+        response = StreamingHttpResponse(
+            pdf_buffer,
+            content_type='application/pdf'
+        )
+        response['Content-Disposition'] = f'attachment; filename*=UTF-8\'\'{quote(filename)}'
+        response['Access-Control-Expose-Headers'] = 'Content-Disposition'
+
+        logger.info(
+            "✅ PDF exportado",
+            extra={
+                "records": len(arqueos_qs),
+                "user": user.usuario,
+                "sucursal": sucursal_nombre,
+                "file_name": filename
+            }
+        )
+
+        return response
+
+    except ValueError as e:
+        logger.error(f"Error en exportar_historial_arqueos_pdf (ValueError): {str(e)}")
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_401_UNAUTHORIZED)
+    except Exception as e:
+        logger.error(f"Error en exportar_historial_arqueos_pdf: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)

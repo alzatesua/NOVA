@@ -8,6 +8,7 @@ import MovimientosTable from './caja/MovimientosTable';
 import RegistroMovimiento from './caja/RegistroMovimiento';
 import CuadreCaja from './caja/CuadreCaja';
 import ArqueoCaja from './caja/ArqueoCaja';
+import HistorialArqueos from './caja/HistorialArqueos';
 import CajaMenor from './caja/CajaMenor';
 import { fetchSucursalesCaja } from '../services/api';
 import { showToast } from '../utils/toast';
@@ -84,20 +85,87 @@ const STYLES = `
   .caja-pill input[type="date"], .caja-pill select { background: transparent; border: none; outline: none; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--caja-text, #111827); cursor: pointer; padding: 0; appearance: none; -webkit-appearance: none; }
   .caja-pill select { padding-right: 2px; }
 
-  /* Dark mode support */
+  /* Ring effect IGUAL QUE PROVEEDORESVIEW */
+  .caja-panel {
+    position: relative;
+  }
+  .caja-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(to bottom, rgba(226, 232, 240, 0.5), rgba(226, 232, 240, 0.2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .dark .caja-panel::before {
+    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.2), rgba(148, 163, 184, 0.1));
+  }
+  .dark .caja-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(to bottom, rgba(148, 163, 184, 0.15), rgba(148, 163, 184, 0.05));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+  }
+
+  /* Responsive grid layouts */
+  @media (min-width: 769px) {
+    .caja-grid-desktop {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) !important;
+      gap: clamp(12px, 2vw, 20px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .caja-grid-desktop {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(12px, 2vw, 20px);
+    }
+    .caja-header {
+      flex-direction: column;
+      align-items: flex-start !important;
+    }
+    .caja-controls {
+      width: 100%;
+      justify-content: flex-start;
+    }
+    .caja-tab-bar {
+      width: 100%;
+      overflow-x: auto;
+      justify-content: flex-start;
+    }
+    .caja-tab {
+      flex: 0 0 auto;
+      min-width: max-content;
+    }
+  }
+
+  /* Dark mode support - IGUALES QUE PROVEEDORESVIEW */
   @media (prefers-color-scheme: dark) {
     :root {
       --caja-blue: #3b82f6;
       --caja-blue-dark: #2563eb;
       --caja-blue-light: #1e3a5f;
       --caja-blue-border: #1e40af;
-      --caja-text: #f9fafb;
-      --caja-text-mid: #d1d5db;
-      --caja-text-sub: #9ca3af;
-      --caja-text-muted: #6b7280;
-      --caja-border: #374151;
-      --caja-surface: #1f2937;
-      --caja-bg: #111827;
+      --caja-text: #ffffff;
+      --caja-text-mid: #e2e8f0;
+      --caja-text-sub: #cbd5e1;
+      --caja-text-muted: #94a3b8;
+      --caja-border: #334155;
+      --caja-surface: #0f172a;
+      --caja-bg: #020617;
     }
   }
 
@@ -117,19 +185,19 @@ const STYLES = `
     }
   }
 
-  /* Support for manual dark mode class */
+  /* Support for manual dark mode class - IGUALES QUE PROVEEDORESVIEW */
   .dark {
     --caja-blue: #3b82f6;
     --caja-blue-dark: #2563eb;
     --caja-blue-light: #1e3a5f;
     --caja-blue-border: #1e40af;
-    --caja-text: #f9fafb;
-    --caja-text-mid: #d1d5db;
-    --caja-text-sub: #9ca3af;
-    --caja-text-muted: #6b7280;
-    --caja-border: #374151;
-    --caja-surface: #1f2937;
-    --caja-bg: #111827;
+    --caja-text: #ffffff;
+    --caja-text-mid: #e2e8f0;
+    --caja-text-sub: #cbd5e1;
+    --caja-text-muted: #94a3b8;
+    --caja-border: #334155;
+    --caja-surface: #0f172a;
+    --caja-bg: #020617;
   }
 `;
 
@@ -199,19 +267,19 @@ export default function CajaView() {
   const handleRegistroExitoso = () => setRefreshKey(k => k + 1);
   const handleRefresh         = () => setRefreshKey(k => k + 1);
 
-  // Dynamic colors based on theme
+  // Dynamic colors based on theme - IGUALES QUE PROVEEDORESVIEW
   const colors = isDark ? {
     blue:       '#3b82f6',
     blueDark:   '#2563eb',
     blueLight:  '#1e3a5f',
     blueBorder: '#1e40af',
-    text:       '#f9fafb',
-    textMid:    '#d1d5db',
-    textSub:    '#9ca3af',
-    textMuted:  '#6b7280',
-    border:     '#374151',
-    surface:    '#1f2937',
-    bg:         '#111827',
+    text:       '#ffffff',
+    textMid:    '#e2e8f0',
+    textSub:    '#cbd5e1',
+    textMuted:  '#94a3b8',
+    border:     '#334155',
+    surface:    '#0f172a',
+    bg:         '#020617',
   } : {
     blue:       '#2563eb',
     blueDark:   '#1d4ed8',
@@ -227,11 +295,12 @@ export default function CajaView() {
   };
 
   const vistaOptions  = [
-    { value: 'general',    label: 'Vista General'  },
-    { value: 'movimientos',label: 'Movimientos'    },
-    { value: 'cuadre',     label: 'Cuadre de Caja' },
-    { value: 'arqueo',     label: 'Arqueo de Caja' },
-    { value: 'caja_menor', label: 'Caja Menor'     },
+    { value: 'general',         label: 'Vista General'     },
+    { value: 'movimientos',     label: 'Movimientos'       },
+    { value: 'cuadre',          label: 'Cuadre de Caja'    },
+    { value: 'arqueo',          label: 'Arqueo de Caja'    },
+    { value: 'historial_arqueos', label: 'Historial Arqueos' },
+    { value: 'caja_menor',      label: 'Caja Menor'        },
   ];
   const filtroOptions = [
     { value: 'todos',   label: 'Todos'    },
@@ -241,44 +310,222 @@ export default function CajaView() {
 
   /* ── Shared inline styles ── */
   const s = {
-    page:    { fontFamily: "'Inter', -apple-system, sans-serif", background: colors.bg, minHeight: '100vh', display: 'flex', flexDirection: 'column' },
+    page:    {
+      fontFamily: "'Inter', -apple-system, sans-serif",
+      background: colors.bg,
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
+      maxWidth: '100vw',
+      overflow: 'hidden',
+      boxSizing: 'border-box'
+    },
 
-    // Header
-    header:  { background: colors.surface, borderBottom: `1px solid ${colors.border}`, padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' },
-    iconBox: { width: 38, height: 38, borderRadius: 10, background: colors.blueLight, border: `1px solid ${colors.blueBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.blue, flexShrink: 0 },
-    title:   { fontSize: 17, fontWeight: 700, color: colors.text, margin: 0 },
-    sub:     { fontSize: 12, color: colors.textSub, margin: '2px 0 0' },
+    // Header - responsive padding - IGUAL QUE PROVEEDORESVIEW
+    header:  {
+      background: colors.surface,
+      borderBottom: `1px solid ${colors.border}`,
+      padding: 'clamp(12px, 2vw, 14px) clamp(16px, 3vw, 28px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+      flexWrap: 'wrap',
+      boxShadow: isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,0.05)',
+      position: 'relative',
+    },
+    iconBox: {
+      width: 38,
+      height: 38,
+      borderRadius: 10,
+      background: isDark ? '#1e3a5f' : colors.blueLight,
+      border: `1px solid ${isDark ? '#1e40af' : colors.blueBorder}`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: colors.blue,
+      flexShrink: 0,
+      boxShadow: isDark ? '0 0 0 1px rgba(59, 130, 246, 0.2)' : 'none'
+    },
+    title:   { fontSize: 'clamp(16px, 2vw, 17px)', fontWeight: 700, color: colors.text, margin: 0 },
+    sub:     { fontSize: 'clamp(11px, 1.5vw, 12px)', color: colors.textSub, margin: '2px 0 0' },
 
-    // Controls
-    controls:{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+    // Controls - responsive gap and flex
+    controls:{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 'clamp(6px, 1vw, 8px)',
+      flexWrap: 'wrap',
+      flex: '1 1 auto',
+      justifyContent: 'flex-end'
+    },
 
-    // Pill (date / select inputs)
-    pill:    { display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', borderRadius: 8, border: `1px solid ${colors.border}`, background: colors.surface, fontSize: 13, fontWeight: 600, color: colors.text, transition: 'border-color .15s, box-shadow .15s', whiteSpace: 'nowrap', cursor: 'default' },
+    // Pill (date / select inputs) - responsive - IGUAL QUE PROVEEDORESVIEW
+    pill:    {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6,
+      padding: 'clamp(6px, 1vw, 7px) clamp(10px, 2vw, 12px)',
+      borderRadius: 8,
+      border: `1px solid ${colors.border}`,
+      background: isDark ? '#1e293b' : colors.surface,
+      fontSize: 'clamp(12px, 1.5vw, 13px)',
+      fontWeight: 600,
+      color: colors.text,
+      transition: 'border-color .15s, box-shadow .15s',
+      whiteSpace: 'nowrap',
+      cursor: 'default',
+      boxShadow: isDark ? '0 1px 2px rgba(0,0,0,0.2)' : '0 1px 2px rgba(0,0,0,0.04)'
+    },
 
-    // Tab bar
-    tabBar:  { display: 'flex', gap: 2, background: colors.bg, borderRadius: 8, padding: 3, border: `1px solid ${colors.border}` },
-    tab:     (on) => ({ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, transition: 'all .15s', background: on ? colors.blue : 'transparent', color: on ? '#fff' : colors.textSub, boxShadow: on ? '0 1px 3px rgba(37,99,235,.2)' : 'none', fontFamily: 'inherit' }),
+    // Tab bar - responsive - IGUAL QUE PROVEEDORESVIEW
+    tabBar:  {
+      display: 'flex',
+      gap: 2,
+      background: colors.bg,
+      borderRadius: 8,
+      padding: 3,
+      border: `1px solid ${colors.border}`,
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      boxShadow: isDark ? 'inset 0 1px 2px rgba(0,0,0,0.2)' : 'none'
+    },
+    tab:     (on) => ({
+      display: 'flex',
+      alignItems: 'center',
+      gap: 5,
+      padding: 'clamp(6px, 1vw, 7px) clamp(10px, 2vw, 14px)',
+      borderRadius: 6,
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: 'clamp(11px, 1.5vw, 13px)',
+      fontWeight: 600,
+      transition: 'all .15s',
+      background: on ? colors.blue : 'transparent',
+      color: on ? '#fff' : colors.textSub,
+      boxShadow: on ? '0 1px 3px rgba(37,99,235,.2)' : 'none',
+      fontFamily: 'inherit',
+      flex: '1 1 auto',
+      textAlign: 'center',
+      justifyContent: 'center',
+      minWidth: 'min-content'
+    }),
 
-    // Content
-    content: { flex: 1, padding: '20px 28px', display: 'flex', flexDirection: 'column', gap: 20 },
+    // Content - responsive padding
+    content: {
+      flex: 1,
+      padding: 'clamp(12px, 2vw, 20px) clamp(16px, 3vw, 28px)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 20,
+      maxWidth: '100%',
+      overflow: 'hidden'
+    },
 
-    // Cards
-    panel:   { background: colors.surface, borderRadius: 12, border: `1px solid ${colors.border}`, overflow: 'hidden', boxShadow: '0 1px 2px rgba(0,0,0,.04)' },
-    panelHead: { padding: '13px 18px', borderBottom: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-    panelTitle:{ fontSize: 14, fontWeight: 600, color: colors.text, margin: 0 },
+    // Cards - IGUALES QUE PROVEEDORESVIEW: ring-1 ring-slate-200 dark:!ring-slate-700
+    panel:   {
+      background: colors.surface,
+      borderRadius: 12,
+      border: `1px solid ${colors.border}`,
+      overflow: 'hidden',
+      boxShadow: isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,.04)',
+      boxSizing: 'border-box',
+      position: 'relative',
+    },
+    panelBefore: {
+      content: '""',
+      position: 'absolute',
+      inset: 0,
+      borderRadius: 12,
+      padding: '1px',
+      background: isDark ? 'linear-gradient(to bottom, rgba(148, 163, 184, 0.2), rgba(148, 163, 184, 0.1))' : 'linear-gradient(to bottom, rgba(226, 232, 240, 0.5), rgba(226, 232, 240, 0.2))',
+      WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+      WebkitMaskComposite: 'xor',
+      maskComposite: 'exclude',
+      pointerEvents: 'none',
+    },
+    panelHead: {
+      padding: 'clamp(10px, 2vw, 13px) clamp(14px, 3vw, 18px)',
+      borderBottom: `1px solid ${colors.border}`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      flexWrap: 'wrap',
+      gap: 8
+    },
+    panelTitle:{
+      fontSize: 'clamp(13px, 1.5vw, 14px)',
+      fontWeight: 600,
+      color: colors.text,
+      margin: 0
+    },
 
-    // Grid (registro + movimientos)
-    grid:    { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,2fr)', gap: 20 },
+    // Grid (registro + movimientos) - responsive columns
+    grid:    {
+      display: 'grid',
+      gridTemplateColumns: 'minmax(0, 1fr)',
+      gap: 'clamp(12px, 2vw, 20px)'
+    },
 
-    // Filter bar
-    filterBar: { padding: '12px 18px', borderBottom: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
-    filterLabel: { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: colors.textMuted, display: 'flex', alignItems: 'center', gap: 5 },
+    // Grid for desktop only
+    gridDesktop: {
+      display: 'grid',
+      gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 2fr)',
+      gap: 'clamp(12px, 2vw, 20px)'
+    },
 
-    // Chips
-    chip:    (on) => ({ padding: '5px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600, border: `1px solid ${on ? colors.blue : colors.border}`, background: on ? colors.blue : colors.surface, color: on ? '#fff' : colors.textSub, cursor: 'pointer', transition: 'all .15s', fontFamily: 'inherit' }),
+    // Filter bar - responsive
+    filterBar: {
+      padding: 'clamp(10px, 2vw, 12px) clamp(14px, 3vw, 18px)',
+      borderBottom: `1px solid ${colors.border}`,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 'clamp(6px, 1vw, 10px)',
+      flexWrap: 'wrap'
+    },
+    filterLabel: {
+      fontSize: 'clamp(10px, 1.2vw, 11px)',
+      fontWeight: 600,
+      textTransform: 'uppercase',
+      letterSpacing: '0.06em',
+      color: colors.textMuted,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 5
+    },
 
-    // Ghost btn
-    btnGhost: { display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px', background: 'transparent', color: colors.textMid, border: `1px solid ${colors.border}`, borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all .15s', fontFamily: 'inherit' },
+    // Chips - responsive
+    chip:    (on) => ({
+      padding: 'clamp(4px, 1vw, 5px) clamp(10px, 2vw, 14px)',
+      borderRadius: 999,
+      fontSize: 'clamp(11px, 1.3vw, 12px)',
+      fontWeight: 600,
+      border: `1px solid ${on ? colors.blue : colors.border}`,
+      background: on ? colors.blue : colors.surface,
+      color: on ? '#fff' : colors.textSub,
+      cursor: 'pointer',
+      transition: 'all .15s',
+      fontFamily: 'inherit',
+      whiteSpace: 'nowrap'
+    }),
+
+    // Ghost btn - responsive
+    btnGhost: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 5,
+      padding: 'clamp(5px, 1vw, 6px) clamp(10px, 2vw, 12px)',
+      background: 'transparent',
+      color: colors.textMid,
+      border: `1px solid ${colors.border}`,
+      borderRadius: 7,
+      fontSize: 'clamp(11px, 1.3vw, 12px)',
+      fontWeight: 600,
+      cursor: 'pointer',
+      transition: 'all .15s',
+      fontFamily: 'inherit'
+    },
   };
 
   return (
@@ -287,8 +534,8 @@ export default function CajaView() {
       <div style={s.page}>
 
         {/* ── HEADER ── */}
-        <header style={s.header}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <header style={s.header} className="caja-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 auto' }}>
             <div style={s.iconBox}><IcoCash /></div>
             <div>
               <h1 style={s.title}>Control de Caja</h1>
@@ -298,7 +545,7 @@ export default function CajaView() {
             </div>
           </div>
 
-          <div style={s.controls}>
+          <div style={s.controls} className="caja-controls">
             {/* Fecha */}
             <label className="caja-pill" style={s.pill}>
               <IcoCalendar />
@@ -323,7 +570,7 @@ export default function CajaView() {
             )}
 
             {/* Tab switcher */}
-            <div style={s.tabBar}>
+            <div style={s.tabBar} className="caja-tab-bar">
               {vistaOptions.map(o => (
                 <button
                   key={o.value}
@@ -351,9 +598,9 @@ export default function CajaView() {
                 onRefresh={handleRefresh}
                 isDark={isDark}
               />
-              <div style={{ ...s.grid, marginTop: 20 }}>
+              <div style={{ ...s.gridDesktop, marginTop: 20 }} className="caja-grid-desktop">
                 {/* Registro */}
-                <div style={s.panel}>
+                <div style={s.panel} className="caja-panel">
                   <div style={s.panelHead}>
                     <p style={s.panelTitle}>Registrar Movimiento</p>
                   </div>
@@ -367,7 +614,7 @@ export default function CajaView() {
                 </div>
 
                 {/* Movimientos */}
-                <div style={s.panel}>
+                <div style={s.panel} className="caja-panel">
                   <div style={s.panelHead}>
                     <button className="caja-btn-ghost" style={s.btnGhost} onClick={handleRefresh}>
                       <IcoRefresh /> Actualizar
@@ -435,6 +682,15 @@ export default function CajaView() {
               <ArqueoCaja
                 fecha={fecha}
                 isAdmin={isAdmin}
+                idSucursal={getSucursalFilter()}
+              />
+            </div>
+          )}
+
+          {/* Historial de Arqueos */}
+          {vista === 'historial_arqueos' && (
+            <div className="caja-section" key={`historial_arqueos-${refreshKey}`}>
+              <HistorialArqueos
                 idSucursal={getSucursalFilter()}
               />
             </div>

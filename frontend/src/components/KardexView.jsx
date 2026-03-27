@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { get } from '../services/api';
+import { get, fetchSucursalesCaja } from '../services/api';
 import { showToast } from '../utils/toast';
 import {
   ClipboardDocumentListIcon,
@@ -15,14 +15,13 @@ import {
   ArrowPathIcon,
   DocumentArrowDownIcon,
   CalendarIcon,
-  UserIcon,
   ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
 import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
 
 export default function KardexView() {
-  const { tokenUsuario, usuario, subdominio } = useAuth();
+  const { tokenUsuario, usuario, subdominio, idSucursal, isAdmin } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Estados principales
@@ -36,12 +35,24 @@ export default function KardexView() {
   const [historialAjustes, setHistorialAjustes] = useState([]);
   const [filtroCategoria, setFiltroCategoria] = useState('');
 
+  // Estados para sucursales
+  const [sucursales, setSucursales] = useState([]);
+  const [sucursalSeleccionada, setSucursalSeleccionada] = useState(null);
+  const [loadingSucursales, setLoadingSucursales] = useState(false);
+  const [esAdminBackend, setEsAdminBackend] = useState(false);
+
+  // Valor unificado del filtro de sucursal activo
+  const sucursalFiltroActivo = esAdminBackend
+    ? sucursalSeleccionada
+    : (sucursalSeleccionada || idSucursal);
+
   // Detectar modo oscuro
   useEffect(() => {
     const checkDarkMode = () => {
-      const isDark = document.documentElement.classList.contains('dark') ||
-                     document.body.classList.contains('dark-mode') ||
-                     localStorage.getItem('darkMode') === 'true';
+      const isDark =
+        document.documentElement.classList.contains('dark') ||
+        document.body.classList.contains('dark-mode') ||
+        localStorage.getItem('darkMode') === 'true';
       setIsDarkMode(isDark);
     };
     checkDarkMode();
@@ -51,8 +62,41 @@ export default function KardexView() {
     return () => observer.disconnect();
   }, []);
 
-  // Cargar productos
-  const cargarProductos = async () => {
+  // Cargar sucursales
+  const cargarSucursales = async () => {
+    setLoadingSucursales(true);
+    try {
+      const response = await fetchSucursalesCaja({ token: tokenUsuario, usuario, subdominio });
+      if (response?.success) {
+        setSucursales(response.data);
+        setEsAdminBackend(response.es_admin || false);
+        // Para no-admin, autoseleccionar la sucursal asignada
+        if (!response.es_admin && response.sucursal_asignada) {
+          setSucursalSeleccionada(response.sucursal_asignada);
+        }
+      } else {
+        showToast('error', 'Error al cargar las sedes');
+      }
+    } catch (err) {
+      console.error('❌ Error cargando sedes:', err);
+      showToast('error', 'Error al cargar las sedes');
+    } finally {
+      setLoadingSucursales(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarSucursales();
+  }, []);
+
+  // Cargar productos — recibe el id de sucursal como argumento directo
+  // para evitar depender del estado en el momento de ejecución
+  const cargarProductos = async (sucursalId) => {
+    if (!esAdminBackend && !sucursalId) {
+      showToast('error', 'No tienes una sede asignada. Contacta al administrador.');
+      return;
+    }
+
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -60,10 +104,15 @@ export default function KardexView() {
         token: tokenUsuario,
         subdominio
       });
+
+      // Solo agrega id_sucursal si hay un valor definido
+      if (sucursalId !== null && sucursalId !== undefined && sucursalId !== '') {
+        params.append('id_sucursal', sucursalId);
+      }
+
       const response = await get(`api/productos/?${params.toString()}`, tokenUsuario);
       if (response && response.success) {
         setProductos(response.data || []);
-        // Inicializar conteos con valor vacío
         const conteosIniciales = {};
         (response.data || []).forEach(p => {
           conteosIniciales[p.id] = '';
@@ -83,25 +132,35 @@ export default function KardexView() {
   // Cargar historial de ajustes
   const cargarHistorialAjustes = async () => {
     try {
-      const params = new URLSearchParams({
-        usuario,
-        token: tokenUsuario,
-        subdominio
-      });
       // Nota: Este endpoint debe crearse en el backend
+      // const params = new URLSearchParams({ usuario, token: tokenUsuario, subdominio });
       // const response = await get(`api/kardex/historial/?${params.toString()}`, tokenUsuario);
-      // if (response && response.success) {
-      //   setHistorialAjustes(response.data || []);
-      // }
+      // if (response && response.success) setHistorialAjustes(response.data || []);
     } catch (error) {
       console.error('Error cargando historial:', error);
     }
   };
 
+  // Efecto principal: se ejecuta SOLO cuando termina de cargar las sucursales (carga inicial).
+  // Los cambios posteriores de sucursal se manejan directamente en el onChange del select.
   useEffect(() => {
-    cargarProductos();
-    cargarHistorialAjustes();
-  }, []);
+    if (!loadingSucursales) {
+      const filtroInicial = esAdminBackend
+        ? sucursalSeleccionada
+        : (sucursalSeleccionada || idSucursal);
+      cargarProductos(filtroInicial);
+      cargarHistorialAjustes();
+    }
+  }, [loadingSucursales]); // ← solo depende de loadingSucursales para la carga inicial
+
+  // Manejador del cambio de sucursal en el select (admin)
+  // Llama cargarProductos directamente con el valor nuevo, sin esperar re-render
+  const handleSucursalChange = (e) => {
+    const rawValue = e.target.value;
+    const nuevoValor = rawValue ? parseInt(rawValue, 10) : null;
+    setSucursalSeleccionada(nuevoValor);
+    cargarProductos(nuevoValor); // valor fresco, no depende del estado
+  };
 
   // Actualizar cantidad de conteo para un producto
   const handleCantidadChange = (productoId, valor) => {
@@ -124,12 +183,11 @@ export default function KardexView() {
 
   // Filtrar productos
   const productosFiltrados = productos.filter(producto => {
-    const cumpleBusqueda = !busqueda ||
+    const cumpleBusqueda =
+      !busqueda ||
       producto.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
       producto.codigo_producto?.toLowerCase().includes(busqueda.toLowerCase());
-
     const cumpleCategoria = !filtroCategoria || producto.categoria === filtroCategoria;
-
     return cumpleBusqueda && cumpleCategoria;
   });
 
@@ -161,15 +219,16 @@ export default function KardexView() {
 
     const resultado = {
       fecha: new Date().toISOString(),
-      usuario: usuario,
+      usuario,
       totalProductos: productos.length,
       productosContados: Object.values(productosConteo).filter(v => v !== '').length,
       productosCuadrados,
       productosConDiferencia,
       diferencias,
-      porcentajePrecision: productos.length > 0
-        ? ((productosCuadrados / productos.length) * 100).toFixed(1)
-        : 0,
+      porcentajePrecision:
+        productos.length > 0
+          ? ((productosCuadrados / productos.length) * 100).toFixed(1)
+          : 0,
       valorTotalDiferencias: diferencias.reduce((sum, d) => sum + d.valorDiferencia, 0),
       sugerencia: generarSugerencia(diferencias)
     };
@@ -180,42 +239,32 @@ export default function KardexView() {
 
   // Generar sugerencia basada en las diferencias
   const generarSugerencia = (diferencias) => {
-    if (diferencias.length === 0) {
-      return 'Inventario cuadrado';
-    }
+    if (diferencias.length === 0) return 'Inventario cuadrado';
 
     const tieneSobrantes = diferencias.some(d => d.tipo === 'sobrante');
     const tieneFaltantes = diferencias.some(d => d.tipo === 'faltante');
     const valorTotal = diferencias.reduce((sum, d) => sum + d.valorDiferencia, 0);
 
     if (tieneSobrantes && tieneFaltantes) {
-      if (valorTotal > 1000000) {
+      if (valorTotal > 1000000)
         return 'Revisión de inventario urgente - Se detectan movimientos significativos no registrados';
-      }
       return 'Cruce de mercancía - Se detectan sobrantes y faltantes que sugieren movimientos no registrados';
     }
-
-    if (tieneSobrantes) {
+    if (tieneSobrantes)
       return 'Posibles ventas sin registrar - Se detectan sobrantes en inventario';
-    }
-
     if (tieneFaltantes) {
-      if (valorTotal > 500000) {
+      if (valorTotal > 500000)
         return 'Alerta: Mérito de revisión - Valor de faltantes requiere investigación inmediata';
-      }
       return 'Posibles mermas o hurtos - Se detectan faltantes en inventario';
     }
-
     return 'Revisión de inventario recomendada';
   };
 
   // Guardar ajuste de inventario
   const guardarAjuste = async () => {
     if (!resultadoKardex) return;
-
     setGuardando(true);
     try {
-      // Preparar datos para enviar al backend
       const ajuste = {
         usuario,
         token: tokenUsuario,
@@ -241,21 +290,17 @@ export default function KardexView() {
       // Nota: Este endpoint debe crearse en el backend
       // const response = await post('api/kardex/guardar-ajuste/', ajuste, tokenUsuario);
 
-      // Simulamos el guardado exitoso
       await new Promise(resolve => setTimeout(resolve, 1000));
-
       showToast('success', 'Ajuste de inventario guardado correctamente');
 
-      // Agregar al historial local
       const nuevoHistorial = {
         id: Date.now(),
         fecha: new Date().toISOString(),
-        usuario: usuario,
+        usuario,
         ...ajuste.resumen,
         sugerencia: resultadoKardex.sugerencia
       };
       setHistorialAjustes([nuevoHistorial, ...historialAjustes]);
-
     } catch (error) {
       console.error('Error guardando ajuste:', error);
       showToast('error', 'Error al guardar el ajuste');
@@ -267,20 +312,14 @@ export default function KardexView() {
   // Exportar a PDF
   const exportarPDF = () => {
     if (!resultadoKardex) return;
-
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Título
     doc.setFontSize(18);
     doc.text('Reporte de Kardex de Inventario', pageWidth / 2, 20, { align: 'center' });
-
-    // Fecha y usuario
     doc.setFontSize(10);
     doc.text(`Fecha: ${new Date(resultadoKardex.fecha).toLocaleString('es-CO')}`, 14, 35);
     doc.text(`Usuario: ${resultadoKardex.usuario}`, 14, 42);
-
-    // Resumen
     doc.setFontSize(12);
     doc.text('Resumen:', 14, 55);
     doc.setFontSize(10);
@@ -290,31 +329,27 @@ export default function KardexView() {
     doc.text(`Productos con diferencia: ${resultadoKardex.productosConDiferencia}`, 20, 86);
     doc.text(`Precisión: ${resultadoKardex.porcentajePrecision}%`, 20, 93);
 
-    // Diferencias
+    let y = 118;
     if (resultadoKardex.diferencias.length > 0) {
       doc.setFontSize(12);
       doc.text('Diferencias encontradas:', 14, 108);
-
-      let y = 118;
       resultadoKardex.diferencias.forEach((d, index) => {
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
-        }
-
+        if (y > 270) { doc.addPage(); y = 20; }
         doc.setFontSize(9);
         doc.text(`${index + 1}. ${d.producto.nombre}`, 20, y);
         doc.text(`   Código: ${d.producto.codigo_producto || 'N/A'}`, 20, y + 6);
         doc.text(`   Sistema: ${d.cantidadSistema} | Físico: ${d.cantidadFisica} | Diferencia: ${d.diferencia > 0 ? '+' : ''}${d.diferencia}`, 20, y + 12);
         doc.text(`   Valor: $${d.valorDiferencia.toLocaleString('es-CO')}`, 20, y + 18);
-
         y += 28;
       });
     }
 
-    // Sugerencia
     doc.setFontSize(12);
-    doc.text(`Sugerencia: ${resultadoKardex.sugerencia}`, 14, resultadoKardex.diferencias.length > 0 ? Math.min(y + 20, 270) : 120);
+    doc.text(
+      `Sugerencia: ${resultadoKardex.sugerencia}`,
+      14,
+      resultadoKardex.diferencias.length > 0 ? Math.min(y + 20, 270) : 120
+    );
 
     doc.save(`kardex-inventario-${new Date().toISOString().split('T')[0]}.pdf`);
     showToast('success', 'Reporte PDF generado');
@@ -323,10 +358,8 @@ export default function KardexView() {
   // Exportar a Excel
   const exportarExcel = () => {
     if (!resultadoKardex) return;
-
     const wb = XLSX.utils.book_new();
 
-    // Hoja de resumen
     const resumenData = [
       ['REPORTE DE KARDEX DE INVENTARIO'],
       ['Fecha', new Date(resultadoKardex.fecha).toLocaleString('es-CO')],
@@ -342,11 +375,9 @@ export default function KardexView() {
       [''],
       ['SUGERENCIA', resultadoKardex.sugerencia]
     ];
-
     const wsResumen = XLSX.utils.aoa_to_sheet(resumenData);
     XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
 
-    // Hoja de diferencias
     if (resultadoKardex.diferencias.length > 0) {
       const diferenciasData = [
         ['DIFERENCIAS ENCONTRADAS'],
@@ -362,7 +393,6 @@ export default function KardexView() {
           d.valorDiferencia
         ])
       ];
-
       const wsDiferencias = XLSX.utils.aoa_to_sheet(diferenciasData);
       XLSX.utils.book_append_sheet(wb, wsDiferencias, 'Diferencias');
     }
@@ -389,7 +419,13 @@ export default function KardexView() {
             </div>
           </div>
           <button
-            onClick={cargarProductos}
+            onClick={() => {
+              if (!esAdminBackend && !sucursalFiltroActivo) {
+                showToast('error', 'No tienes una sede asignada. Contacta al administrador.');
+                return;
+              }
+              cargarProductos(sucursalFiltroActivo);
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <ArrowPathIcon style={{ width: 18, height: 18 }} />
@@ -468,6 +504,41 @@ export default function KardexView() {
               />
             </div>
 
+            {/* Selector de sede */}
+            {esAdminBackend ? (
+              <div className="relative">
+                <select
+                  value={sucursalSeleccionada ?? ''}
+                  onChange={handleSucursalChange}
+                  disabled={loadingSucursales}
+                  className="pl-10 pr-8 py-2.5 bg-gray-50 dark:!bg-slate-800 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 appearance-none cursor-pointer min-w-[180px]"
+                >
+                  <option value="">Todas las sedes</option>
+                  {sucursales.map(s => (
+                    <option key={s.id} value={s.id}>{s.nombre}</option>
+                  ))}
+                </select>
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            ) : (
+              <div className="px-4 py-2.5 bg-blue-50 dark:!bg-blue-900/20 border border-blue-200 dark:!border-blue-800 rounded-lg text-sm text-blue-700 dark:!text-blue-300 flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                <span className="font-medium">Sede:</span>
+                <span>{sucursales.find(s => s.id === sucursalFiltroActivo)?.nombre || 'Cargando...'}</span>
+              </div>
+            )}
+
             <select
               value={filtroCategoria}
               onChange={(e) => setFiltroCategoria(e.target.value)}
@@ -483,11 +554,8 @@ export default function KardexView() {
               onClick={() => {
                 setBusqueda('');
                 setFiltroCategoria('');
-                // Resetear conteos
                 const conteosReset = {};
-                productos.forEach(p => {
-                  conteosReset[p.id] = '';
-                });
+                productos.forEach(p => { conteosReset[p.id] = ''; });
                 setProductosConteo(conteosReset);
                 setResultadoKardex(null);
                 setMostrarReporte(false);
@@ -513,9 +581,7 @@ export default function KardexView() {
             <button
               onClick={() => {
                 const conteosRapidos = {};
-                productos.forEach(p => {
-                  conteosRapidos[p.id] = p.stock_actual || 0;
-                });
+                productos.forEach(p => { conteosRapidos[p.id] = p.stock_actual || 0; });
                 setProductosConteo(conteosRapidos);
                 showToast('success', 'Conteo rápido completado');
               }}
@@ -529,7 +595,6 @@ export default function KardexView() {
         {/* Reporte de Kardex */}
         {mostrarReporte && resultadoKardex && (
           <div className="bg-white dark:!bg-slate-900 rounded-xl border border-gray-200 dark:!border-slate-700 mb-6 overflow-hidden">
-            {/* Header del reporte */}
             <div className={`p-6 border-b ${
               resultadoKardex.productosConDiferencia === 0
                 ? 'bg-green-50 dark:!bg-green-900/20 border-green-200 dark:!border-green-800'
@@ -564,10 +629,7 @@ export default function KardexView() {
                   </div>
                 </div>
                 <button
-                  onClick={() => {
-                    setMostrarReporte(false);
-                    setResultadoKardex(null);
-                  }}
+                  onClick={() => { setMostrarReporte(false); setResultadoKardex(null); }}
                   className="p-2 hover:bg-black/5 dark:hover:!bg-white/10 rounded-lg transition-colors"
                 >
                   <XMarkIcon style={{ width: 24, height: 24 }} className="text-gray-500 dark:!text-slate-400" />
@@ -620,16 +682,10 @@ export default function KardexView() {
                             <p className="text-sm font-medium text-gray-900 dark:!text-white">{d.producto.nombre}</p>
                             <p className="text-xs text-gray-500 dark:!text-slate-400">{d.producto.codigo_producto || 'N/A'}</p>
                           </td>
-                          <td className="py-3 px-4 text-center text-sm text-gray-700 dark:!text-slate-300">
-                            {d.cantidadSistema}
-                          </td>
-                          <td className="py-3 px-4 text-center text-sm text-gray-700 dark:!text-slate-300">
-                            {d.cantidadFisica}
-                          </td>
+                          <td className="py-3 px-4 text-center text-sm text-gray-700 dark:!text-slate-300">{d.cantidadSistema}</td>
+                          <td className="py-3 px-4 text-center text-sm text-gray-700 dark:!text-slate-300">{d.cantidadFisica}</td>
                           <td className="py-3 px-4 text-center">
-                            <span className={`text-sm font-semibold ${
-                              d.diferencia > 0 ? 'text-green-600' : 'text-red-600'
-                            }`}>
+                            <span className={`text-sm font-semibold ${d.diferencia > 0 ? 'text-green-600' : 'text-red-600'}`}>
                               {d.diferencia > 0 ? '+' : ''}{d.diferencia}
                             </span>
                           </td>
@@ -677,10 +733,7 @@ export default function KardexView() {
                 Excel
               </button>
               <button
-                onClick={() => {
-                  setMostrarReporte(false);
-                  setResultadoKardex(null);
-                }}
+                onClick={() => { setMostrarReporte(false); setResultadoKardex(null); }}
                 className="px-4 py-2.5 bg-gray-100 dark:!bg-slate-800 text-gray-700 dark:!text-slate-300 rounded-lg hover:bg-gray-200 dark:hover:!bg-slate-700 transition-colors font-semibold"
               >
                 Nuevo Conteo
@@ -698,6 +751,23 @@ export default function KardexView() {
                 Ingrese la cantidad física contada de cada producto
               </p>
             </div>
+
+            {/* Mensaje de advertencia para no-admin sin sede asignada */}
+            {!esAdminBackend && !sucursalFiltroActivo && !loading && (
+              <div className="p-8 text-center">
+                <div className="max-w-md mx-auto">
+                  <div className="w-16 h-16 rounded-full bg-amber-100 dark:!bg-amber-900/30 flex items-center justify-center mx-auto mb-4">
+                    <ExclamationTriangleIcon style={{ width: 32, height: 32 }} className="text-amber-600 dark:!text-amber-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:!text-white mb-2">
+                    No tienes una sede asignada
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:!text-slate-400">
+                    Para realizar el kardex de inventario, necesitas tener una sede asignada. Por favor contacta al administrador del sistema.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {loading ? (
               <div className="flex justify-center items-center py-12">
@@ -728,9 +798,7 @@ export default function KardexView() {
                       return (
                         <tr
                           key={producto.id}
-                          className={`border-b border-gray-100 dark:!border-slate-800 ${
-                            tieneDiferencia ? 'bg-amber-50/50 dark:!bg-amber-900/20' : ''
-                          }`}
+                          className={`border-b border-gray-100 dark:!border-slate-800 ${tieneDiferencia ? 'bg-amber-50/50 dark:!bg-amber-900/20' : ''}`}
                         >
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-3">
@@ -758,9 +826,7 @@ export default function KardexView() {
                             </span>
                           </td>
                           <td className="py-3 px-4 text-center">
-                            <span className="text-sm font-semibold text-gray-700 dark:!text-slate-300">
-                              {cantidadSistema}
-                            </span>
+                            <span className="text-sm font-semibold text-gray-700 dark:!text-slate-300">{cantidadSistema}</span>
                           </td>
                           <td className="py-3 px-4">
                             <input

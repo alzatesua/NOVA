@@ -26,6 +26,9 @@ export default function Dashboard() {
   const [users, setUsers] = useState(usersData);
   const { sucursales, isLoading: loadingSuc, ref: gridRef } = useFetchSucursales();
 
+  // Estado para controlar si el menú móvil está abierto
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   // Sincronizar users cuando cambie usersData
   useEffect(() => {
     if (usersData && Array.isArray(usersData.datos)) {
@@ -84,29 +87,42 @@ export default function Dashboard() {
         onViewChange={setView}
         onLogout={logout}
         currentView={view}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
       />
 
-      <main className="pt-16 flex-grow flex flex-col px-4 pb-10 w-full">
+      <main
+        className="flex-grow flex flex-col pb-10 w-full transition-all duration-300 overflow-x-hidden"
+        style={{
+          paddingTop: mobileMenuOpen ? 'calc(68px + 300px)' : '72px',
+          paddingLeft: 'clamp(12px, 2vw, 24px)',
+          paddingRight: 'clamp(12px, 2vw, 24px)',
+          maxWidth: '100vw',
+          overflowX: 'hidden'
+        }}
+      >
         {/* VISTA DE DASHBOARD - Nuevas gráficas y métricas */}
         {view === 'dashboard' && (
-          <div className="relative w-full">
+          <div className="relative w-full" style={{ maxWidth: '100%', overflow: 'hidden' }}>
             <DashboardView />
           </div>
         )}
 
         {view === 'usuarios' && (
-          <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
-            <section className="w-full">
-              <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-slate-100">Gestión de Usuarios</h3>
+          <div className="relative w-full mb-8 rounded-3xl overflow-hidden
+            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200"
+            style={{ padding: 'clamp(12px, 3vw, 32px)', maxWidth: '100%', overflowX: 'hidden' }}>
+            <section className="w-full" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+              <h3 className="text-xl sm:text-2xl font-bold mb-4 text-slate-900 dark:text-slate-100">Gestión de Usuarios</h3>
               <UsersView users={usersData} onCreated={reloadUsers} />
             </section>
           </div>
         )}
 
         {view === 'sucursales' && (
-          <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
+          <div className="relative w-full mb-8 rounded-3xl overflow-hidden
+            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200"
+            style={{ padding: 'clamp(12px, 3vw, 32px)', maxWidth: '100%', overflowX: 'hidden' }}>
             <SucursalesGrid
               sucursales={sucursales}
               isLoading={loadingSuc}
@@ -116,8 +132,9 @@ export default function Dashboard() {
         )}
 
         {view === 'productos' && (
-          <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
+          <div className="relative w-full mb-8 rounded-3xl overflow-hidden
+            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200"
+            style={{ padding: 'clamp(12px, 3vw, 32px)', maxWidth: '100%', overflowX: 'hidden' }}>
             <ProductosView
               products={products}
               loading={loadingProducts}
@@ -136,8 +153,9 @@ export default function Dashboard() {
 
         {/* VISTA DE FACTURACIÓN - SIN PROPS, USA DATOS INTERNOS */}
         {view === 'facturacion' && (
-          <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
+          <div className="relative w-full mb-8 rounded-3xl overflow-hidden
+            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200"
+            style={{ padding: 'clamp(12px, 3vw, 32px)', maxWidth: '100%', overflowX: 'hidden' }}>
             <FacturacionView />
           </div>
         )}
@@ -147,29 +165,30 @@ export default function Dashboard() {
 
         {/* VISTA DE GESTIÓN DE CLIENTES - CUPONES Y CLIENTES */}
         {view === 'clientes' && (
-          <div className="relative w-full mb-8 p-8 rounded-3xl
-            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200">
+          <div className="relative w-full mb-8 rounded-3xl overflow-hidden
+            bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200"
+            style={{ padding: 'clamp(12px, 3vw, 32px)', maxWidth: '100%', overflowX: 'hidden' }}>
             <ClientesView />
           </div>
         )}
 
         {/* VISTA DE CAJA - CONTROL DE CAJA */}
         {view === 'caja' && (
-          <div className="relative w-full mb-8">
+          <div className="relative w-full mb-8" style={{ maxWidth: '100%', overflowX: 'hidden' }}>
             <CajaView />
           </div>
         )}
 
         {/* VISTA DE GESTIÓN DE MORA */}
         {view === 'mora' && (
-          <div className="relative w-full mb-8">
+          <div className="relative w-full mb-8" style={{ maxWidth: '100%', overflowX: 'hidden' }}>
             <MoraView />
           </div>
         )}
 
         {/* VISTA DE GESTIÓN DE PROVEEDORES */}
         {view === 'proveedores' && (
-          <div className="relative w-full mb-8">
+          <div className="relative w-full mb-8" style={{ maxWidth: '100%', overflowX: 'hidden' }}>
             <ProveedoresView />
           </div>
         )}

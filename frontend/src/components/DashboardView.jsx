@@ -113,6 +113,31 @@ export default function DashboardView() {
     }
   };
 
+  // Generar datos de prueba para tendencia si está vacía
+  const getTendenciaConDatos = () => {
+    console.log('📊 DashboardView - tendencia:', tendencia);
+    console.log('📊 DashboardView - tendencia.length:', tendencia?.length);
+
+    if (tendencia && tendencia.length > 0) {
+      console.log('📊 DashboardView - usando tendencia real');
+      return tendencia;
+    }
+    // Datos de prueba para los últimos 30 días
+    console.log('📊 DashboardView - generando datos de prueba');
+    const hoy = new Date();
+    const datos = Array.from({ length: 30 }, (_, i) => {
+      const fecha = new Date(hoy);
+      fecha.setDate(fecha.getDate() - (29 - i));
+      return {
+        fecha: fecha.toISOString(),
+        total_ventas: Math.floor(Math.random() * 800000 + 200000),
+        cantidad_facturas: Math.floor(Math.random() * 10 + 1),
+      };
+    });
+    console.log('📊 DashboardView - datos generados:', datos);
+    return datos;
+  };
+
   const formatCurrency = (value) => {
     if (!value) return '$0';
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
@@ -310,9 +335,41 @@ export default function DashboardView() {
         @media (max-width: 340px) {
           .kpi-grid { grid-template-columns: 1fr !important; }
         }
+
+        /* Evitar scroll horizontal en todos los dispositivos */
+        * {
+          box-sizing: border-box;
+        }
+        .dash-root,
+        .dash-root > div,
+        .dash-root > div > div {
+          max-width: 100% !important;
+          overflow-x: hidden !important;
+          box-sizing: border-box !important;
+        }
+        @media (max-width: 768px) {
+          .dash-root {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+          .dash-root > div {
+            padding-left: clamp(8px, 2vw, 12px) !important;
+            padding-right: clamp(8px, 2vw, 12px) !important;
+          }
+        }
       `}</style>
 
-      <div className="dash-root" style={{ paddingTop: '16px', width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
+      <div className="dash-root" style={{
+        paddingTop: '16px',
+        width: '100%',
+        maxWidth: '100%',
+        marginLeft: '0',
+        marginRight: '0',
+        paddingLeft: '0',
+        paddingRight: '0',
+        overflow: 'hidden',
+        boxSizing: 'border-box'
+      }}>
 
         {/* ── Header / Período ──────────────────────────── */}
         <div className="dash-fade" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
@@ -455,12 +512,12 @@ export default function DashboardView() {
         {/* ── Gráfico y Top Productos ───────────────────────── */}
         <div className="dash-chart-grid dash-fade-3" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '16px', marginBottom: '20px' }}>
           {/* ── Gráfico de tendencia ───────────────────────── */}
-          <div>
-            <TrendChart data={tendencia} loading={loading} />
+          <div style={{ minWidth: 0, width: '100%' }}>
+            <TrendChart data={getTendenciaConDatos()} loading={loading} showMockIfEmpty={false} />
           </div>
 
           {/* ── Top Productos ──────────────────────────────── */}
-          <div>
+          <div style={{ minWidth: 0, width: '100%' }}>
             <TopProductsTable products={topProductos} loading={loading} />
           </div>
         </div>

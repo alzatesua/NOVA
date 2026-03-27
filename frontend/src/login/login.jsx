@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Package, BarChart3, ShoppingCart, FileText, TrendingUp, Zap, Shield, Users } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Package, BarChart3, ShoppingCart, FileText, TrendingUp, Zap, Shield, Users } from 'lucide-react';
 const API_URL = import.meta.env.VITE_API_URL;
 
 function Login() {
@@ -100,42 +100,74 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
 
-      {/* Animated background grid */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
-            linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px',
-          transform: `perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px)`,
-          animation: 'grid-move 20s linear infinite'
-        }}></div>
-      </div>
-
-      {/* Floating particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full bg-blue-500/20"
-            style={{
-              width: Math.random() * 10 + 5 + 'px',
-              height: Math.random() * 10 + 5 + 'px',
-              left: Math.random() * 100 + '%',
-              top: Math.random() * 100 + '%',
-              animation: `float ${Math.random() * 10 + 10}s ease-in-out infinite`,
-              animationDelay: Math.random() * 5 + 's',
-            }}
-          />
-        ))}
-      </div>
-
       {/* Animated gradient orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-orb1"></div>
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl animate-orb2"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-600/10 rounded-full blur-3xl animate-orb3"></div>
+      </div>
+
+      {/* Animated sparkles/destellos - MUCHOS MÁS */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Pequeños destellos - 1px */}
+        <div className="absolute top-[5%] left-[8%] w-1 h-1 bg-blue-400 rounded-full animate-sparkle1"></div>
+        <div className="absolute top-[12%] left-[22%] w-1 h-1 bg-cyan-400 rounded-full animate-sparkle2"></div>
+        <div className="absolute top-[8%] right-[15%] w-1 h-1 bg-purple-400 rounded-full animate-sparkle3"></div>
+        <div className="absolute top-[18%] right-[8%] w-1 h-1 bg-blue-300 rounded-full animate-sparkle4"></div>
+        <div className="absolute top-[25%] left-[5%] w-1 h-1 bg-cyan-300 rounded-full animate-sparkle5"></div>
+        <div className="absolute top-[22%] right-[25%] w-1 h-1 bg-purple-300 rounded-full animate-sparkle6"></div>
+        <div className="absolute top-[35%] left-[12%] w-1 h-1 bg-blue-400 rounded-full animate-sparkle7"></div>
+        <div className="absolute top-[38%] right-[18%] w-1 h-1 bg-cyan-400 rounded-full animate-sparkle8"></div>
+        <div className="absolute top-[45%] left-[7%] w-1 h-1 bg-purple-400 rounded-full animate-sparkle1"></div>
+        <div className="absolute top-[48%] right-[12%] w-1 h-1 bg-blue-300 rounded-full animate-sparkle2"></div>
+        <div className="absolute top-[55%] left-[20%] w-1 h-1 bg-cyan-300 rounded-full animate-sparkle3"></div>
+        <div className="absolute top-[58%] right-[6%] w-1 h-1 bg-purple-300 rounded-full animate-sparkle4"></div>
+        <div className="absolute top-[65%] left-[10%] w-1 h-1 bg-blue-400 rounded-full animate-sparkle5"></div>
+        <div className="absolute top-[68%] right-[22%] w-1 h-1 bg-cyan-400 rounded-full animate-sparkle6"></div>
+        <div className="absolute top-[75%] left-[15%] w-1 h-1 bg-purple-400 rounded-full animate-sparkle7"></div>
+        <div className="absolute top-[78%] right-[10%] w-1 h-1 bg-blue-300 rounded-full animate-sparkle8"></div>
+        <div className="absolute top-[85%] left-[8%] w-1 h-1 bg-cyan-300 rounded-full animate-sparkle1"></div>
+        <div className="absolute top-[88%] right-[18%] w-1 h-1 bg-purple-300 rounded-full animate-sparkle2"></div>
+        <div className="absolute top-[95%] left-[12%] w-1 h-1 bg-blue-400 rounded-full animate-sparkle3"></div>
+
+        {/* Destellos medios - 2px */}
+        <div className="absolute top-[15%] left-[35%] w-2 h-2 bg-blue-500 rounded-full animate-sparkle9"></div>
+        <div className="absolute top-[28%] right-[35%] w-2 h-2 bg-cyan-500 rounded-full animate-sparkle10"></div>
+        <div className="absolute top-[42%] left-[40%] w-2 h-2 bg-purple-500 rounded-full animate-sparkle11"></div>
+        <div className="absolute top-[62%] right-[38%] w-2 h-2 bg-blue-400 rounded-full animate-sparkle12"></div>
+        <div className="absolute top-[72%] left-[45%] w-2 h-2 bg-cyan-400 rounded-full animate-sparkle13"></div>
+        <div className="absolute top-[82%] right-[42%] w-2 h-2 bg-purple-400 rounded-full animate-sparkle14"></div>
+
+        {/* Destellos grandes - 3px */}
+        <div className="absolute top-[10%] left-[60%] w-3 h-3 bg-blue-500 rounded-full animate-sparkle15"></div>
+        <div className="absolute top-[30%] right-[55%] w-3 h-3 bg-cyan-500 rounded-full animate-sparkle16"></div>
+        <div className="absolute top-[50%] left-[55%] w-3 h-3 bg-purple-500 rounded-full animate-sparkle17"></div>
+        <div className="absolute top-[70%] right-[60%] w-3 h-3 bg-blue-400 rounded-full animate-sparkle18"></div>
+        <div className="absolute top-[90%] left-[58%] w-3 h-3 bg-cyan-400 rounded-full animate-sparkle19"></div>
+
+        {/* Extra destellos con movimiento rápido */}
+        <div className="absolute top-[5%] left-[80%] w-1.5 h-1.5 bg-purple-300 rounded-full animate-sparkle20"></div>
+        <div className="absolute top-[20%] left-[75%] w-1.5 h-1.5 bg-blue-300 rounded-full animate-sparkle21"></div>
+        <div className="absolute top-[40%] right-[70%] w-1.5 h-1.5 bg-cyan-300 rounded-full animate-sparkle22"></div>
+        <div className="absolute top-[60%] left-[72%] w-1.5 h-1.5 bg-purple-400 rounded-full animate-sparkle23"></div>
+        <div className="absolute top-[80%] right-[75%] w-1.5 h-1.5 bg-blue-400 rounded-full animate-sparkle24"></div>
+
+        {/* Destellos centrales */}
+        <div className="absolute top-[33%] left-[48%] w-2 h-2 bg-cyan-500 rounded-full animate-sparkle25"></div>
+        <div className="absolute top-[52%] right-[48%] w-2 h-2 bg-purple-500 rounded-full animate-sparkle26"></div>
+        <div className="absolute top-[67%] left-[52%] w-2 h-2 bg-blue-500 rounded-full animate-sparkle27"></div>
+      </div>
+
+      {/* Floating glow effects - MÁS EFECTOS */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[15%] left-[20%] w-32 h-32 bg-blue-500/5 rounded-full blur-2xl animate-float1"></div>
+        <div className="absolute top-[60%] right-[15%] w-40 h-40 bg-purple-500/5 rounded-full blur-2xl animate-float2"></div>
+        <div className="absolute bottom-[20%] left-[30%] w-36 h-36 bg-cyan-500/5 rounded-full blur-2xl animate-float3"></div>
+        <div className="absolute top-[35%] right-[30%] w-28 h-28 bg-blue-500/4 rounded-full blur-2xl animate-float4"></div>
+        <div className="absolute bottom-[45%] left-[15%] w-32 h-32 bg-purple-500/4 rounded-full blur-2xl animate-float5"></div>
+        <div className="absolute top-[70%] left-[65%] w-36 h-36 bg-cyan-500/4 rounded-full blur-2xl animate-float6"></div>
+        <div className="absolute top-[25%] left-[75%] w-30 h-30 bg-blue-500/3 rounded-full blur-2xl animate-float7"></div>
+        <div className="absolute bottom-[35%] right-[65%] w-34 h-34 bg-purple-500/3 rounded-full blur-2xl animate-float8"></div>
       </div>
 
       {/* Main content wrapper */}
@@ -153,7 +185,7 @@ function Login() {
             <div className="relative w-full h-[400px]">
 
               {/* Card 1 - Inventory */}
-              <div className="absolute left-0 top-0 w-64 h-40 bg-gradient-to-br from-blue-600/30 to-blue-800/30 backdrop-blur-xl rounded-2xl border border-blue-500/30 p-5 transform hover:scale-105 hover:-translate-y-2 transition-all duration-300 animate-float1">
+              <div className="absolute left-0 top-0 w-64 h-40 bg-gradient-to-br from-blue-600/30 to-blue-800/30 backdrop-blur-xl rounded-2xl border border-blue-500/30 p-5 transform hover:scale-105 hover:-translate-y-2 transition-all duration-300">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 bg-blue-500/20 rounded-lg">
                     <Package className="w-6 h-6 text-blue-400" />
@@ -171,7 +203,7 @@ function Login() {
               </div>
 
               {/* Card 2 - Sales */}
-              <div className="absolute right-0 top-16 w-64 h-40 bg-gradient-to-br from-emerald-600/30 to-emerald-800/30 backdrop-blur-xl rounded-2xl border border-emerald-500/30 p-5 transform hover:scale-105 hover:-translate-y-2 transition-all duration-300 animate-float2">
+              <div className="absolute right-0 top-16 w-64 h-40 bg-gradient-to-br from-emerald-600/30 to-emerald-800/30 backdrop-blur-xl rounded-2xl border border-emerald-500/30 p-5 transform hover:scale-105 hover:-translate-y-2 transition-all duration-300">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 bg-emerald-500/20 rounded-lg">
                     <TrendingUp className="w-6 h-6 text-emerald-400" />
@@ -188,7 +220,7 @@ function Login() {
               </div>
 
               {/* Card 3 - Invoices */}
-              <div className="absolute left-20 bottom-0 w-64 h-40 bg-gradient-to-br from-purple-600/30 to-purple-800/30 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-5 transform hover:scale-105 hover:-translate-y-2 transition-all duration-300 animate-float3">
+              <div className="absolute left-20 bottom-0 w-64 h-40 bg-gradient-to-br from-purple-600/30 to-purple-800/30 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-5 transform hover:scale-105 hover:-translate-y-2 transition-all duration-300">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 bg-purple-500/20 rounded-lg">
                     <FileText className="w-6 h-6 text-purple-400" />
@@ -207,13 +239,13 @@ function Login() {
               </div>
 
               {/* Floating icons */}
-              <div className="absolute top-8 right-32 animate-bounce-slow">
+              <div className="absolute top-8 right-32">
                 <ShoppingCart className="w-8 h-8 text-cyan-400 opacity-60" />
               </div>
-              <div className="absolute bottom-20 left-48 animate-bounce-slow" style={{ animationDelay: '1s' }}>
+              <div className="absolute bottom-20 left-48">
                 <BarChart3 className="w-8 h-8 text-blue-400 opacity-60" />
               </div>
-              <div className="absolute top-32 left-8 animate-bounce-slow" style={{ animationDelay: '2s' }}>
+              <div className="absolute top-32 left-8">
                 <Zap className="w-8 h-8 text-yellow-400 opacity-60" />
               </div>
             </div>
@@ -346,10 +378,9 @@ function Login() {
                   <div className="text-right">
                     <a
                       href="/recuperar"
-                      className="text-sm text-blue-400 hover:text-blue-300 transition-colors duration-200 inline-flex items-center gap-1 group"
+                      className="text-sm text-blue-400 hover:text-blue-300 transition-colors duration-200"
                     >
                       ¿Olvidaste tu contraseña?
-                      <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform duration-200" />
                     </a>
                   </div>
 
@@ -363,20 +394,17 @@ function Login() {
                         : 'bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 hover:from-blue-500 hover:via-cyan-500 hover:to-purple-500 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40'
                     }`}
                   >
-                    <span className="relative z-10 flex items-center justify-center gap-2">
+                    <span className="relative z-10 flex items-center justify-center">
                       {loading ? (
                         <>
-                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                          <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
                           Iniciando sesión...
                         </>
                       ) : (
-                        <>
-                          Iniciar sesión
-                          <ArrowRight className="h-5 w-5 group-hover/btn:translate-x-1 transition-transform duration-200" />
-                        </>
+                        'Iniciar sesión'
                       )}
                     </span>
                     {!loading && (
@@ -450,50 +478,6 @@ function Login() {
 
       {/* Custom animations */}
       <style jsx>{`
-        @keyframes grid-move {
-          0% { background-position: 0 0; }
-          100% { background-position: 50px 50px; }
-        }
-
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0) translateX(0);
-            opacity: 0.2;
-          }
-          25% {
-            transform: translateY(-20px) translateX(10px);
-            opacity: 0.4;
-          }
-          50% {
-            transform: translateY(-10px) translateX(-10px);
-            opacity: 0.3;
-          }
-          75% {
-            transform: translateY(-30px) translateX(5px);
-            opacity: 0.5;
-          }
-        }
-
-        @keyframes float1 {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-
-        @keyframes float2 {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-15px); }
-        }
-
-        @keyframes float3 {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
-        }
-
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-
         @keyframes glow {
           0%, 100% { opacity: 0.5; transform: scale(1); }
           50% { opacity: 0.8; transform: scale(1.05); }
@@ -527,10 +511,181 @@ function Login() {
           100% { width: 75%; }
         }
 
-        .animate-float1 { animation: float1 4s ease-in-out infinite; }
-        .animate-float2 { animation: float2 5s ease-in-out infinite 0.5s; }
-        .animate-float3 { animation: float3 4.5s ease-in-out infinite 1s; }
-        .animate-bounce-slow { animation: bounce-slow 3s ease-in-out infinite; }
+        @keyframes sparkle1 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(10px, -10px); }
+        }
+
+        @keyframes sparkle2 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(-15px, 5px); }
+        }
+
+        @keyframes sparkle3 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(8px, 12px); }
+        }
+
+        @keyframes sparkle4 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(-12px, -8px); }
+        }
+
+        @keyframes sparkle5 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(15px, 10px); }
+        }
+
+        @keyframes sparkle6 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(-10px, -15px); }
+        }
+
+        @keyframes sparkle7 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(5px, 8px); }
+        }
+
+        @keyframes sparkle8 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(-8px, -5px); }
+        }
+
+        @keyframes sparkle9 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(12px, -8px); }
+        }
+
+        @keyframes sparkle10 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(-10px, 10px); }
+        }
+
+        @keyframes sparkle11 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(8px, -12px); }
+        }
+
+        @keyframes sparkle12 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(-12px, 8px); }
+        }
+
+        @keyframes sparkle13 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(10px, 12px); }
+        }
+
+        @keyframes sparkle14 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(-8px, -10px); }
+        }
+
+        @keyframes sparkle15 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(15px, -15px); }
+        }
+
+        @keyframes sparkle16 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(-18px, 12px); }
+        }
+
+        @keyframes sparkle17 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(12px, 18px); }
+        }
+
+        @keyframes sparkle18 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(-15px, -12px); }
+        }
+
+        @keyframes sparkle19 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(18px, 15px); }
+        }
+
+        @keyframes sparkle20 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.1) translate(-8px, 8px); }
+        }
+
+        @keyframes sparkle21 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.1) translate(10px, -6px); }
+        }
+
+        @keyframes sparkle22 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.1) translate(-7px, 10px); }
+        }
+
+        @keyframes sparkle23 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.1) translate(9px, -9px); }
+        }
+
+        @keyframes sparkle24 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.1) translate(-11px, 7px); }
+        }
+
+        @keyframes sparkle25 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.3) translate(6px, -8px); }
+        }
+
+        @keyframes sparkle26 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.3) translate(-7px, 9px); }
+        }
+
+        @keyframes sparkle27 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.3) translate(8px, -7px); }
+        }
+
+        @keyframes float1 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+          50% { transform: translate(30px, -40px) scale(1.2); opacity: 0.6; }
+        }
+
+        @keyframes float2 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+          50% { transform: translate(-40px, 30px) scale(1.3); opacity: 0.6; }
+        }
+
+        @keyframes float3 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+          50% { transform: translate(20px, 40px) scale(1.1); opacity: 0.6; }
+        }
+
+        @keyframes float4 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.25; }
+          50% { transform: translate(-25px, -35px) scale(1.15); opacity: 0.5; }
+        }
+
+        @keyframes float5 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.25; }
+          50% { transform: translate(30px, 25px) scale(1.1); opacity: 0.55; }
+        }
+
+        @keyframes float6 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.25; }
+          50% { transform: translate(-20px, 30px) scale(1.2); opacity: 0.5; }
+        }
+
+        @keyframes float7 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.2; }
+          50% { transform: translate(25px, -25px) scale(1.15); opacity: 0.45; }
+        }
+
+        @keyframes float8 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.2; }
+          50% { transform: translate(-30px, -20px) scale(1.1); opacity: 0.5; }
+        }
+
         .animate-glow { animation: glow 3s ease-in-out infinite; }
         .animate-gradient {
           background-size: 200% 200%;
@@ -540,6 +695,41 @@ function Login() {
         .animate-orb2 { animation: orb2 18s ease-in-out infinite; }
         .animate-orb3 { animation: orb3 20s linear infinite; }
         .animate-progress { animation: progress 2s ease-out forwards; }
+        .animate-sparkle1 { animation: sparkle1 3s ease-in-out infinite; }
+        .animate-sparkle2 { animation: sparkle2 4s ease-in-out infinite 0.5s; }
+        .animate-sparkle3 { animation: sparkle3 3.5s ease-in-out infinite 1s; }
+        .animate-sparkle4 { animation: sparkle4 4.5s ease-in-out infinite 1.5s; }
+        .animate-sparkle5 { animation: sparkle5 3.2s ease-in-out infinite 2s; }
+        .animate-sparkle6 { animation: sparkle6 3.8s ease-in-out infinite 0.8s; }
+        .animate-sparkle7 { animation: sparkle7 4.2s ease-in-out infinite 1.2s; }
+        .animate-sparkle8 { animation: sparkle8 3.6s ease-in-out infinite 1.8s; }
+        .animate-sparkle9 { animation: sparkle9 2.8s ease-in-out infinite 0.3s; }
+        .animate-sparkle10 { animation: sparkle10 3.1s ease-in-out infinite 0.7s; }
+        .animate-sparkle11 { animation: sparkle11 2.9s ease-in-out infinite 1.1s; }
+        .animate-sparkle12 { animation: sparkle12 3.3s ease-in-out infinite 0.4s; }
+        .animate-sparkle13 { animation: sparkle13 2.7s ease-in-out infinite 1.5s; }
+        .animate-sparkle14 { animation: sparkle14 3.0s ease-in-out infinite 0.9s; }
+        .animate-sparkle15 { animation: sparkle15 3.5s ease-in-out infinite 0.2s; }
+        .animate-sparkle16 { animation: sparkle16 3.2s ease-in-out infinite 1.3s; }
+        .animate-sparkle17 { animation: sparkle17 3.7s ease-in-out infinite 0.6s; }
+        .animate-sparkle18 { animation: sparkle18 3.4s ease-in-out infinite 1.0s; }
+        .animate-sparkle19 { animation: sparkle19 3.6s ease-in-out infinite 1.4s; }
+        .animate-sparkle20 { animation: sparkle20 2.5s ease-in-out infinite 0.5s; }
+        .animate-sparkle21 { animation: sparkle21 2.6s ease-in-out infinite 1.1s; }
+        .animate-sparkle22 { animation: sparkle22 2.4s ease-in-out infinite 0.8s; }
+        .animate-sparkle23 { animation: sparkle23 2.7s ease-in-out infinite 1.2s; }
+        .animate-sparkle24 { animation: sparkle24 2.5s ease-in-out infinite 0.4s; }
+        .animate-sparkle25 { animation: sparkle25 3.0s ease-in-out infinite 0.9s; }
+        .animate-sparkle26 { animation: sparkle26 2.8s ease-in-out infinite 1.3s; }
+        .animate-sparkle27 { animation: sparkle27 3.1s ease-in-out infinite 0.7s; }
+        .animate-float1 { animation: float1 8s ease-in-out infinite; }
+        .animate-float2 { animation: float2 10s ease-in-out infinite; }
+        .animate-float3 { animation: float3 9s ease-in-out infinite; }
+        .animate-float4 { animation: float4 11s ease-in-out infinite; }
+        .animate-float5 { animation: float5 9.5s ease-in-out infinite; }
+        .animate-float6 { animation: float6 10.5s ease-in-out infinite; }
+        .animate-float7 { animation: float7 8.5s ease-in-out infinite; }
+        .animate-float8 { animation: float8 11.5s ease-in-out infinite; }
       `}</style>
     </div>
   );

@@ -1,7 +1,8 @@
 
 
 // src/services/api.js
-const BASE_URL = 'https://dagi.co/';
+// ✅ Multitenant: Usar el dominio actual del navegador
+const BASE_URL = window.location.origin + '/';
 const id_sucursal = localStorage.getItem("id_sucursal");
 
 // Sistema de refresh mejorado
@@ -2025,6 +2026,81 @@ export function listarMisSolicitudes({ token, usuario, subdominio }) {
     token,
     subdominio
   }, token);
+}
+
+/**
+ * Obtiene el historial de arqueos de caja
+ */
+export function fetchHistorialArqueos({
+  token,
+  usuario,
+  subdominio,
+  id_sucursal,
+  fecha_desde,
+  fecha_hasta,
+  limite = 50
+}) {
+  token = token || localStorage.getItem('token_usuario');
+  return post('api/caja/historial_arqueos/', {
+    usuario,
+    token,
+    subdominio,
+    id_sucursal,
+    fecha_desde,
+    fecha_hasta,
+    limite
+  }, token);
+}
+
+
+/**
+ * ✅ Realiza una petición POST y espera un archivo (blob) como respuesta
+ * Retorna objeto con blob y headers por separado (bug fix: Blob no soporta headers nativamente)
+ */
+export async function postDownload(endpoint, data, config = {}) {
+  const token = localStorage.getItem('token');
+  const usuario = localStorage.getItem('usuario');
+  const subdominio = localStorage.getItem('subdominio');
+
+  const requestBody = {
+    token,
+    usuario,
+    subdominio,
+    ...data
+  };
+
+  try {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...config.headers
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Intentar refresh token
+        const newToken = await refreshToken();
+        if (newToken) {
+          return postDownload(endpoint, data, config);
+        }
+      }
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    // ✅ Retornar blob y headers por separado (Blob no soporta headers nativamente)
+    const blob = await response.blob();
+
+    return {
+      blob,
+      headers: response.headers  // ✅ Headers nativos de Response
+    };
+  } catch (error) {
+    console.error(`Error en postDownload(${endpoint}):`, error);
+    throw error;
+  }
 }
 
 

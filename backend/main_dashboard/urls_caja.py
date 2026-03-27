@@ -20,6 +20,11 @@ from .views_caja import (
     aprobar_solicitud,
     rechazar_solicitud,
     listar_solicitudes_usuario,
+    # Historial
+    historial_arqueos,
+    # Exportación
+    exportar_historial_arqueos_excel,
+    exportar_historial_arqueos_pdf,
 )
 
 app_name = 'caja_api'
@@ -72,4 +77,19 @@ urlpatterns = [
 
     # Listar mis solicitudes (para ver el estado)
     path('solicitudes/mis_solicitudes/', listar_solicitudes_usuario, name='listar_solicitudes_usuario'),
+
+    # ========================================================================
+    # Historial de arqueos
+    # ========================================================================
+    # Obtener historial de arqueos
+    path('historial_arqueos/', historial_arqueos, name='historial_arqueos'),
+
+    # ========================================================================
+    # Exportación de Historial
+    # ========================================================================
+    # Exportar a Excel
+    path('historial_arqueos/export/excel/', exportar_historial_arqueos_excel, name='exportar_historial_arqueos_excel'),
+
+    # Exportar a PDF
+    path('historial_arqueos/export/pdf/', exportar_historial_arqueos_pdf, name='exportar_historial_arqueos_pdf'),
 ]

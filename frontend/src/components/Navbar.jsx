@@ -14,7 +14,7 @@ function getRandomColor() {
   return `linear-gradient(135deg, ${color1}, ${color2})`;
 }
 
-export default function Navbar({ rol: propRol, onViewChange, onLogout, currentView }) {
+export default function Navbar({ rol: propRol, onViewChange, onLogout, currentView, mobileMenuOpen, setMobileMenuOpen }) {
   const adminButtons = ['dashboard', 'usuarios', 'sucursales', 'productos', 'clientes', 'configuracion', 'facturacion', 'caja', 'mora', 'proveedores'];
   const operarioButtons = ['entrada', 'productos', 'clientes', 'facturacion', 'caja', 'mora', 'proveedores'];
 
@@ -42,6 +42,13 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
   const profileRef = useRef(null);
   const mobileRef = useRef(null);
   const [avatarBg, setAvatarBg] = useState('');
+
+  // Sincronizar el estado local con el prop del padre
+  React.useEffect(() => {
+    if (setMobileMenuOpen) {
+      setMobileMenuOpen(mobileOpen);
+    }
+  }, [mobileOpen, setMobileMenuOpen]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -130,11 +137,6 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
         }
         .anim-mobile { animation: slideDown 0.25s ease forwards; overflow: hidden; }
 
-        @keyframes grid-move {
-          0% { background-position: 0 0; }
-          100% { background-position: 50px 50px; }
-        }
-
         @keyframes glow {
           0%, 100% { opacity: 0.5; transform: scale(1); }
           50% { opacity: 0.8; transform: scale(1.05); }
@@ -216,19 +218,6 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
       >
         {/* Animated background elements */}
         <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, overflow: 'visible' }}>
-        {/* Animated background grid */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `
-              linear-gradient(rgba(14, 165, 233, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(14, 165, 233, 0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '50px 50px',
-            transform: 'perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px)',
-            animation: 'grid-move 20s linear infinite'
-          }}></div>
-        </div>
-
         {/* Animated gradient orbs */}
         <div className="absolute inset-0">
           <div className="absolute -top-20 -right-20 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl animate-orb1"></div>
@@ -350,46 +339,70 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
                   {rol}
                 </p>
               </div>
-              <svg
-                style={{ width: 14, height: 14, color: T.rolColor, transition: 'transform 0.2s', transform: profileOpen ? 'rotate(180deg)' : 'none', flexShrink: 0 }}
-                fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
             </button>
 
             {profileOpen && (
               <div className="anim-fade" style={{
-                position: 'fixed', right: '24px', top: 'calc(68px + 10px)',
-                width: '220px',
+                position: 'fixed',
+                right: 'clamp(12px, 2vw, 24px)',
+                top: 'calc(68px + 8px)',
+                width: '240px',
                 background: T.dropBg,
                 border: `1px solid ${T.dropBorder}`,
                 borderRadius: '14px',
                 boxShadow: T.dropShadow,
                 overflow: 'visible',
-                zIndex: 9999,
+                zIndex: 99999,
+                maxHeight: '80vh',
+                overflowY: 'auto',
               }}>
                 <div style={{ padding: '14px 18px', borderBottom: `1px solid ${T.divider}` }}>
-                  <p style={{ color: T.userNameColor, fontWeight: 700, fontSize: '14px', margin: 0 }}>{usuario}</p>
+                  <p style={{ color: T.userNameColor, fontWeight: 700, fontSize: '14px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{usuario}</p>
                   <p style={{ color: T.rolColor, fontSize: '11px', marginTop: '3px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>{rol}</p>
                 </div>
                 <button
                   className="drop-item"
                   onClick={toggleTheme}
-                  style={{ padding: '13px 18px', color: T.dropItemColor, fontSize: '13px', fontWeight: 500, background: 'transparent', borderBottom: `1px solid ${T.divider}` }}
+                  style={{
+                    width: '100%',
+                    padding: '13px 18px',
+                    color: T.dropItemColor,
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    background: 'transparent',
+                    borderBottom: `1px solid ${T.divider}`,
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    textAlign: 'left',
+                    boxSizing: 'border-box'
+                  }}
                   onMouseEnter={e => e.currentTarget.style.background = T.dropItemHoverBg}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
                   <span>{isDark ? 'Modo Claro' : 'Modo Oscuro'}</span>
                   {isDark
-                    ? <SunIcon style={{ height: 17, width: 17, color: '#fbbf24' }} />
-                    : <MoonIcon style={{ height: 17, width: 17, color: T.rolColor }} />
+                    ? <SunIcon style={{ height: 17, width: 17, color: '#fbbf24', flexShrink: 0 }} />
+                    : <MoonIcon style={{ height: 17, width: 17, color: T.rolColor, flexShrink: 0 }} />
                   }
                 </button>
                 <button
                   className="drop-item"
                   onClick={onLogout}
-                  style={{ padding: '13px 18px', color: '#f87171', fontSize: '13px', fontWeight: 600, background: 'transparent' }}
+                  style={{
+                    width: '100%',
+                    padding: '13px 18px',
+                    color: '#f87171',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    boxSizing: 'border-box'
+                  }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.1)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
@@ -433,6 +446,9 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
               ? '0 8px 32px rgba(0,0,0,0.4)'
               : '0 8px 24px rgba(14,165,233,0.12)',
             padding: '8px 0 12px',
+            maxHeight: 'calc(100vh - 68px)',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           {/* Nav items */}
@@ -523,6 +539,19 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
 
       {/* ── RESPONSIVE CSS ─────────────────────────────────────── */}
       <style>{`
+        /* Ocultar scrollbars y flechas de desplazamiento */
+        .anim-fade::-webkit-scrollbar,
+        .navbar-mobile-menu::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        .anim-fade,
+        .navbar-mobile-menu {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
+
         @media (max-width: 768px) {
           .navbar-desktop { display: none !important; }
           .navbar-profile-desktop { display: none !important; }
@@ -531,6 +560,23 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
         @media (min-width: 769px) {
           .navbar-ham { display: none !important; }
           .navbar-mobile-menu { display: none !important; }
+        }
+
+        /* Mejoras para dropdown del perfil */
+        .drop-item {
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        /* Mejoras para menú móvil */
+        @media (max-width: 480px) {
+          .navbar-mobile-menu {
+            padding: '6px 0 10px' !important;
+          }
+          .navbar-mobile-menu button {
+            padding: '11px 20px' !important;
+            font-size: '13px' !important;
+          }
         }
       `}</style>
     </>

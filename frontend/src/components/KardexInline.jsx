@@ -2,8 +2,9 @@
  * Componente KardexInline - Integración dentro de ProductosView
  * Permite realizar conteo físico de inventario y comparar con stock del sistema
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { fetchSucursalesCaja } from '../services/api';
 import { showToast } from '../utils/toast';
 import {
   ClipboardDocumentListIcon,
@@ -17,12 +18,44 @@ import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
 
 export default function KardexInline({ productos }) {
-  const { tokenUsuario, usuario, subdominio } = useAuth();
+  const { tokenUsuario, usuario, subdominio, isAdmin } = useAuth();
   const [busqueda, setBusqueda] = useState('');
   const [productosConteo, setProductosConteo] = useState({});
   const [resultadoKardex, setResultadoKardex] = useState(null);
   const [mostrarReporte, setMostrarReporte] = useState(false);
   const [procesando, setProcesando] = useState(false);
+
+  // Estados para filtro de sucursales
+  const [sucursales, setSucursales] = useState([]);
+  const [sucursalSeleccionada, setSucursalSeleccionada] = useState(null);
+  const [loadingSucursales, setLoadingSucursales] = useState(false);
+  const [esAdminBackend, setEsAdminBackend] = useState(false);
+
+  // Cargar sucursales al montar
+  useEffect(() => {
+    const cargarSucursales = async () => {
+      setLoadingSucursales(true);
+      try {
+        const response = await fetchSucursalesCaja({ token: tokenUsuario, usuario, subdominio });
+        console.log('🔍 KardexInline - Response fetchSucursalesCaja:', response);
+        if (response?.success) {
+          setSucursales(response.data);
+          setEsAdminBackend(response.es_admin || false);
+          console.log('✅ KardexInline - esAdminBackend:', response.es_admin);
+          // Para no-admin, autoseleccionar la sucursal asignada
+          if (!response.es_admin && response.sucursal_asignada) {
+            setSucursalSeleccionada(response.sucursal_asignada);
+          }
+        }
+      } catch (err) {
+        console.error('❌ KardexInline - Error cargando sucursales:', err);
+      } finally {
+        setLoadingSucursales(false);
+      }
+    };
+
+    cargarSucursales();
+  }, []);
 
   // Inicializar conteos cuando cambian los productos
   React.useEffect(() => {
@@ -53,14 +86,40 @@ export default function KardexInline({ productos }) {
 
   // Filtrar productos
   const productosFiltrados = productos.filter(producto => {
-    if (!busqueda) return true;
-    const search = busqueda.toLowerCase();
-    return (
-      producto.nombre?.toLowerCase().includes(search) ||
-      producto.sku?.toLowerCase().includes(search) ||
-      producto.codigo_barras?.toLowerCase().includes(search)
-    );
+    // Filtro de búsqueda
+    if (busqueda) {
+      const search = busqueda.toLowerCase();
+      const cumpleBusqueda =
+        producto.nombre?.toLowerCase().includes(search) ||
+        producto.sku?.toLowerCase().includes(search) ||
+        producto.codigo_barras?.toLowerCase().includes(search);
+      if (!cumpleBusqueda) return false;
+    }
+
+    // Filtro de sucursal (solo para admin o si hay sucursal seleccionada)
+    if (esAdminBackend && sucursalSeleccionada !== null) {
+      console.log(`🔍 Filtro: producto="${producto.nombre}" | sucursal_id=${producto.sucursal_id} | seleccionada=${sucursalSeleccionada} | pasa=${producto.sucursal_id === sucursalSeleccionada}`);
+      // Si el producto tiene sucursal_id, filtrar por ella
+      if (producto.sucursal_id !== undefined) {
+        return producto.sucursal_id === sucursalSeleccionada;
+      }
+      // Si no tiene sucursal_id, mostrar todos (pueden ser productos globales)
+      return true;
+    }
+
+    return true;
   });
+
+  // Log para debug: mostrar si los productos tienen sucursal_id
+  React.useEffect(() => {
+    if (productos.length > 0) {
+      console.log('📦 Productos en KardexInline:', productos.length);
+      console.log('🏢 Productos con sucursal_id:', productos.filter(p => p.sucursal_id !== undefined).length);
+      console.log('📋 Primer producto:', productos[0]);
+      console.log('🔍 sucursalSeleccionada:', sucursalSeleccionada);
+      console.log('👤 esAdminBackend:', esAdminBackend);
+    }
+  }, [productos, sucursalSeleccionada, esAdminBackend]);
 
   // Procesar Kardex - comparar conteo físico vs sistema
   const procesarKardex = () => {
@@ -262,6 +321,8 @@ export default function KardexInline({ productos }) {
       </div>
 
       {/* Estado actual */}
+
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 border border-slate-200 dark:!border-slate-800">
           <div className="text-sm text-slate-600 dark:text-slate-400">Total Productos</div>
@@ -289,8 +350,8 @@ export default function KardexInline({ productos }) {
 
       {/* Controles */}
       <div className="flex flex-wrap gap-4 items-center justify-between bg-white dark:!bg-slate-900 rounded-lg p-4 border border-slate-200 dark:!border-slate-800">
-        <div className="flex items-center gap-4 flex-1">
-          <div className="relative flex-1 max-w-md">
+        <div className="flex items-center gap-4 flex-1 flex-wrap">
+          <div className="relative flex-1 min-w-[200px]">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" style={{ width: 20, height: 20 }} />
             <input
               type="text"
@@ -300,6 +361,43 @@ export default function KardexInline({ productos }) {
               className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:!border-slate-600 rounded-lg bg-white dark:!bg-slate-800 text-slate-900 dark:text-slate-100"
             />
           </div>
+
+          {/* Selector de sede */}
+          {loadingSucursales ? (
+            <div className="text-sm text-slate-500">Cargando sedes...</div>
+          ) : esAdminBackend ? (
+            <div className="relative min-w-[180px]">
+              <select
+                value={sucursalSeleccionada || ''}
+                onChange={(e) => setSucursalSeleccionada(e.target.value ? parseInt(e.target.value) : null)}
+                className="pl-10 pr-8 py-2 border border-slate-300 dark:!border-slate-600 rounded-lg bg-white dark:!bg-slate-800 text-slate-900 dark:text-slate-100 appearance-none cursor-pointer text-sm"
+              >
+                <option value="">Todas las sedes</option>
+                {sucursales.map(s => (
+                  <option key={s.id} value={s.id}>{s.nombre}</option>
+                ))}
+              </select>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          ) : (
+            <div className="px-3 py-2 bg-blue-50 dark:!bg-blue-900/20 border border-blue-200 dark:!border-blue-800 rounded-lg text-sm text-blue-700 dark:!text-blue-300 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <span className="font-medium">Sede:</span>
+              <span>{sucursales.find(s => s.id === sucursalSeleccionada)?.nombre || 'Todas'}</span>
+            </div>
+          )}
+
           <button
             onClick={reiniciarConteo}
             className="px-4 py-2 bg-slate-200 dark:!bg-slate-700 text-slate-700 dark:!text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors"

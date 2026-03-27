@@ -3,8 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Vite + React</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html, body {
+        overflow-x: hidden !important;
+        max-width: 100vw;
+        width: 100%;
+      }
+      #root {
+        overflow-x: hidden !important;
+        max-width: 100vw;
+        width: 100%;
+      }
+      /* Prevenir scroll horizontal en todos los elementos */
+      div, section, main, article, aside, nav, header, footer {
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+      /* Asegurar que las imágenes no excedan el ancho */
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+      /* Ocultar scrollbars webkit en elementos específicos */
+      ::-webkit-scrollbar {
+        width: 0px;
+        height: 0px;
+        background: transparent;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
