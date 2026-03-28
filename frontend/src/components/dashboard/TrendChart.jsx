@@ -9,7 +9,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
 } from 'recharts';
 import { format, subDays } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -37,7 +36,7 @@ function CustomTooltip({ active, payload, label, isDark }) {
         backgroundColor: isDark ? '#0f172a' : '#ffffff',
         border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
         borderRadius: '10px',
-        padding: '10px 14px',
+        padding: '10px 20px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
         color: isDark ? '#f1f5f9' : '#0f172a',
         fontSize: 13,
@@ -165,49 +164,47 @@ export default function TrendChart({
           </p>
         </div>
       ) : (
-        <div style={{ width: '100%', height: '320px', border: '2px solid red', background: '#f0f0f0', overflow: 'auto' }}>
-          <div style={{ minWidth: '800px', height: '100%' }}>
-            <LineChart width={800} height={320} data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-              <XAxis
-                dataKey="fecha"
-                tick={{ fontSize: 12, fill: textColor }}
-                stroke={textColor}
-                tickLine={false}
-              />
-              <YAxis
-                yAxisId="ventas"
-                tick={{ fontSize: 12, fill: textColor }}
-                stroke={textColor}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(v) =>
-                  v >= 1_000_000
-                    ? `$${(v / 1_000_000).toFixed(1)}M`
-                    : v >= 1_000
-                    ? `$${(v / 1_000).toFixed(0)}K`
-                    : `$${v}`
-                }
-              />
-              <Tooltip
-                content={<CustomTooltip isDark={isDark} />}
-                cursor={{
-                  stroke: isDark ? '#334155' : '#cbd5e1',
-                  strokeWidth: 1,
-                  strokeDasharray: '4 4',
-                }}
-              />
-              <Line
-                yAxisId="ventas"
-                type="monotone"
-                dataKey="ventas"
-                stroke={lineColor}
-                strokeWidth={2.5}
-                dot={{ fill: dotColor, r: 4, strokeWidth: 0 }}
-                activeDot={{ r: 6, fill: dotColor, strokeWidth: 2, stroke: '#fff' }}
-              />
-            </LineChart>
-          </div>
+        <div className="w-full overflow-x-auto" style={{ height: '340px', display: 'flex', justifyContent: 'center' }}>
+          <LineChart width={1200} height={320} data={chartData} margin={{ top: 10, right: 80, left: 10, bottom: 10 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis
+              dataKey="fecha"
+              tick={{ fontSize: 12, fill: textColor }}
+              stroke={textColor}
+              tickLine={false}
+            />
+            <YAxis
+              yAxisId="ventas"
+              tick={{ fontSize: 12, fill: textColor }}
+              stroke={textColor}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(v) =>
+                v >= 1_000_000
+                  ? `$${(v / 1_000_000).toFixed(1)}M`
+                  : v >= 1_000
+                  ? `$${(v / 1_000).toFixed(0)}K`
+                  : `$${v}`
+              }
+            />
+            <Tooltip
+              content={<CustomTooltip isDark={isDark} />}
+              cursor={{
+                stroke: isDark ? '#334155' : '#cbd5e1',
+                strokeWidth: 1,
+                strokeDasharray: '4 4',
+              }}
+            />
+            <Line
+              yAxisId="ventas"
+              type="monotone"
+              dataKey="ventas"
+              stroke={lineColor}
+              strokeWidth={2.5}
+              dot={{ fill: dotColor, r: 4, strokeWidth: 0 }}
+              activeDot={{ r: 6, fill: dotColor, strokeWidth: 2, stroke: '#fff' }}
+            />
+          </LineChart>
         </div>
       )}
     </div>

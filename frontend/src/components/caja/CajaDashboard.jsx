@@ -26,23 +26,23 @@ const C = {
   amber:       '#d97706',
   amberLight:  '#fffbeb',
   amberBorder: '#fde68a',
-  // Dark mode
+  // Dark mode - IGUAL QUE PROVEEDORESVIEW
   dark: {
     blue:        '#3b82f6',
     blueLight:   '#1e3a5f',
-    blueBorder:  '#2563eb',
-    text:        '#f9fafb',
-    textSub:     '#9ca3af',
-    textMuted:   '#6b7280',
-    border:      '#374151',
-    surface:     '#1f2937',
-    bg:          '#111827',
-    green:       '#254bc7ff',
-    greenLight:  '#2563eb',
-    greenBorder: '#2563eb',
+    blueBorder:  '#1e40af',
+    text:        '#ffffff',
+    textSub:     '#cbd5e1',
+    textMuted:   '#94a3b8',
+    border:      '#334155',
+    surface:     '#0f172a',
+    bg:          '#020617',
+    green:       '#22c55e',
+    greenLight:  '#14532d',
+    greenBorder: '#166534',
     red:         '#ef4444',
-    redLight:    '#7f1d1d',
-    redBorder:   '#991b1b',
+    redLight:    '#450a0a',
+    redBorder:   '#7f1d1d',
   }
 };
 
@@ -101,23 +101,23 @@ const Skeleton = ({ w = '60%', h = 28, radius = 6 }) => (
 /* ─── MetricCard ──────────────────────────────────────────────────────── */
 function MetricCard({ label, amount, icon, iconBg, iconColor, accentColor, badge, badgeUp, badgeNeutral, footerText, loading, delay = 0, colors = C }) {
   return (
-    <div style={{
-      background: colors.surface,
-      borderRadius: 12,
-      border: `1px solid ${colors.border}`,
-      borderLeft: `3px solid ${accentColor}`,
-      padding: '18px 20px',
-      boxShadow: '0 1px 2px rgba(0,0,0,.04)',
-      transition: 'box-shadow .15s, transform .15s',
-      animation: `cd-slidein .3s ease ${delay}s both`,
-      cursor: 'default',
-    }}
+    <div
+      className="bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700"
+      style={{
+        borderRadius: 12,
+        borderLeft: `3px solid ${accentColor}`,
+        padding: '18px 20px',
+        boxShadow: '0 1px 2px rgba(0,0,0,.04)',
+        transition: 'box-shadow .15s, transform .15s',
+        animation: `cd-slidein .3s ease ${delay}s both`,
+        cursor: 'default',
+      }}
       onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,.04)'; e.currentTarget.style.transform = 'none'; }}
     >
       {/* Top row */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: colors.textMuted }}>
+        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: colors.textMuted }} className="dark:!text-slate-400">
           {label}
         </span>
         <div style={{
@@ -161,7 +161,7 @@ function MetricCard({ label, amount, icon, iconBg, iconColor, accentColor, badge
               </span>
             )}
             {footerText && (
-              <span style={{ fontSize: 11, color: colors.textMuted, fontWeight: 500 }}>{footerText}</span>
+              <span style={{ fontSize: 11, color: colors.textMuted, fontWeight: 500 }} className="dark:!text-slate-400">{footerText}</span>
             )}
           </div>
         </>

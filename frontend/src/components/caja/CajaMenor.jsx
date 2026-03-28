@@ -26,25 +26,25 @@ const C = {
   red:         '#dc2626',
   redLight:    '#fef2f2',
   redBorder:   '#fecaca',
-  // Dark mode
+  // Dark mode - IGUAL QUE PROVEEDORESVIEW
   dark: {
     blue:        '#3b82f6',
     blueDark:    '#2563eb',
-    blueLight:   '#2563eb',
-    blueBorder:  '#2563eb',
-    text:        '#f9fafb',
-    textMid:     '#d1d5db',
-    textSub:     '#9ca3af',
-    textMuted:   '#6b7280',
-    border:      '#374151',
-    surface:     '#1f2937',
-    bg:          '#111827',
-    green:       '#2563eb',
-    greenLight:  '#2563eb',
-    greenBorder: '#2563eb',
+    blueLight:   '#1e3a5f',
+    blueBorder:  '#1e40af',
+    text:        '#ffffff',
+    textMid:     '#e2e8f0',
+    textSub:     '#cbd5e1',
+    textMuted:   '#94a3b8',
+    border:      '#334155',
+    surface:     '#0f172a',
+    bg:          '#020617',
+    green:       '#22c55e',
+    greenLight:  '#14532d',
+    greenBorder: '#166534',
     red:         '#ef4444',
-    redLight:    '#7f1d1d',
-    redBorder:   '#991b1b',
+    redLight:    '#450a0a',
+    redBorder:   '#7f1d1d',
   }
 };
 
@@ -138,16 +138,17 @@ const IcoSpinner = ({ gray }) => (
 /* ─── KPI Card ────────────────────────────────────────────────────────── */
 function KpiCard({ label, amount, icon, iconBg, iconColor, accent, badge, badgeUp, badgeNeutral, delay = 0, colors = C }) {
   return (
-    <div style={{
-      background: colors.surface, borderRadius: 12,
-      border: `1px solid ${colors.border}`,
-      borderLeft: `3px solid ${accent}`,
-      padding: '16px 18px',
-      boxShadow: '0 1px 2px rgba(0,0,0,.04)',
-      animation: `cm-slidein .3s ease ${delay}s both`,
-    }}>
+    <div
+      className="bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700"
+      style={{
+        borderRadius: 12,
+        borderLeft: `3px solid ${accent}`,
+        padding: '16px 18px',
+        boxShadow: '0 1px 2px rgba(0,0,0,.04)',
+        animation: `cm-slidein .3s ease ${delay}s both`,
+      }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: colors.textMuted }}>
+        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: colors.textMuted }} className="dark:!text-slate-400">
           {label}
         </span>
         <div style={{ width: 34, height: 34, borderRadius: 8, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -310,11 +311,11 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
 
   /* ── Shared styles ── */
   const s = {
-    panel:     { background: colors.surface, borderRadius: 12, border: `1px solid ${colors.border}`, overflow: 'hidden', boxShadow: '0 1px 2px rgba(0,0,0,.04)' },
+    panel:     { borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 2px rgba(0,0,0,.04)' },
     panelHead: { padding: '13px 18px', borderBottom: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
     panelTitle:{ fontSize: 14, fontWeight: 600, color: colors.text, margin: 0 },
     lbl:       { display: 'block', fontSize: 12, fontWeight: 600, color: colors.textMid, marginBottom: 5 },
-    input:     { width: '100%', padding: '9px 12px', border: `1px solid ${colors.border}`, borderRadius: 8, fontSize: 13, color: colors.text, background: colors.surface, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', transition: 'border-color .15s, box-shadow .15s' },
+    input:     { width: '100%', padding: '9px 12px', border: `1px solid ${colors.border}`, borderRadius: 8, fontSize: 13, color: colors.text, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', transition: 'border-color .15s, box-shadow .15s' },
     field:     { marginBottom: 13 },
     btnGhost:  { display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px', background: 'transparent', color: colors.textMid, border: `1px solid ${colors.border}`, borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' },
   };
@@ -395,9 +396,9 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
       <div className="cm-main-grid" style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20, alignItems: 'start' }}>
 
         {/* ── Formulario ── */}
-        <div style={s.panel}>
+        <div style={s.panel} className="bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700">
           <div style={s.panelHead}>
-            <p style={s.panelTitle}>Registrar Movimiento</p>
+            <p style={s.panelTitle} className="dark:!text-white">Registrar Movimiento</p>
             <span style={{ fontSize: 11, color: C.textMuted }}>Caja Menor</span>
           </div>
           <div style={{ padding: 16 }}>
@@ -464,7 +465,7 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
                 <input
                   type="number" placeholder="0.00" min="0" step="1"
                   value={monto} onChange={e => setMonto(e.target.value)}
-                  className="cm-input-f"
+                  className="cm-input-f dark:!bg-slate-800 dark:!text-white dark:!border-slate-600"
                   style={{ ...s.input, paddingLeft: 26, fontSize: 15, fontWeight: 700 }}
                 />
               </div>
@@ -479,7 +480,7 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
             <div style={s.field}>
               <label style={s.lbl}>Categoría <span style={{ color: colors.red }}>*</span></label>
               <select
-                className="cm-input-f"
+                className="cm-input-f dark:!bg-slate-800 dark:!text-white dark:!border-slate-600"
                 value={categoria} onChange={e => setCategoria(e.target.value)}
                 style={{ ...s.input, cursor: 'pointer', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', paddingRight: 34, appearance: 'none', WebkitAppearance: 'none' }}
               >
@@ -494,7 +495,7 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
               <textarea
                 rows={3} placeholder="Describe el motivo del movimiento…"
                 value={descripcion} onChange={e => setDescripcion(e.target.value)}
-                className="cm-input-f"
+                className="cm-input-f dark:!bg-slate-800 dark:!text-white dark:!border-slate-600"
                 style={{ ...s.input, resize: 'vertical', lineHeight: 1.55, minHeight: 76 }}
               />
             </div>
@@ -508,12 +509,12 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
                 <input type="file" accept="image/*" id="cm-file" onChange={handleFile} style={{ display: 'none' }} />
                 <label
                   htmlFor="cm-file"
-                  className="cm-file-zone"
+                  className="cm-file-zone dark:!bg-slate-800"
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                     width: '100%', padding: '10px 12px', borderRadius: 8, boxSizing: 'border-box',
                     border: `1px dashed ${soporte ? colors.green : colors.border}`,
-                    background: soporte ? colors.greenLight : colors.surface,
+                    background: soporte ? colors.greenLight : '',
                     color: soporte ? colors.green : colors.textMuted,
                     fontSize: 13, fontWeight: soporte ? 600 : 400,
                     cursor: 'pointer', transition: 'all .15s',
@@ -570,9 +571,9 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
         </div>
 
         {/* ── Tabla movimientos ── */}
-        <div style={s.panel}>
+        <div style={s.panel} className="bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700">
           <div style={s.panelHead}>
-            <p style={s.panelTitle}>Movimientos de Caja Menor</p>
+            <p style={s.panelTitle} className="dark:!text-white">Movimientos de Caja Menor</p>
             <button className="cm-btn-ghost" style={s.btnGhost} onClick={cargar} disabled={loading}>
               {loading ? <><IcoSpinner gray /> Cargando</> : <><IcoRefresh /> Actualizar</>}
             </button>
@@ -623,7 +624,7 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
                         </span>
                       </td>
                       <td style={{ padding: '12px 14px' }}>
-                        <span style={{ fontSize: 12, fontWeight: 500, color: colors.textSub, background: colors.bg, border: `1px solid ${colors.border}`, borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap' }}>
+                        <span className="dark:!bg-slate-800 dark:!border-slate-600" style={{ fontSize: 12, fontWeight: 500, color: colors.textSub, background: colors.bg, border: `1px solid ${colors.border}`, borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap' }}>
                           {catLabel(mov.categoria)}
                         </span>
                       </td>
@@ -664,7 +665,7 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
       {/* ── Modal Soporte ── */}
       {modalSoporte && soporteSeleccionado && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
-          <div style={{ background: colors.surface, borderRadius: 14, boxShadow: '0 20px 50px rgba(0,0,0,.16)', maxWidth: 780, width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div className="bg-white dark:!bg-slate-900" style={{ borderRadius: 14, boxShadow: '0 20px 50px rgba(0,0,0,.16)', maxWidth: 780, width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Header */}
             <div style={{ padding: '16px 20px', borderBottom: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -672,8 +673,8 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
                   <span style={{ fontSize: 15 }}>📄</span>
                 </div>
                 <div>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: colors.text, margin: 0 }}>Soporte de Pago</p>
-                  <p style={{ fontSize: 12, color: colors.textSub, margin: '1px 0 0' }}>Comprobante del movimiento</p>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: colors.text, margin: 0 }} className="dark:!text-white">Soporte de Pago</p>
+                  <p style={{ fontSize: 12, color: colors.textSub, margin: '1px 0 0' }} className="dark:!text-slate-400">Comprobante del movimiento</p>
                 </div>
               </div>
               <button onClick={() => { setModalSoporte(false); setSoporteSeleccionado(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: colors.textMuted, padding: 4, borderRadius: 6 }}>

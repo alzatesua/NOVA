@@ -632,12 +632,40 @@ export function fetchUsers({rol, token, usuario, tokenUsuario, accessToken, nomb
   }, token);
 }
 
-export async function fetchBodegas({ tokenUsuario, usuario, subdominio }) {
-  const token = tokenUsuario; 
-  return post(
-    'api/obtener/datos/info-tienda/', { usuario, token, subdominio, tabla: 'inventario_bodega' 
-    },token
-  );
+export async function fetchBodegas({ tokenUsuario, usuario, subdominio, sucursalId }) {
+  const token = tokenUsuario;
+  const payload = { usuario, token, subdominio, tabla: 'inventario_bodega' };
+
+  // Si se proporciona un sucursalId, agregarlo al payload
+  if (sucursalId) {
+    payload.id_sucursal = sucursalId;
+  }
+
+  return post('api/obtener/datos/info-tienda/', payload, token);
+}
+
+// Obtiene TODAS las bodegas de una sucursal (sin filtrar por asignación del usuario)
+export async function fetchBodegasTodas({ tokenUsuario, usuario, subdominio, sucursalId, excluirSucursalId }) {
+  const token = tokenUsuario;
+  const payload = {
+    usuario,
+    token,
+    subdominio,
+    tabla: 'inventario_bodega',
+    todas_las_bodegas: true  // 🔓 Parámetro especial para omitir filtro de asignación
+  };
+
+  // Si se quiere bodegas de una sucursal específica
+  if (sucursalId) {
+    payload.id_sucursal = sucursalId;
+  }
+
+  // Si se quiere EXCLUIR una sucursal (para traslados de destino)
+  if (excluirSucursalId) {
+    payload.excluir_sucursal_id = excluirSucursalId;
+  }
+
+  return post('api/obtener/datos/info-tienda/', payload, token);
 }
 
 //actualizar datos de una tabla

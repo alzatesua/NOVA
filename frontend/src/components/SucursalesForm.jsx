@@ -128,9 +128,9 @@ export default function SucursalesForm({ onCreated }) {
   };
 
   return (
-    <div className="bg-white dark:!bg-slate-900 p-8 rounded-xl shadow-lg max-w-3xl mx-auto">
-      <h4 className="text-2xl font-semibold mb-6 text-gray-900 dark:!text-slate-100">Nueva Sucursal</h4>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div className="bg-white dark:!bg-slate-900 p-8 rounded-xl shadow-lg max-w-4xl mx-auto w-full">
+      <h4 className="text-2xl font-semibold mb-6 text-gray-900 dark:!text-white">Nueva Sucursal</h4>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
         {/* País */}
         <div className="flex flex-col">
@@ -142,14 +142,14 @@ export default function SucursalesForm({ onCreated }) {
             onChange={e => setSelectedPais(e.target.value)}
             disabled={loading || isLoadingPaises}
             required
-            className="px-5 py-3 rounded-lg border border-gray-300 dark:!border-slate-700 bg-gray-50 dark:!bg-slate-800
-              focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 hover:border-blue-400"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:!border-slate-600 bg-gray-50 dark:!bg-slate-800 dark:!text-white
+              focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 hover:border-blue-400"
           >
-            <option value="" disabled>
+            <option value="" disabled className="dark:!bg-slate-800">
               {isLoadingPaises ? 'Cargando países...' : 'Seleccione un país'}
             </option>
             {paises.map(pais => (
-              <option key={pais.id} value={pais.id}>
+              <option key={pais.id} value={pais.id} className="dark:!bg-slate-800">
                 {pais.name}
               </option>
             ))}
@@ -158,7 +158,7 @@ export default function SucursalesForm({ onCreated }) {
 
         {/* Ciudad */}
         <div className="flex flex-col">
-          <label htmlFor="ciudad" className="mb-2 text-sm font-medium text-gray-700 select-none">Ciudad</label>
+          <label htmlFor="ciudad" className="mb-2 text-sm font-medium text-gray-700 dark:!text-slate-300 select-none">Ciudad</label>
           <select
             id="ciudad"
             name="ciudad"
@@ -166,14 +166,14 @@ export default function SucursalesForm({ onCreated }) {
             onChange={e => setSelectedCiudad(e.target.value)}
             disabled={loading || isLoadingCiudades || !selectedPais}
             required
-            className="px-5 py-3 rounded-lg border border-gray-300 dark:!border-slate-700 bg-gray-50 dark:!bg-slate-800
-              focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 hover:border-blue-400"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:!border-slate-600 bg-gray-50 dark:!bg-slate-800 dark:!text-white
+              focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 hover:border-blue-400"
           >
-            <option value="" disabled>
+            <option value="" disabled className="dark:!bg-slate-800">
               {isLoadingCiudades ? 'Cargando ciudades...' : 'Seleccione una ciudad'}
             </option>
             {ciudades.map(ciudad => (
-              <option key={ciudad.id} value={ciudad.id}>
+              <option key={ciudad.id} value={ciudad.id} className="dark:!bg-slate-800">
                 {ciudad.name}
               </option>
             ))}
@@ -182,7 +182,7 @@ export default function SucursalesForm({ onCreated }) {
 
         {/* Municipio / Región */}
         <div className="flex flex-col">
-          <label htmlFor="region" className="mb-2 text-sm font-medium text-gray-700 select-none">Municipio</label>
+          <label htmlFor="region" className="mb-2 text-sm font-medium text-gray-700 dark:!text-slate-300 select-none">Municipio</label>
           <select
             id="region"
             name="region"
@@ -190,55 +190,56 @@ export default function SucursalesForm({ onCreated }) {
             onChange={e => setSelectedRegion(e.target.value)}
             disabled={loading || isLoadingRegiones || !selectedCiudad}
             required
-            className="px-5 py-3 rounded-lg border border-gray-300 dark:!border-slate-700 bg-gray-50 dark:!bg-slate-800
-              focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 hover:border-blue-400"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:!border-slate-600 bg-gray-50 dark:!bg-slate-800 dark:!text-white
+              focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 hover:border-blue-400"
           >
-            <option value="" disabled>
+            <option value="" disabled className="dark:!bg-slate-800">
               {isLoadingRegiones ? 'Cargando municipios...' : 'Seleccione un municipio'}
             </option>
             {regiones.map(region => (
-              <option key={region.id} value={region.id}>
+              <option key={region.id} value={region.id} className="dark:!bg-slate-800">
                 {region.name}
               </option>
             ))}
           </select>
         </div>
 
-        {/* Otros campos (Nombre, Dirección, etc) */}
+        {/* Nombre */}
         <div className="flex flex-col">
-          <label htmlFor="nombre" className="mb-2 text-sm font-medium text-gray-700 select-none">Nombre</label>
+          <label htmlFor="nombre" className="mb-2 text-sm font-medium text-gray-700 dark:!text-slate-300 select-none">Nombre</label>
           <input
             id="nombre"
             name="nombre"
             required
-            placeholder="Nombre"
+            placeholder="Nombre de la sucursal"
             disabled={loading}
-            className="px-5 py-3 rounded-lg border border-gray-300 dark:!border-slate-700 bg-gray-50 dark:!bg-slate-800
-              focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 placeholder-gray-400 hover:border-blue-400"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:!border-slate-600 bg-gray-50 dark:!bg-slate-800 dark:!text-white
+              focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 placeholder-gray-400 dark:!placeholder-slate-400 hover:border-blue-400"
           />
         </div>
 
-        <div className="flex flex-col">
-          <label htmlFor="direccion" className="mb-2 text-sm font-medium text-gray-700 select-none">Dirección</label>
+        {/* Dirección */}
+        <div className="flex flex-col md:col-span-2 lg:col-span-2">
+          <label htmlFor="direccion" className="mb-2 text-sm font-medium text-gray-700 dark:!text-slate-300 select-none">Dirección</label>
           <input
             id="direccion"
             name="direccion"
             required
-            placeholder="Dirección"
+            placeholder="Dirección completa"
             disabled={loading}
-            className="px-5 py-3 rounded-lg border border-gray-300 dark:!border-slate-700 bg-gray-50 dark:!bg-slate-800
-              focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300 placeholder-gray-400 hover:border-blue-400"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:!border-slate-600 bg-gray-50 dark:!bg-slate-800 dark:!text-white
+              focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 placeholder-gray-400 dark:!placeholder-slate-400 hover:border-blue-400"
           />
         </div>
 
         {/* Botón */}
-        <div className="sm:col-span-2 flex justify-end">
+        <div className="md:col-span-2 lg:col-span-3 flex justify-end">
           <button
             type="submit"
             disabled={loading}
             className="inline-flex items-center justify-center
               px-7 py-3 bg-blue-600 text-white dark:text-blue-100 font-semibold rounded-lg shadow-md
-              hover:bg-blue-700 dark:hover:bg-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-400
+              hover:bg-blue-700 dark:hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
               transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (

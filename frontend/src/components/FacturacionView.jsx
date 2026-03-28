@@ -138,7 +138,8 @@ export default function FacturacionView() {
         rol,
         tokenUsuario,
         usuario,
-        subdominio
+        subdominio,
+        sucursalId: sucursalSeleccionada  // ✅ Pasar la sucursal seleccionada
       });
       const bodegasActivas = response.datos?.filter(b => b.estatus) || [];
       setBodegas(bodegasActivas);

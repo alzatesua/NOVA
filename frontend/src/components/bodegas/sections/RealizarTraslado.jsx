@@ -30,6 +30,8 @@ export default function RealizarTraslado({
   usarTransito, setUsarTransito,
   onRealizarTraslado, trasladoLoading,
   bodegas, isLoadingBodegas,
+  bodegasTodas = [],  // ✅ TODAS las bodegas de la sucursal (para origen)
+  bodegasOtrasSucursales = [],  // ✅ Bodegas de OTRAS sucursales (para destino)
   productos, isLoadingProductos,
   errorBodegas, onRetryBodegas,
   sucursalSel,
@@ -500,17 +502,30 @@ export default function RealizarTraslado({
                             {isLoadingBodegas ? (
                               <option disabled>⏳ Cargando bodegas...</option>
                             ) : (
-                              bodegas.map(b => (
-                                <option key={b.id} value={b.id}>🏪 {b.nombre}</option>
-                              ))
+                              bodegasTodas.length > 0 ? (
+                                // ✅ Usar TODAS las bodegas de la sucursal para origen
+                                bodegasTodas
+                                  .filter(b => Number(b.sucursal_id ?? b.id_sucursal ?? b.sucursal) === Number(sucursalSel?.id))
+                                  .map(b => (
+                                    <option key={b.id} value={b.id}>🏪 {b.nombre}</option>
+                                  ))
+                              ) : (
+                                // Fallback: usar bodegas normales si no hay bodegasTodas
+                                bodegas
+                                  .filter(b => Number(b.sucursal_id ?? b.id_sucursal ?? b.sucursal) === Number(sucursalSel?.id))
+                                  .map(b => (
+                                    <option key={b.id} value={b.id}>🏪 {b.nombre}</option>
+                                  ))
+                              )
                             )}
                           </select>
                         </div>
+                        <p className="text-xs text-slate-500 mt-1">Todas las bodegas de {sucursalSel?.nombre}</p>
                       </div>
 
                       {/* Bodega Destino */}
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">📥 Bodega Destino <span className="text-rose-400">*</span></label>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">📥 Bodega Destino (otra sucursal) <span className="text-rose-400">*</span></label>
                         <div className="relative">
                           <select
                             required
@@ -521,20 +536,25 @@ export default function RealizarTraslado({
                             <option value="">Seleccionar destino...</option>
                             {isLoadingBodegas ? (
                               <option disabled>⏳ Cargando bodegas...</option>
+                            ) : bodegasOtrasSucursales.length === 0 ? (
+                              <option disabled>No hay bodegas de otras sucursales disponibles</option>
                             ) : (
-                              bodegas
-                                .filter(b => Number(b.sucursal_id ?? b.id_sucursal ?? b.sucursal) === Number(sucursalSel?.id))
-                                .map(bodega => (
-                                  <option key={bodega.id} value={bodega.id} disabled={String(bodega.id) === String(product.bodega_origen)}>
-                                    🏪 {bodega.nombre}
+                              // ✅ Usar bodegas de OTRAS sucursales (ya filtradas por el backend)
+                              bodegasOtrasSucursales.map(bodega => {
+                                const nombreSucursal = bodega.sucursal?.nombre || bodega.sucursal_nombre || `Sucursal ${bodega.sucursal_id || bodega.id_sucursal}`;
+                                return (
+                                  <option key={bodega.id} value={bodega.id}>
+                                    🏪 {bodega.nombre} <span style={{fontSize: '11px', color: '#64748b'}}> - {nombreSucursal}</span>
                                   </option>
-                                ))
+                                );
+                              })
                             )}
                           </select>
                           <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                           </div>
                         </div>
+                        <p className="text-xs text-slate-500 mt-1">Bodegas de otras sucursales ({bodegasOtrasSucursales.length} disponibles)</p>
                       </div>
 
 

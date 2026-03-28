@@ -125,25 +125,77 @@ def obtener_info_tienda(request):
                 cursor.execute(f"SELECT * FROM {tabla} WHERE sucursal_id = %s", [sucursal_id])
             elif tabla == 'inventario_bodega':
                 # 📦 Filtrar bodegas según el rol del usuario
-                if user.rol in ['admin', 'almacen']:
-                    # Admin y almacacen: todas las bodegas de su sucursal
-                    if user.id_sucursal_default:
+                # Nuevo parámetro 'todas_las_bodegas' para obtener TODAS las bodegas (sin filtro de asignación)
+                todas_las_bodegas = request.data.get('todas_las_bodegas', False)
+                # Nuevo parámetro 'excluir_sucursal_id' para obtener bodegas de OTRAS sucursales
+                excluir_sucursal_id = request.data.get('excluir_sucursal_id')
+
+                if todas_las_bodegas:
+                    # 🔓 Modo especial: Traer TODAS las bodegas (sin filtro de asignación)
+                    if excluir_sucursal_id is not None:
+                        # ✅ Bodegas de OTRAS sucursales (excluyendo la actual)
+                        cursor.execute(
+                            f"SELECT * FROM {tabla} WHERE sucursal_id != %s AND estatus = TRUE",
+                            [excluir_sucursal_id]
+                        )
+                    elif sucursal_id:
+                        # Traer todas las bodegas de una sucursal específica
+                        cursor.execute(
+                            f"SELECT * FROM {tabla} WHERE sucursal_id = %s AND estatus = TRUE",
+                            [sucursal_id]
+                        )
+                    elif user.id_sucursal_default:
+                        # Traer todas las bodegas de la sucursal default del usuario
                         cursor.execute(
                             f"SELECT * FROM {tabla} WHERE sucursal_id = %s AND estatus = TRUE",
                             [user.id_sucursal_default_id]
                         )
                     else:
+                        # Traer todas las bodegas de todas las sucursales
+                        cursor.execute(f"SELECT * FROM {tabla} WHERE estatus = TRUE")
+                elif user.rol in ['admin', 'almacen']:
+                    # Admin y almacén: filtra por sucursal específica si se envía, si no, por su sucursal default
+                    if sucursal_id:
+                        # Si se envió sucursal_id específica (ej: admin seleccionando otra sucursal)
+                        cursor.execute(
+                            f"SELECT * FROM {tabla} WHERE sucursal_id = %s AND estatus = TRUE",
+                            [sucursal_id]
+                        )
+                    elif user.id_sucursal_default:
+                        # Si no, usar la sucursal default del usuario
+                        cursor.execute(
+                            f"SELECT * FROM {tabla} WHERE sucursal_id = %s AND estatus = TRUE",
+                            [user.id_sucursal_default_id]
+                        )
+                    else:
+                        # Si no tiene sucursal default, traer todas
                         cursor.execute(f"SELECT * FROM {tabla} WHERE estatus = TRUE")
                 elif user.rol in ['vendedor', 'operario']:
-                    # Vendedor y operario: solo sus bodegas asignadas
-                    cursor.execute("""
+                    # Vendedor y operario: solo sus bodegas asignadas de su sucursal
+                    # Primero filtrar por sucursal si se envió
+                    sucursal_filter = ""
+                    params = [user.id]
+                    if sucursal_id:
+                        sucursal_filter = " AND b.sucursal_id = %s"
+                        params.append(sucursal_id)
+                    elif user.id_sucursal_default:
+                        sucursal_filter = " AND b.sucursal_id = %s"
+                        params.append(user.id_sucursal_default_id)
+
+                    cursor.execute(f"""
                         SELECT b.* FROM inventario_bodega b
                         INNER JOIN login_usuario_bodega lub ON b.id = lub.id_bodega
-                        WHERE lub.id_login_usuario = %s AND b.estatus = TRUE
-                    """, [user.id])
+                        WHERE lub.id_login_usuario = %s AND b.estatus = TRUE{sucursal_filter}
+                    """, params)
                 else:
-                    # Otros roles: todas las bodegas activas
-                    cursor.execute(f"SELECT * FROM {tabla} WHERE estatus = TRUE")
+                    # Otros roles: todas las bodegas activas (o filtradas por sucursal si se envía)
+                    if sucursal_id:
+                        cursor.execute(
+                            f"SELECT * FROM {tabla} WHERE sucursal_id = %s AND estatus = TRUE",
+                            [sucursal_id]
+                        )
+                    else:
+                        cursor.execute(f"SELECT * FROM {tabla} WHERE estatus = TRUE")
             else:
                 cursor.execute(f"SELECT * FROM {tabla}")
 

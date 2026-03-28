@@ -16,6 +16,7 @@ import RecibirTraslado from './sections/RecibirTraslado';
 import {
   fetchCategorias,
   fetchBodegas,
+  fetchBodegasTodas,
   fetchAllProducts,
   createProduct,
   subirImagenProducto,
@@ -60,7 +61,9 @@ export default function BodegasModal({
   ]);
 
   // Bodegas / Productos para selects
-  const [bodegas, setBodegas] = useState([]);
+  const [bodegas, setBodegas] = useState([]);  // Bodegas asignadas (para destino)
+  const [bodegasTodas, setBodegasTodas] = useState([]);  // TODAS las bodegas de la sucursal (para origen)
+  const [bodegasOtrasSucursales, setBodegasOtrasSucursales] = useState([]);  // Bodegas de OTRAS sucursales (para destino)
   const [isLoadingBodegas, setIsLoadingBodegas] = useState(false);
   const [productos, setProductos] = useState([]);
   const [productosTraslados, setProductosTraslados] = useState([]);
@@ -123,16 +126,44 @@ export default function BodegasModal({
     setIsLoadingBodegas(true);
     setErrorBodegas(null);
     try {
-      const response = await fetchBodegas({ tokenUsuario, usuario, subdominio });
+      // ✅ Cargar bodegas asignadas al usuario (para destino según rol)
+      const response = await fetchBodegas({
+        tokenUsuario,
+        usuario,
+        subdominio,
+        sucursalId: sucursalSel?.id  // Filtrar por sucursal seleccionada
+      });
       const datos = response?.datos || [];
       setBodegas(datos);
+
+      // ✅ Cargar TODAS las bodegas de la sucursal (para origen)
+      if (sucursalSel?.id) {
+        const responseTodas = await fetchBodegasTodas({
+          tokenUsuario,
+          usuario,
+          subdominio,
+          sucursalId: sucursalSel.id
+        });
+        setBodegasTodas(responseTodas?.datos || []);
+
+        // ✅ Cargar bodegas de OTRAS sucursales (para destino)
+        const responseOtras = await fetchBodegasTodas({
+          tokenUsuario,
+          usuario,
+          subdominio,
+          excluirSucursalId: sucursalSel.id  // Excluir sucursal actual
+        });
+        setBodegasOtrasSucursales(responseOtras?.datos || []);
+      }
     } catch (e) {
       setErrorBodegas('Error al cargar las bodegas');
       setBodegas([]);
+      setBodegasTodas([]);
+      setBodegasOtrasSucursales([]);
     } finally {
       setIsLoadingBodegas(false);
     }
-  }, [tokenUsuario, usuario, subdominio]);
+  }, [tokenUsuario, usuario, subdominio, sucursalSel?.id]);
 
   useEffect(() => { cargarBodegas(); }, [cargarBodegas]);
 
@@ -674,6 +705,8 @@ export default function BodegasModal({
                     onRealizarTraslado={onRealizarTraslado}
                     trasladoLoading={trasladoLoading}
                     bodegas={bodegas}
+                    bodegasTodas={bodegasTodas}
+                    bodegasOtrasSucursales={bodegasOtrasSucursales}
                     isLoadingBodegas={isLoadingBodegas}
                     productos={productos}
                     productosPorBodega={productosPorBodega}

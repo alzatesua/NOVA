@@ -154,6 +154,9 @@ export default function EcommerceView() {
 
   // Función para cerrar el navbar en móvil
   const closeNavbar = () => {
+    // Solo cerrar en móvil (pantallas < 992px)
+    if (window.innerWidth >= 992) return;
+
     const collapseElement = document.getElementById('navbarSupportedContent');
     if (collapseElement && collapseElement.classList.contains('show')) {
       const bsCollapse = window.bootstrap?.Collapse?.getInstance(collapseElement);
@@ -161,8 +164,6 @@ export default function EcommerceView() {
         bsCollapse.hide();
       } else {
         collapseElement.classList.remove('show');
-        collapseElement.style.height = '';
-        collapseElement.style.overflow = '';
       }
     }
   };
@@ -430,6 +431,60 @@ export default function EcommerceView() {
 
     setFilteredProducts(filtered);
   }, [activeCategory, searchQuery, products]);
+
+  // Asegurar que el navbar se muestre correctamente en desktop
+  useEffect(() => {
+    let lastWidth = window.innerWidth;
+
+    const handleResize = () => {
+      const currentWidth = window.innerWidth;
+      const collapseElement = document.getElementById('navbarSupportedContent');
+
+      // Solo actuar si cambiamos entre desktop y móvil
+      const switchedToDesktop = lastWidth < 992 && currentWidth >= 992;
+      const switchedToMobile = lastWidth >= 992 && currentWidth < 992;
+
+      if (switchedToDesktop && collapseElement) {
+        // Cambió a desktop: asegurar que el navbar esté visible
+        collapseElement.classList.add('show');
+        collapseElement.style.display = 'flex';
+        collapseElement.style.visibility = 'visible';
+        collapseElement.style.opacity = '1';
+      } else if (switchedToMobile && collapseElement) {
+        // Cambió a móvil: remover estilos forzados y dejar que Bootstrap maneje
+        collapseElement.classList.remove('show');
+        collapseElement.style.display = '';
+        collapseElement.style.visibility = '';
+        collapseElement.style.opacity = '';
+      }
+
+      lastWidth = currentWidth;
+    };
+
+    // Ejecutar al montar solo para desktop
+    if (window.innerWidth >= 992) {
+      const collapseElement = document.getElementById('navbarSupportedContent');
+      if (collapseElement) {
+        collapseElement.classList.add('show');
+        collapseElement.style.display = 'flex';
+        collapseElement.style.visibility = 'visible';
+        collapseElement.style.opacity = '1';
+      }
+    }
+
+    // Escuchar cambios de tamaño de ventana con debounce
+    let resizeTimeout;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleResize, 100);
+    };
+
+    window.addEventListener('resize', debouncedResize);
+    return () => {
+      window.removeEventListener('resize', debouncedResize);
+      clearTimeout(resizeTimeout);
+    };
+  }, []);
 
   // Cambiar a sección de productos cuando hay una búsqueda activa
   useEffect(() => {
@@ -1222,9 +1277,19 @@ export default function EcommerceView() {
               align-items: center;
             }
 
+            /* Asegurar que el navbar se muestre siempre en desktop */
             .navbar-collapse {
               flex: 1;
               display: flex !important;
+              visibility: visible !important;
+              opacity: 1 !important;
+              height: auto !important;
+              overflow: visible !important;
+            }
+
+            /* Ocultar el botón toggle en desktop */
+            .navbar-toggler {
+              display: none !important;
             }
           }
 
@@ -1241,10 +1306,23 @@ export default function EcommerceView() {
           }
 
           @media (max-width: 991px) {
+            /* En móvil, dejar que Bootstrap maneje el collapse nativamente */
             .navbar-collapse {
               max-height: 85vh;
               overflow-y: auto;
               padding: 15px 0;
+            }
+
+            /* Asegurar que cuando Bootstrap agregue la clase 'show', se muestre */
+            .navbar-collapse.show {
+              display: block !important;
+              visibility: visible !important;
+              opacity: 1 !important;
+            }
+
+            /* Cuando está colapsado (sin clase show), asegurar que esté oculto */
+            .navbar-collapse:not(.show) {
+              display: none !important;
             }
 
             .nav-btn-futuristic {

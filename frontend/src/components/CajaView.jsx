@@ -531,15 +531,15 @@ export default function CajaView() {
   return (
     <>
       <style>{STYLES}</style>
-      <div style={s.page}>
+      <div style={s.page} className="dark:!bg-slate-950">
 
         {/* ── HEADER ── */}
-        <header style={s.header} className="caja-header">
+        <header style={s.header} className="caja-header dark:!bg-slate-900 dark:!border-slate-700">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 auto' }}>
             <div style={s.iconBox}><IcoCash /></div>
             <div>
-              <h1 style={s.title}>Control de Caja</h1>
-              <p style={s.sub}>
+              <h1 style={s.title} className="dark:!text-white">Control de Caja</h1>
+              <p style={s.sub} className="dark:!text-slate-400">
                 {isAdmin ? 'Gestiona todos los movimientos y cuadres de caja' : 'Vista limitada a tu sucursal asignada'}
               </p>
             </div>
@@ -547,20 +547,21 @@ export default function CajaView() {
 
           <div style={s.controls} className="caja-controls">
             {/* Fecha */}
-            <label className="caja-pill" style={s.pill}>
+            <label className="caja-pill ring-1 ring-slate-200 dark:!ring-slate-700" style={s.pill}>
               <IcoCalendar />
-              <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} style={{ color: colors.text }} />
+              <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} style={{ color: colors.text }} className="dark:!text-white" />
             </label>
 
             {/* Sucursal (solo admin) */}
             {isAdmin && (
-              <label className="caja-pill" style={s.pill}>
+              <label className="caja-pill ring-1 ring-slate-200 dark:!ring-slate-700" style={s.pill}>
                 <IcoBuilding />
                 <select
                   value={sucursalSeleccionada || ''}
                   onChange={e => setSucursalSeleccionada(e.target.value ? parseInt(e.target.value) : null)}
                   disabled={loadingSucursales}
                   style={{ color: colors.text }}
+                  className="dark:!text-white"
                 >
                   <option value="">Todas las sedes</option>
                   {sucursales.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
@@ -574,7 +575,7 @@ export default function CajaView() {
               {vistaOptions.map(o => (
                 <button
                   key={o.value}
-                  className={`caja-tab${vista === o.value ? ' caja-tab-active' : ''}`}
+                  className={`caja-tab${vista === o.value ? ' caja-tab-active' : ''} dark:!text-slate-300`}
                   style={s.tab(vista === o.value)}
                   onClick={() => setVista(o.value)}
                 >
@@ -600,9 +601,9 @@ export default function CajaView() {
               />
               <div style={{ ...s.gridDesktop, marginTop: 20 }} className="caja-grid-desktop">
                 {/* Registro */}
-                <div style={s.panel} className="caja-panel">
+                <div style={s.panel} className="caja-panel bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700">
                   <div style={s.panelHead}>
-                    <p style={s.panelTitle}>Registrar Movimiento</p>
+                    <p style={s.panelTitle} className="dark:!text-white">Registrar Movimiento</p>
                   </div>
                   <div style={{ padding: 18 }}>
                     <RegistroMovimiento
@@ -614,9 +615,9 @@ export default function CajaView() {
                 </div>
 
                 {/* Movimientos */}
-                <div style={s.panel} className="caja-panel">
+                <div style={s.panel} className="caja-panel bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700">
                   <div style={s.panelHead}>
-                    <button className="caja-btn-ghost" style={s.btnGhost} onClick={handleRefresh}>
+                    <button className="caja-btn-ghost dark:!text-slate-300 dark:hover:!bg-slate-800 dark:hover:!text-white" style={s.btnGhost} onClick={handleRefresh}>
                       <IcoRefresh /> Actualizar
                     </button>
                   </div>
@@ -635,14 +636,14 @@ export default function CajaView() {
           {/* Movimientos */}
           {vista === 'movimientos' && (
             <div className="caja-section" key={`movimientos-${refreshKey}`}>
-              <div style={s.panel}>
+              <div style={s.panel} className="bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700">
                 <div style={s.filterBar}>
-                  <span style={s.filterLabel}><IcoFilter /> Filtrar</span>
+                  <span style={s.filterLabel} className="dark:!text-slate-300"><IcoFilter /> Filtrar</span>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     {filtroOptions.map(o => (
                       <button
                         key={o.value}
-                        className={`caja-chip${filtroTipo === o.value ? ' caja-chip-active' : ''}`}
+                        className={`caja-chip${filtroTipo === o.value ? ' caja-chip-active' : ''} dark:!text-slate-300`}
                         style={s.chip(filtroTipo === o.value)}
                         onClick={() => setFiltroTipo(o.value)}
                       >
@@ -650,7 +651,7 @@ export default function CajaView() {
                       </button>
                     ))}
                   </div>
-                  <button className="caja-btn-ghost" style={{ ...s.btnGhost, marginLeft: 'auto' }} onClick={handleRefresh}>
+                  <button className="caja-btn-ghost dark:!text-slate-300 dark:hover:!bg-slate-800 dark:hover:!text-white" style={{ ...s.btnGhost, marginLeft: 'auto' }} onClick={handleRefresh}>
                     <IcoRefresh /> Actualizar
                   </button>
                 </div>
