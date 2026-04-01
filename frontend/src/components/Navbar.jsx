@@ -63,7 +63,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
 
   // ── Tema tokens ──────────────────────────────────────────────
   const T = isDark ? {
-    navBg: 'linear-gradient(135deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%)',
+    navBg: 'linear-gradient(135deg, rgba(10, 22, 40, 0.4) 0%, rgba(13, 31, 60, 0.4) 50%, rgba(10, 22, 40, 0.4) 100%)',
     navShadow: '0 4px 24px rgba(14,165,233,0.08), 0 1px 0 rgba(14,165,233,0.15)',
     navBorder: 'rgba(14,165,233,0.18)',
     logoBg: 'linear-gradient(90deg, #0ea5e9, #38bdf8)',
@@ -90,7 +90,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
     hamColor: '#94a3b8',
     divider: 'rgba(14,165,233,0.12)',
   } : {
-    navBg: 'linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 50%, #f0f7ff 100%)',
+    navBg: 'linear-gradient(135deg, rgba(240, 247, 255, 0.5) 0%, rgba(232, 244, 253, 0.5) 50%, rgba(240, 247, 255, 0.5) 100%)',
     navShadow: '0 4px 20px rgba(14,165,233,0.12), 0 1px 0 rgba(14,165,233,0.2)',
     navBorder: 'rgba(14,165,233,0.25)',
     logoBg: 'linear-gradient(90deg, #0284c7, #0ea5e9)',
@@ -165,6 +165,46 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
           50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); }
         }
 
+        @keyframes sparkle1 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(10px, -10px); }
+        }
+
+        @keyframes sparkle2 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(-15px, 5px); }
+        }
+
+        @keyframes sparkle3 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(8px, 12px); }
+        }
+
+        @keyframes sparkle4 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(-12px, -8px); }
+        }
+
+        @keyframes sparkle5 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(12px, -8px); }
+        }
+
+        @keyframes sparkle6 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(-10px, 10px); }
+        }
+
+        @keyframes sparkle7 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(15px, -15px); }
+        }
+
+        @keyframes sparkle8 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(-18px, 12px); }
+        }
+
         .animate-glow { animation: glow 3s ease-in-out infinite; }
         .animate-gradient {
           background-size: 200% 200%;
@@ -173,6 +213,14 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
         .animate-orb1 { animation: orb1 15s ease-in-out infinite; }
         .animate-orb2 { animation: orb2 18s ease-in-out infinite; }
         .animate-orb3 { animation: orb3 20s linear infinite; }
+        .animate-sparkle1 { animation: sparkle1 3s ease-in-out infinite; }
+        .animate-sparkle2 { animation: sparkle2 4s ease-in-out infinite 0.5s; }
+        .animate-sparkle3 { animation: sparkle3 3.5s ease-in-out infinite 1s; }
+        .animate-sparkle4 { animation: sparkle4 4.5s ease-in-out infinite 1.5s; }
+        .animate-sparkle5 { animation: sparkle5 2.8s ease-in-out infinite 0.3s; }
+        .animate-sparkle6 { animation: sparkle6 3.1s ease-in-out infinite 0.7s; }
+        .animate-sparkle7 { animation: sparkle7 3.5s ease-in-out infinite 0.2s; }
+        .animate-sparkle8 { animation: sparkle8 3.2s ease-in-out infinite 1.3s; }
 
         .nav-btn {
           position: relative; border: none; cursor: pointer;
@@ -203,7 +251,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
 
       {/* ── NAVBAR ─────────────────────────────────────────────── */}
       <nav
-        className="navbar-root fixed top-0 left-0 right-0 z-50"
+        className="navbar-root fixed top-0 left-0 right-0"
         style={{
           background: T.navBg,
           boxShadow: T.navShadow,
@@ -214,10 +262,33 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
           justifyContent: 'space-between',
           padding: '0 24px',
           position: 'relative',
+          zIndex: 100,
         }}
       >
         {/* Animated background elements */}
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, overflow: 'visible' }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
+        {/* Sparkles animados */}
+        <div className="absolute inset-0">
+          {/* Pequeños destellos - MUY BRILLANTES en modo oscuro */}
+          <div className="absolute top-[15%] left-[8%] w-1.5 h-1.5 bg-blue-400 dark:!bg-cyan-200 rounded-full animate-sparkle1 opacity-90 dark:!opacity-100"></div>
+          <div className="absolute top-[25%] left-[20%] w-1.5 h-1.5 bg-cyan-400 dark:!bg-blue-200 rounded-full animate-sparkle2 opacity-90 dark:!opacity-100"></div>
+          <div className="absolute top-[35%] right-[15%] w-1.5 h-1.5 bg-purple-400 dark:!bg-purple-200 rounded-full animate-sparkle3 opacity-90 dark:!opacity-100"></div>
+          <div className="absolute top-[45%] right-[25%] w-1.5 h-1.5 bg-blue-300 dark:!bg-cyan-100 rounded-full animate-sparkle4 opacity-90 dark:!opacity-100"></div>
+          <div className="absolute top-[55%] left-[12%] w-1.5 h-1.5 bg-cyan-300 dark:!bg-blue-100 rounded-full animate-sparkle1 opacity-90 dark:!opacity-100"></div>
+          <div className="absolute top-[65%] right-[18%] w-1.5 h-1.5 bg-purple-300 dark:!bg-purple-100 rounded-full animate-sparkle2 opacity-90 dark:!opacity-100"></div>
+          <div className="absolute top-[75%] left-[22%] w-1.5 h-1.5 bg-blue-400 dark:!bg-cyan-200 rounded-full animate-sparkle3 opacity-90 dark:!opacity-100"></div>
+          <div className="absolute top-[85%] right-[10%] w-1.5 h-1.5 bg-cyan-400 dark:!bg-blue-200 rounded-full animate-sparkle4 opacity-90 dark:!opacity-100"></div>
+
+          {/* Destellos medios - MUY BRILLANTES en modo oscuro */}
+          <div className="absolute top-[30%] left-[35%] w-2.5 h-2.5 bg-blue-500 dark:!bg-cyan-300 rounded-full animate-sparkle5 opacity-95 dark:!opacity-100"></div>
+          <div className="absolute top-[50%] right-[30%] w-2.5 h-2.5 bg-cyan-500 dark:!bg-blue-300 rounded-full animate-sparkle6 opacity-95 dark:!opacity-100"></div>
+          <div className="absolute top-[70%] left-[40%] w-2.5 h-2.5 bg-purple-500 dark:!bg-purple-300 rounded-full animate-sparkle1 opacity-95 dark:!opacity-100"></div>
+
+          {/* Destellos grandes - MUY BRILLANTES en modo oscuro */}
+          <div className="absolute top-[40%] left-[55%] w-3.5 h-3.5 bg-blue-500 dark:!bg-cyan-400 rounded-full animate-sparkle7 opacity-100"></div>
+          <div className="absolute top-[60%] right-[50%] w-3.5 h-3.5 bg-cyan-500 dark:!bg-blue-400 rounded-full animate-sparkle8 opacity-100"></div>
+        </div>
+
         {/* Animated gradient orbs */}
         <div className="absolute inset-0">
           <div className="absolute -top-20 -right-20 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl animate-orb1"></div>
@@ -227,8 +298,9 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
         </div>
 
         {/* Logo */}
-        <div className="relative z-10" style={{
+        <div className="relative" style={{
           flexShrink: 0,
+          zIndex: 10,
         }}>
           <div className="relative inline-block">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-cyan-500 to-purple-500 rounded-lg blur-lg animate-glow"></div>
@@ -255,12 +327,13 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
 
         {/* Desktop nav */}
         <div
-          className="navbar-desktop relative z-10"
+          className="navbar-desktop relative"
           style={{
             display: 'flex',
             alignItems: 'stretch',
             height: '68px',
             gap: '2px',
+            zIndex: 10,
           }}
         >
           {list.map(view => {
@@ -309,7 +382,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
         </div>
 
         {/* Right side */}
-        <div className="relative z-10" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+        <div className="relative" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0, zIndex: 10 }}>
 
           {/* Profile — desktop */}
           <div className="navbar-profile-desktop" ref={profileRef} style={{ position: 'relative' }}>
@@ -352,7 +425,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
                 borderRadius: '14px',
                 boxShadow: T.dropShadow,
                 overflow: 'visible',
-                zIndex: 99999,
+                zIndex: 10000,
                 maxHeight: '80vh',
                 overflowY: 'auto',
               }}>
@@ -439,7 +512,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
             top: '68px',
             left: 0,
             right: 0,
-            zIndex: 49,
+            zIndex: 90,
             background: T.mobileBg,
             borderBottom: `1px solid ${T.mobileBorder}`,
             boxShadow: isDark

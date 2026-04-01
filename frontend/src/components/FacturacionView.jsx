@@ -232,7 +232,7 @@ export default function FacturacionView() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 pb-8">
+    <div className="w-full px-4 pb-8">
       {/* Header */}
       <div className="mb-4 flex justify-between items-center">
         <div>
@@ -416,7 +416,7 @@ export default function FacturacionView() {
               {/* Paso 2: Formulario de Factura - CENTRADO */}
               {pasoActual === 2 && bodegaSeleccionada && (
                 <div className="lg:col-span-3">
-                  <div className="max-w-5xl mx-auto">
+                  <div className="w-full">
                     <div className="bg-white dark:!bg-slate-900 rounded-xl shadow-md border border-slate-200 dark:!border-slate-800 overflow-hidden">
                       <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3">
                         <h3 className="text-base font-bold text-white">

@@ -294,7 +294,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
   return (
     <section className="space-y-6 w-full px-6 py-4">
       {/* Cabecera con búsqueda y filtros */}
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mb-6 max-w-7xl mx-auto">
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mb-6 w-full">
         <input
           type="text"
           placeholder="Buscar usuarios..."
@@ -333,7 +333,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
       {showCreateForm && (
         <form
           onSubmit={handleSubmitNewUser}
-          className="bg-white dark:!bg-slate-900 p-6 rounded-lg shadow-md border border-slate-200 dark:!border-slate-800 space-y-4 mb-6 transition-colors max-w-7xl mx-auto"
+          className="bg-white dark:!bg-slate-900 p-6 rounded-lg shadow-md border border-slate-200 dark:!border-slate-800 space-y-4 mb-6 transition-colors w-full"
         >
           <h4 className="text-lg font-medium text-slate-900 dark:!text-slate-100">Crear Nuevo Usuario</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -429,7 +429,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
 
       {/* Vista tarjetas o tabla */}
       {viewMode === 'card' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 w-full">
           {filteredUsers.length === 0 && !loading && (
             <p className="col-span-full text-center text-slate-500 dark:!text-slate-400 py-8">No se encontraron usuarios.</p>
           )}

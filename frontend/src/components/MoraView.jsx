@@ -185,19 +185,19 @@ export default function MoraView() {
         </div>
         <div className="flex items-center gap-2">
           <div className="flex gap-0.5 bg-gray-50 dark:!bg-slate-800 rounded-lg p-0.5 border border-gray-200 dark:!border-slate-700">
-            <button className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md border-0 cursor-pointer text-xs font-semibold transition-all ${tabActiva === 'mora' ? 'bg-white dark:!bg-slate-700 text-blue-600 dark:!text-blue-400 shadow-sm' : 'bg-transparent text-gray-500 dark:!text-slate-400'}`} onClick={() => setTabActiva('mora')}>
-              <ExclamationTriangleIcon style={{ width: 14, height: 14 }} />
+            <button className={`flex items-center gap-1.5 px-5 py-2.5 rounded-md border-0 cursor-pointer text-sm font-semibold transition-all ${tabActiva === 'mora' ? 'bg-blue-600 text-white shadow-sm' : 'bg-transparent text-blue-600 dark:!text-blue-400'}`} onClick={() => setTabActiva('mora')}>
+              <ExclamationTriangleIcon style={{ width: 16, height: 16 }} />
               Clientes en Mora
               {clientesEnMora.length > 0 && <Badge>{clientesEnMora.length}</Badge>}
             </button>
-            <button className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md border-0 cursor-pointer text-xs font-semibold transition-all ${tabActiva === 'deuda' ? 'bg-white dark:!bg-slate-700 text-blue-600 dark:!text-blue-400 shadow-sm' : 'bg-transparent text-gray-500 dark:!text-slate-400'}`} onClick={() => setTabActiva('deuda')}>
-              <ChartBarIcon style={{ width: 14, height: 14 }} />
+            <button className={`flex items-center gap-1.5 px-5 py-2.5 rounded-md border-0 cursor-pointer text-sm font-semibold transition-all ${tabActiva === 'deuda' ? 'bg-blue-600 text-white shadow-sm' : 'bg-transparent text-blue-600 dark:!text-blue-400'}`} onClick={() => setTabActiva('deuda')}>
+              <ChartBarIcon style={{ width: 16, height: 16 }} />
               Deuda General
               {clientesConDeuda.length > 0 && <Badge>{clientesConDeuda.length}</Badge>}
             </button>
           </div>
-          <button className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-transparent text-gray-700 dark:!text-slate-300 border border-gray-300 dark:!border-slate-600 rounded-lg text-xs font-semibold cursor-pointer hover:bg-gray-50 dark:hover:!bg-slate-800" onClick={() => tabActiva === 'mora' ? cargarClientesEnMora() : cargarClientesConDeuda()}>
-            <ArrowPathIcon style={{ width: 13, height: 13 }} /> Actualizar
+          <button className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-transparent text-blue-600 dark:!text-blue-400 border border-blue-300 dark:!border-blue-600 rounded-lg text-sm font-semibold cursor-pointer hover:bg-blue-50 dark:hover:!bg-blue-900/30" onClick={() => tabActiva === 'mora' ? cargarClientesEnMora() : cargarClientesConDeuda()}>
+            <ArrowPathIcon style={{ width: 16, height: 16 }} /> Actualizar
           </button>
         </div>
       </div>
@@ -225,7 +225,7 @@ export default function MoraView() {
 
       {/* ── BARRA DE BÚSQUEDA ── */}
       <div className="px-7 py-3 bg-gray-50 dark:!bg-slate-800 border-b border-gray-200 dark:!border-slate-700">
-        <div className="relative">
+        <div className="relative max-w-md mx-auto">
           <MagnifyingGlassIcon style={{ width: 18, height: 18 }} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
@@ -256,11 +256,11 @@ export default function MoraView() {
 
         {/* Lista */}
         <div className="bg-white dark:!bg-slate-900 rounded-xl border border-gray-200 dark:!border-slate-700 overflow-hidden shadow-sm">
-          <div className="px-4.5 py-3 border-b border-gray-200 dark:!border-slate-700 flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:!bg-blue-900/20 flex items-center justify-center flex-shrink-0">
+          <div className="px-6 py-3 border-b border-gray-200 dark:!border-slate-700 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-50 dark:!bg-blue-900/20 flex items-center justify-center flex-shrink-0">
               {tabActiva === 'mora'
-                ? <ExclamationTriangleIcon style={{ width: 16, height: 16 }} className="text-blue-600 dark:!text-blue-400" />
-                : <ChartBarIcon style={{ width: 16, height: 16 }} className="text-blue-600 dark:!text-blue-400" />
+                ? <ExclamationTriangleIcon style={{ width: 20, height: 20 }} className="text-blue-600 dark:!text-blue-400" />
+                : <ChartBarIcon style={{ width: 20, height: 20 }} className="text-blue-600 dark:!text-blue-400" />
               }
             </div>
             <div>
@@ -277,7 +277,7 @@ export default function MoraView() {
               </div>
             ) : lista.length === 0 ? (
               <div className="text-center py-13">
-                <div className="w-13 h-13 rounded-full bg-green-50 dark:!bg-green-900/20 border border-green-200 dark:!border-green-800 flex items-center justify-center mx-auto mb-3">
+                <div className="w-16 h-16 rounded-full bg-green-50 dark:!bg-green-900/20 border border-green-200 dark:!border-green-800 flex items-center justify-center mx-auto mb-3">
                   <CheckIcon style={{ width: 26, height: 26 }} className="text-green-600 dark:!text-green-400" />
                 </div>
                 <p className="text-sm font-semibold text-gray-700 dark:!text-slate-300 m-0">{tabActiva === 'mora' ? '¡Sin clientes en mora!' : '¡Sin clientes con deuda!'}</p>

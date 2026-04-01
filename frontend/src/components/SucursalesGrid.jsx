@@ -379,11 +379,11 @@ export default function SucursalesGrid() {
 
   return (
     <main className="w-full p-4 sm:p-6 lg:p-8 bg-slate-50 dark:!bg-slate-950 min-h-screen transition-colors duration-200">
-      <div className="max-w-[1400px] mx-auto">
+      <div className="w-full">
         {/* Cabecera */}
         <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mb-6">
           {/* Buscador */}
-          <div className="relative flex-1 max-w-lg w-full">
+          <div className="relative mx-auto w-full max-w-xs">
             <input
               type="text"
               placeholder="Buscar sucursales..."
@@ -395,7 +395,7 @@ export default function SucursalesGrid() {
             <MagnifyingGlassIcon className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
           </div>
 
-          {/* Filtros rápidos y botón nueva sucursal */}
+          {/* Filtros rápidos y botón nueva sucursal
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex gap-2">
               {['Todas', 'Activas', 'Inactivas'].map((label) => (
@@ -420,7 +420,7 @@ export default function SucursalesGrid() {
               <PlusIcon className="h-4 w-4 mr-1.5" />
               {showCreateForm ? 'Cancelar' : 'Nueva Sucursal'}
             </button>
-          </div>
+          </div>*/}
 
           {/* Modal crear sucursal */}
           {showCreateForm && (
@@ -442,38 +442,15 @@ export default function SucursalesGrid() {
         {isLoading ? (
           <p className="text-center py-8 text-slate-600 dark:!text-slate-400">Cargando sucursales…</p>
         ) : (
-          <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
             {filteredSucursales.map((suc) => (
               <div
                 key={suc.id}
                 className="bg-white dark:!bg-slate-900 rounded-xl shadow p-5 flex flex-col h-full cursor-pointer hover:shadow-xl hover:shadow-blue-500/20 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-300 ease-out border border-slate-200 dark:!border-slate-700 hover:border-blue-400 dark:hover:!border-blue-500 ring-1 ring-slate-200 dark:!ring-slate-700 group"
               >
                 {/* Header de la tarjeta */}
-                <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:!border-slate-700">
+                <div className="mb-4 pb-3 border-b border-slate-200 dark:!border-slate-700 text-center">
                   <h5 className="text-lg font-semibold text-gray-900 dark:!text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">{suc.nombre}</h5>
-
-                  <div className="flex items-center gap-2">
-                    {/* Botón para abrir bodegas */}
-                    <button
-                      type="button"
-                      onClick={() => abrirNuevaBodega(suc)}
-                      title={`Bodegas de ${suc.nombre}`}
-                      className="
-                        inline-flex items-center gap-1
-                        bg-amber-50 dark:!bg-amber-900/50 text-amber-800 dark:!text-amber-200
-                        text-xs font-medium
-                        px-2.5 py-1 rounded-full
-                        border border-amber-200 dark:!border-amber-500
-                        hover:bg-amber-100 dark:hover:bg-amber-900/70
-                        group-hover:scale-110 group-hover:bg-amber-100 dark:group-hover:!bg-amber-800/70
-                        focus:outline-none focus:ring-2 focus:ring-amber-400 dark:!focus:ring-amber-500 focus:ring-offset-1
-                        transition-all duration-300
-                      "
-                    >
-                      <BuildingStorefrontIcon className="w-3.5 h-3.5" />
-                      <span>Bodegas</span>
-                    </button>
-                  </div>
                 </div>
 
                 {/* Datos */}
@@ -489,6 +466,33 @@ export default function SucursalesGrid() {
                     </div>
                   ))}
                 </dl>
+
+                {/* Botón de bodegas en la parte inferior */}
+                <div className="mt-4 pt-3 border-t border-slate-200 dark:!border-slate-700 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      abrirNuevaBodega(suc);
+                    }}
+                    title={`Bodegas de ${suc.nombre}`}
+                    className="
+                      inline-flex items-center gap-1
+                      bg-amber-50 dark:!bg-amber-900/50 text-amber-800 dark:!text-amber-200
+                      text-xs font-medium
+                      px-2.5 py-1 rounded-full
+                      border border-amber-200 dark:!border-amber-500
+                      hover:bg-amber-100 dark:hover:bg-amber-900/70
+                      group-hover:scale-110 group-hover:bg-amber-100 dark:group-hover:!bg-amber-800/70
+                      focus:outline-none focus:ring-2 focus:ring-amber-400 dark:!focus:ring-amber-500 focus:ring-offset-1
+                      transition-all duration-300
+                      whitespace-nowrap
+                    "
+                  >
+                    <BuildingStorefrontIcon className="w-3.5 h-3.5" />
+                    <span>Bodegas</span>
+                  </button>
+                </div>
               </div>
             ))}
           </div>

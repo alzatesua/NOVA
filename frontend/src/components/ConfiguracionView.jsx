@@ -410,7 +410,7 @@ export default function ConfiguracionView() {
   };
 
   return (
-    <div className="relative w-full max-w-7xl mx-auto">
+    <div className="relative w-full">
       <div className="flex items-center gap-3 mb-6 mt-10">
         <div className="w-10 h-10 rounded-xl bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
           <i className='bx bx-cog text-xl text-[rgb(37,99,235)]'></i>
