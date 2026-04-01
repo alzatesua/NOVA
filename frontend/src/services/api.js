@@ -70,13 +70,10 @@ async function refreshAccessToken() {
       localStorage.setItem('token_usuario', data.access);
       localStorage.setItem('accessToken', data.access);
 
-      console.log('✅ Token refrescado exitosamente');
-
       // Si ROTATE_REFRESH_TOKENS=True, guardar nuevo refresh token
       if (data.refresh) {
         localStorage.setItem('auth_refresh_token', data.refresh);
         localStorage.setItem('refresh_token', data.refresh);
-        console.log('✅ Refresh token rotado exitosamente');
       }
 
       // Procesar cola de peticiones pendientes
@@ -145,7 +142,7 @@ async function _getRaw(endpoint, token) {
 }
 
 async function post(endpoint, body, token, skipRefresh = false) {
-  console.log(`POST ${BASE_URL}${endpoint}`, body);
+
 
   // Verificar si es un endpoint de auth (no intentar refresh en estos casos)
   const isAuthEndpoint = endpoint.includes('api/auth/login') ||
@@ -159,11 +156,9 @@ async function post(endpoint, body, token, skipRefresh = false) {
 
   // Primera intento
   let { res, json } = await attemptRequest(token);
-  console.log(`Response ${res.status}:`, json);
 
   // Si la petición fue exitosa, guardar nuevo_token si está presente en la respuesta
   if (res.ok && json && json.nuevo_token) {
-    console.log('✅ Nuevo token recibido, guardando en localStorage...');
     localStorage.setItem('token_usuario', json.nuevo_token);
   }
 
@@ -177,14 +172,11 @@ async function post(endpoint, body, token, skipRefresh = false) {
 
       // Reintentar la petición original con el nuevo token
       const retryResult = await attemptRequest(newToken);
-      console.log(`Response ${retryResult.res.status}:`, retryResult.json);
 
       if (retryResult.res.ok) {
-        console.log(`✅ Reintento exitoso después de refresh`);
 
         // Guardar nuevo_token si está presente en la respuesta del reintento
         if (retryResult.json && retryResult.json.nuevo_token) {
-          console.log('✅ Nuevo token recibido en reintento, guardando en localStorage...');
           localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
         }
 
@@ -252,7 +244,6 @@ async function get(endpoint, token, skipRefresh = false) {
 
   // Si la petición fue exitosa, guardar nuevo_token si está presente en la respuesta
   if (res.ok && json && json.nuevo_token) {
-    console.log('✅ Nuevo token recibido (GET), guardando en localStorage...');
     localStorage.setItem('token_usuario', json.nuevo_token);
   }
 
@@ -268,11 +259,10 @@ async function get(endpoint, token, skipRefresh = false) {
       const retryResult = await attemptRequest(newToken);
 
       if (retryResult.res.ok) {
-        console.log(`✅ Reintento exitoso después de refresh (GET)`);
 
         // Guardar nuevo_token si está presente en la respuesta del reintento
         if (retryResult.json && retryResult.json.nuevo_token) {
-          console.log('✅ Nuevo token recibido en reintento (GET), guardando en localStorage...');
+    
           localStorage.setItem('token_usuario', retryResult.json.nuevo_token);
         }
 
@@ -341,11 +331,10 @@ async function patch(endpoint, body, token, skipRefresh = false) {
 
   // Primera intento
   let { res, json } = await attemptRequest(token);
-  console.log(`Response ${res.status}:`, json);
+  
 
   // Si la petición fue exitosa, guardar nuevo_token si está presente en la respuesta
   if (res.ok && json && json.nuevo_token) {
-    console.log('✅ Nuevo token recibido, guardando en localStorage...');
     localStorage.setItem('token_usuario', json.nuevo_token);
   }
 

@@ -76,7 +76,6 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
 
   // Efecto para limpiar campos cuando cambia el tipo de factura
   useEffect(() => {
-    console.log('tipoFactura cambió a:', tipoFactura);
     if (tipoFactura === 'contado') {
       // Limpiar campos de crédito cuando cambia a contado
       setDiaPago('');
@@ -294,11 +293,6 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
   };
 
   const puedeAvanzar = () => {
-    console.log('=== puedeAvanzar() called ===');
-    console.log('pasoActual:', pasoActual);
-    console.log('tipoFactura:', tipoFactura);
-    console.log('diaPago:', diaPago);
-    console.log('cuotas:', cuotas);
 
     let result = false;
 
@@ -315,7 +309,6 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
       case 1:
         // Paso 1: Cliente es opcional, pero si se selecciona uno debe ser válido
         // Se puede avanzar siempre (con o sin cliente)
-        console.log('puedeAvanzar() Paso 1: return true');
         return true;
 
       case 2:
@@ -338,7 +331,6 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
         });
 
         result = hayProductos && todosProductosSeleccionados && todosConCantidadValida;
-        console.log('puedeAvanzar() Paso 2: result =', result);
         return result;
 
       case 3:
@@ -353,10 +345,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
         productosSeleccionados = hayProductosPago && productos.every(p => p.producto_seleccionado);
         totalMayorQueCero = calcularTotal() > 0;
 
-        console.log('=== puedeAvanzar Paso 3 ===');
-        console.log('tipoFactura:', tipoFactura);
-        console.log('diaPago:', diaPago, 'tipo:', typeof diaPago);
-        console.log('cuotas:', cuotas, 'tipo:', typeof cuotas);
+    
 
         if (tipoFactura === 'credito') {
           // Para crédito: validar día de pago y cuotas
@@ -365,11 +354,9 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
           const diaPagoValido = !isNaN(diaPagoNum) && diaPagoNum >= 1 && diaPagoNum <= 31;
           const cuotasValidas = !isNaN(cuotasNum) && cuotasNum >= 1;
 
-          console.log('diaPagoNum:', diaPagoNum, 'diaPagoValido:', diaPagoValido);
-          console.log('cuotasNum:', cuotasNum, 'cuotasValidas:', cuotasValidas);
+       
 
           result = hayProductosPago && productosSeleccionados && totalMayorQueCero && diaPagoValido && cuotasValidas;
-          console.log('puedeAvanzar() Paso 3 Crédito: result =', result);
           return result;
         } else {
           // Para contado: validar pagos
@@ -379,19 +366,15 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
           });
           pagoCompleto = calcularTotalPagado() >= calcularTotal();
           result = hayProductosPago && productosSeleccionados && totalMayorQueCero && hayPagosValidos && pagoCompleto;
-          console.log('puedeAvanzar() Paso 3 Contado: result =', result);
           return result;
         }
 
       default:
-        console.log('puedeAvanzar() Default: return true');
         return true;
     }
   };
 
   // Agregar console.log al final para depuración
-  console.log('=== puedeAvanzar() result ===');
-  console.log('pasoActual:', pasoActual, 'result:', puedeAvanzar.result);
 
   const handleSiguiente = () => {
     if (puedeAvanzar()) {
@@ -932,9 +915,6 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
         {/* Paso 3: Pago */}
         {pasoActual === 3 && (
           <div className="p-3 sm:p-4">
-            {console.log('=== RENDER PASO 3 ===')}
-            {console.log('tipoFactura:', tipoFactura)}
-            {console.log('tipoFactura === "credito":', tipoFactura === 'credito')}
             <div className="flex items-center gap-2 mb-3">
               <div className="p-1.5 bg-sky-100 dark:bg-sky-900/30 rounded-lg">
                 <CreditCardIcon className="h-5 w-5 text-sky-600 dark:text-sky-400" />

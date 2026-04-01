@@ -104,11 +104,6 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
     // Usar la sucursal del usuario si no se proporciona una
     const sucursalToUse = idSucursal || idSucursalAuth;
 
-    console.log('🔍 [DEBUG] verificarEstado - idSucursal (prop):', idSucursal);
-    console.log('🔍 [DEBUG] verificarEstado - idSucursalAuth (localStorage):', idSucursalAuth);
-    console.log('🔍 [DEBUG] verificarEstado - sucursalToUse:', sucursalToUse);
-    console.log('🔍 [DEBUG] verificarEstado - usuario:', usuario);
-    console.log('🔍 [DEBUG] verificarEstado - rol:', rol);
 
     if (!sucursalToUse) {
       console.warn('⚠️ [DEBUG] sucursalToUse es null/undefined, asumiendo caja abierta');
@@ -126,13 +121,11 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
         id_sucursal: sucursalToUse,
       };
 
-      console.log('📤 [DEBUG] Enviando params:', params);
+
       const response = await verificarEstadoCaja(params);
-      console.log('📥 [DEBUG] Respuesta verificarEstadoCaja:', response);
 
       if (response.success) {
         setEstadoCaja(response);
-        console.log('✅ [DEBUG] Estado de caja actualizado:', response);
       }
     } catch (error) {
       console.error('❌ [DEBUG] Error al verificar estado de caja:', error);
@@ -354,15 +347,7 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
   const puedeReabrir = rol === 'admin';
 
   // DEBUG: Log para depurar botones
-  console.log('🎛️ [DEBUG] Estados de botones:', {
-    estadoCaja,
-    cajaCerrada,
-    rol,
-    usuarioRol: rol,
-    puedeReabrir,
-    deberiaMostrarBotonAdmin: cajaCerrada && puedeReabrir,
-    deberiaMostrarBotonVendedor: cajaCerrada && !puedeReabrir
-  });
+
 
   return (
     <Card>

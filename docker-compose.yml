@@ -48,6 +48,7 @@ services:
       - ./backend/media:/app/media/
       - /etc/letsencrypt/live/portafolio-juan.dagi.co/fullchain.pem:/etc/ssl/certs/fullchain.pem
       - /etc/letsencrypt/live/portafolio-juan.dagi.co/privkey.pem:/etc/ssl/private/privkey.pem
+      - /var/www/certbot:/var/www/certbot
     networks:
       - nova_network
 

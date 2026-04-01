@@ -65,24 +65,19 @@ export default function TrendChart({
   const isDark = theme === 'dark';
 
   const rawData = useMemo(() => {
-    console.log('📊 TrendChart - data recibida:', data);
-    console.log('📊 TrendChart - showMockIfEmpty:', showMockIfEmpty);
+
 
     if (data && data.length > 0) {
-      console.log('📊 Usando datos reales:', data);
       return data;
     }
     if (showMockIfEmpty) {
       const mockData = generateMockData();
-      console.log('📊 Usando datos mock:', mockData);
       return mockData;
     }
-    console.log('📊 Sin datos');
     return [];
   }, [data, showMockIfEmpty]);
 
   const chartData = useMemo(() => {
-    console.log('📊 Procesando chartData desde rawData:', rawData);
     const processed = rawData.map((item) => {
       let fechaFormateada = item.fecha;
       try {
@@ -101,7 +96,6 @@ export default function TrendChart({
         cantidad: cantidad,
       };
     });
-    console.log('📊 chartData procesado:', processed);
     return processed;
   }, [rawData]);
 

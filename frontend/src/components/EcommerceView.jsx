@@ -21,8 +21,6 @@ import LearnSection from './ecommerce/sections/LearnSection';
 import EcommerceFooter from './ecommerce/shared/EcommerceFooter';
 
 export default function EcommerceView() {
-  console.log('🚀 Componente EcommerceView renderizado - VERSIÓN VIDEO ACTUALIZADA');
-  console.log('📍 Fecha de compilación:', new Date().toISOString());
 
   // Estados principales
   const [products, setProducts] = useState([]);
@@ -89,16 +87,11 @@ export default function EcommerceView() {
     const savedUser = localStorage.getItem('auth_usuario');
     const savedCoupons = localStorage.getItem('ecommerce_coupons');
 
-    console.log('=== Cargando datos al iniciar ===');
-    console.log('accessToken:', accessToken);
-    console.log('savedUser:', savedUser);
-
     if (accessToken && savedUser) {
       try {
         const user = JSON.parse(savedUser);
         setCustomerData(user);
         setIsLoggedIn(true);
-        console.log('Usuario detectado, isLoggedIn = true');
       } catch (e) {
         console.error('Error parseando usuario:', e);
         localStorage.removeItem('auth_access_token');
@@ -107,7 +100,6 @@ export default function EcommerceView() {
       }
     } else {
       setIsLoggedIn(false);
-      console.log('No hay usuario, isLoggedIn = false');
     }
 
     if (savedCoupons) {
@@ -188,22 +180,15 @@ export default function EcommerceView() {
 
   // Asegurar que el video se reproduzca en la sección de contacto
   useLayoutEffect(() => {
-    console.log('🔍 Sección actual:', activeSection);
-    console.log('🎥 videoRef.current (inmediato):', videoRef.current);
 
     if (activeSection === 'contacto') {
-      console.log('✅ Estás en la sección de contacto');
 
       // Verificar si el elemento video existe en el DOM después de renderizar
       // Usar múltiples timeouts para verificar en diferentes momentos
       const checkVideo = () => {
         if (videoRef.current) {
-          console.log('✅ Elemento video encontrado:', videoRef.current);
-          console.log('📹 Video src:', videoRef.current.currentSrc);
-          console.log('📹 Video readyState:', videoRef.current.readyState);
 
           const video = videoRef.current;
-          console.log('Intentando reproducir video de contacto...');
 
           // Asegurarse de que el video esté muted para autoplay
           video.muted = true;
@@ -214,15 +199,15 @@ export default function EcommerceView() {
           if (playPromise !== undefined) {
             playPromise
               .then(() => {
-                console.log('✅ Video de contacto reproduciéndose correctamente');
+                console.log('Video de contacto reproduciéndose correctamente');
               })
               .catch(err => {
-                console.error('❌ Error al reproducir el video:', err);
+                console.error('Error al reproducir el video:', err);
                 video.setAttribute('controls', '');
               });
           }
         } else {
-          console.log('❌ Elemento video NO encontrado - Reintentando...');
+          console.log(' Elemento video NO encontrado - Reintentando...');
         }
       };
 
@@ -395,7 +380,7 @@ export default function EcommerceView() {
               imagen: null
             }
           ];
-          console.log('✅ Cargados', productos.length, 'productos de ejemplo de movilidad eléctrica');
+
         }
 
         const cats = [...new Set(productos.map(p => p.categoria_nombre).filter(Boolean))];
@@ -554,8 +539,6 @@ export default function EcommerceView() {
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   // Debug: mostrar en consola el estado del carrito
-  console.log('Cart items:', cart);
-  console.log('Cart item count:', cartItemCount);
 
   // Función para obtener emoji según categoría
   const getCategoryEmoji = (category) => {
@@ -622,7 +605,6 @@ export default function EcommerceView() {
 
     // Verificar si está logueado
     if (!isLoggedIn) {
-      console.log('🔒 Usuario no logueado. No se puede enviar pedido.');
       return;
     }
 
@@ -634,7 +616,6 @@ export default function EcommerceView() {
   // Reseñas
   const handleSubmitReview = () => {
     if (!isLoggedIn) {
-      console.log('🔒 Usuario no logueado. No se puede dejar reseña.');
       return;
     }
 
@@ -867,18 +848,13 @@ export default function EcommerceView() {
     }
 
     try {
-      console.log('[CUPONES] Cargando cupones del cliente:', customerData.email);
       const response = await obtenerMisCupones({ correo: customerData.email });
-
-      console.log('[CUPONES] Respuesta del backend:', response);
-
       // Mostrar mensaje si existe
       if (response.mensaje) {
         console.log('[CUPONES] Mensaje del backend:', response.mensaje);
       }
 
       // Verificar si hay cupones en la respuesta
-      console.log('[CUPONES] Cantidad de cupones en respuesta:', response.cupones?.length || 0);
       if (response.cupones && response.cupones.length > 0) {
         console.log('[CUPONES] Primer cupón (crudo):', response.cupones[0]);
       }
@@ -888,17 +864,11 @@ export default function EcommerceView() {
         // El serializer retorna 'cupon_detalle' con la info completa del cupón
         const cupon = cc.cupon_detalle || cc.cupon || {};
 
-        console.log(`[CUPONES] Procesando cupón #${idx}:`, {
-          'cc.cupon_detalle': cc.cupon_detalle,
-          'cc.cupon': cc.cupon,
-          'cupon (merged)': cupon
-        });
+
 
         // Mapear campos del backend al formato local
         const codigo = cupon.nombre || cupon.codigo || 'DESCONOCIDO';
         const descuento = parseFloat(cupon.valor || cupon.descuento || 0);
-
-        console.log(`[CUPONES] Mapeo: nombre=${cupon.nombre} → codigo=${codigo}, valor=${cupon.valor} → descuento=${descuento}`);
 
         const transformed = {
           codigo: codigo,
@@ -913,22 +883,17 @@ export default function EcommerceView() {
           tipo_display: cupon.tipo_display,
           fecha_vencimiento: cupon.fecha_vencimiento
         };
-        console.log('[CUPONES] Cupón transformado:', transformed);
         return transformed;
       });
 
-      console.log('[CUPONES] Cupones del backend transformados:', backendCoupons);
-
       // Combinar con cupones locales (generados por reseñas)
       const localCoupons = coupons.filter(c => c.generadoLocal === true);
-      console.log('[CUPONES] Cupones locales:', localCoupons);
 
       const allCoupons = [...backendCoupons, ...localCoupons];
 
       setCoupons(allCoupons);
       localStorage.setItem('ecommerce_coupons', JSON.stringify(allCoupons));
 
-      console.log(`[CUPONES] Total de cupones: ${allCoupons.length} (${backendCoupons.length} del backend, ${localCoupons.length} locales)`);
     } catch (error) {
       console.error('[CUPONES] Error cargando cupones:', error.message);
       console.error('[CUPONES] Detalle del error:', error);
@@ -1763,10 +1728,8 @@ export default function EcommerceView() {
                     if (cart.length > 0) {
                       // Verificar autenticación ANTES de enviar a WhatsApp
                       if (!isLoggedIn) {
-                        console.log('Botón carrito - Usuario NO logueado');
                         return;
                       }
-                      console.log('Botón carrito - Usuario logueado, enviando a WhatsApp');
                       sendToWhatsApp();
                     } else {
                       showToast('error', 'Tu carrito está vacío');

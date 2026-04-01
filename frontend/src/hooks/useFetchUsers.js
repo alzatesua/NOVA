@@ -12,9 +12,6 @@ export function useFetchUsers() {
   refetchRef.current = async () => {
     try {
       const data = await fetchUsers(auth);
-      console.log("Recargando usuarios - respuesta completa:", JSON.stringify(data, null, 2));
-      console.log("¿Es array datos?", Array.isArray(data?.datos));
-      console.log("datos:", data?.datos);
       setUsers(Array.isArray(data.datos) ? data.datos : []);
     } catch (err) {
       console.error("Error al cargar usuarios:", err);

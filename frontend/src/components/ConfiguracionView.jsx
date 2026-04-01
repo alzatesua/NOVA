@@ -53,43 +53,31 @@ export default function ConfiguracionView() {
     setLoading(prev => ({ ...prev, [tab]: true }));
     try {
       let response;
-      console.log(`📥 Cargando ${tab}...`);
 
       switch (tab) {
         case 'categorias':
           response = await fetchCategorias({ tokenUsuario, usuario, subdominio });
-          console.log('Categorías response:', response);
           setCategorias(response?.datos || []);
           break;
         case 'marcas':
           response = await fetchMarcas({ tokenUsuario, usuario, subdominio });
-          console.log('Marcas response:', response);
           setMarcas(response?.datos || []);
           break;
         case 'ivas':
           response = await fetchIva({ tokenUsuario, usuario, subdominio });
-          console.log('IVAs response:', response);
           setIvas(response?.datos || []);
           break;
         case 'descuentos':
           response = await fetchDescuentos({ tokenUsuario, usuario, subdominio });
-          console.log('Descuentos response:', response);
           setDescuentos(response?.datos || []);
           break;
         case 'medidas':
           response = await fetchTipoMedida({ tokenUsuario, usuario, subdominio });
-          console.log('Medidas response:', response);
           setTiposMedida(response?.datos || []);
           break;
       }
 
-      console.log(`✅ ${tab} cargados:`, {
-        categorias: categorias.length,
-        marcas: marcas.length,
-        ivas: ivas.length,
-        descuentos: descuentos.length,
-        medidas: tiposMedida.length
-      });
+    
     } catch (error) {
       console.error(`❌ Error cargando ${tab}:`, error);
       showToast('error', `Error al cargar ${tab}`);
@@ -151,8 +139,6 @@ export default function ConfiguracionView() {
       const token = localStorage.getItem('token_usuario');
       const datos = prepareFormData(formData, activeTab);
 
-      console.log('📤 Enviando datos a la API:', { activeTab, datos });
-
       if (editingItem) {
         // Editar - usamos actualizarfila
         const tabla = getTablaForTab(activeTab);
@@ -187,37 +173,23 @@ export default function ConfiguracionView() {
               creacionExitosa = !!response;
               break;
             case 'descuentos':
-              console.log('🔵 Intentando crear descuento con datos:', datos);
               response = await crearDescuento({ usuario, token, subdominio, datos });
-              console.log('🔵 Respuesta descuento:', response);
               // Para descuentos, validamos que tenga un campo de éxito o no sea un error
               creacionExitosa = response && !response.error && !response.mensaje?.toLowerCase().includes('error');
-              console.log('🔵 creacionExitosa:', creacionExitosa);
               break;
             case 'medidas':
               response = await crearMedida({ usuario, token, subdominio, datos });
               creacionExitosa = !!response;
               break;
           }
-          console.log('📥 Respuesta de la API:', response);
           if (creacionExitosa) {
             showToast('success', 'Creado correctamente');
           } else if (activeTab === 'descuentos') {
             // Si es descuentos y no hubo éxito, mostrar error
-            console.error('❌ No se pudo crear el descuento, response:', response);
             showToast('error', response?.mensaje || response?.error || 'Error al crear descuento');
             return; // Detener ejecución
           }
         } catch (error) {
-          console.log('🔍 Error capturado, propiedades:', {
-            activeTab,
-            status: error.status,
-            message: error.message,
-            hasDetails: !!error.details,
-            detailsStatus: error.details?.status,
-            details: error.details,
-            stringified: JSON.stringify(error)
-          });
 
           // Lista de endpoints que tienen el bug del 500 (guardan pero retornan error)
           const endpointsConBug500 = ['categorias', 'marcas', 'ivas', 'medidas'];

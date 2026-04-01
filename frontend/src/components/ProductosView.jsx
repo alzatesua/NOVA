@@ -175,12 +175,7 @@ export default function ProductsView({
 
   // ——— Funciones para filtro por bodega ———
   const cargarProductosPorBodega = useCallback(async (bodegaId) => {
-    console.log('[ProductosView] cargarProductosPorBodega llamado', {
-      bodegaId,
-      subdominio,
-      usuario,
-      hasToken: !!tokenUsuario
-    });
+
 
     if (!bodegaId || !subdominio || !usuario) {
       console.error('[ProductosView] Faltan parámetros requeridos', {
@@ -192,7 +187,7 @@ export default function ProductsView({
     }
 
     try {
-      console.log('[ProductosView] Llamando a obtenerProductosPorBodega...');
+    
       const response = await obtenerProductosPorBodega({
         usuario,
         tokenUsuario,
@@ -201,10 +196,8 @@ export default function ProductsView({
         solo_con_stock: true
       });
 
-      console.log('[ProductosView] Respuesta recibida:', response);
 
       if (response && response.datos) {
-        console.log('[ProductosView] Productos recibidos:', response.datos.length);
 
         // Mapear los productos al formato esperado
         const productosMapeados = response.datos.map(p => ({
@@ -224,14 +217,12 @@ export default function ProductsView({
           iva: { id: p.id_iva }
         }));
 
-        console.log('[ProductosView] Productos mapeados:', productosMapeados.length);
 
         setProductosPorBodega(prev => {
           const newState = {
             ...prev,
             [bodegaId]: productosMapeados
           };
-          console.log('[ProductosView] Estado productosPorBodega actualizado:', newState);
           return newState;
         });
 
@@ -248,10 +239,7 @@ export default function ProductsView({
   }, [subdominio, usuario, tokenUsuario]);
 
   const cambiarBodega = useCallback(() => {
-    console.log('[ProductosView] cambiarBodega llamado', {
-      totalBodegas: bodegas.length,
-      bodegaSeleccionada
-    });
+
 
     if (bodegas.length === 0) {
       console.warn('[ProductosView] No hay bodegas disponibles');
@@ -261,12 +249,10 @@ export default function ProductsView({
 
     // Usar todas las bodegas disponibles (no filtrar por sucursal)
     const listaBodegas = bodegas;
-    console.log('[ProductosView] Lista de bodegas:', listaBodegas);
 
     // Si no hay bodega seleccionada, seleccionar la primera
     if (!bodegaSeleccionada) {
       const primeraBodega = listaBodegas[0];
-      console.log('[ProductosView] Seleccionando primera bodega:', primeraBodega);
       setBodegaSeleccionada(primeraBodega.id);
       cargarProductosPorBodega(primeraBodega.id);
       showToast(`Bodega: ${primeraBodega.nombre}`, 'info');
@@ -288,10 +274,7 @@ export default function ProductsView({
     const siguienteIndice = (indiceActual + 1) % listaBodegas.length;
     const siguienteBodega = listaBodegas[siguienteIndice];
 
-    console.log('[ProductosView] Cambiando a siguiente bodega:', {
-      actual: listaBodegas[indiceActual]?.nombre,
-      siguiente: siguienteBodega?.nombre
-    });
+
 
     setBodegaSeleccionada(siguienteBodega.id);
     cargarProductosPorBodega(siguienteBodega.id);
@@ -299,7 +282,6 @@ export default function ProductsView({
   }, [bodegas, bodegaSeleccionada, cargarProductosPorBodega]);
 
   const limpiarFiltroBodega = useCallback(() => {
-    console.log('[ProductosView] Limpiando filtro de bodega');
     setBodegaSeleccionada(null);
     // No limpiar productosPorBodega para que se muestren todos los productos de las bodegas asignadas
     showToast('Mostrando productos de todas tus bodegas', 'info');
@@ -337,7 +319,6 @@ export default function ProductsView({
       const productosUnicos = new Map();
       productosBase.forEach(p => productosUnicos.set(p.id, p));
       productosBase = Array.from(productosUnicos.values());
-      console.log('[ProductosView] Productos combinados de todas las bodegas:', productosBase.length);
     }
     // Si no hay bodega seleccionada y es admin/almacen, usar todos los productos
     else {
@@ -536,9 +517,6 @@ export default function ProductsView({
           const productoCreado = response[i];
           const productoLocal = newProducts[i];
           const categoria = Number(productoLocal.categoria);
-
-          console.log('Producto local:', productoLocal);
-          console.log('Categoría:', productoLocal.categoria, 'Convertida:', categoria);
 
           if (productoLocal.file) {
             setIsUploadingImage(true);
@@ -836,12 +814,10 @@ export default function ProductsView({
   //------ CARGAR TODAS LAS BODEGAS ------
     useEffect(() => {
     const cargarBodegas = async () => {
-      console.log('[ProductosView] Cargando bodegas...', { rol, subdominio, usuario });
 
       setIsLoadingBodegas(true);
       try {
         const response = await fetchBodegas({ rol, tokenUsuario, usuario, subdominio });
-        console.log('[ProductosView] Respuesta fetchBodegas:', response);
         let datosBodegas = response?.datos || [];
 
         // Filtrar bodegas según las asignadas al usuario (para vendedores y operarios)
@@ -849,10 +825,7 @@ export default function ProductsView({
         if (bodegasSeleccionadas) {
           const bodegasIds = JSON.parse(bodegasSeleccionadas);
           if (bodegasIds.length > 0) {
-            console.log('[ProductosView] Filtrando bodegas por IDs:', bodegasIds);
             datosBodegas = datosBodegas.filter(b => bodegasIds.includes(b.id));
-            console.log('[ProductosView] Bodegas después del filtro:', datosBodegas.length);
-
             // Para vendedor/operario: cargar productos de todas sus bodegas
             if (datosBodegas.length > 0 && (rol === 'vendedor' || rol === 'operario')) {
               // Cargar productos de todas las bodegas en paralelo
@@ -861,13 +834,11 @@ export default function ProductsView({
 
               // Auto-seleccionar la primera bodega
               const primeraBodega = datosBodegas[0];
-              console.log('[ProductosView] Auto-seleccionando primera bodega:', primeraBodega);
               setBodegaSeleccionada(primeraBodega.id);
             }
           }
         }
 
-        console.log('[ProductosView] Bodegas cargadas:', datosBodegas.length, datosBodegas);
         setBodegas(datosBodegas);
       } catch (error) {
         console.error('[ProductosView] Error cargando bodegas:', error);

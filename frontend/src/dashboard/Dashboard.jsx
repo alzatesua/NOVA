@@ -12,6 +12,7 @@ import ClientesView from '../components/ClientesView';
 import CajaView from '../components/CajaView';
 import MoraView from '../components/MoraView';
 import ProveedoresView from '../components/ProveedoresView';
+import NovaFooter from '../components/Footer/NovaFooter';
 import { useFetchUsers } from '../hooks/useFetchUsers';
 import { useFetchSucursales } from '../hooks/useFetchSucursales';
 import { useAuth } from '../hooks/useAuth';
@@ -194,6 +195,9 @@ export default function Dashboard() {
         )}
 
       </main>
+
+      {/* Footer DAGI */}
+      <NovaFooter />
     </div>
   );
 }

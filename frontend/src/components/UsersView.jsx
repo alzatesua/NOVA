@@ -265,13 +265,7 @@ export default function UsersView({ users: initialUsers, onCreated }) {
     const rolNuevo = e.target.rol.value;
     const sucursalId = e.target.sucursal_id.value;
 
-    console.log('[DEBUG ENVIANDO USUARIO]:', {
-      usuario: usuarioNuevo,
-      correo,
-      rol: rolNuevo,
-      sucursalId,
-      bodegas_ids: newUser.bodegas_ids
-    });
+
 
     try {
       await createUsuario({

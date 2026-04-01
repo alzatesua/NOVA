@@ -62,10 +62,7 @@ export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursa
 
       const response = await fetchMovimientosCaja(params);
 
-      console.log('📋 Respuesta movimientos:', response);
-
       if (response.success) {
-        console.log('✅ Movimientos recibidos:', response.data.movimientos);
         setMovimientos(response.data.movimientos);
         setTotalPaginas(response.data.total_paginas);
       } else {

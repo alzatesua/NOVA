@@ -106,7 +106,6 @@ export default function BodegasModal({
         const userId = localStorage.getItem('user_id');
         if (userId) {
           setCurrentUserId(userId);
-          console.log('ID de usuario cargado:', userId);
         } else {
           console.warn('No se encontró user_id en localStorage');
         }
@@ -188,7 +187,6 @@ export default function BodegasModal({
       }
 
       const datos = response?.datos || [];
-      console.log("fetchAllProducts", datos);
   
       setProductos(datos);
     } catch (e) {
@@ -207,7 +205,6 @@ export default function BodegasModal({
     try {
       const response = await fetchAllProductsTraslado({ tokenUsuario, usuario, subdominio });
       const datos = response?.datos || [];
-      console.log("fetchAllProductsTraslado", datos);
       setProductosTraslados(datos);
     } catch (e) {
       setProductosTraslados([]);
@@ -225,7 +222,6 @@ export default function BodegasModal({
   // Cargar productos por bodega (para traslados)
   const cargarProductosPorBodega = useCallback(async (bodegaId) => {
     if (!tokenUsuario || !usuario || !subdominio || !bodegaId) {
-      console.log('Faltan datos para cargar productos por bodega:', { tokenUsuario: !!tokenUsuario, usuario: !!usuario, subdominio: !!subdominio, bodegaId });
       return;
     }
 
@@ -240,7 +236,6 @@ export default function BodegasModal({
       });
 
       const datos = response?.datos || [];
-      console.log(`Productos para bodega ${bodegaId}:`, datos);
       setProductosPorBodega(prev => ({
         ...prev,
         [bodegaId]: datos
@@ -259,8 +254,6 @@ export default function BodegasModal({
   // Cargar traslados disponibles para recibir
   const cargarTrasladosDisponibles = useCallback(async () => {
     
-    console.log("bodegas", bodegas);
-    console.log("sucursalSel", sucursalSel);
 
     const arrayBodegas = [];
 
@@ -270,7 +263,6 @@ export default function BodegasModal({
       }
     }
 
-    console.log("arrayBodegas",arrayBodegas);
     const bodegaDestino = arrayBodegas;
 
     setIsLoadingTraslados(true);
@@ -285,7 +277,6 @@ export default function BodegasModal({
         estado: 'ENV'
       });
       
-      console.log("response", response);
       setTrasladosDisponibles(response);
     } catch (error) {
       setErrorTraslados(error.message || 'Error al cargar traslados');
@@ -324,11 +315,6 @@ export default function BodegasModal({
       return;
     }
 
-    console.log('=== ENVIANDO TRASLADO ===');
-    console.log('Traslado ID:', enviarForm.trasladoId);
-    console.log('Usuario:', usuario);
-    console.log('Subdominio:', subdominio);
-    console.log('Token:', tokenUsuario ? 'Presente' : 'Ausente');
 
     setEnviarLoading(true);
     
@@ -341,8 +327,7 @@ export default function BodegasModal({
         traslado_id: enviarForm.trasladoId
       });
       
-      console.log('Respuesta del servidor:', response);
- 
+
       showToast('success', 'Traslado enviado exitosamente');
       
       // Recargar la lista de traslados
@@ -500,10 +485,6 @@ export default function BodegasModal({
       return;
     }
 
-    console.log('=== AJUSTANDO EXISTENCIA ===');
-    console.log('Payload:', payload);
-    console.log('Usuario:', usuario);
-    console.log('Subdominio:', subdominio);
 
     // Aquí deberías tener setAjusteLoading si no lo tienes
     // const [ajusteLoading, setAjusteLoading] = useState(false);

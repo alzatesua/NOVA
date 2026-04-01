@@ -115,15 +115,12 @@ export default function DashboardView() {
 
   // Generar datos de prueba para tendencia si está vacía
   const getTendenciaConDatos = () => {
-    console.log('📊 DashboardView - tendencia:', tendencia);
-    console.log('📊 DashboardView - tendencia.length:', tendencia?.length);
+
 
     if (tendencia && tendencia.length > 0) {
-      console.log('📊 DashboardView - usando tendencia real');
       return tendencia;
     }
     // Datos de prueba para los últimos 30 días
-    console.log('📊 DashboardView - generando datos de prueba');
     const hoy = new Date();
     const datos = Array.from({ length: 30 }, (_, i) => {
       const fecha = new Date(hoy);
@@ -134,7 +131,6 @@ export default function DashboardView() {
         cantidad_facturas: Math.floor(Math.random() * 10 + 1),
       };
     });
-    console.log('📊 DashboardView - datos generados:', datos);
     return datos;
   };
 

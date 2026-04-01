@@ -94,9 +94,8 @@ const response = await fetchProductosEcommerce({
 if (response.ok && response.data && Array.isArray(response.data) && response.data.length > 0) {
   // Transformar productos al formato que espera el componente
   productos = response.data.map(transformarProducto);
-  console.log('✅ Productos cargados del backend (API E-commerce):', productos.length);
 } else {
-  console.log('⚠️ No hay productos en backend, usando productos de ejemplo');
+  console.log('No hay productos en backend, usando productos de ejemplo');
 }
 ```
 

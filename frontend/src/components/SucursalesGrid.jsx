@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { UsersIcon } from '@heroicons/react/24/outline';
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -9,12 +8,13 @@ import {
   XCircleIcon,
 } from '@heroicons/react/24/solid';
 import {
-  fetchUsers,
   crearBodega,
   fetchBodegas,
   crearExistencia,
   fetchProducts,
-  crearTraslado
+  crearTraslado,
+  fetchCiudades,
+  fetchPaises
 } from '../services/api';
 import Modal from '../components/Modal';
 import SucursalesForm from '../components/SucursalesForm';
@@ -37,6 +37,25 @@ const SECCIONES = [//secciones para el modal de bodegas
 
 export default function SucursalesGrid() {
 
+  // --- Helpers para obtener nombres de ciudad y país ---
+  const getNombreCiudad = (ciudadId) => {
+    if (!ciudadId) return 'No especificada';
+    const ciudad = ciudades.find(c => String(c.id) === String(ciudadId));
+    if (!ciudad) {
+      console.log('❌ Ciudad no encontrada:', { ciudadId, ciudadesIds: ciudades.slice(0, 5).map(c => c.id) });
+    }
+    return ciudad?.name || ciudadId;
+  };
+
+  const getNombrePais = (paisId) => {
+    if (!paisId) return 'No especificado';
+    const pais = paises.find(p => String(p.id) === String(paisId));
+    if (!pais) {
+      console.log('❌ País no encontrado:', { paisId, paisesIds: paises.slice(0, 5).map(p => p.id) });
+    }
+    return pais?.name || paisId;
+  };
+
   const [ajusteForm, setAjusteForm] = useState({
     producto: '', 
     bodega: '',   
@@ -57,8 +76,8 @@ export default function SucursalesGrid() {
   const [searchTerm, setSearchTerm] = useState('');
   const [quickFilter, setQuickFilter] = useState('todas');
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [encargadosData, setEncargadosData] = useState({});
-  const [bodegasData, setBodegasData] = useState({});
+  const [ciudades, setCiudades] = useState([]);
+  const [paises, setPaises] = useState([]);
 
   // --- Estados de crear bodega (con UI mejorada) ---
   const [showBodegaForm, setShowBodegaForm] = useState(false);
@@ -76,94 +95,24 @@ export default function SucursalesGrid() {
   const [active, setActive] = useState(SECCIONES[0].id);
   const [newProducts, setNewProducts] = useState([]);
 
-
-  // --- Cargar encargados por sucursal ---
+  // --- Cargar ciudades y países para mostrar nombres ---
   useEffect(() => {
-    if (!sucursales?.length) return;
-    let isMounted = true;
-
-    async function loadEncargados() {
+    const cargarUbicaciones = async () => {
       try {
-        const results = await Promise.all(
-          sucursales.map(async (suc) => {
-            try {
-              const data = await fetchUsers({ tokenUsuario, usuario, subdominio: subdominio });
-      
-              const encargadosPorSucursal = (data?.datos || []).filter(
-                (u) => u.id_sucursal_default === suc.id
-              );
-              return { id: suc.id, count: encargadosPorSucursal.length };
-            } catch {
-              return { id: suc.id, count: 0 };
-            }
-          })
-        );
-        if (isMounted) {
-          const map = {};
-          results.forEach(({ id, count }) => (map[id] = count));
-          setEncargadosData(map);
-          
-        }
+        const [ciudadesData, paisesData] = await Promise.all([
+          fetchCiudades(tokenUsuario),
+          fetchPaises(tokenUsuario)
+        ]);
+        const ciudadesArray = Array.isArray(ciudadesData) ? ciudadesData : [];
+        const paisesArray = Array.isArray(paisesData) ? paisesData : [];
+        setCiudades(ciudadesArray);
+        setPaises(paisesArray);
       } catch (e) {
-        console.error('Error cargando encargados:', e);
+        console.error('Error cargando ubicaciones:', e);
       }
-    }
-
-    loadEncargados();
-    return () => { isMounted = false; };
-  }, [sucursales, tokenUsuario, usuario]);
-
-
-  // --- Cargar bodegas (dedup por subdominio) ---
-  useEffect(() => {
-    if (!Array.isArray(sucursales) || !sucursales.length) return;
-    let cancelled = false;
-
-    const getSucIdFromBodega = (b) =>
-      Number(b?.sucursal_id ?? b?.id_sucursal ?? b?.sucursal);
-
-    (async function loadBodegas() {
-      try {
-        // 1) subdominios únicos
-        const subs = [...new Set(sucursales.map(s => s.subdominio))];
-
-        // 2) pedir una vez por subdominio
-        const datasets = await Promise.all(
-          subs.map(async (sub) => {
-            try {
-              const resp = await fetchBodegas({
-                tokenUsuario,
-                usuario,
-                subdominio: subdominio,
-              });
-              const datos = resp?.datos ?? resp?.data?.datos ?? [];
-              return [sub, datos];
-            } catch (e) {
-              console.error('fetchBodegas falló para', sub, e);
-              return [sub, []];
-            }
-          })
-        );
-
-        const bodegasBySub = Object.fromEntries(datasets);
-
-        // 3) contar por sucursal usando su subdominio
-        const entries = sucursales.map((suc) => {
-          const bodegas = bodegasBySub[suc.subdominio] ?? [];
-          const count = bodegas.filter(b => getSucIdFromBodega(b) === Number(suc.id)).length;
-          return [suc.id, count];
-        });
-
-        if (!cancelled) {
-          setBodegasData(Object.fromEntries(entries));
-        }
-      } catch (e) {
-        console.error('Error cargando bodegas:', e);
-      }
-    })();
-
-    return () => { cancelled = true; };
-  }, [sucursales, tokenUsuario, usuario]);
+    };
+    cargarUbicaciones();
+  }, [tokenUsuario]);
 
 
   // --- Filtros ---
@@ -504,13 +453,7 @@ export default function SucursalesGrid() {
                   <h5 className="text-lg font-semibold text-gray-900 dark:!text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">{suc.nombre}</h5>
 
                   <div className="flex items-center gap-2">
-                    {/* Pill de usuarios */}
-                    <span className="inline-flex items-center bg-blue-50 dark:!bg-blue-900/50 text-blue-800 dark:!text-blue-200 text-xs font-medium px-2.5 py-1 rounded-full border border-blue-200 dark:!border-blue-500 group-hover:scale-110 group-hover:bg-blue-100 dark:group-hover:!bg-blue-800/70 transition-all duration-300">
-                      <UsersIcon className="w-3.5 h-3.5 mr-1" />
-                      {encargadosData[suc.id] ?? 0}
-                    </span>
-
-                    {/* Botón pill de bodegas (abre modal) */}
+                    {/* Botón para abrir bodegas */}
                     <button
                       type="button"
                       onClick={() => abrirNuevaBodega(suc)}
@@ -528,8 +471,7 @@ export default function SucursalesGrid() {
                       "
                     >
                       <BuildingStorefrontIcon className="w-3.5 h-3.5" />
-                      <span>{bodegasData[suc.id] ?? 0}</span>
-
+                      <span>Bodegas</span>
                     </button>
                   </div>
                 </div>
@@ -538,8 +480,8 @@ export default function SucursalesGrid() {
                 <dl className="flex-grow grid grid-cols-1 gap-y-2 group/dl">
                   {[
                     ['Dirección', suc.direccion],
-                    ['Ciudad', suc.ciudad],
-                    ['País', suc.pais],
+                    ['Ciudad', getNombreCiudad(suc.ciudad)],
+                    ['País', getNombrePais(suc.pais)],
                   ].map(([dt, dd]) => (
                     <div key={dt} className="flex justify-between group-hover/dl:translate-x-1 transition-transform duration-300">
                       <dt className="text-xs font-medium text-slate-600 dark:!text-slate-400">{dt}</dt>

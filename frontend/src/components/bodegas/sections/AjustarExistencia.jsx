@@ -255,7 +255,6 @@ export default function AjustarExistencia({
       delta: Number(ajusteForm.delta),
     };
 
-    console.log('📤 Enviando ajuste:', payload);
 
     if (typeof onAjustar === 'function') {
       onAjustar(payload);

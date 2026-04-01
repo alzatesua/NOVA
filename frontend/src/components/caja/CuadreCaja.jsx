@@ -75,15 +75,10 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
         params.id_sucursal = idSucursal;
       }
 
-      console.log('🔍 ENVIANDO PETICIÓN CUADRE - idSucursal:', idSucursal, 'tipo:', typeof idSucursal);
-      console.log('📋 Parámetros completos:', params);
 
       const response = await fetchCuadreCaja(params);
 
-      console.log('💰 Respuesta cuadre:', response);
-
       if (response.success) {
-        console.log('✅ Datos del cuadre recibidos:', response.data);
         setCuadre(response.data);
       } else {
         console.error('❌ Error en respuesta:', response);

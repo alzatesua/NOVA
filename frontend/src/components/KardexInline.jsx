@@ -37,11 +37,9 @@ export default function KardexInline({ productos }) {
       setLoadingSucursales(true);
       try {
         const response = await fetchSucursalesCaja({ token: tokenUsuario, usuario, subdominio });
-        console.log('🔍 KardexInline - Response fetchSucursalesCaja:', response);
         if (response?.success) {
           setSucursales(response.data);
           setEsAdminBackend(response.es_admin || false);
-          console.log('✅ KardexInline - esAdminBackend:', response.es_admin);
           // Para no-admin, autoseleccionar la sucursal asignada
           if (!response.es_admin && response.sucursal_asignada) {
             setSucursalSeleccionada(response.sucursal_asignada);
@@ -98,7 +96,6 @@ export default function KardexInline({ productos }) {
 
     // Filtro de sucursal (solo para admin o si hay sucursal seleccionada)
     if (esAdminBackend && sucursalSeleccionada !== null) {
-      console.log(`🔍 Filtro: producto="${producto.nombre}" | sucursal_id=${producto.sucursal_id} | seleccionada=${sucursalSeleccionada} | pasa=${producto.sucursal_id === sucursalSeleccionada}`);
       // Si el producto tiene sucursal_id, filtrar por ella
       if (producto.sucursal_id !== undefined) {
         return producto.sucursal_id === sucursalSeleccionada;
@@ -111,15 +108,7 @@ export default function KardexInline({ productos }) {
   });
 
   // Log para debug: mostrar si los productos tienen sucursal_id
-  React.useEffect(() => {
-    if (productos.length > 0) {
-      console.log('📦 Productos en KardexInline:', productos.length);
-      console.log('🏢 Productos con sucursal_id:', productos.filter(p => p.sucursal_id !== undefined).length);
-      console.log('📋 Primer producto:', productos[0]);
-      console.log('🔍 sucursalSeleccionada:', sucursalSeleccionada);
-      console.log('👤 esAdminBackend:', esAdminBackend);
-    }
-  }, [productos, sucursalSeleccionada, esAdminBackend]);
+
 
   // Procesar Kardex - comparar conteo físico vs sistema
   const procesarKardex = () => {

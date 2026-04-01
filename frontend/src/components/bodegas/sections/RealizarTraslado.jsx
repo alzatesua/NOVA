@@ -69,7 +69,6 @@ export default function RealizarTraslado({
   const cargarProductosParaBodega = async (bodegaId) => {
     if (!bodegaId || !subdominio || !usuario) return;
 
-    console.log('[RealizarTraslado] Cargando productos para bodega:', bodegaId);
 
     setIsLoadingProductosBodega(true);
     try {
@@ -82,7 +81,7 @@ export default function RealizarTraslado({
       });
 
       if (response && response.datos) {
-        console.log('[RealizarTraslado] Productos recibidos para bodega:', bodegaId, response.datos.length);
+        
         setProductosPorBodegaOrigen(prev => ({
           ...prev,
           [bodegaId]: response.datos
