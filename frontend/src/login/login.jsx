@@ -9,27 +9,14 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     setIsLoaded(true);
-    const handleMouseMove = (e) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth - 0.5) * 20,
-        y: (e.clientY / window.innerHeight - 0.5) * 20
-      });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    // NO enviamos subdominio - el backend lo extrae del Host HTTP automáticamente
-    // Esto permite el acceso correcto tanto desde subdominios (ej: tienda.nova.dagi.co)
-    // como desde el dominio principal (nova.dagi.co)
 
     try {
       const response = await fetch(`${API_URL}/validar/`, {
@@ -40,7 +27,6 @@ function Login() {
         body: JSON.stringify({
           usuario: correoUsuario,
           password: password
-          // subdominio NO se envía - el backend lo resuelve desde el Host
         })
       });
 
@@ -104,9 +90,8 @@ function Login() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-600/10 rounded-full blur-3xl animate-orb3"></div>
       </div>
 
-      {/* Animated sparkles/destellos - MUCHOS MÁS */}
+      {/* Animated sparkles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Pequeños destellos - 1px */}
         <div className="absolute top-[5%] left-[8%] w-1 h-1 bg-blue-400 rounded-full animate-sparkle1"></div>
         <div className="absolute top-[12%] left-[22%] w-1 h-1 bg-cyan-400 rounded-full animate-sparkle2"></div>
         <div className="absolute top-[8%] right-[15%] w-1 h-1 bg-purple-400 rounded-full animate-sparkle3"></div>
@@ -126,36 +111,28 @@ function Login() {
         <div className="absolute top-[85%] left-[8%] w-1 h-1 bg-cyan-300 rounded-full animate-sparkle1"></div>
         <div className="absolute top-[88%] right-[18%] w-1 h-1 bg-purple-300 rounded-full animate-sparkle2"></div>
         <div className="absolute top-[95%] left-[12%] w-1 h-1 bg-blue-400 rounded-full animate-sparkle3"></div>
-
-        {/* Destellos medios - 2px */}
         <div className="absolute top-[15%] left-[35%] w-2 h-2 bg-blue-500 rounded-full animate-sparkle9"></div>
         <div className="absolute top-[28%] right-[35%] w-2 h-2 bg-cyan-500 rounded-full animate-sparkle10"></div>
         <div className="absolute top-[42%] left-[40%] w-2 h-2 bg-purple-500 rounded-full animate-sparkle11"></div>
         <div className="absolute top-[62%] right-[38%] w-2 h-2 bg-blue-400 rounded-full animate-sparkle12"></div>
         <div className="absolute top-[72%] left-[45%] w-2 h-2 bg-cyan-400 rounded-full animate-sparkle13"></div>
         <div className="absolute top-[82%] right-[42%] w-2 h-2 bg-purple-400 rounded-full animate-sparkle14"></div>
-
-        {/* Destellos grandes - 3px */}
         <div className="absolute top-[10%] left-[60%] w-3 h-3 bg-blue-500 rounded-full animate-sparkle15"></div>
         <div className="absolute top-[30%] right-[55%] w-3 h-3 bg-cyan-500 rounded-full animate-sparkle16"></div>
         <div className="absolute top-[50%] left-[55%] w-3 h-3 bg-purple-500 rounded-full animate-sparkle17"></div>
         <div className="absolute top-[70%] right-[60%] w-3 h-3 bg-blue-400 rounded-full animate-sparkle18"></div>
         <div className="absolute top-[90%] left-[58%] w-3 h-3 bg-cyan-400 rounded-full animate-sparkle19"></div>
-
-        {/* Extra destellos con movimiento rápido */}
         <div className="absolute top-[5%] left-[80%] w-1.5 h-1.5 bg-purple-300 rounded-full animate-sparkle20"></div>
         <div className="absolute top-[20%] left-[75%] w-1.5 h-1.5 bg-blue-300 rounded-full animate-sparkle21"></div>
         <div className="absolute top-[40%] right-[70%] w-1.5 h-1.5 bg-cyan-300 rounded-full animate-sparkle22"></div>
         <div className="absolute top-[60%] left-[72%] w-1.5 h-1.5 bg-purple-400 rounded-full animate-sparkle23"></div>
         <div className="absolute top-[80%] right-[75%] w-1.5 h-1.5 bg-blue-400 rounded-full animate-sparkle24"></div>
-
-        {/* Destellos centrales */}
         <div className="absolute top-[33%] left-[48%] w-2 h-2 bg-cyan-500 rounded-full animate-sparkle25"></div>
         <div className="absolute top-[52%] right-[48%] w-2 h-2 bg-purple-500 rounded-full animate-sparkle26"></div>
         <div className="absolute top-[67%] left-[52%] w-2 h-2 bg-blue-500 rounded-full animate-sparkle27"></div>
       </div>
 
-      {/* Floating glow effects - MÁS EFECTOS */}
+      {/* Floating glow effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[15%] left-[20%] w-32 h-32 bg-blue-500/5 rounded-full blur-2xl animate-float1"></div>
         <div className="absolute top-[60%] right-[15%] w-40 h-40 bg-purple-500/5 rounded-full blur-2xl animate-float2"></div>
@@ -168,83 +145,99 @@ function Login() {
       </div>
 
       {/* Main content wrapper */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 py-8 grid lg:grid-cols-2 gap-8 items-center">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 py-8 grid lg:grid-cols-[1.3fr_1fr] gap-8 items-center">
 
         {/* Left side - Illustration and info */}
         <div className={`hidden lg:block transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}>
 
-          {/* 3D Illustration */}
-          <div className="relative mb-8" style={{
-            transform: `perspective(1000px) rotateY(${mousePosition.x * 0.5}deg) rotateX(${-mousePosition.y * 0.5}deg)`,
-            transition: 'transform 0.1s ease-out'
-          }}>
-            {/* Main card stack */}
-            <div className="relative w-full h-[400px]">
+          {/* Cards — sin efecto 3D */}
+          <div className="relative mb-8 w-full flex justify-center">
 
-              {/* Card 1 - Inventory */}
-              <div className="absolute left-0 top-0 w-64 h-40 bg-gradient-to-br from-blue-600/30 to-blue-800/30 backdrop-blur-xl rounded-2xl border border-blue-500/30 p-5 transform hover:scale-105 hover:-translate-y-2 transition-all duration-300">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                    <Package className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-blue-300">Inventario</p>
-                    <p className="text-lg font-bold text-white">1,284</p>
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  {[40, 65, 45, 80, 55, 70, 60].map((h, i) => (
-                    <div key={i} className="flex-1 bg-blue-500/40 rounded-t" style={{ height: h + '%' }}></div>
-                  ))}
-                </div>
-              </div>
+            <div className="flex flex-col gap-2 max-w-xs w-full">
 
-              {/* Card 2 - Sales */}
-              <div className="absolute right-0 top-16 w-64 h-40 bg-gradient-to-br from-emerald-600/30 to-emerald-800/30 backdrop-blur-xl rounded-2xl border border-emerald-500/30 p-5 transform hover:scale-105 hover:-translate-y-2 transition-all duration-300">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-emerald-500/20 rounded-lg">
-                    <TrendingUp className="w-6 h-6 text-emerald-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-emerald-300">Ventas Hoy</p>
-                    <p className="text-lg font-bold text-white">$12,450</p>
-                  </div>
-                </div>
-                <svg className="w-full h-12" viewBox="0 0 100 40">
-                  <path d="M0,35 Q10,30 20,32 T40,25 T60,28 T80,15 T100,20" fill="none" stroke="currentColor" strokeWidth="2" className="text-emerald-400" />
-                  <path d="M0,35 Q10,30 20,32 T40,25 T60,28 T80,15 T100,20 V40 H0 Z" fill="currentColor" className="text-emerald-500/20" />
-                </svg>
-              </div>
+              {/* Fila 1: Inventario + Ventas */}
+              <div className="grid grid-cols-2 gap-2">
 
-              {/* Card 3 - Invoices */}
-              <div className="absolute left-20 bottom-0 w-64 h-40 bg-gradient-to-br from-purple-600/30 to-purple-800/30 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-5 transform hover:scale-105 hover:-translate-y-2 transition-all duration-300">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-purple-500/20 rounded-lg">
-                    <FileText className="w-6 h-6 text-purple-400" />
+                {/* Card Inventario */}
+                <div className="bg-gradient-to-br from-blue-600/30 to-blue-800/30 backdrop-blur-xl rounded-lg border border-blue-500/30 p-2 hover:scale-105 transition-all duration-300 shadow-md shadow-blue-500/20">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-1">
+                      <div className="p-1 bg-blue-500/20 rounded-md shrink-0">
+                        <Package className="w-3 h-3 text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-blue-300 leading-none">Inventario</p>
+                        <p className="text-xs font-bold text-white leading-tight">1,284</p>
+                      </div>
+                    </div>
+                    <div className="w-5 h-5 bg-blue-500/30 rounded-md flex items-center justify-center border border-blue-400/40 shrink-0 animate-pulse">
+                      <ShoppingCart className="w-2.5 h-2.5 text-blue-300" />
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-purple-300">Facturas</p>
-                    <p className="text-lg font-bold text-white">48 Pendientes</p>
+                  <div className="flex gap-0.5 items-end h-5">
+                    {[40, 65, 45, 80, 55, 70, 60].map((h, i) => (
+                      <div key={i} className="flex-1 bg-blue-500/40 rounded-t" style={{ height: `${h}%` }}></div>
+                    ))}
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="h-2 bg-purple-500/30 rounded-full overflow-hidden">
-                    <div className="h-full bg-purple-400 rounded-full animate-progress"></div>
+
+                {/* Card Ventas */}
+                <div className="bg-gradient-to-br from-emerald-600/30 to-emerald-800/30 backdrop-blur-xl rounded-lg border border-emerald-500/30 p-2 hover:scale-105 transition-all duration-300 shadow-md shadow-emerald-500/20">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-1">
+                      <div className="p-1 bg-emerald-500/20 rounded-md shrink-0">
+                        <TrendingUp className="w-3 h-3 text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-emerald-300 leading-none">Ventas</p>
+                        <p className="text-xs font-bold text-white leading-tight">$12,450</p>
+                      </div>
+                    </div>
+                    <div className="w-5 h-5 bg-emerald-500/30 rounded-md flex items-center justify-center border border-emerald-400/40 shrink-0 animate-pulse">
+                      <BarChart3 className="w-2.5 h-2.5 text-emerald-300" />
+                    </div>
                   </div>
-                  <p className="text-xs text-purple-300">Procesando...</p>
+                  <svg className="w-full h-5" viewBox="0 0 100 40">
+                    <path d="M0,35 Q10,30 20,32 T40,25 T60,28 T80,15 T100,20" fill="none" stroke="#6ee7b7" strokeWidth="2" />
+                    <path d="M0,35 Q10,30 20,32 T40,25 T60,28 T80,15 T100,20 V40 H0 Z" fill="rgba(16,185,129,0.15)" />
+                  </svg>
                 </div>
+
               </div>
 
-              {/* Floating icons */}
-              <div className="absolute top-8 right-32">
-                <ShoppingCart className="w-8 h-8 text-cyan-400 opacity-60" />
+              {/* Card Facturas - ancho completo */}
+              <div className="bg-gradient-to-br from-purple-600/30 to-purple-800/30 backdrop-blur-xl rounded-lg border border-purple-500/30 p-2 hover:scale-[1.02] transition-all duration-300 shadow-md shadow-purple-500/20">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1">
+                    <div className="p-1 bg-purple-500/20 rounded-md shrink-0">
+                      <FileText className="w-3 h-3 text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-purple-300 leading-none">Facturas</p>
+                      <p className="text-xs font-bold text-white leading-tight">48 Pendientes</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 ml-auto mr-2">
+                    <div className="text-center">
+                      <p className="text-xs font-bold text-white">124</p>
+                      <p className="text-[9px] text-slate-500">Emitidas</p>
+                    </div>
+                    <div className="w-px h-4 bg-slate-700"></div>
+                    <div className="text-center">
+                      <p className="text-xs font-bold text-white">48</p>
+                      <p className="text-[9px] text-slate-500">Pendientes</p>
+                    </div>
+                  </div>
+                  <div className="w-5 h-5 bg-purple-500/30 rounded-md flex items-center justify-center border border-purple-400/40 shrink-0 animate-pulse">
+                    <Zap className="w-2.5 h-2.5 text-purple-300" />
+                  </div>
+                </div>
+                <div className="h-1 bg-purple-500/20 rounded-full overflow-hidden mb-1">
+                  <div className="h-full bg-gradient-to-r from-purple-500 to-purple-300 rounded-full animate-progress" style={{ width: '75%' }}></div>
+                </div>
+                <p className="text-[9px] text-purple-300">Procesando... 75%</p>
               </div>
-              <div className="absolute bottom-20 left-48">
-                <BarChart3 className="w-8 h-8 text-blue-400 opacity-60" />
-              </div>
-              <div className="absolute top-32 left-8">
-                <Zap className="w-8 h-8 text-yellow-400 opacity-60" />
-              </div>
+
             </div>
           </div>
 
@@ -310,7 +303,6 @@ function Login() {
 
             {/* Login Card */}
             <div className="bg-slate-900/60 backdrop-blur-2xl rounded-3xl border border-slate-800/50 shadow-2xl p-8 relative overflow-hidden group">
-              {/* Animated border gradient */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
               <div className="relative z-10">
@@ -385,7 +377,7 @@ function Login() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group/btn ${
+                    className={`w-full py-3 rounded-xl font-semibold text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group/btn ${
                       loading
                         ? 'bg-slate-700 cursor-not-allowed'
                         : 'bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 hover:from-blue-500 hover:via-cyan-500 hover:to-purple-500 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40'
@@ -409,41 +401,6 @@ function Login() {
                     )}
                   </button>
                 </form>
-
-                {/* Divider */}
-                <div className="relative my-8">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-700"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-slate-900/60 text-slate-500 backdrop-blur-xl">o continúa con</span>
-                  </div>
-                </div>
-
-                {/* Social Login Buttons */}
-                <div className="space-y-3">
-                  <button
-                    onClick={handleGoogleLogin}
-                    disabled={loading}
-                    className="w-full py-3.5 px-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-slate-600 rounded-xl text-white transition-all duration-300 transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 group"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    <span className="font-medium">Google</span>
-                  </button>
-                </div>
-
-                {/* Register Link */}
-                <div className="mt-6 text-center text-sm text-slate-400">
-                  ¿No tienes cuenta?{' '}
-                  <a href="https://dagi.co/registro/tienda" className="text-blue-400 hover:text-blue-300 transition-colors duration-200 font-medium">
-                    Crea una aquí
-                  </a>
-                </div>
               </div>
             </div>
 
@@ -468,215 +425,184 @@ function Login() {
           0%, 100% { opacity: 0.5; transform: scale(1); }
           50% { opacity: 0.8; transform: scale(1.05); }
         }
-
         @keyframes gradient {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
-
         @keyframes orb1 {
           0%, 100% { transform: translate(0, 0) scale(1); }
           33% { transform: translate(30px, -30px) scale(1.1); }
           66% { transform: translate(-20px, 20px) scale(0.9); }
         }
-
         @keyframes orb2 {
           0%, 100% { transform: translate(0, 0) scale(1); }
           33% { transform: translate(-30px, 30px) scale(0.9); }
           66% { transform: translate(20px, -20px) scale(1.1); }
         }
-
         @keyframes orb3 {
           0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
           50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); }
         }
-
         @keyframes progress {
           0% { width: 0%; }
           100% { width: 75%; }
         }
-
         @keyframes sparkle1 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1) translate(10px, -10px); }
         }
-
         @keyframes sparkle2 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1) translate(-15px, 5px); }
         }
-
         @keyframes sparkle3 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1) translate(8px, 12px); }
         }
-
         @keyframes sparkle4 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1) translate(-12px, -8px); }
         }
-
         @keyframes sparkle5 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1) translate(15px, 10px); }
         }
-
         @keyframes sparkle6 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1) translate(-10px, -15px); }
         }
-
         @keyframes sparkle7 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1) translate(5px, 8px); }
         }
-
         @keyframes sparkle8 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1) translate(-8px, -5px); }
         }
-
         @keyframes sparkle9 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.2) translate(12px, -8px); }
         }
-
         @keyframes sparkle10 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.2) translate(-10px, 10px); }
         }
-
         @keyframes sparkle11 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.2) translate(8px, -12px); }
         }
-
         @keyframes sparkle12 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.2) translate(-12px, 8px); }
         }
-
         @keyframes sparkle13 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.2) translate(10px, 12px); }
         }
-
         @keyframes sparkle14 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.2) translate(-8px, -10px); }
         }
-
         @keyframes sparkle15 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.5) translate(15px, -15px); }
         }
-
         @keyframes sparkle16 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.5) translate(-18px, 12px); }
         }
-
         @keyframes sparkle17 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.5) translate(12px, 18px); }
         }
-
         @keyframes sparkle18 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.5) translate(-15px, -12px); }
         }
-
         @keyframes sparkle19 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.5) translate(18px, 15px); }
         }
-
         @keyframes sparkle20 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.1) translate(-8px, 8px); }
         }
-
         @keyframes sparkle21 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.1) translate(10px, -6px); }
         }
-
         @keyframes sparkle22 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.1) translate(-7px, 10px); }
         }
-
         @keyframes sparkle23 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.1) translate(9px, -9px); }
         }
-
         @keyframes sparkle24 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.1) translate(-11px, 7px); }
         }
-
         @keyframes sparkle25 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.3) translate(6px, -8px); }
         }
-
         @keyframes sparkle26 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.3) translate(-7px, 9px); }
         }
-
         @keyframes sparkle27 {
           0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
           50% { opacity: 1; transform: scale(1.3) translate(8px, -7px); }
         }
-
         @keyframes float1 {
           0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
           50% { transform: translate(30px, -40px) scale(1.2); opacity: 0.6; }
         }
-
         @keyframes float2 {
           0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
           50% { transform: translate(-40px, 30px) scale(1.3); opacity: 0.6; }
         }
-
         @keyframes float3 {
           0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
           50% { transform: translate(20px, 40px) scale(1.1); opacity: 0.6; }
         }
-
         @keyframes float4 {
           0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.25; }
           50% { transform: translate(-25px, -35px) scale(1.15); opacity: 0.5; }
         }
-
         @keyframes float5 {
           0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.25; }
           50% { transform: translate(30px, 25px) scale(1.1); opacity: 0.55; }
         }
-
         @keyframes float6 {
           0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.25; }
           50% { transform: translate(-20px, 30px) scale(1.2); opacity: 0.5; }
         }
-
         @keyframes float7 {
           0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.2; }
           50% { transform: translate(25px, -25px) scale(1.15); opacity: 0.45; }
         }
-
         @keyframes float8 {
           0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.2; }
           50% { transform: translate(-30px, -20px) scale(1.1); opacity: 0.5; }
         }
+        @keyframes card-float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
+        @keyframes card-float-delay {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-5px); }
+        }
+        @keyframes card-float-delay-2 {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
 
         .animate-glow { animation: glow 3s ease-in-out infinite; }
-        .animate-gradient {
-          background-size: 200% 200%;
-          animation: gradient 5s ease infinite;
-        }
+        .animate-gradient { background-size: 200% 200%; animation: gradient 5s ease infinite; }
         .animate-orb1 { animation: orb1 15s ease-in-out infinite; }
         .animate-orb2 { animation: orb2 18s ease-in-out infinite; }
         .animate-orb3 { animation: orb3 20s linear infinite; }
@@ -716,6 +642,9 @@ function Login() {
         .animate-float6 { animation: float6 10.5s ease-in-out infinite; }
         .animate-float7 { animation: float7 8.5s ease-in-out infinite; }
         .animate-float8 { animation: float8 11.5s ease-in-out infinite; }
+        .animate-card-float { animation: card-float 4s ease-in-out infinite; }
+        .animate-card-float-delay { animation: card-float-delay 4.5s ease-in-out infinite 0.5s; }
+        .animate-card-float-delay-2 { animation: card-float-delay-2 5s ease-in-out infinite 1s; }
       `}</style>
     </div>
   );

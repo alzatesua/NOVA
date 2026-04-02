@@ -95,7 +95,7 @@ export default function Dashboard() {
       <main
         className="flex-grow flex flex-col pb-10 w-full transition-all duration-300 overflow-x-hidden"
         style={{
-          paddingTop: mobileMenuOpen ? 'calc(68px + 300px)' : '20px',
+          paddingTop: mobileMenuOpen ? 'calc(68px + 300px)' : '88px',
           paddingLeft: 'clamp(12px, 2vw, 24px)',
           paddingRight: 'clamp(12px, 2vw, 24px)',
           maxWidth: '100vw',
