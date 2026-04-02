@@ -6,7 +6,7 @@ Al implementar los endpoints de exportación, se encontró el siguiente error:
 
 ```
 Access to fetch at 'https://dagi.co/caja/historial_arqueos/export/excel/'
-from origin 'https://dagi-4a4487.dagi.co' has been blocked by CORS policy:
+from origin 'https://dagi-4a4487.nova.dagi.co' has been blocked by CORS policy:
 Response to preflight request doesn't pass access control check:
 No 'Access-Control-Allow-Origin' header is present on the requested resource.
 ```
@@ -115,7 +115,7 @@ curl -X POST https://dagi.co/api/caja/historial_arqueos/export/excel/ \
 2. **Verificar headers CORS en la respuesta:**
 ```bash
 curl -X OPTIONS https://dagi.co/api/caja/historial_arqueos/export/excel/ \
-  -H "Origin: https://dagi-4a4487.dagi.co" \
+  -H "Origin: https://dagi-4a4487.nova.dagi.co" \
   -H "Access-Control-Request-Method: POST" \
   -H "Access-Control-Request-Headers: content-type, authorization" \
   -v
@@ -123,7 +123,7 @@ curl -X OPTIONS https://dagi.co/api/caja/historial_arqueos/export/excel/ \
 
 Debería ver:
 ```
-Access-Control-Allow-Origin: https://dagi-4a4487.dagi.co
+Access-Control-Allow-Origin: https://dagi-4a4487.nova.dagi.co
 Access-Control-Allow-Credentials: true
 Access-Control-Expose-Headers: content-disposition, content-type
 ```

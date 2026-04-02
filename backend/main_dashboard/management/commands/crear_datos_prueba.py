@@ -52,7 +52,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS('\n✅ Datos de prueba creados exitosamente!\n'))
         self.stdout.write(self.style.SUCCESS(f'Subdominio: {subdominio}\n'))
-        self.stdout.write(self.style.SUCCESS(f'URL de prueba: https://{subdominio}.dagi.co/\n'))
+        self.stdout.write(self.style.SUCCESS(f'URL de prueba: https://{subdominio}.nova.dagi.co/\n'))
 
     def _crear_o_obtener_tienda(self, subdominio):
         """Crea una tienda de prueba o retorna una existente"""

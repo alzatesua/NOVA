@@ -62,17 +62,81 @@ def login_view(request):
     Endpoint de login: recibe usuario, password y opcional subdominio.
     Si subdominio no se envía, se extrae del Host.
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
+    logger.info(f"=== Login attempt ===")
+    logger.info(f"Request data: {request.data}")
+    logger.info(f"Request headers: {dict(request.headers)}")
+    logger.info(f"Request host: {request.get_host()}")
+    logger.info(f"Request META: {request.META.get('REMOTE_ADDR')}")
+
     try:
         serializer = LoginSerializer(data=request.data)
+        logger.info(f"Serializer created: {serializer}")
+        logger.info(f"Serializer is_valid: {serializer.is_valid()}")
+
+        if not serializer.is_valid():
+            logger.error(f"Serializer errors: {serializer.errors}")
+
         serializer.is_valid(raise_exception=True)
         usuario  = serializer.validated_data['usuario']
         password = serializer.validated_data['password']
         subdom   = serializer.validated_data.get('subdominio')
 
+        logger.info(f"Subdominio del serializer: '{subdom}' (tipo: {type(subdom).__name__})")
+
         # Extrae subdominio del Host si no se proporciona
-        if not subdom:
+        if not subdom or subdom == '':
             host   = request.get_host().split(':')[0]
-            subdom = host.split('.')[0].lower()
+            partes = host.split('.')
+
+            logger.info(f"Host: {host}, Partes: {partes}, Len: {len(partes)}")
+
+            # Determinar si es un subdominio de tienda o el dominio principal
+            # Dominios principales: nova.dagi.co, dagi.co, www.nova.dagi.co, www.dagi.co
+            # Subdominio de tienda: tienda-abc.nova.dagi.co (4+ partes) o tienda-abc.dagi.co (3 partes)
+            es_dominio_principal = (
+                len(partes) <= 2 or  # dagi.co o localhost
+                partes[0] in ['nova', 'www', 'api']  # nova.dagi.co, www.nova.dagi.co, etc.
+            )
+
+            if not es_dominio_principal and len(partes) >= 3:
+                # Es un subdominio de tienda
+                subdom = partes[0].lower()
+                logger.info(f"Subdominio de tienda extraído del host: {subdom}")
+            else:
+                # Si es dominio principal (nova.dagi.co o dagi.co),
+                # buscar dominio marcado como principal en BD
+                logger.info(f"Acceso al dominio principal: {host}")
+                try:
+                    dominio_principal = Dominios.objects.using('default').filter(es_principal=True).first()
+                    logger.info(f"Query de dominio principal ejecutado, resultado: {dominio_principal}")
+
+                    if dominio_principal:
+                        subdom = dominio_principal.dominio
+                        logger.info(f"Usando dominio principal: {subdom}")
+                    else:
+                        # Si no hay dominio principal, usar el primero disponible
+                        logger.info("No hay dominio principal, buscando primero disponible")
+                        primer_dominio = Dominios.objects.using('default').first()
+                        logger.info(f"Query de primer dominio ejecutado, resultado: {primer_dominio}")
+
+                        if primer_dominio:
+                            subdom = primer_dominio.dominio
+                            logger.info(f"Usando primer dominio disponible: {subdom}")
+                        else:
+                            logger.error("No hay dominios configurados en la base de datos")
+                            return Response({
+                                'error': 'No hay tiendas configuradas. Contacta al administrador.'
+                            }, status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    logger.error(f"Error al buscar dominio: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    return Response({
+                        'error': f'Error al buscar dominio: {str(e)}'
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         if not subdom:
             return Response({'error': 'Subdominio no proporcionado'}, status=status.HTTP_400_BAD_REQUEST)

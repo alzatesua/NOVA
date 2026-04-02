@@ -412,11 +412,11 @@ function CrearTienda() {
             Tu tienda fue creada en:{" "}
             <a
               className="underline text-blue-600"
-              href={`https://${sub_dominio}.dagi.co/login`}
+              href={`https://${sub_dominio}.nova.dagi.co/login`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              https://{sub_dominio}.dagi.co/login
+              https://{sub_dominio}.nova.dagi.co/login
             </a>
           </p>
 
@@ -431,7 +431,7 @@ function CrearTienda() {
                     const decoded = jwtDecode(credentialResponse.credential);
                     const tokenGoogle = credentialResponse.credential;
 
-                    const res = await fetch("https://dagi.co/api/activar-tienda/", {
+                    const res = await fetch(`${window.location.origin}/api/activar-tienda/`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ token: tokenGoogle }),
@@ -449,7 +449,7 @@ function CrearTienda() {
                         });
                       
                         if (sub_dominio) {
-                          window.location.href = `https://${sub_dominio}.dagi.co`;
+                          window.location.href = `https://${sub_dominio}.nova.dagi.co`;
                         } else {
                            toast.warn("Tienda valida, pero no se encontró el dominio.", {
                             position: "top-right",
@@ -507,7 +507,7 @@ function CrearTienda() {
             <Button
               className="bg-blue-600 text-white"
               onClick={() =>
-                window.location.href = `https://${sub_dominio}.dagi.co/login`
+                window.location.href = `https://${sub_dominio}.nova.dagi.co/login`
               }
             >
               Iniciar sesión en tu tienda

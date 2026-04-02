@@ -17,9 +17,10 @@ DEBUG = False
 MEDIA_ROOT = '/app/media'
 
 ALLOWED_HOSTS = [
+    'nova.dagi.co',
     'dagi.co',
     '31.97.14.61',
-    '.dagi.co',
+    '.nova.dagi.co',
     'backend',
     'nginx',
     'frontend'
@@ -39,14 +40,16 @@ DATABASES = {
 
 # CORS - Producción (más restrictivo)
 CORS_ALLOWED_ORIGINS = [
+    "https://nova.dagi.co",
     "https://dagi.co",
     "http://31.97.14.61",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://31.97.14.61",
+    "https://nova.dagi.co",
     "https://dagi.co",
-    "https://*.dagi.co",
+    "https://*.nova.dagi.co",
 ]
 
 # Logging más detallado en producción

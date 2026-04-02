@@ -27,8 +27,9 @@ function Login() {
     e.preventDefault();
     setLoading(true);
 
-    const hostname = window.location.hostname;
-    const subdominio = hostname.split('.')[0];
+    // NO enviamos subdominio - el backend lo extrae del Host HTTP automáticamente
+    // Esto permite el acceso correcto tanto desde subdominios (ej: tienda.nova.dagi.co)
+    // como desde el dominio principal (nova.dagi.co)
 
     try {
       const response = await fetch(`${API_URL}/validar/`, {
@@ -38,8 +39,8 @@ function Login() {
         },
         body: JSON.stringify({
           usuario: correoUsuario,
-          password: password,
-          subdominio
+          password: password
+          // subdominio NO se envía - el backend lo resuelve desde el Host
         })
       });
 

@@ -10,7 +10,7 @@ import EcommerceView from '../components/EcommerceView';
  */
 export default function TiendaPage() {
   // Extraer el subdominio del hostname actual
-  // Ejemplo: dagi-4a4487.dagi.co -> dagi-4a4487
+  // Ejemplo: dagi-4a4487.nova.dagi.co -> dagi-4a4487
   const extractSubdomain = (hostname) => {
     const parts = hostname.split('.');
     // Si hay al menos 2 partes y la primera no es 'www'

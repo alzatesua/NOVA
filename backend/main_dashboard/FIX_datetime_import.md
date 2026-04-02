@@ -126,7 +126,7 @@ Logs:
 
 ### Escenario 1: Sin Filtros de Fecha
 ```
-1. Abrir: https://dagi-4a4487.dagi.co/caja/historial-arqueos
+1. Abrir: https://dagi-4a4487.nova.dagi.co/caja/historial-arqueos
 2. NO seleccionar fechas
 3. Click en "Excel"
 Resultado: ✅ Funciona (no se ejecuta conversión de fechas)

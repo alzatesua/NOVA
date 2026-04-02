@@ -491,7 +491,7 @@ export default function BodegasModal({
     
     try {
       // Llamar a la API de ajuste de existencia
-      const response = await fetch('https://dagi.co/api/existencias/ajustar/', {
+      const response = await fetch(`${window.location.origin}/api/existencias/ajustar/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

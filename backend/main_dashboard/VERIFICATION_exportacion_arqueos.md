@@ -79,7 +79,7 @@ $ docker logs nova-backend-1 --tail 5
 
 1. **Abrir Historial de Arqueos:**
    ```
-   https://dagi-4a4487.dagi.co/caja/historial-arqueos
+   https://dagi-4a4487.nova.dagi.co/caja/historial-arqueos
    ```
 
 2. **Aplicar filtros de fecha** (opcional pero recomendado)
@@ -105,7 +105,7 @@ $ docker logs nova-backend-1 --tail 5
 **Test CORS Preflight (Excel):**
 ```bash
 curl -X OPTIONS https://dagi.co/api/caja/historial_arqueos/export/excel/ \
-  -H "Origin: https://dagi-4a4487.dagi.co" \
+  -H "Origin: https://dagi-4a4487.nova.dagi.co" \
   -H "Access-Control-Request-Method: POST" \
   -H "Access-Control-Request-Headers: content-type, authorization" \
   -v
@@ -114,7 +114,7 @@ curl -X OPTIONS https://dagi.co/api/caja/historial_arqueos/export/excel/ \
 **Respuesta esperada:**
 ```
 HTTP/2 200
-Access-Control-Allow-Origin: https://dagi-4a4487.dagi.co
+Access-Control-Allow-Origin: https://dagi-4a4487.nova.dagi.co
 Access-Control-Allow-Credentials: true
 Access-Control-Expose-Headers: content-disposition, content-type
 Access-Control-Allow-Headers: accept, content-disposition, x-requested-with, ...
@@ -252,7 +252,7 @@ Mensaje de error con HTTP 413
 ## Próximos Pasos
 
 1. **Usuario debe probar desde navegador:**
-   - Abrir https://dagi-4a4487.dagi.co/caja/historial-arqueos
+   - Abrir https://dagi-4a4487.nova.dagi.co/caja/historial-arqueos
    - Click en botón Excel
    - Click en botón PDF
    - Verificar que no hay errores de CORS
@@ -270,4 +270,4 @@ Mensaje de error con HTTP 413
 
 **Estado actual:** Implementación completa, esperando verificación del usuario.
 
-**Para probar:** Ir a https://dagi-4a4487.dagi.co/caja/historial-arqueos y hacer click en los botones de exportación.
+**Para probar:** Ir a https://dagi-4a4487.nova.dagi.co/caja/historial-arqueos y hacer click en los botones de exportación.

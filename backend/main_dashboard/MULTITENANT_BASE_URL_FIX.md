@@ -8,7 +8,7 @@ POST https://dagi.co/api/caja/historial_arqueos/export/excel/ 400 (Bad Request)
 ```
 
 **Contexto:**
-El usuario está en `https://dagi-4a4487.dagi.co` pero las peticiones se hacen a `https://dagi.co` (dominio principal).
+El usuario está en `https://dagi-4a4487.nova.dagi.co` pero las peticiones se hacen a `https://dagi.co` (dominio principal).
 
 **Causa Raíz:**
 ```javascript
@@ -37,8 +37,8 @@ const BASE_URL = window.location.origin + '/';
 
 | Usuario está en | `window.location.origin` | `BASE_URL` resultante |
 |----------------|-------------------------|----------------------|
-| `https://dagi-4a4487.dagi.co` | `https://dagi-4a4487.dagi.co` | `https://dagi-4a4487.dagi.co/` ✅ |
-| `https://otro-subdominio.dagi.co` | `https://otro-subdominio.dagi.co` | `https://otro-subdominio.dagi.co/` ✅ |
+| `https://dagi-4a4487.nova.dagi.co` | `https://dagi-4a4487.nova.dagi.co` | `https://dagi-4a4487.nova.dagi.co/` ✅ |
+| `https://otro-subdominio.nova.dagi.co` | `https://otro-subdominio.nova.dagi.co` | `https://otro-subdominio.nova.dagi.co/` ✅ |
 | `https://dagi.co` | `https://dagi.co` | `https://dagi.co/` ✅ |
 | `http://localhost:3000` | `http://localhost:3000` | `http://localhost:3000/` ✅ |
 
@@ -46,7 +46,7 @@ const BASE_URL = window.location.origin + '/';
 
 **Antes (hardcoded):**
 ```javascript
-// Usuario en: https://dagi-4a4487.dagi.co
+// Usuario en: https://dagi-4a4487.nova.dagi.co
 BASE_URL = 'https://dagi.co/'
 endpoint = 'api/caja/historial_arqueos/export/excel/'
 URL final = 'https://dagi.co/api/caja/historial_arqueos/export/excel/' ❌
@@ -55,11 +55,11 @@ URL final = 'https://dagi.co/api/caja/historial_arqueos/export/excel/' ❌
 
 **Después (dinámico):**
 ```javascript
-// Usuario en: https://dagi-4a4487.dagi.co
-window.location.origin = 'https://dagi-4a4487.dagi.co'
-BASE_URL = 'https://dagi-4a4487.dagi.co/'
+// Usuario en: https://dagi-4a4487.nova.dagi.co
+window.location.origin = 'https://dagi-4a4487.nova.dagi.co'
+BASE_URL = 'https://dagi-4a4487.nova.dagi.co/'
 endpoint = 'api/caja/historial_arqueos/export/excel/'
-URL final = 'https://dagi-4a4487.dagi.co/api/caja/historial_arqueos/export/excel/' ✅
+URL final = 'https://dagi-4a4487.nova.dagi.co/api/caja/historial_arqueos/export/excel/' ✅
 // Correcto: Petición al dominio actual del tenant
 ```
 
@@ -68,16 +68,16 @@ URL final = 'https://dagi-4a4487.dagi.co/api/caja/historial_arqueos/export/excel
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  Navegador del Usuario                                  │
-│  URL actual: https://dagi-4a4487.dagi.co               │
+│  URL actual: https://dagi-4a4487.nova.dagi.co               │
 └────────────────┬────────────────────────────────────────┘
                  │
                  │ window.location.origin
-                 │ = 'https://dagi-4a4487.dagi.co'
+                 │ = 'https://dagi-4a4487.nova.dagi.co'
                  ↓
 ┌─────────────────────────────────────────────────────────┐
 │  Frontend (React)                                       │
 │  BASE_URL = window.location.origin + '/'                │
-│  = 'https://dagi-4a4487.dagi.co/'                       │
+│  = 'https://dagi-4a4487.nova.dagi.co/'                       │
 └────────────────┬────────────────────────────────────────┘
                  │
                  │ POST /api/caja/historial_arqueos/export/excel/
@@ -101,9 +101,9 @@ URL final = 'https://dagi-4a4487.dagi.co/api/caja/historial_arqueos/export/excel
 
 ### Escenario 1: Subdominio Tenant
 ```
-URL: https://dagi-4a4487.dagi.co/caja/historial-arqueos
+URL: https://dagi-4a4487.nova.dagi.co/caja/historial-arqueos
 Acción: Click en "Excel"
-Petición a: https://dagi-4a4487.dagi.co/api/caja/historial_arqueos/export/excel/
+Petición a: https://dagi-4a4487.nova.dagi.co/api/caja/historial_arqueos/export/excel/
 Resultado: ✅ Descarga exitosa
 ```
 
@@ -133,7 +133,7 @@ Resultado: ✅ Descarga exitosa (si hay proxy local)
    console.log('Full URL:', window.location.origin + '/api/caja/historial_arqueos/export/excel/');
    ```
 4. **Verificar que coincide con tu dominio actual:**
-   - Si estás en `dagi-4a4487.dagi.co` → debe mostrar ese dominio ✅
+   - Si estás en `dagi-4a4487.nova.dagi.co` → debe mostrar ese dominio ✅
 
 ## Impacto en Otros Endpoints
 
@@ -142,19 +142,19 @@ Este cambio afecta **TODAS** las peticiones del frontend, no solo exportación:
 ```javascript
 // Auth
 fetch(`${BASE_URL}api/auth/login/`, ...)
-// → https://dagi-4a4487.dagi.co/api/auth/login/ ✅
+// → https://dagi-4a4487.nova.dagi.co/api/auth/login/ ✅
 
 // Dashboard
 fetch(`${BASE_URL}api/dashboard/stats/`, ...)
-// → https://dagi-4a4487.dagi.co/api/dashboard/stats/ ✅
+// → https://dagi-4a4487.nova.dagi.co/api/dashboard/stats/ ✅
 
 // Caja
 fetch(`${BASE_URL}api/caja/historial_arqueos/`, ...)
-// → https://dagi-4a4487.dagi.co/api/caja/historial_arqueos/ ✅
+// → https://dagi-4a4487.nova.dagi.co/api/caja/historial_arqueos/ ✅
 
 // Exportación
 fetch(`${BASE_URL}api/caja/historial_arqueos/export/excel/`, ...)
-// → https://dagi-4a4487.dagi.co/api/caja/historial_arqueos/export/excel/ ✅
+// → https://dagi-4a4487.nova.dagi.co/api/caja/historial_arqueos/export/excel/ ✅
 ```
 
 ## Frontend Rebuild

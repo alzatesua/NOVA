@@ -52,7 +52,7 @@ Ejecutando comando de Django...
 
 ✅ Datos de prueba creados exitosamente!
 Subdominio: mi-tienda-deportiva
-URL de prueba: https://mi-tienda-deportiva.dagi.co/
+URL de prueba: https://mi-tienda-deportiva.nova.dagi.co/
 ```
 
 ### Método 2: Comando de Django Directo
@@ -196,7 +196,7 @@ Detalles de la tienda:
 ======================================================================
 
 Subdominio: mi-tienda
- URL: https://mi-tienda.dagi.co/
+ URL: https://mi-tienda.nova.dagi.co/
  API: curl -X POST https://dagi.co/api/productos/list/ \
        -H "Content-Type: application/json" \
        -d '{"subdominio": "mi-tienda"}'
@@ -505,10 +505,10 @@ curl -X POST https://dagi.co/api/productos/list/ \
 ./verificar_conexion.sh otra-tienda --test-connection
 
 # 3. Actualizar /etc/hosts (solo desarrollo local)
-echo "127.0.0.1 otra-tienda.dagi.co" | sudo tee -a /etc/hosts
+echo "127.0.0.1 otra-tienda.nova.dagi.co" | sudo tee -a /etc/hosts
 
 # 4. Probar en navegador
-# Abrir https://otra-tienda.dagi.co/
+# Abrir https://otra-tienda.nova.dagi.co/
 # Debería mostrar los productos de esa tienda
 ```
 

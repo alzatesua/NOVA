@@ -46,11 +46,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-9)6^ej5!o6d^y)n7+#p+i
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = [
+    'nova.dagi.co',
     'dagi.co',
     '31.97.14.61',
     'localhost',
     '127.0.0.1',
-    '.dagi.co',
+    '.nova.dagi.co',
     'backend',
     'nginx',
     'frontend'
@@ -221,6 +222,7 @@ USE_X_FORWARDED_HOST = True
 
 
 CORS_ALLOWED_ORIGINS = [
+    "https://nova.dagi.co",  # el dominio principal del sistema
     "https://dagi.co",      # el dominio raíz sin subdominio
     "http://31.97.14.61",  # IP u otros orígenes si usas
 ]
@@ -231,8 +233,9 @@ CORS_ALLOW_ALL_ORIGINS = False
 
 CSRF_TRUSTED_ORIGINS = [
     "http://31.97.14.61",
+    "https://nova.dagi.co",
     "https://dagi.co",
-    "https://*.dagi.co",# en caso de que se inplemente un front diferente para cada tienda
+    "https://*.nova.dagi.co",# en caso de que se inplemente un front diferente para cada tienda
 ]
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
@@ -276,7 +279,7 @@ SIMPLE_JWT = {
 
 
 #dominio
-BASE_DOMAIN = os.environ.get('BASE_DOMAIN', 'dagi.co')  # dominio principal
+BASE_DOMAIN = os.environ.get('BASE_DOMAIN', 'nova.dagi.co')  # dominio principal
 
 
 CORS_ALLOW_HEADERS = list(default_headers) + [

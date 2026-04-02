@@ -44,7 +44,7 @@ python manage.py crear_datos_prueba \
 if [ $? -eq 0 ]; then
     echo ""
     echo -e "${GREEN}✅ Datos de prueba creados exitosamente!${NC}"
-    echo -e "${GREEN}URL de prueba: https://${SUBDOMINIO}.dagi.co/${NC}"
+    echo -e "${GREEN}URL de prueba: https://${SUBDOMINIO}.nova.dagi.co/${NC}"
     echo ""
     echo -e "${YELLOW}Para probar la API ejecuta:${NC}"
     echo -e "curl -X POST https://dagi.co/api/productos/list/ \\"

@@ -5,7 +5,7 @@
 **Error CORS:**
 ```
 Access to fetch at 'https://dagi.co/caja/historial_arqueos/export/excel/'
-from origin 'https://dagi-4a4487.dagi.co' has been blocked by CORS policy
+from origin 'https://dagi-4a4487.nova.dagi.co' has been blocked by CORS policy
 ```
 
 **Causa Raíz:**
@@ -62,7 +62,7 @@ fetch(`${BASE_URL}api/caja/historial_arqueos/export/excel/`, ...)
 ## Flujo de la Petición (Arquitectura Docker)
 
 ```
-Browser (https://dagi-4a4487.dagi.co)
+Browser (https://dagi-4a4487.nova.dagi.co)
   ↓ POST https://dagi.co/api/caja/historial_arqueos/export/excel/
   ↓
 Nginx (nova-nginx-1:443)
@@ -107,7 +107,7 @@ Esto reinicia el contenedor y reconstruye el frontend con el código corregido.
 ## Testing
 
 Desde el navegador:
-1. Abrir: https://dagi-4a4487.dagi.co/caja/historial-arqueos
+1. Abrir: https://dagi-4a4487.nova.dagi.co/caja/historial-arqueos
 2. Aplicar filtros de fecha (opcional)
 3. Click en botón "Excel" (verde)
 4. Click en botón "PDF" (rojo)

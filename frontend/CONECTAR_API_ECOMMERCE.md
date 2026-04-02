@@ -91,7 +91,7 @@ if (response.ok && response.data && Array.isArray(response.data) && response.dat
 └─────────────────────────────────────────────────────────────┘
                            │
                            │ 1. Extrae subdominio del hostname
-                           │    (ej: "mi-tienda" de "mi-tienda.dagi.co")
+                           │    (ej: "mi-tienda" de "mi-tienda.nova.dagi.co")
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
@@ -289,10 +289,10 @@ location /api/ {
 ### Opción 1: Subdominio Real
 ```bash
 # 1. Agregar entrada a /etc/hosts (solo desarrollo)
-echo "127.0.0.1 mi-tienda.dagi.co" | sudo tee -a /etc/hosts
+echo "127.0.0.1 mi-tienda.nova.dagi.co" | sudo tee -a /etc/hosts
 
 # 2. Abrir en navegador
-https://mi-tienda.dagi.co/
+https://mi-tienda.nova.dagi.co/
 
 # 3. Verificar en consola del navegador
 # Debería mostrar: "✅ Productos cargados del backend (API E-commerce): X"

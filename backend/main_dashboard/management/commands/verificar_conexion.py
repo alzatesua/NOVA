@@ -145,7 +145,7 @@ class Command(BaseCommand):
 
             for dom in dominios[:3]:  # Mostrar máximo 3
                 self.stdout.write(f'Subdominio: {dom.dominio}\n')
-                self.stdout.write(f'  URL: https://{dom.dominio}.dagi.co/\n')
+                self.stdout.write(f'  URL: https://{dom.dominio}.nova.dagi.co/\n')
                 self.stdout.write(f'  API: curl -X POST https://dagi.co/api/productos/list/ \\\n')
                 self.stdout.write(f'       -H "Content-Type: application/json" \\\n')
                 self.stdout.write(f'       -d \'{"subdominio": "{dom.dominio}"}\'\n')

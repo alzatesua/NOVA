@@ -60,7 +60,7 @@ async function refreshAccessToken() {
   }
 
   try {
-    const response = await fetch('https://dagi.co/api/auth/refresh/', {
+    const response = await fetch(`${window.location.origin}/api/auth/refresh/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

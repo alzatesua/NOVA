@@ -203,14 +203,14 @@ export default function CajaMenor({ fecha, idSucursal, onRefresh, isDark = false
       const sucursalId = isAdmin ? (idSucursal || null) : (idSucursal);
 
       // Obtener balance acumulado de caja menor (todos los movimientos históricos)
-      const balanceRes = await fetch('https://dagi.co/api/caja/balance_caja_menor/', {
+      const balanceRes = await fetch(`${window.location.origin}/api/caja/balance_caja_menor/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: tokenUsuario, usuario, subdominio, id_sucursal: sucursalId }),
       });
 
       // Obtener movimientos del día actual para la tabla
-      const movsRes = await fetch('https://dagi.co/api/caja/movimientos_caja_menor/', {
+      const movsRes = await fetch(`${window.location.origin}/api/caja/movimientos_caja_menor/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: tokenUsuario, usuario, subdominio, fecha, id_sucursal: sucursalId }),

@@ -142,7 +142,7 @@ Logs:
 
 ### Escenario 1: Exportar con datos
 ```
-1. Abrir: https://dagi-4a4487.dagi.co/caja/historial-arqueos
+1. Abrir: https://dagi-4a4487.nova.dagi.co/caja/historial-arqueos
 2. Aplicar filtros de fecha
 3. Click en "Excel"
 Resultado: ✅ Archivo descargado con nombres de usuario y sucursal

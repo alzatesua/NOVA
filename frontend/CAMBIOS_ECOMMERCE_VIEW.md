@@ -198,7 +198,7 @@ Para poder identificar y corregir el problema visual específico, necesito que m
    ```
    https://dagi.co/
    o
-   https://mi-tienda.dagi.co/ (si existe)
+   https://mi-tienda.nova.dagi.co/ (si existe)
    ```
 
 ---
