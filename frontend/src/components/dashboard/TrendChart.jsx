@@ -115,7 +115,7 @@ export default function TrendChart({
           style={{ background: isDark ? '#1e293b' : '#e2e8f0' }}
         />
         <div
-          className="h-[300px] rounded"
+          className="h-[250px] rounded"
           style={{ background: isDark ? '#1e293b' : '#e2e8f0' }}
         />
       </div>
@@ -124,13 +124,13 @@ export default function TrendChart({
 
   return (
     <div className="bg-white dark:!bg-slate-900 rounded-lg shadow p-6 border border-slate-200 dark:!border-slate-800 transition-colors duration-200">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col items-center justify-center mb-4">
         <h3 className="text-lg font-semibold text-slate-900 dark:!text-slate-100">
           Tendencia de Ventas
         </h3>
         {showMockIfEmpty && data.length === 0 && rawData.length > 0 && (
           <span
-            className="text-xs px-2 py-1 rounded-full"
+            className="text-xs px-2 py-1 rounded-full mt-2"
             style={{
               background: isDark ? '#1e3a5f' : '#dbeafe',
               color: isDark ? '#93c5fd' : '#1d4ed8',
@@ -143,7 +143,7 @@ export default function TrendChart({
 
       {chartData.length === 0 ? (
         <div
-          className="h-[300px] flex flex-col items-center justify-center gap-3"
+          className="h-[250px] flex flex-col items-center justify-center gap-3"
           style={{ color: isDark ? '#475569' : '#94a3b8' }}
         >
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
@@ -158,8 +158,8 @@ export default function TrendChart({
           </p>
         </div>
       ) : (
-        <div className="w-full overflow-x-auto" style={{ height: '340px', display: 'flex', justifyContent: 'center' }}>
-          <LineChart width={800} height={320} data={chartData} margin={{ top: 10, right: 80, left: 10, bottom: 10 }}>
+        <div className="w-full overflow-x-auto" style={{ height: '290px', display: 'flex', justifyContent: 'center' }}>
+          <LineChart width={800} height={270} data={chartData} margin={{ top: 10, right: 80, left: 10, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
             <XAxis
               dataKey="fecha"

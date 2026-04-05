@@ -278,19 +278,18 @@ function Login() {
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center mb-4">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-cyan-500 to-purple-500 rounded-2xl blur-xl animate-glow"></div>
-                  <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 p-4 rounded-2xl border border-slate-700/50">
-                    <svg className="w-14 h-14 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
+                  <img
+                    src="/logo-nova.png"
+                    alt="Nova Logo"
+                    className="w-64 h-auto"
+                    style={{
+                      maxHeight: '120px',
+                      objectFit: 'contain',
+                      mixBlendMode: 'multiply'
+                    }}
+                  />
                 </div>
               </div>
-              <h1 className="text-6xl font-bold bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent mb-3 animate-gradient">
-                Nova
-              </h1>
               <p className="text-slate-400 text-sm max-w-xs mx-auto">
                 Tu sistema integral de inventario, facturación electrónica y e-commerce
               </p>

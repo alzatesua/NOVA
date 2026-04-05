@@ -113,10 +113,7 @@ export default function Dashboard() {
           <div className="relative w-full mb-8 rounded-3xl overflow-hidden
             bg-white dark:!bg-slate-900 backdrop-blur-md ring-1 ring-slate-200 dark:!ring-slate-800 shadow-lg transition-colors duration-200"
             style={{ padding: 'clamp(12px, 3vw, 32px)', maxWidth: '100%', overflowX: 'hidden' }}>
-            <section className="w-full" style={{ maxWidth: '100%', overflow: 'hidden' }}>
-              <h3 className="text-xl sm:text-2xl font-bold mb-4 text-slate-900 dark:text-slate-100">Gestión de Usuarios</h3>
-              <UsersView users={usersData} onCreated={reloadUsers} />
-            </section>
+            <UsersView users={usersData} onCreated={reloadUsers} />
           </div>
         )}
 

@@ -233,23 +233,20 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
           style={{ height: '100%' }}
         >
           {/* Logo - Izquierda */}
-          <div style={{ flexShrink: 0, width: '120px' }}>
-            <span
-              className="inline-block"
+          <div style={{ flexShrink: 0, width: '140px' }}>
+            <img
+              src="/logo-nova.png"
+              alt="Nova"
+              className="inline-block cursor-pointer"
               style={{
-                background: 'linear-gradient(to right, #0ea5e9, #38bdf8, #8b5cf6)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundSize: '200% 100%',
-                fontWeight: 800,
-                fontSize: '24px',
-                letterSpacing: '-0.5px',
-                cursor: 'pointer',
+                width: '120px',
+                height: 'auto',
+                maxHeight: '36px',
+                objectFit: 'contain',
+                mixBlendMode: 'multiply',
                 userSelect: 'none',
               }}
-            >
-              NOVA
-            </span>
+            />
           </div>
 
           {/* Desktop nav - CENTRADO */}

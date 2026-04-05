@@ -5,7 +5,9 @@ import {
   XCircleIcon,
   PencilSquareIcon,
   ChevronDownIcon,
-  ChevronUpIcon
+  ChevronUpIcon,
+  XMarkIcon,
+  UserIcon
 } from '@heroicons/react/24/solid';
 import { fetchSucursales, actualizarfila, createUsuario, fetchBodegas } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
@@ -13,6 +15,146 @@ import { showToast } from '../utils/toast';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 import Select from 'react-select';
+
+// Componente Modal reutilizable (como en ClientesView)
+function Modal({ isOpen, onClose, title, subtitle, icon: Icon, iconColor = 'from-[rgb(37,99,235)] to-[rgb(29,78,216)]', children, footer }) {
+  if (!isOpen) return null;
+
+  return (
+    <>
+      {/* Estilos para animaciones de destellos */}
+      <style>{`
+        @keyframes sparkle1 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(10px, -10px); }
+        }
+        @keyframes sparkle2 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(-15px, 5px); }
+        }
+        @keyframes sparkle3 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(8px, 12px); }
+        }
+        @keyframes sparkle4 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(-12px, -8px); }
+        }
+        @keyframes sparkle5 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(12px, -8px); }
+        }
+        @keyframes sparkle6 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(-10px, 10px); }
+        }
+        @keyframes sparkle7 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(15px, -15px); }
+        }
+        @keyframes sparkle8 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(-18px, 12px); }
+        }
+        .animate-sparkle1 { animation: sparkle1 3s ease-in-out infinite; }
+        .animate-sparkle2 { animation: sparkle2 4s ease-in-out infinite 0.5s; }
+        .animate-sparkle3 { animation: sparkle3 3.5s ease-in-out infinite 1s; }
+        .animate-sparkle4 { animation: sparkle4 4.5s ease-in-out infinite 1.5s; }
+        .animate-sparkle5 { animation: sparkle5 2.8s ease-in-out infinite 0.3s; }
+        .animate-sparkle6 { animation: sparkle6 3.1s ease-in-out infinite 0.7s; }
+        .animate-sparkle7 { animation: sparkle7 3.5s ease-in-out infinite 0.2s; }
+        .animate-sparkle8 { animation: sparkle8 3.2s ease-in-out infinite 1.3s; }
+      `}</style>
+
+      <div className="fixed inset-0 z-50 overflow-y-auto" style={{ paddingTop: '60px' }}>
+        <div className="flex items-start justify-center min-h-screen px-2 sm:px-4 py-4">
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            onClick={onClose}
+            style={{ paddingTop: '60px' }}
+          />
+
+          {/* Modal Content */}
+          <div
+            className="relative rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-4 overflow-hidden"
+            style={{
+              maxHeight: 'calc(100vh - 100px)',
+              backgroundColor: '#0B0D26',
+              border: '1px solid',
+              borderColor: '#1a1d3d'
+            }}
+          >
+            {/* Destellos animados en el modal */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+              {/* Pequeños destellos - 1px */}
+              <div className="absolute top-[10%] left-[5%] w-1 h-1 rounded-full animate-sparkle1" style={{ backgroundColor: '#93c5fd' }}></div>
+              <div className="absolute top-[20%] left-[15%] w-1 h-1 rounded-full animate-sparkle2" style={{ backgroundColor: '#67e8f9' }}></div>
+              <div className="absolute top-[30%] right-[10%] w-1 h-1 rounded-full animate-sparkle3" style={{ backgroundColor: '#c4b5fd' }}></div>
+              <div className="absolute top-[40%] right-[20%] w-1 h-1 rounded-full animate-sparkle4" style={{ backgroundColor: '#bfdbfe' }}></div>
+              <div className="absolute top-[60%] left-[8%] w-1 h-1 rounded-full animate-sparkle1" style={{ backgroundColor: '#a5f3fc' }}></div>
+              <div className="absolute top-[70%] right-[15%] w-1 h-1 rounded-full animate-sparkle2" style={{ backgroundColor: '#ddd6fe' }}></div>
+              <div className="absolute top-[80%] left-[12%] w-1 h-1 rounded-full animate-sparkle3" style={{ backgroundColor: '#93c5fd' }}></div>
+              <div className="absolute top-[90%] right-[8%] w-1 h-1 rounded-full animate-sparkle4" style={{ backgroundColor: '#67e8f9' }}></div>
+
+              {/* Destellos medios - 2px */}
+              <div className="absolute top-[25%] left-[30%] w-2 h-2 rounded-full animate-sparkle5" style={{ backgroundColor: '#60a5fa' }}></div>
+              <div className="absolute top-[50%] right-[25%] w-2 h-2 rounded-full animate-sparkle6" style={{ backgroundColor: '#22d3ee' }}></div>
+              <div className="absolute top-[75%] left-[35%] w-2 h-2 rounded-full animate-sparkle1" style={{ backgroundColor: '#a78bfa' }}></div>
+
+              {/* Destellos grandes - 3px */}
+              <div className="absolute top-[35%] left-[50%] w-3 h-3 rounded-full animate-sparkle7" style={{ backgroundColor: '#60a5fa' }}></div>
+              <div className="absolute top-[65%] right-[45%] w-3 h-3 rounded-full animate-sparkle8" style={{ backgroundColor: '#22d3ee' }}></div>
+            </div>
+
+            {/* Header */}
+            <div
+              className="sticky top-0 p-3 sm:p-4 md:p-6 z-10"
+              style={{
+                backgroundColor: '#0B0D26',
+                borderBottom: '1px solid',
+                borderColor: '#1a1d3d'
+              }}
+            >
+              <div className="flex items-center justify-between gap-2 sm:gap-4">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 bg-gradient-to-br ${iconColor} rounded-lg`}>
+                    <Icon className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg md:text-2xl font-bold" style={{ color: '#ffffff' }}>{title}</h2>
+                    {subtitle && <p className="text-sm" style={{ color: '#cbd5e1' }}>{subtitle}</p>}
+                  </div>
+                </div>
+                <button
+                  onClick={onClose}
+                  style={{ color: '#94a3b8' }}
+                  className="hover:opacity-70 transition-colors flex-shrink-0"
+                >
+                  <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-3 sm:p-4 md:p-6 overflow-y-auto relative z-10" style={{ maxHeight: 'calc(70vh - 60px)' }}>
+              <div style={{ color: '#f1f5f9' }}>
+                {children}
+              </div>
+            </div>
+
+            {/* Footer */}
+            {footer && (
+              <div className="p-3 sm:p-4 md:p-6 relative z-10" style={{ borderTop: '1px solid', borderColor: '#1a1d3d', backgroundColor: '#0B0D26' }}>
+                {footer}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
 
 export default function UsersView({ users: initialUsers, onCreated }) {
   const [users, setUsers] = useState(initialUsers);
@@ -25,6 +167,10 @@ export default function UsersView({ users: initialUsers, onCreated }) {
   const [bodegas, setBodegas] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
+
+  // Estados para el modal de detalles
+  const [modalDetallesOpen, setModalDetallesOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const { rol, usuario, tokenUsuario, subdominio, logout } = useAuth();
 
@@ -74,6 +220,19 @@ export default function UsersView({ users: initialUsers, onCreated }) {
         fields: users.find(u => u.id_login_usuario === userId) || {}
       }
     }));
+  };
+
+  const openModal = (userId) => {
+    const user = users.find(u => u.id_login_usuario === userId);
+    if (user) {
+      setSelectedUser(user);
+      setModalDetallesOpen(true);
+    }
+  };
+
+  const closeModalDetalles = () => {
+    setModalDetallesOpen(false);
+    setSelectedUser(null);
   };
 
   const toggleEdit = (userId) => {
@@ -292,18 +451,46 @@ export default function UsersView({ users: initialUsers, onCreated }) {
   };
 
   return (
-    <section className="space-y-6 w-full px-6 py-4">
-      {/* Cabecera con búsqueda y filtros */}
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mb-6 w-full">
-        <input
-          type="text"
-          placeholder="Buscar usuarios..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          className="w-full lg:w-80 px-4 py-2 rounded-full border border-slate-300 dark:!border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:!bg-slate-800 dark:!text-slate-100 dark:!placeholder-slate-400 transition-colors"
-        />
+    <>
+      <style>{`
+        .modal-custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .modal-custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(30, 41, 59, 0.1);
+          border-radius: 4px;
+        }
+        .modal-custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(148, 163, 184, 0.5);
+          border-radius: 4px;
+        }
+        .modal-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(148, 163, 184, 0.7);
+        }
+        .dark .modal-custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.3);
+        }
+        .dark .modal-custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(71, 85, 105, 0.5);
+        }
+        .dark .modal-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(71, 85, 105, 0.7);
+        }
+      `}</style>
+      <section className="space-y-6 w-full px-6 py-4">
+      {/* Cabecera con título, búsqueda y filtros */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 w-full">
+        <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Gestión de Usuarios</h3>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+          <input
+            type="text"
+            placeholder="Buscar usuarios..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="w-full lg:w-80 px-4 py-2 rounded-full border border-slate-300 dark:!border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:!bg-slate-800 dark:!text-slate-100 dark:!placeholder-slate-400 transition-colors"
+          />
+
           <div className="flex gap-2 whitespace-nowrap">
             {['Todos', 'Activo', 'Inactivo'].map(label => (
               <button
@@ -520,118 +707,12 @@ export default function UsersView({ users: initialUsers, onCreated }) {
 
                 <div className="mt-4 text-right">
                   <button
-                    onClick={() => toggleDetails(u.id_login_usuario)}
+                    onClick={() => openModal(u.id_login_usuario)}
                     className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center transition-all duration-300 hover:scale-105 group-hover:translate-x-1"
                   >
-                    {isExpanded ? (
-                      <>Ocultar <ChevronUpIcon className="w-4 h-4 ml-1" /></>
-                    ) : (
-                      <>Más detalles <ChevronDownIcon className="w-4 h-4 ml-1" /></>
-                    )}
+                    <>Más detalles <ChevronDownIcon className="w-4 h-4 ml-1" /></>
                   </button>
-
                 </div>
-
-                {isExpanded && (
-                  <div className="mt-4 pt-4 border-t border-slate-200 dark:!border-slate-800 space-y-2 text-sm text-slate-700 dark:!text-slate-300">
-                    <div>
-                      <span className="font-medium text-slate-500 dark:!text-slate-400">Rol:</span>{' '}
-                      {isEditing ? (
-                        <select
-                          className="border dark:!border-slate-700 rounded px-2 py-1 text-sm dark:!bg-slate-800 dark:!text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                          value={fields.rol}
-                          onChange={e => handleFieldChange(u.id_login_usuario, 'rol', e.target.value)}
-                        >
-                          <option value="" disabled>-- Selecciona un rol --</option>
-                          {availableRoles.map(role => (
-                            <option key={role.value} value={role.value}>{role.label}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        availableRoles.find(r => r.value === fields.rol)?.label || fields.rol
-                      )}
-                    </div>
-
-                    <div>
-                      <span className="font-medium text-slate-500 dark:!text-slate-400">Usuario:</span>{' '}
-                      {isEditing ? (
-                        <input
-                          className="border dark:!border-slate-700 rounded px-2 py-1 text-sm dark:!bg-slate-800 dark:!text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                          value={fields.usuario}
-                          onChange={e => handleFieldChange(u.id_login_usuario, 'usuario', e.target.value)}
-                        />
-                      ) : (
-                        fields.usuario
-                      )}
-                    </div>
-
-                    <div>
-                      <span className="font-medium text-slate-500 dark:!text-slate-400">Sucursal:</span>{' '}
-                      {isEditing ? (
-                        <select
-                          className="border dark:!border-slate-700 rounded px-2 py-1 text-sm dark:!bg-slate-800 dark:!text-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                          value={fields.id_sucursal_default}
-                          onChange={e => handleFieldChange(u.id_login_usuario, 'id_sucursal_default', e.target.value)}
-                        >
-                          <option value="">Seleccione una sucursal</option>
-                          {sucursales.map(s => (
-                            <option key={s.id} value={s.id}>{s.nombre}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        sucursales.find(s => s.id === fields.id_sucursal_default)?.nombre || '—'
-                      )}
-                    </div>
-
-                    <div>
-                      <span className="font-medium text-slate-500 dark:!text-slate-400">Fecha de creación:</span> {fields.creado_en}
-                    </div>
-
-                    {u.foto_perfil && (
-                      <div>
-                        <img
-                          src={u.foto_perfil}
-                          alt="Foto de perfil"
-                          className="w-20 h-20 rounded-full object-cover border border-slate-200 dark:!border-slate-700"
-                        />
-                      </div>
-                    )}
-
-                    <div className="flex gap-3 pt-3">
-                      {isEditing ? (
-                        <>
-                          <button
-                            onClick={() => handleSave(u.id_login_usuario)}
-                            className="bg-emerald-600 dark:bg-emerald-500 text-white text-sm px-3 py-1 rounded hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors"
-                          >
-                            Guardar
-                          </button>
-                          <button
-                            onClick={() => toggleEdit(u.id_login_usuario)}
-                            className="bg-slate-300 dark:bg-slate-700 text-slate-800 dark:!text-slate-200 text-sm px-3 py-1 rounded hover:bg-slate-400 dark:hover:bg-slate-600 transition-colors"
-                          >
-                            Cancelar
-                          </button>
-                        </>
-                      ) : (
-                        <button
-                          onClick={() => toggleEdit(u.id_login_usuario)}
-                          className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm transition-colors"
-                        >
-                          <PencilSquareIcon className="w-5 h-5 mr-1" />
-                          Editar
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleToggleActive(u)}
-                        className={`px-3 py-1 rounded text-sm font-medium text-white transition-colors
-                          ${u.is_active ? 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700' : 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700'}`}
-                      >
-                        {u.is_active ? 'Inactivar' : 'Activar'}
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             );
           })}
@@ -639,6 +720,80 @@ export default function UsersView({ users: initialUsers, onCreated }) {
       ) : (
         <UsersTable users={users} />
       )}
+
+      {/* Modal de detalles del usuario */}
+      {modalDetallesOpen && selectedUser && (
+        <Modal
+          isOpen={modalDetallesOpen}
+          onClose={closeModalDetalles}
+          title="Detalles del Usuario"
+          subtitle={selectedUser.usuario}
+          icon={UserIcon}
+          iconColor="from-blue-500 to-indigo-600"
+          footer={
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={closeModalDetalles}
+                className="px-6 py-2.5 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-lg hover:opacity-90 transition-all font-medium shadow-md border border-slate-500"
+              >
+                Cerrar
+              </button>
+            </div>
+          }
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Usuario</label>
+              <div className="text-white border border-slate-700 bg-slate-900/50 px-4 py-3 rounded-lg">
+                {selectedUser.usuario}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Rol</label>
+              <div className="text-white border border-slate-700 bg-slate-900/50 px-4 py-3 rounded-lg">
+                {availableRoles.find(r => r.value === selectedUser.rol)?.label || selectedUser.rol}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Correo</label>
+              <div className="text-white border border-slate-700 bg-slate-900/50 px-4 py-3 rounded-lg break-all">
+                {selectedUser.correo_usuario}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Sucursal</label>
+              <div className="text-white border border-slate-700 bg-slate-900/50 px-4 py-3 rounded-lg">
+                {sucursales.find(s => s.id === selectedUser.id_sucursal_default)?.nombre || '—'}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Estado</label>
+              <div className="flex items-center gap-2 px-4 py-3 border border-slate-700 bg-slate-900/50 rounded-lg">
+                <span className={`inline-flex items-center text-sm font-medium px-3 py-1 rounded-full ${
+                  selectedUser.is_active
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-red-600 text-white'
+                }`}>
+                  {selectedUser.is_active ? 'Activo' : 'Inactivo'}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Fecha de creación</label>
+              <div className="text-white border border-slate-700 bg-slate-900/50 px-4 py-3 rounded-lg">
+                {selectedUser.creado_en || 'N/A'}
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
+
     </section>
+    </>
   );
 }

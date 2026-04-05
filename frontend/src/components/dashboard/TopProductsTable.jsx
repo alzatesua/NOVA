@@ -14,7 +14,7 @@ export default function TopProductsTable({ products = [], loading = false }) {
 
   return (
     <div className="bg-white dark:!bg-slate-900 rounded-lg shadow p-6 border border-slate-200 dark:!border-slate-800 transition-colors duration-200">
-      <h3 className="text-lg font-semibold text-slate-900 dark:!text-slate-100 mb-4">
+      <h3 className="text-lg font-semibold text-slate-900 dark:!text-slate-100 mb-4 text-center">
         Top Productos Más Vendidos
       </h3>
       <div className="overflow-x-auto">

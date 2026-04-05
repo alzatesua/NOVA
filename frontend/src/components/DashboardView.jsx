@@ -96,7 +96,7 @@ export default function DashboardView() {
         await Promise.all([
           fetchKPIsGenerales(authData, { dias }),
           fetchTendenciaVentas(authData, { dias }),
-          fetchTopProductos(authData, { dias, limite: 10 }),
+          fetchTopProductos(authData, { dias, limite: 20 }),
           fetchInventarioResumen(authData),
           fetchComparativaPeriodos(authData, { dias_actual: dias, dias_anterior: dias }),
         ]);
@@ -506,7 +506,7 @@ export default function DashboardView() {
         </div>
 
         {/* ── Gráfico y Top Productos ───────────────────────── */}
-        <div className="dash-chart-grid dash-fade-3" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 4fr)', gap: '20px', marginBottom: '20px' }}>
+        <div className="dash-chart-grid dash-fade-3" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '20px', marginBottom: '20px' }}>
           {/* ── Gráfico de tendencia ───────────────────────── */}
           <div style={{ minWidth: 0, width: '100%' }}>
             <TrendChart data={getTendenciaConDatos()} loading={loading} showMockIfEmpty={false} />

@@ -31,102 +31,163 @@ function Modal({ isOpen, onClose, title, subtitle, icon: Icon, iconColor = 'from
   const isDarkMode = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark-mode');
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      style={{ zIndex: 9998 }}
-    >
-      <div
-        className="rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
-        style={{
-          backgroundColor: isDarkMode ? '#1e1e1e !important' : '#ffffff !important',
-          zIndex: 9999
-        }}
-      >
-        {/* Header */}
-        <div
-          className="p-6 border-b flex items-center justify-between flex-shrink-0"
-          style={{
-            backgroundColor: isDarkMode ? '#1e1e1e !important' : '#ffffff !important',
-            borderColor: isDarkMode ? '#333333 !important' : '#e2e8f0 !important'
-          }}
-        >
-          <div className="flex items-center space-x-3">
-            <div className={`p-2 bg-gradient-to-br ${iconColor} rounded-lg`}>
-              <Icon className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold" style={{ color: isDarkMode ? '#f5f5f5 !important' : '#0f172a' }}>{title}</h4>
-              {subtitle && <p className="text-sm" style={{ color: isDarkMode ? '#cccccc !important' : '#64748b' }}>{subtitle}</p>}
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg transition-colors"
-            style={{ backgroundColor: 'transparent !important' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#333333' : '#f1f5f9'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            <XMarkIcon className="h-5 w-5" style={{ color: isDarkMode ? '#f5f5f5' : '#94a3b8' }} />
-          </button>
-        </div>
+    <>
+      {/* Estilos para animaciones de destellos */}
+      <style>{`
+        @keyframes sparkle1 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(10px, -10px); }
+        }
+        @keyframes sparkle2 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(-15px, 5px); }
+        }
+        @keyframes sparkle3 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(8px, 12px); }
+        }
+        @keyframes sparkle4 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(-12px, -8px); }
+        }
+        @keyframes sparkle5 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(12px, -8px); }
+        }
+        @keyframes sparkle6 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(-10px, 10px); }
+        }
+        @keyframes sparkle7 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(15px, -15px); }
+        }
+        @keyframes sparkle8 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(-18px, 12px); }
+        }
+        .animate-sparkle1 { animation: sparkle1 3s ease-in-out infinite; }
+        .animate-sparkle2 { animation: sparkle2 4s ease-in-out infinite 0.5s; }
+        .animate-sparkle3 { animation: sparkle3 3.5s ease-in-out infinite 1s; }
+        .animate-sparkle4 { animation: sparkle4 4.5s ease-in-out infinite 1.5s; }
+        .animate-sparkle5 { animation: sparkle5 2.8s ease-in-out infinite 0.3s; }
+        .animate-sparkle6 { animation: sparkle6 3.1s ease-in-out infinite 0.7s; }
+        .animate-sparkle7 { animation: sparkle7 3.5s ease-in-out infinite 0.2s; }
+        .animate-sparkle8 { animation: sparkle8 3.2s ease-in-out infinite 1.3s; }
+      `}</style>
 
-        {/* Body */}
-        <div
-          className="p-6 overflow-y-auto flex-1"
-          style={{
-            backgroundColor: isDarkMode ? '#1e1e1e !important' : '#ffffff !important'
-          }}
-        >
-          <div style={{ backgroundColor: isDarkMode ? '#1e1e1e !important' : '#ffffff !important' }}>
-            {children}
-          </div>
-        </div>
-
-        {/* Footer */}
-        {footer && (
+      <div className="fixed inset-0 z-50 overflow-y-auto" style={{ paddingTop: '60px' }}>
+        <div className="flex items-start justify-center min-h-screen px-2 sm:px-4 py-4">
+          {/* Overlay */}
           <div
-            className="p-6 border-t flex-shrink-0"
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            onClick={onClose}
+            style={{ paddingTop: '60px' }}
+          />
+
+          {/* Modal Content */}
+          <div
+            className="relative rounded-2xl shadow-2xl w-full max-w-4xl mx-auto my-4 overflow-hidden"
             style={{
-              backgroundColor: isDarkMode ? '#1e1e1e !important' : '#ffffff !important',
-              borderColor: isDarkMode ? '#333333 !important' : '#e2e8f0 !important'
+              maxHeight: 'calc(100vh - 100px)',
+              backgroundColor: '#0B0D26',
+              border: '1px solid',
+              borderColor: '#1a1d3d'
             }}
           >
-            {footer}
+            {/* Destellos animados en el modal */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+              {/* Pequeños destellos - 1px */}
+              <div className="absolute top-[10%] left-[5%] w-1 h-1 rounded-full animate-sparkle1" style={{ backgroundColor: '#93c5fd' }}></div>
+              <div className="absolute top-[20%] left-[15%] w-1 h-1 rounded-full animate-sparkle2" style={{ backgroundColor: '#67e8f9' }}></div>
+              <div className="absolute top-[30%] right-[10%] w-1 h-1 rounded-full animate-sparkle3" style={{ backgroundColor: '#c4b5fd' }}></div>
+              <div className="absolute top-[40%] right-[20%] w-1 h-1 rounded-full animate-sparkle4" style={{ backgroundColor: '#bfdbfe' }}></div>
+              <div className="absolute top-[60%] left-[8%] w-1 h-1 rounded-full animate-sparkle1" style={{ backgroundColor: '#a5f3fc' }}></div>
+              <div className="absolute top-[70%] right-[15%] w-1 h-1 rounded-full animate-sparkle2" style={{ backgroundColor: '#ddd6fe' }}></div>
+              <div className="absolute top-[80%] left-[12%] w-1 h-1 rounded-full animate-sparkle3" style={{ backgroundColor: '#93c5fd' }}></div>
+              <div className="absolute top-[90%] right-[8%] w-1 h-1 rounded-full animate-sparkle4" style={{ backgroundColor: '#67e8f9' }}></div>
+
+              {/* Destellos medios - 2px */}
+              <div className="absolute top-[25%] left-[30%] w-2 h-2 rounded-full animate-sparkle5" style={{ backgroundColor: '#60a5fa' }}></div>
+              <div className="absolute top-[50%] right-[25%] w-2 h-2 rounded-full animate-sparkle6" style={{ backgroundColor: '#22d3ee' }}></div>
+              <div className="absolute top-[75%] left-[35%] w-2 h-2 rounded-full animate-sparkle1" style={{ backgroundColor: '#a78bfa' }}></div>
+
+              {/* Destellos grandes - 3px */}
+              <div className="absolute top-[35%] left-[50%] w-3 h-3 rounded-full animate-sparkle7" style={{ backgroundColor: '#60a5fa' }}></div>
+              <div className="absolute top-[65%] right-[45%] w-3 h-3 rounded-full animate-sparkle8" style={{ backgroundColor: '#22d3ee' }}></div>
+            </div>
+
+            {/* Header */}
+            <div
+              className="sticky top-0 p-3 sm:p-4 md:p-6 z-10"
+              style={{
+                backgroundColor: '#0B0D26',
+                borderBottom: '1px solid',
+                borderColor: '#1a1d3d'
+              }}
+            >
+              <div className="flex items-center justify-between gap-2 sm:gap-4">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 bg-gradient-to-br ${iconColor} rounded-lg`}>
+                    <Icon className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg md:text-2xl font-bold" style={{ color: '#ffffff' }}>{title}</h2>
+                    {subtitle && <p className="text-sm" style={{ color: '#cbd5e1' }}>{subtitle}</p>}
+                  </div>
+                </div>
+                <button
+                  onClick={onClose}
+                  style={{ color: '#94a3b8' }}
+                  className="hover:opacity-70 transition-colors flex-shrink-0"
+                >
+                  <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-3 sm:p-4 md:p-6 overflow-y-auto relative z-10" style={{ maxHeight: 'calc(70vh - 60px)' }}>
+              <div style={{ color: '#f1f5f9' }}>
+                {children}
+              </div>
+            </div>
+
+            {/* Footer */}
+            {footer && (
+              <div className="p-3 sm:p-4 md:p-6 relative z-10" style={{ borderTop: '1px solid', borderColor: '#1a1d3d', backgroundColor: '#0B0D26' }}>
+                {footer}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
 function StatCard({ title, value, icon: Icon, color, bgColor }) {
   const isDarkMode = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark-mode');
 
+  const colorClasses = {
+    blue: 'bg-blue-500 dark:bg-blue-600',
+    green: 'bg-emerald-500 dark:bg-emerald-600',
+    purple: 'bg-purple-500 dark:bg-purple-600',
+    orange: 'bg-orange-500 dark:bg-orange-600',
+    red: 'bg-red-500 dark:bg-red-600',
+  };
+
+  const bgColorClass = colorClasses[color] || colorClasses.blue;
+
   return (
-    <div
-      className="relative overflow-hidden rounded-2xl p-5 shadow-sm ring-1 ring-slate-200 dark:!ring-slate-700 bg-white dark:!bg-slate-900 transition-all hover:shadow-md"
-      style={{
-        backgroundColor: isDarkMode ? '#1e1e1e !important' : '#ffffff',
-        borderColor: isDarkMode ? '#333333' : '#e2e8f0'
-      }}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p
-            className="text-sm font-medium text-slate-600 dark:!text-slate-300"
-            style={{ color: isDarkMode ? '#e2e8f0 !important' : '#64748b' }}
-          >
-            {title}
-          </p>
-          <p
-            className="text-2xl font-bold mt-1 text-slate-900 dark:!text-white"
-            style={{ color: isDarkMode ? '#ffffff !important' : '#0f172a' }}
-          >
-            {value}
-          </p>
+    <div className="bg-white dark:!bg-slate-900 rounded-lg shadow-sm px-5 py-4 hover:shadow-md transition-all duration-200 border border-slate-200 dark:!border-slate-800">
+      <div className="flex items-center gap-4">
+        <div className={`flex-shrink-0 p-3 rounded-lg ${bgColorClass} text-white shadow-sm`}>
+          <Icon className="h-6 w-6" />
         </div>
-        <div className={`p-3 bg-gradient-to-br ${color} rounded-xl shadow-sm`}>
-          <Icon className="h-5 w-5 text-white" />
+        <div className="flex-1">
+          <p className="text-sm font-medium text-slate-600 dark:!text-slate-400">{title}</p>
+          <p className="text-2xl font-bold text-slate-900 dark:!text-slate-100">{value}</p>
         </div>
       </div>
     </div>
@@ -285,7 +346,6 @@ function AsignacionesTable({ loading, clienteCupones, onRefresh, onUsarCupon }) 
 /** Modal: Ver cupones de un cliente específico */
 function CuponesClienteModal({ cliente, onClose }) {
   const cupones = cliente?.cupones || [];
-  const isDarkMode = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark-mode');
 
   return (
     <Modal
@@ -296,7 +356,14 @@ function CuponesClienteModal({ cliente, onClose }) {
       icon={UserIcon}
       iconColor="from-[rgb(37,99,235)] to-[rgb(29,78,216)]"
       footer={
-        <button onClick={onClose} className="w-full py-3 bg-slate-100 dark:!bg-slate-800 hover:bg-slate-200 dark:hover:!bg-slate-700 text-slate-700 dark:!text-white rounded-xl font-medium transition-all">
+        <button
+          onClick={onClose}
+          style={{
+            backgroundColor: '#1a1d3d',
+            color: '#ffffff'
+          }}
+          className="w-full py-3 rounded-xl font-medium transition-all hover:opacity-80"
+        >
           Cerrar
         </button>
       }
@@ -304,18 +371,32 @@ function CuponesClienteModal({ cliente, onClose }) {
       {cupones.length > 0 ? (
         <div className="space-y-3">
           {cupones.map((cc) => (
-            <div key={cc.id} className="p-4 bg-slate-50 dark:!bg-slate-800 rounded-xl border border-slate-200 dark:!border-slate-700">
+            <div
+              key={cc.id}
+              className="p-4 rounded-xl"
+              style={{
+                backgroundColor: '#1a1d3d',
+                border: '1px solid',
+                borderColor: '#252a52'
+              }}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-lg">
                     <TicketIcon className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <p className="font-semibold dark:!text-white">{cc.cupon_detalle?.nombre || 'N/A'}</p>
-                    <p className="text-sm dark:!text-slate-300">{cc.cupon_detalle?.tipo === 'PCT' ? `${cc.cupon_detalle.valor}% descuento` : `$${cc.cupon_detalle.valor} de descuento`}</p>
+                    <p className="font-semibold" style={{ color: '#ffffff' }}>{cc.cupon_detalle?.nombre || 'N/A'}</p>
+                    <p className="text-sm" style={{ color: '#cbd5e1' }}>{cc.cupon_detalle?.tipo === 'PCT' ? `${cc.cupon_detalle.valor}% descuento` : `$${cc.cupon_detalle.valor} de descuento`}</p>
                   </div>
                 </div>
-                <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${cc.activo ? 'bg-green-100 text-green-800 dark:!bg-green-900/30 dark:!text-green-300' : 'bg-red-100 text-red-800 dark:!bg-red-900/30 dark:!text-red-300'}`}>
+                <span
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{
+                    backgroundColor: cc.activo ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)',
+                    color: cc.activo ? '#86efac' : '#fca5a5'
+                  }}
+                >
                   {cc.cantidad_disponible} disponibles
                 </span>
               </div>
@@ -331,9 +412,6 @@ function CuponesClienteModal({ cliente, onClose }) {
 
 /** Modal: Gestión de Clientes */
 function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery, onSearchChange, onVerCupones, onNuevoCliente, onEditarCliente }) {
-  // Check if dark mode is active
-  const isDarkMode = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark-mode');
-
   return (
     <Modal
       isOpen={isOpen}
@@ -343,14 +421,11 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
       icon={UserIcon}
       iconColor="from-[rgb(37,99,235)] to-[rgb(29,78,216)]"
     >
-      <div
-        className="space-y-5"
-        style={{ backgroundColor: isDarkMode ? '#1e1e1e !important' : 'transparent !important' }}
-      >
+      <div className="space-y-5">
         {/* Buscador y botón nuevo cliente */}
         <div className="flex gap-3">
           <div className="relative flex-1">
-            <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: isDarkMode ? '#cccccc' : '#94a3b8' }} />
+            <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: '#94a3b8' }} />
             <input
               type="text"
               value={searchQuery}
@@ -358,9 +433,9 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
               placeholder="Buscar por nombre, cédula o RUC..."
               style={{
                 border: '1px solid',
-                borderColor: isDarkMode ? '#444444' : '#e2e8f0',
-                backgroundColor: isDarkMode ? '#2a2a2a' : '#ffffff',
-                color: isDarkMode ? '#f5f5f5' : '#0f172a'
+                borderColor: '#1a1d3d',
+                backgroundColor: '#0f1229',
+                color: '#ffffff'
               }}
               className="w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-[rgb(37,99,235)] focus:outline-none transition-all"
             />
@@ -382,26 +457,26 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
             className="rounded-xl overflow-hidden"
             style={{
               border: '1px solid',
-              borderColor: isDarkMode ? '#444444' : '#e2e8f0',
-              backgroundColor: isDarkMode ? '#1e1e1e !important' : '#ffffff !important'
+              borderColor: '#1a1d3d',
+              backgroundColor: '#0f1229'
             }}
           >
             <table className="w-full text-sm">
-              <thead style={{ backgroundColor: isDarkMode ? '#2a2a2a !important' : '#f8fafc' }}>
+              <thead style={{ backgroundColor: '#1a1d3d' }}>
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold" style={{ color: isDarkMode ? '#f5f5f5 !important' : '#334155' }}>Cliente</th>
-                  <th className="px-4 py-3 text-left font-semibold" style={{ color: isDarkMode ? '#f5f5f5 !important' : '#334155' }}>Documento</th>
-                  <th className="px-4 py-3 text-left font-semibold" style={{ color: isDarkMode ? '#f5f5f5 !important' : '#334155' }}>Tipo</th>
-                  <th className="px-4 py-3 text-right font-semibold" style={{ color: isDarkMode ? '#f5f5f5 !important' : '#334155' }}>Acciones</th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: '#ffffff' }}>Cliente</th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: '#ffffff' }}>Documento</th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: '#ffffff' }}>Tipo</th>
+                  <th className="px-4 py-3 text-right font-semibold" style={{ color: '#ffffff' }}>Acciones</th>
                 </tr>
               </thead>
-              <tbody style={{ backgroundColor: isDarkMode ? '#1e1e1e !important' : '#ffffff' }}>
+              <tbody style={{ backgroundColor: '#0f1229' }}>
                 {clientes.map((cliente) => (
                   <tr
                     key={cliente.id}
                     className="transition-colors cursor-pointer"
-                    style={{ borderBottom: `1px solid ${isDarkMode ? '#333333' : '#f1f5f9'}` }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#2a2a2a' : '#f8fafc'}
+                    style={{ borderBottom: `1px solid #1a1d3d` }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1a1d3d'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     onClick={() => onEditarCliente(cliente)}
                   >
@@ -410,22 +485,18 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
                         <div className="w-8 h-8 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-full flex items-center justify-center flex-shrink-0">
                           <UserIcon className="h-4 w-4 text-white" />
                         </div>
-                        <p className="font-medium truncate max-w-[140px]" style={{ color: isDarkMode ? '#f5f5f5 !important' : '#0f172a' }}>
+                        <p className="font-medium truncate max-w-[140px]" style={{ color: '#ffffff' }}>
                           {cliente.tipo_persona === 'JUR' ? cliente.razon_social : `${cliente.primer_nombre || ''} ${cliente.apellidos || ''}`}
                         </p>
                       </div>
                     </td>
-                    <td className="px-4 py-3" style={{ color: isDarkMode ? '#cccccc !important' : '#475569' }}>{cliente.numero_documento}</td>
+                    <td className="px-4 py-3" style={{ color: '#94a3b8' }}>{cliente.numero_documento}</td>
                     <td className="px-4 py-3">
                       <span
                         className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold"
                         style={{
-                          backgroundColor: cliente.tipo_persona === 'JUR'
-                            ? (isDarkMode ? '#1e3a8a' : '#dbeafe')
-                            : (isDarkMode ? '#581c87' : '#f3e8ff'),
-                          color: cliente.tipo_persona === 'JUR'
-                            ? (isDarkMode ? '#93c5fd' : '#1e40af')
-                            : (isDarkMode ? '#d8b4fe' : '#7e22ce')
+                          backgroundColor: cliente.tipo_persona === 'JUR' ? '#1e3a8a' : '#581c87',
+                          color: cliente.tipo_persona === 'JUR' ? '#93c5fd' : '#d8b4fe'
                         }}
                       >
                         {cliente.tipo_persona === 'JUR' ? 'Jurídica' : 'Natural'}
@@ -440,11 +511,11 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
                           }}
                           className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
                           style={{
-                            backgroundColor: isDarkMode ? '#312e81 !important' : '#e0e7ff',
-                            color: isDarkMode ? '#a5b4fc !important' : '#4338ca'
+                            backgroundColor: '#312e81',
+                            color: '#a5b4fc'
                           }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#3730a3' : '#c7d2fe'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#312e81' : '#e0e7ff'}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3730a3'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#312e81'}
                         >
                           <PencilIcon className="h-3.5 w-3.5" />
                           <span>Editar</span>
@@ -456,11 +527,11 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
                           }}
                           className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
                           style={{
-                            backgroundColor: isDarkMode ? '#581c87 !important' : '#f3e8ff',
-                            color: isDarkMode ? '#d8b4fe !important' : '#7e22ce'
+                            backgroundColor: '#581c87',
+                            color: '#d8b4fe'
                           }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#6b21a8' : '#e9d5ff'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#581c87' : '#f3e8ff'}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6b21a8'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#581c87'}
                         >
                           <TicketIcon className="h-3.5 w-3.5" />
                           <span>Ver Cupones</span>
@@ -484,112 +555,274 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
 
 /** Modal: Asignar Cupón */
 function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, searchQuery, onSearchChange, selectedCliente, onSelectCliente, selectedCupon, onSelectCupon, cantidad, onCantidadChange, onSubmit }) {
+  if (!isOpen) return null;
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Asignar Cupón a Cliente"
-      subtitle="Selecciona un cliente y un cupón"
-      icon={GiftIcon}
-      iconColor="from-[rgb(37,99,235)] to-[rgb(29,78,216)]"
-    >
-      <form onSubmit={onSubmit} className="space-y-5">
-        {/* Buscador de cliente */}
-        <div>
-          <label className="block text-sm font-semibold dark:!text-white mb-2">Buscar Cliente</label>
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Buscar por nombre, cédula o RUC..."
-              className="w-full pl-12 pr-4 py-3 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            />
-          </div>
-        </div>
+    <>
+      {/* Estilos para animaciones de destellos */}
+      <style>{`
+        @keyframes sparkle1 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(10px, -10px); }
+        }
+        @keyframes sparkle2 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(-15px, 5px); }
+        }
+        @keyframes sparkle3 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(8px, 12px); }
+        }
+        @keyframes sparkle4 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1) translate(-12px, -8px); }
+        }
+        @keyframes sparkle5 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(12px, -8px); }
+        }
+        @keyframes sparkle6 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.2) translate(-10px, 10px); }
+        }
+        @keyframes sparkle7 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(15px, -15px); }
+        }
+        @keyframes sparkle8 {
+          0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+          50% { opacity: 1; transform: scale(1.5) translate(-18px, 12px); }
+        }
+        .animate-sparkle1 { animation: sparkle1 3s ease-in-out infinite; }
+        .animate-sparkle2 { animation: sparkle2 4s ease-in-out infinite 0.5s; }
+        .animate-sparkle3 { animation: sparkle3 3.5s ease-in-out infinite 1s; }
+        .animate-sparkle4 { animation: sparkle4 4.5s ease-in-out infinite 1.5s; }
+        .animate-sparkle5 { animation: sparkle5 2.8s ease-in-out infinite 0.3s; }
+        .animate-sparkle6 { animation: sparkle6 3.1s ease-in-out infinite 0.7s; }
+        .animate-sparkle7 { animation: sparkle7 3.5s ease-in-out infinite 0.2s; }
+        .animate-sparkle8 { animation: sparkle8 3.2s ease-in-out infinite 1.3s; }
+      `}</style>
 
-        {/* Lista de clientes */}
-        {loading ? (
-          <LoadingSpinner color="blue" text="Buscando clientes..." />
-        ) : clientes.length > 0 ? (
-          <div className="border border-slate-200 dark:!border-slate-700 rounded-xl overflow-hidden max-h-52 overflow-y-auto">
-            {clientes.map((cliente) => (
-              <div
-                key={cliente.id}
-                onClick={() => onSelectCliente(cliente.id)}
-                className={`p-4 cursor-pointer transition-all border-b border-slate-100 dark:!border-slate-800 last:border-b-0 ${selectedCliente === cliente.id ? 'bg-[rgb(37,99,235)]/10 dark:!bg-[rgb(37,99,235)]/20 border-l-4 border-l-[rgb(37,99,235)]' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30 border-l-4 border-l-transparent'}`}
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-full flex items-center justify-center flex-shrink-0">
-                    <UserIcon className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium dark:!text-white truncate">
-                      {cliente.email || cliente.nombre || 'Cliente'}
-                    </p>
-                    <p className="text-sm dark:!text-slate-300">ID: {cliente.id}</p>
-                  </div>
-                  {selectedCliente === cliente.id && <CheckIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : searchQuery ? (
-          <EmptyState icon={UserIcon} title="No se encontraron clientes" />
-        ) : null}
-
-        {/* Seleccionar cupón */}
-        <div>
-          <label className="block text-sm font-semibold dark:!text-white mb-2">Seleccionar Cupón</label>
-          <select
-            value={selectedCupon || ''}
-            onChange={(e) => onSelectCupon(Number(e.target.value))}
-            className="w-full px-4 py-3 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            required
-          >
-            <option value="">-- Selecciona un cupón --</option>
-            {cupones.map((cupon) => (
-              <option key={cupon.id} value={cupon.id}>
-                {cupon.nombre} ({cupon.tipo === 'PCT' ? `${cupon.valor}% descuento` : `$${cupon.valor} de descuento`})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Cantidad */}
-        <div>
-          <label className="block text-sm font-semibold dark:!text-white mb-2">Cantidad a Asignar</label>
-          <input
-            type="number"
-            min="1"
-            value={cantidad}
-            onChange={(e) => onCantidadChange(Number(e.target.value))}
-            className="w-full px-4 py-3 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            required
-          />
-        </div>
-
-        {/* Acciones */}
-        <div className="grid grid-cols-2 gap-4 pt-1">
-          <button
-            type="button"
+      <div className="fixed inset-0 z-50 overflow-y-auto" style={{ paddingTop: '60px' }}>
+        <div className="flex items-start justify-center min-h-screen px-2 sm:px-4 py-4">
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
             onClick={onClose}
-            className="py-3 bg-slate-100 dark:!bg-slate-800 hover:bg-slate-200 dark:hover:!bg-slate-700 dark:!text-white text-slate-700 rounded-xl font-semibold transition-all"
+            style={{ paddingTop: '60px' }}
+          />
+
+          {/* Modal Content */}
+          <div
+            className="relative rounded-2xl shadow-2xl w-full max-w-2xl mx-auto my-4 overflow-hidden"
+            style={{
+              maxHeight: 'calc(100vh - 100px)',
+              backgroundColor: '#0B0D26',
+              border: '1px solid',
+              borderColor: '#1a1d3d'
+            }}
           >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={!selectedCliente || !selectedCupon}
-            className="py-3 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] disabled:from-slate-300 disabled:to-slate-400 dark:disabled:!from-slate-700 dark:disabled:!to-slate-800 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
-          >
-            <GiftIcon className="h-5 w-5" />
-            <span>Asignar</span>
-          </button>
+            {/* Destellos animados en el modal */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+              {/* Pequeños destellos - 1px */}
+              <div className="absolute top-[10%] left-[5%] w-1 h-1 rounded-full animate-sparkle1" style={{ backgroundColor: '#93c5fd' }}></div>
+              <div className="absolute top-[20%] left-[15%] w-1 h-1 rounded-full animate-sparkle2" style={{ backgroundColor: '#67e8f9' }}></div>
+              <div className="absolute top-[30%] right-[10%] w-1 h-1 rounded-full animate-sparkle3" style={{ backgroundColor: '#c4b5fd' }}></div>
+              <div className="absolute top-[40%] right-[20%] w-1 h-1 rounded-full animate-sparkle4" style={{ backgroundColor: '#bfdbfe' }}></div>
+              <div className="absolute top-[60%] left-[8%] w-1 h-1 rounded-full animate-sparkle1" style={{ backgroundColor: '#a5f3fc' }}></div>
+              <div className="absolute top-[70%] right-[15%] w-1 h-1 rounded-full animate-sparkle2" style={{ backgroundColor: '#ddd6fe' }}></div>
+              <div className="absolute top-[80%] left-[12%] w-1 h-1 rounded-full animate-sparkle3" style={{ backgroundColor: '#93c5fd' }}></div>
+              <div className="absolute top-[90%] right-[8%] w-1 h-1 rounded-full animate-sparkle4" style={{ backgroundColor: '#67e8f9' }}></div>
+
+              {/* Destellos medios - 2px */}
+              <div className="absolute top-[25%] left-[30%] w-2 h-2 rounded-full animate-sparkle5" style={{ backgroundColor: '#60a5fa' }}></div>
+              <div className="absolute top-[50%] right-[25%] w-2 h-2 rounded-full animate-sparkle6" style={{ backgroundColor: '#22d3ee' }}></div>
+              <div className="absolute top-[75%] left-[35%] w-2 h-2 rounded-full animate-sparkle1" style={{ backgroundColor: '#a78bfa' }}></div>
+
+              {/* Destellos grandes - 3px */}
+              <div className="absolute top-[35%] left-[50%] w-3 h-3 rounded-full animate-sparkle7" style={{ backgroundColor: '#60a5fa' }}></div>
+              <div className="absolute top-[65%] right-[45%] w-3 h-3 rounded-full animate-sparkle8" style={{ backgroundColor: '#22d3ee' }}></div>
+            </div>
+
+            {/* Header */}
+            <div
+              className="sticky top-0 p-3 sm:p-4 md:p-6 z-10"
+              style={{
+                backgroundColor: '#0B0D26',
+                borderBottom: '1px solid',
+                borderColor: '#1a1d3d'
+              }}
+            >
+              <div className="flex items-center justify-between gap-2 sm:gap-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-lg">
+                    <GiftIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg md:text-xl font-bold" style={{ color: '#ffffff' }}>Asignar Cupón a Cliente</h2>
+                    <p className="text-sm" style={{ color: '#cbd5e1' }}>Selecciona un cliente y un cupón</p>
+                  </div>
+                </div>
+                <button
+                  onClick={onClose}
+                  style={{ color: '#94a3b8' }}
+                  className="hover:opacity-70 transition-colors flex-shrink-0"
+                >
+                  <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-3 sm:p-4 md:p-6 overflow-y-auto relative z-10" style={{ maxHeight: 'calc(70vh - 60px)' }}>
+              <form onSubmit={onSubmit} className="space-y-4">
+                {/* Buscador de cliente */}
+                <div>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: '#ffffff' }}>Buscar Cliente</label>
+                  <div className="relative">
+                    <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: '#94a3b8' }} />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => onSearchChange(e.target.value)}
+                      placeholder="Buscar por nombre, cédula o RUC..."
+                      style={{
+                        border: '1px solid',
+                        borderColor: '#1a1d3d',
+                        backgroundColor: '#0f1229',
+                        color: '#ffffff'
+                      }}
+                      className="w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Lista de clientes */}
+                {loading ? (
+                  <LoadingSpinner color="blue" text="Buscando clientes..." />
+                ) : clientes.length > 0 ? (
+                  <div
+                    className="rounded-xl overflow-hidden max-h-52 overflow-y-auto"
+                    style={{
+                      border: '1px solid',
+                      borderColor: '#1a1d3d',
+                      backgroundColor: '#0f1229'
+                    }}
+                  >
+                    {clientes.map((cliente) => (
+                      <div
+                        key={cliente.id}
+                        onClick={() => onSelectCliente(cliente.id)}
+                        className="p-4 cursor-pointer transition-all"
+                        style={{
+                          borderBottom: '1px solid',
+                          borderColor: '#1a1d3d',
+                          borderLeft: selectedCliente === cliente.id ? '4px solid rgb(37,99,235)' : '4px solid transparent',
+                          backgroundColor: selectedCliente === cliente.id ? 'rgba(37,99,235,0.2)' : 'transparent'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (selectedCliente !== cliente.id) {
+                            e.currentTarget.style.backgroundColor = '#1a1d3d';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (selectedCliente === cliente.id) {
+                            e.currentTarget.style.backgroundColor = 'rgba(37,99,235,0.2)';
+                          } else {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                          }
+                        }}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-9 h-9 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-full flex items-center justify-center flex-shrink-0">
+                            <UserIcon className="h-4 w-4 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate" style={{ color: '#ffffff' }}>
+                              {cliente.email || cliente.nombre || 'Cliente'}
+                            </p>
+                            <p className="text-sm" style={{ color: '#94a3b8' }}>ID: {cliente.id}</p>
+                          </div>
+                          {selectedCliente === cliente.id && <CheckIcon className="h-5 w-5 text-blue-400 flex-shrink-0" />}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : searchQuery ? (
+                  <EmptyState icon={UserIcon} title="No se encontraron clientes" />
+                ) : null}
+
+                {/* Seleccionar cupón */}
+                <div>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: '#ffffff' }}>Seleccionar Cupón</label>
+                  <select
+                    value={selectedCupon || ''}
+                    onChange={(e) => onSelectCupon(Number(e.target.value))}
+                    style={{
+                      border: '1px solid',
+                      borderColor: '#1a1d3d',
+                      backgroundColor: '#0f1229',
+                      color: '#ffffff'
+                    }}
+                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                    required
+                  >
+                    <option value="">-- Selecciona un cupón --</option>
+                    {cupones.map((cupon) => (
+                      <option key={cupon.id} value={cupon.id}>
+                        {cupon.nombre} ({cupon.tipo === 'PCT' ? `${cupon.valor}% descuento` : `$${cupon.valor} de descuento`})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Cantidad */}
+                <div>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: '#ffffff' }}>Cantidad a Asignar</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={cantidad}
+                    onChange={(e) => onCantidadChange(Number(e.target.value))}
+                    style={{
+                      border: '1px solid',
+                      borderColor: '#1a1d3d',
+                      backgroundColor: '#0f1229',
+                      color: '#ffffff'
+                    }}
+                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                    required
+                  />
+                </div>
+
+                {/* Acciones */}
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    style={{
+                      backgroundColor: '#1a1d3d',
+                      color: '#ffffff'
+                    }}
+                    className="py-3 rounded-xl font-semibold transition-all hover:opacity-80"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!selectedCliente || !selectedCupon}
+                    className="py-3 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
+                  >
+                    <GiftIcon className="h-5 w-5" />
+                    <span>Asignar</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
-      </form>
-    </Modal>
+      </div>
+    </>
   );
 }
 
@@ -679,30 +912,31 @@ function CiudadSelector({ value, onChange, token, label = "Ciudad" }) {
 
 /** Modal: Crear/Editar Cliente */
 function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange, esEdicion, token, errores = {} }) {
-  // Función auxiliar para mostrar error de campo
-  const mostrarError = (campo) => errores[campo];
-
   // Función auxiliar para clases de input con error
   const clasesInput = (campo) => {
     const tieneError = errores[campo];
-    return `w-full px-4 py-3 ${tieneError ? 'pr-10' : ''} border ${tieneError ? 'border-red-500 bg-red-50 dark:!bg-red-900/10' : 'border-slate-200 dark:!border-slate-700'} rounded-xl ${tieneError ? 'text-red-900 dark:text-red-200' : 'bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100'} focus:ring-2 ${tieneError ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-indigo-500 focus:border-transparent'} transition-all`;
+    return `w-full px-4 py-3 ${tieneError ? 'pr-10' : ''} border rounded-xl focus:ring-2 focus:outline-none transition-all ${
+      tieneError
+        ? 'border-red-500 text-red-900 focus:ring-red-500 focus:border-red-500'
+        : 'focus:ring-indigo-500'
+    }`;
   };
 
-  // Wrapper para input con mensaje de error
-  const CampoConError = ({ campo, children }) => (
-    <div className="relative">
-      {children}
-      {errores[campo] && (
-        <ExclamationTriangleIcon className="absolute right-3 top-10 h-5 w-5 text-red-500 pointer-events-none" />
-      )}
-      {errores[campo] && (
-        <p className="mt-1 text-xs text-red-600 dark:!text-red-400 flex items-center gap-1">
-          <ExclamationTriangleIcon className="h-3 w-3" />
-          {errores[campo]}
-        </p>
-      )}
-    </div>
-  );
+  // Estilo base para inputs
+  const getInputStyle = (campo) => {
+    const tieneError = errores[campo];
+    return {
+      border: '1px solid',
+      borderColor: tieneError ? '#ef4444' : '#1a1d3d',
+      backgroundColor: tieneError ? 'rgba(239,68,68,0.1)' : '#0f1229',
+      color: tieneError ? '#fca5a5' : '#ffffff'
+    };
+  };
+
+  const labelStyle = { color: '#ffffff' };
+
+  // Función auxiliar para mostrar error de campo
+  const mostrarError = (campo) => errores[campo];
 
   return (
     <Modal
@@ -721,11 +955,12 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
         `}</style>
         {/* Tipo de persona */}
         <div>
-          <label className="block text-sm font-semibold dark:!text-white mb-2">Tipo de Persona *</label>
+          <label className="block text-sm font-semibold mb-2" style={labelStyle}>Tipo de Persona *</label>
           <select
             required
             value={cliente.tipo_persona}
             onChange={(e) => onChange({ ...cliente, tipo_persona: e.target.value })}
+            style={getInputStyle('tipo_persona')}
             className={clasesInput('tipo_persona')}
           >
             <option value="NAT">Natural</option>
@@ -738,36 +973,39 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
           // Persona Natural
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold dark:!text-white mb-2">Primer Nombre *</label>
+              <label className="block text-sm font-semibold mb-2" style={labelStyle}>Primer Nombre *</label>
               <input
                 type="text"
                 required={cliente.tipo_persona === 'NAT'}
                 value={cliente.primer_nombre}
                 onChange={(e) => onChange({ ...cliente, primer_nombre: e.target.value })}
                 placeholder="Juan"
+                style={getInputStyle('primer_nombre')}
                 className={clasesInput('primer_nombre')}
               />
               {mostrarError('primer_nombre') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('primer_nombre')}</p>}
             </div>
             <div>
-              <label className="block text-sm font-semibold dark:!text-white mb-2">Segundo Nombre</label>
+              <label className="block text-sm font-semibold mb-2" style={labelStyle}>Segundo Nombre</label>
               <input
                 type="text"
                 value={cliente.segundo_nombre}
                 onChange={(e) => onChange({ ...cliente, segundo_nombre: e.target.value })}
                 placeholder="Carlos"
+                style={getInputStyle('segundo_nombre')}
                 className={clasesInput('segundo_nombre')}
               />
               {mostrarError('segundo_nombre') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('segundo_nombre')}</p>}
             </div>
             <div className="col-span-2">
-              <label className="block text-sm font-semibold dark:!text-white mb-2">Apellidos *</label>
+              <label className="block text-sm font-semibold mb-2" style={labelStyle}>Apellidos *</label>
               <input
                 type="text"
                 required={cliente.tipo_persona === 'NAT'}
                 value={cliente.apellidos}
                 onChange={(e) => onChange({ ...cliente, apellidos: e.target.value })}
                 placeholder="Pérez García"
+                style={getInputStyle('apellidos')}
                 className={clasesInput('apellidos')}
               />
               {mostrarError('apellidos') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('apellidos')}</p>}
@@ -776,13 +1014,14 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
         ) : (
           // Persona Jurídica
           <div>
-            <label className="block text-sm font-semibold dark:!text-white mb-2">Razón Social *</label>
+            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Razón Social *</label>
             <input
               type="text"
               required={cliente.tipo_persona === 'JUR'}
               value={cliente.razon_social}
               onChange={(e) => onChange({ ...cliente, razon_social: e.target.value })}
               placeholder="Mi Empresa S.A."
+              style={getInputStyle('razon_social')}
               className={clasesInput('razon_social')}
             />
             {mostrarError('razon_social') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('razon_social')}</p>}
@@ -792,11 +1031,12 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
         {/* Tipo y número de documento */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold dark:!text-white mb-2">Tipo Documento *</label>
+            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Tipo Documento *</label>
             <select
               required
               value={cliente.tipo_documento}
               onChange={(e) => onChange({ ...cliente, tipo_documento: e.target.value })}
+              style={getInputStyle('tipo_documento')}
               className={clasesInput('tipo_documento')}
             >
               <option value="CC">Cédula de Ciudadanía</option>
@@ -808,13 +1048,14 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
             {mostrarError('tipo_documento') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('tipo_documento')}</p>}
           </div>
           <div className="relative">
-            <label className="block text-sm font-semibold dark:!text-white mb-2">Número Documento *</label>
+            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Número Documento *</label>
             <input
               type="text"
               required
               value={cliente.numero_documento}
               onChange={(e) => onChange({ ...cliente, numero_documento: e.target.value })}
               placeholder="1234567890"
+              style={getInputStyle('numero_documento')}
               className={clasesInput('numero_documento')}
             />
             {mostrarError('numero_documento') && (
@@ -827,13 +1068,14 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
         {/* Información de contacto */}
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2 relative">
-            <label className="block text-sm font-semibold dark:!text-white mb-2">Correo Electrónico *</label>
+            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Correo Electrónico *</label>
             <input
               type="email"
               required
               value={cliente.correo}
               onChange={(e) => onChange({ ...cliente, correo: e.target.value })}
               placeholder="cliente@ejemplo.com"
+              style={getInputStyle('correo')}
               className={clasesInput('correo')}
             />
             {mostrarError('correo') && (
@@ -842,13 +1084,14 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
             {mostrarError('correo') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{mostrarError('correo')}</p>}
           </div>
           <div className="relative">
-            <label className="block text-sm font-semibold dark:!text-white mb-2">Teléfono *</label>
+            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Teléfono *</label>
             <input
               type="tel"
               required
               value={cliente.telefono}
               onChange={(e) => onChange({ ...cliente, telefono: e.target.value })}
               placeholder="0991234567"
+              style={getInputStyle('telefono')}
               className={clasesInput('telefono')}
             />
             {mostrarError('telefono') && (
@@ -869,12 +1112,13 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
 
         {/* Dirección */}
         <div>
-          <label className="block text-sm font-semibold dark:!text-white mb-2">Dirección</label>
+          <label className="block text-sm font-semibold mb-2" style={labelStyle}>Dirección</label>
           <input
             type="text"
             value={cliente.direccion}
             onChange={(e) => onChange({ ...cliente, direccion: e.target.value })}
             placeholder="Calle 123 # 45-67"
+            style={getInputStyle('direccion')}
             className={clasesInput('direccion')}
           />
           {mostrarError('direccion') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('direccion')}</p>}
@@ -885,7 +1129,11 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
           <button
             type="button"
             onClick={onClose}
-            className="py-3 bg-slate-100 dark:!bg-slate-800 hover:bg-slate-200 dark:hover:!bg-slate-700 dark:!text-white text-slate-700 rounded-xl font-semibold transition-all"
+            style={{
+              backgroundColor: '#1a1d3d',
+              color: '#ffffff'
+            }}
+            className="py-3 rounded-xl font-semibold transition-all hover:opacity-80"
           >
             Cancelar
           </button>
@@ -913,6 +1161,17 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
 
 /** Modal: Crear Cupón */
 function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
+  const inputStyle = {
+    border: '1px solid',
+    borderColor: '#1a1d3d',
+    backgroundColor: '#0f1229',
+    color: '#ffffff'
+  };
+
+  const labelStyle = {
+    color: '#ffffff'
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -925,23 +1184,25 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
       <form onSubmit={onSubmit} className="space-y-5">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold dark:!text-white mb-2">Código *</label>
+            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Código *</label>
             <input
               type="text"
               required
               value={cupon.codigo}
               onChange={(e) => onChange({ ...cupon, codigo: e.target.value.toUpperCase() })}
               placeholder="Ej: VERANO2024"
-              className="w-full px-4 py-3 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+              style={inputStyle}
+              className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold dark:!text-white mb-2">Tipo *</label>
+            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Tipo *</label>
             <select
               required
               value={cupon.tipo}
               onChange={(e) => onChange({ ...cupon, tipo: e.target.value })}
-              className="w-full px-4 py-3 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+              style={inputStyle}
+              className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
             >
               <option value="PORCENTAJE">Porcentaje</option>
               <option value="MONTO_FIJO">Monto Fijo</option>
@@ -950,20 +1211,21 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold dark:!text-white mb-2">Descripción</label>
+          <label className="block text-sm font-semibold mb-2" style={labelStyle}>Descripción</label>
           <input
             type="text"
             value={cupon.descripcion}
             onChange={(e) => onChange({ ...cupon, descripcion: e.target.value })}
             placeholder="Ej: Descuento de temporada"
-            className="w-full px-4 py-3 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+            style={inputStyle}
+            className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           {cupon.tipo === 'PORCENTAJE' ? (
             <div>
-              <label className="block text-sm font-semibold dark:!text-white mb-2">Descuento (%) *</label>
+              <label className="block text-sm font-semibold mb-2" style={labelStyle}>Descuento (%) *</label>
               <div className="relative">
                 <input
                   type="number"
@@ -974,16 +1236,17 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
                   value={cupon.porcentaje_descuento}
                   onChange={(e) => onChange({ ...cupon, porcentaje_descuento: e.target.value })}
                   placeholder="Ej: 10"
-                  className="w-full px-4 py-3 pr-10 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  style={inputStyle}
+                  className="w-full px-4 py-3 pr-10 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 font-medium" style={{ color: '#94a3b8' }}>%</span>
               </div>
             </div>
           ) : (
             <div>
-              <label className="block text-sm font-semibold dark:!text-white mb-2">Monto Fijo ($) *</label>
+              <label className="block text-sm font-semibold mb-2" style={labelStyle}>Monto Fijo ($) *</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-medium" style={{ color: '#94a3b8' }}>$</span>
                 <input
                   type="number"
                   required
@@ -992,36 +1255,39 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
                   value={cupon.monto_fijo}
                   onChange={(e) => onChange({ ...cupon, monto_fijo: e.target.value })}
                   placeholder="0.00"
-                  className="w-full pl-10 pr-4 py-3 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  style={inputStyle}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-semibold dark:!text-white mb-2">Vencimiento</label>
+            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Vencimiento</label>
             <input
               type="date"
               value={cupon.fecha_vencimiento}
               onChange={(e) => onChange({ ...cupon, fecha_vencimiento: e.target.value })}
-              className="w-full px-4 py-3 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+              style={inputStyle}
+              className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold dark:!text-white mb-2">Cantidad Máxima de Usos (por cliente)</label>
+          <label className="block text-sm font-semibold mb-2" style={labelStyle}>Cantidad Máxima de Usos (por cliente)</label>
           <input
             type="number"
             min="1"
             value={cupon.cantidad_maxima}
             onChange={(e) => onChange({ ...cupon, cantidad_maxima: e.target.value })}
             placeholder="Sin límite si está vacío"
-            className="w-full px-4 py-3 border border-slate-200 dark:!border-slate-700 rounded-xl bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+            style={inputStyle}
+            className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
           />
         </div>
 
-        <div className="flex items-center space-x-3 p-4 bg-slate-50 dark:!bg-slate-800/50 rounded-xl">
+        <div className="flex items-center space-x-3 p-4 rounded-xl" style={{ backgroundColor: '#1a1d3d' }}>
           <input
             type="checkbox"
             id="activo"
@@ -1029,7 +1295,7 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
             onChange={(e) => onChange({ ...cupon, activo: e.target.checked })}
             className="w-5 h-5 text-green-600 border-slate-300 rounded focus:ring-2 focus:ring-green-500"
           />
-          <label htmlFor="activo" className="text-sm font-medium dark:!text-white cursor-pointer">
+          <label htmlFor="activo" className="text-sm font-medium cursor-pointer" style={{ color: '#ffffff' }}>
             Cupón activo (disponible para asignar)
           </label>
         </div>
@@ -1038,7 +1304,11 @@ function CrearCuponModal({ isOpen, onClose, onSubmit, cupon, onChange }) {
           <button
             type="button"
             onClick={onClose}
-            className="py-3.5 bg-slate-100 dark:!bg-slate-800 hover:bg-slate-200 dark:hover:!bg-slate-700 text-slate-700 dark:!text-slate-200 rounded-xl font-semibold transition-all"
+            style={{
+              backgroundColor: '#1a1d3d',
+              color: '#ffffff'
+            }}
+            className="py-3.5 rounded-xl font-semibold transition-all hover:opacity-80"
           >
             Cancelar
           </button>
@@ -1624,9 +1894,9 @@ export default function ClientesView() {
   // ── Render ───────────────────────────────────
 
   const stats = [
-    { title: 'Total Cupones', value: cupones.length, icon: TicketIcon, color: 'from-[rgb(37,99,235)] to-[rgb(29,78,216)]', bgColor: 'bg-[rgb(37,99,235)]/10 dark:!bg-[rgb(37,99,235)]/20' },
-    { title: 'Asignaciones Activas', value: clienteCupones.filter(cc => cc.activo).length, icon: GiftIcon, color: 'from-[rgb(37,99,235)] to-[rgb(29,78,216)]', bgColor: 'bg-[rgb(37,99,235)]/10 dark:!bg-[rgb(37,99,235)]/20' },
-    { title: 'Total Asignaciones', value: clienteCupones.length, icon: UserIcon, color: 'from-[rgb(37,99,235)] to-[rgb(29,78,216)]', bgColor: 'bg-[rgb(37,99,235)]/10 dark:!bg-[rgb(37,99,235)]/20' }
+    { title: 'Total Cupones', value: cupones.length, icon: TicketIcon, color: 'blue' },
+    { title: 'Asignaciones Activas', value: clienteCupones.filter(cc => cc.activo).length, icon: GiftIcon, color: 'green' },
+    { title: 'Total Asignaciones', value: clienteCupones.length, icon: UserIcon, color: 'purple' }
   ];
 
   return (
@@ -1644,7 +1914,7 @@ export default function ClientesView() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         {stats.map((s, i) => <StatCard key={i} {...s} />)}
       </div>
 

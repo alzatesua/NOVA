@@ -82,16 +82,19 @@ export default function NovaFooter() {
         </div>
 
         <div className="container mx-auto px-4 py-4 relative z-10">
-          <div className="flex items-center justify-center gap-6">
+          <div className="flex items-start justify-center gap-6">
             {/* Logo DAGI - Elemento independiente al costado */}
             <img
-              src="/logo-dagi.png"
+              src="/logo-dagi-new.png"
               alt="DAGI Logo"
-              className="h-20 w-auto object-contain"
+              className="h-12 w-auto object-contain"
+              style={{
+                mixBlendMode: 'multiply'
+              }}
             />
 
             {/* Textos alineados verticalmente */}
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center gap-0">
               {/* Texto de branding */}
               <p className="text-sm text-slate-600 dark:!text-slate-400 text-center">
                 Nova - Aplicación desarrollada por{' '}
