@@ -153,89 +153,84 @@ function Login() {
           {/* Cards — sin efecto 3D */}
           <div className="relative mb-8 w-full flex justify-center">
 
-            <div className="flex flex-col gap-2 max-w-xs w-full">
+            <div className="relative max-w-lg w-full mx-auto" style={{ minHeight: '420px' }}>
 
-              {/* Fila 1: Inventario + Ventas */}
-              <div className="grid grid-cols-2 gap-2">
-
-                {/* Card Inventario */}
-                <div className="bg-gradient-to-br from-blue-600/30 to-blue-800/30 backdrop-blur-xl rounded-lg border border-blue-500/30 p-2 hover:scale-105 transition-all duration-300 shadow-md shadow-blue-500/20">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-1">
-                      <div className="p-1 bg-blue-500/20 rounded-md shrink-0">
-                        <Package className="w-3 h-3 text-blue-400" />
+              {/* Card Inventario - Top Left */}
+              <div className="absolute top-0 left-0 w-[52%] bg-gradient-to-br from-blue-600/30 to-blue-800/30 backdrop-blur-xl rounded-xl border-2 border-blue-500/50 p-5 hover:scale-105 transition-all duration-300 shadow-xl shadow-blue-500/40 animate-card-float" style={{ minHeight: '160px' }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 bg-blue-500/20 rounded-md shrink-0">
+                        <Package className="w-4 h-4 text-blue-400" />
                       </div>
                       <div>
-                        <p className="text-[9px] text-blue-300 leading-none">Inventario</p>
-                        <p className="text-xs font-bold text-white leading-tight">1,284</p>
+                        <p className="text-[11px] text-blue-300 leading-none">Inventario</p>
+                        <p className="text-base font-bold text-white leading-tight">1,284</p>
                       </div>
                     </div>
-                    <div className="w-5 h-5 bg-blue-500/30 rounded-md flex items-center justify-center border border-blue-400/40 shrink-0 animate-pulse">
-                      <ShoppingCart className="w-2.5 h-2.5 text-blue-300" />
+                    <div className="w-7 h-7 bg-blue-500/30 rounded-md flex items-center justify-center border border-blue-400/40 shrink-0 animate-pulse">
+                      <ShoppingCart className="w-3.5 h-3.5 text-blue-300" />
                     </div>
                   </div>
-                  <div className="flex gap-0.5 items-end h-5">
+                  <div className="flex gap-0.5 items-end h-7">
                     {[40, 65, 45, 80, 55, 70, 60].map((h, i) => (
                       <div key={i} className="flex-1 bg-blue-500/40 rounded-t" style={{ height: `${h}%` }}></div>
                     ))}
                   </div>
                 </div>
 
-                {/* Card Ventas */}
-                <div className="bg-gradient-to-br from-emerald-600/30 to-emerald-800/30 backdrop-blur-xl rounded-lg border border-emerald-500/30 p-2 hover:scale-105 transition-all duration-300 shadow-md shadow-emerald-500/20">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-1">
-                      <div className="p-1 bg-emerald-500/20 rounded-md shrink-0">
-                        <TrendingUp className="w-3 h-3 text-emerald-400" />
+              {/* Card Ventas - Top Right */}
+              <div className="absolute top-16 right-0 w-[52%] bg-gradient-to-br from-emerald-600/30 to-emerald-800/30 backdrop-blur-xl rounded-xl border-2 border-emerald-500/50 p-5 hover:scale-105 transition-all duration-300 shadow-xl shadow-emerald-500/40 animate-card-float-delay" style={{ minHeight: '160px' }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 bg-emerald-500/20 rounded-md shrink-0">
+                        <TrendingUp className="w-4 h-4 text-emerald-400" />
                       </div>
                       <div>
-                        <p className="text-[9px] text-emerald-300 leading-none">Ventas</p>
-                        <p className="text-xs font-bold text-white leading-tight">$12,450</p>
+                        <p className="text-[11px] text-emerald-300 leading-none">Ventas</p>
+                        <p className="text-base font-bold text-white leading-tight">$12,450</p>
                       </div>
                     </div>
-                    <div className="w-5 h-5 bg-emerald-500/30 rounded-md flex items-center justify-center border border-emerald-400/40 shrink-0 animate-pulse">
-                      <BarChart3 className="w-2.5 h-2.5 text-emerald-300" />
+                    <div className="w-7 h-7 bg-emerald-500/30 rounded-md flex items-center justify-center border border-emerald-400/40 shrink-0 animate-pulse">
+                      <BarChart3 className="w-3.5 h-3.5 text-emerald-300" />
                     </div>
                   </div>
-                  <svg className="w-full h-5" viewBox="0 0 100 40">
+                  <svg className="w-full h-7" viewBox="0 0 100 40">
                     <path d="M0,35 Q10,30 20,32 T40,25 T60,28 T80,15 T100,20" fill="none" stroke="#6ee7b7" strokeWidth="2" />
                     <path d="M0,35 Q10,30 20,32 T40,25 T60,28 T80,15 T100,20 V40 H0 Z" fill="rgba(16,185,129,0.15)" />
                   </svg>
                 </div>
 
-              </div>
-
-              {/* Card Facturas - ancho completo */}
-              <div className="bg-gradient-to-br from-purple-600/30 to-purple-800/30 backdrop-blur-xl rounded-lg border border-purple-500/30 p-2 hover:scale-[1.02] transition-all duration-300 shadow-md shadow-purple-500/20">
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-1">
-                    <div className="p-1 bg-purple-500/20 rounded-md shrink-0">
-                      <FileText className="w-3 h-3 text-purple-400" />
+              {/* Card Facturas - Bottom Right */}
+              <div className="absolute bottom-0 right-4 w-[55%] bg-gradient-to-br from-purple-600/30 to-purple-800/30 backdrop-blur-xl rounded-xl border-2 border-purple-500/50 p-5 hover:scale-[1.02] transition-all duration-300 shadow-xl shadow-purple-500/40 animate-card-float-delay-2" style={{ minHeight: '160px' }}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 bg-purple-500/20 rounded-md shrink-0">
+                      <FileText className="w-4 h-4 text-purple-400" />
                     </div>
                     <div>
-                      <p className="text-[9px] text-purple-300 leading-none">Facturas</p>
-                      <p className="text-xs font-bold text-white leading-tight">48 Pendientes</p>
+                      <p className="text-[11px] text-purple-300 leading-none">Facturas</p>
+                      <p className="text-base font-bold text-white leading-tight">48 Pendientes</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 ml-auto mr-2">
                     <div className="text-center">
-                      <p className="text-xs font-bold text-white">124</p>
-                      <p className="text-[9px] text-slate-500">Emitidas</p>
+                      <p className="text-base font-bold text-white">124</p>
+                      <p className="text-[11px] text-slate-500">Emitidas</p>
                     </div>
-                    <div className="w-px h-4 bg-slate-700"></div>
+                    <div className="w-px h-6 bg-slate-700"></div>
                     <div className="text-center">
-                      <p className="text-xs font-bold text-white">48</p>
-                      <p className="text-[9px] text-slate-500">Pendientes</p>
+                      <p className="text-base font-bold text-white">48</p>
+                      <p className="text-[11px] text-slate-500">Pendientes</p>
                     </div>
                   </div>
-                  <div className="w-5 h-5 bg-purple-500/30 rounded-md flex items-center justify-center border border-purple-400/40 shrink-0 animate-pulse">
-                    <Zap className="w-2.5 h-2.5 text-purple-300" />
+                  <div className="w-7 h-7 bg-purple-500/30 rounded-md flex items-center justify-center border border-purple-400/40 shrink-0 animate-pulse">
+                    <Zap className="w-3.5 h-3.5 text-purple-300" />
                   </div>
                 </div>
-                <div className="h-1 bg-purple-500/20 rounded-full overflow-hidden mb-1">
+                <div className="h-2 bg-purple-500/20 rounded-full overflow-hidden mb-2">
                   <div className="h-full bg-gradient-to-r from-purple-500 to-purple-300 rounded-full animate-progress" style={{ width: '75%' }}></div>
                 </div>
-                <p className="text-[9px] text-purple-300">Procesando... 75%</p>
+                <p className="text-[11px] text-purple-300">Procesando... 75%</p>
               </div>
 
             </div>

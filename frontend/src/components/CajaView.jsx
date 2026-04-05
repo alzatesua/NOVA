@@ -312,7 +312,6 @@ export default function CajaView() {
   const s = {
     page:    {
       fontFamily: "'Inter', -apple-system, sans-serif",
-      background: colors.bg,
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
@@ -322,34 +321,27 @@ export default function CajaView() {
       boxSizing: 'border-box'
     },
 
-    // Header - responsive padding - IGUAL QUE PROVEEDORESVIEW
+    // Header - responsive padding
     header:  {
-      background: colors.surface,
-      borderBottom: `1px solid ${colors.border}`,
       padding: 'clamp(12px, 2vw, 14px) clamp(16px, 3vw, 28px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: 12,
       flexWrap: 'wrap',
-      boxShadow: isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,0.05)',
       position: 'relative',
     },
     iconBox: {
       width: 38,
       height: 38,
       borderRadius: 10,
-      background: isDark ? '#1e3a5f' : colors.blueLight,
-      border: `1px solid ${isDark ? '#1e40af' : colors.blueBorder}`,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: colors.blue,
       flexShrink: 0,
-      boxShadow: isDark ? '0 0 0 1px rgba(59, 130, 246, 0.2)' : 'none'
     },
-    title:   { fontSize: 'clamp(16px, 2vw, 17px)', fontWeight: 700, color: colors.text, margin: 0 },
-    sub:     { fontSize: 'clamp(11px, 1.5vw, 12px)', color: colors.textSub, margin: '2px 0 0' },
+    title:   { fontSize: 'clamp(16px, 2vw, 17px)', fontWeight: 700, margin: 0 },
+    sub:     { fontSize: 'clamp(11px, 1.5vw, 12px)', margin: '2px 0 0' },
 
     // Controls - responsive gap and flex
     controls:{
@@ -361,35 +353,28 @@ export default function CajaView() {
       justifyContent: 'flex-end'
     },
 
-    // Pill (date / select inputs) - responsive - IGUAL QUE PROVEEDORESVIEW
+    // Pill (date / select inputs) - responsive
     pill:    {
       display: 'flex',
       alignItems: 'center',
       gap: 6,
       padding: 'clamp(6px, 1vw, 7px) clamp(10px, 2vw, 12px)',
       borderRadius: 8,
-      border: `1px solid ${colors.border}`,
-      background: isDark ? '#1e293b' : colors.surface,
       fontSize: 'clamp(12px, 1.5vw, 13px)',
       fontWeight: 600,
-      color: colors.text,
       transition: 'border-color .15s, box-shadow .15s',
       whiteSpace: 'nowrap',
       cursor: 'default',
-      boxShadow: isDark ? '0 1px 2px rgba(0,0,0,0.2)' : '0 1px 2px rgba(0,0,0,0.04)'
     },
 
-    // Tab bar - responsive - IGUAL QUE PROVEEDORESVIEW
+    // Tab bar - responsive
     tabBar:  {
       display: 'flex',
       gap: 2,
-      background: colors.bg,
       borderRadius: 8,
       padding: 3,
-      border: `1px solid ${colors.border}`,
       flexWrap: 'wrap',
       justifyContent: 'center',
-      boxShadow: isDark ? 'inset 0 1px 2px rgba(0,0,0,0.2)' : 'none'
     },
     tab:     (on) => ({
       display: 'flex',
@@ -402,8 +387,6 @@ export default function CajaView() {
       fontSize: 'clamp(11px, 1.5vw, 13px)',
       fontWeight: 600,
       transition: 'all .15s',
-      background: on ? colors.blue : 'transparent',
-      color: on ? '#fff' : colors.textSub,
       boxShadow: on ? '0 1px 3px rgba(37,99,235,.2)' : 'none',
       fontFamily: 'inherit',
       flex: '1 1 auto',
@@ -425,7 +408,6 @@ export default function CajaView() {
 
     // Cards - IGUALES QUE PROVEEDORESVIEW: ring-1 ring-slate-200 dark:!ring-slate-700
     panel:   {
-      background: colors.surface,
       borderRadius: 12,
       border: `1px solid ${colors.border}`,
       overflow: 'hidden',
@@ -447,7 +429,6 @@ export default function CajaView() {
     },
     panelHead: {
       padding: 'clamp(10px, 2vw, 13px) clamp(14px, 3vw, 18px)',
-      borderBottom: `1px solid ${colors.border}`,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -457,7 +438,6 @@ export default function CajaView() {
     panelTitle:{
       fontSize: 'clamp(13px, 1.5vw, 14px)',
       fontWeight: 600,
-      color: colors.text,
       margin: 0
     },
 
@@ -478,7 +458,6 @@ export default function CajaView() {
     // Filter bar - responsive
     filterBar: {
       padding: 'clamp(10px, 2vw, 12px) clamp(14px, 3vw, 18px)',
-      borderBottom: `1px solid ${colors.border}`,
       display: 'flex',
       alignItems: 'center',
       gap: 'clamp(6px, 1vw, 10px)',
@@ -489,7 +468,6 @@ export default function CajaView() {
       fontWeight: 600,
       textTransform: 'uppercase',
       letterSpacing: '0.06em',
-      color: colors.textMuted,
       display: 'flex',
       alignItems: 'center',
       gap: 5
@@ -517,8 +495,6 @@ export default function CajaView() {
       gap: 5,
       padding: 'clamp(5px, 1vw, 6px) clamp(10px, 2vw, 12px)',
       background: 'transparent',
-      color: colors.textMid,
-      border: `1px solid ${colors.border}`,
       borderRadius: 7,
       fontSize: 'clamp(11px, 1.3vw, 12px)',
       fontWeight: 600,
@@ -534,12 +510,12 @@ export default function CajaView() {
       <div style={s.page} className="dark:!bg-slate-950">
 
         {/* ── HEADER ── */}
-        <header style={s.header} className="caja-header dark:!bg-slate-900 dark:!border-slate-700">
+        <header style={s.header} className="caja-header bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 auto' }}>
-            <div style={s.iconBox}><IcoCash /></div>
+            <div style={s.iconBox} className="bg-blue-50 dark:!bg-blue-900/30 border border-blue-200 dark:!border-blue-700 text-blue-600 dark:!text-blue-400"><IcoCash /></div>
             <div>
-              <h1 style={s.title} className="dark:!text-white">Control de Caja</h1>
-              <p style={s.sub} className="dark:!text-slate-400">
+              <h1 style={s.title} className="text-gray-900 dark:!text-white">Control de Caja</h1>
+              <p style={s.sub} className="text-gray-600 dark:!text-slate-400">
                 {isAdmin ? 'Gestiona todos los movimientos y cuadres de caja' : 'Vista limitada a tu sucursal asignada'}
               </p>
             </div>
@@ -547,21 +523,20 @@ export default function CajaView() {
 
           <div style={s.controls} className="caja-controls">
             {/* Fecha */}
-            <label className="caja-pill ring-1 ring-slate-200 dark:!ring-slate-700" style={s.pill}>
+            <label className="caja-pill ring-1 ring-slate-200 dark:!ring-slate-700 bg-white dark:!bg-slate-800" style={s.pill}>
               <IcoCalendar />
-              <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} style={{ color: colors.text }} className="dark:!text-white" />
+              <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} className="text-gray-900 dark:!text-white" />
             </label>
 
             {/* Sucursal (solo admin) */}
             {isAdmin && (
-              <label className="caja-pill ring-1 ring-slate-200 dark:!ring-slate-700" style={s.pill}>
+              <label className="caja-pill ring-1 ring-slate-200 dark:!ring-slate-700 bg-white dark:!bg-slate-800" style={s.pill}>
                 <IcoBuilding />
                 <select
                   value={sucursalSeleccionada || ''}
                   onChange={e => setSucursalSeleccionada(e.target.value ? parseInt(e.target.value) : null)}
                   disabled={loadingSucursales}
-                  style={{ color: colors.text }}
-                  className="dark:!text-white"
+                  className="text-gray-900 dark:!text-white"
                 >
                   <option value="">Todas las sedes</option>
                   {sucursales.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
@@ -571,11 +546,11 @@ export default function CajaView() {
             )}
 
             {/* Tab switcher */}
-            <div style={s.tabBar} className="caja-tab-bar">
+            <div style={s.tabBar} className="caja-tab-bar bg-gray-50 dark:!bg-slate-800 border border-gray-200 dark:!border-slate-700">
               {vistaOptions.map(o => (
                 <button
                   key={o.value}
-                  className={`caja-tab${vista === o.value ? ' caja-tab-active' : ''} dark:!text-slate-300`}
+                  className={`caja-tab${vista === o.value ? ' caja-tab-active' : ''} text-gray-600 dark:!text-slate-300`}
                   style={s.tab(vista === o.value)}
                   onClick={() => setVista(o.value)}
                 >
@@ -587,7 +562,7 @@ export default function CajaView() {
         </header>
 
         {/* ── CONTENT ── */}
-        <div style={s.content}>
+        <div style={s.content} className="bg-gray-50 dark:!bg-slate-950">
 
           {/* Vista General */}
           {vista === 'general' && (
@@ -602,7 +577,7 @@ export default function CajaView() {
               <div style={{ ...s.gridDesktop, marginTop: 20 }} className="caja-grid-desktop">
                 {/* Registro */}
                 <div style={s.panel} className="caja-panel bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700">
-                  <div style={s.panelHead}>
+                  <div style={s.panelHead} className="border-b border-gray-200 dark:!border-slate-700">
                     <p style={s.panelTitle} className="dark:!text-white">Registrar Movimiento</p>
                   </div>
                   <div style={{ padding: 18 }}>
@@ -616,8 +591,8 @@ export default function CajaView() {
 
                 {/* Movimientos */}
                 <div style={s.panel} className="caja-panel bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700">
-                  <div style={s.panelHead}>
-                    <button className="caja-btn-ghost dark:!text-slate-300 dark:hover:!bg-slate-800 dark:hover:!text-white" style={s.btnGhost} onClick={handleRefresh}>
+                  <div style={s.panelHead} className="border-b border-gray-200 dark:!border-slate-700">
+                    <button className="caja-btn-ghost text-gray-700 dark:!text-slate-300 border border-gray-300 dark:!border-slate-600 hover:bg-blue-50 dark:hover:!bg-slate-800 hover:border-blue-500 dark:hover:!border-slate-500 hover:text-blue-600 dark:hover:!text-white" style={s.btnGhost} onClick={handleRefresh}>
                       <IcoRefresh /> Actualizar
                     </button>
                   </div>
@@ -637,8 +612,8 @@ export default function CajaView() {
           {vista === 'movimientos' && (
             <div className="caja-section" key={`movimientos-${refreshKey}`}>
               <div style={s.panel} className="bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700">
-                <div style={s.filterBar}>
-                  <span style={s.filterLabel} className="dark:!text-slate-300"><IcoFilter /> Filtrar</span>
+                <div style={s.filterBar} className="border-b border-gray-200 dark:!border-slate-700">
+                  <span style={s.filterLabel} className="text-gray-500 dark:!text-slate-400"><IcoFilter /> Filtrar</span>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     {filtroOptions.map(o => (
                       <button
@@ -651,7 +626,7 @@ export default function CajaView() {
                       </button>
                     ))}
                   </div>
-                  <button className="caja-btn-ghost dark:!text-slate-300 dark:hover:!bg-slate-800 dark:hover:!text-white" style={{ ...s.btnGhost, marginLeft: 'auto' }} onClick={handleRefresh}>
+                  <button className="caja-btn-ghost text-gray-700 dark:!text-slate-300 border border-gray-300 dark:!border-slate-600 hover:bg-blue-50 dark:hover:!bg-slate-800 hover:border-blue-500 dark:hover:!border-slate-500 hover:text-blue-600 dark:hover:!text-white" style={{ ...s.btnGhost, marginLeft: 'auto' }} onClick={handleRefresh}>
                     <IcoRefresh /> Actualizar
                   </button>
                 </div>

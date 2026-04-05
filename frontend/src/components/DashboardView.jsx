@@ -266,7 +266,7 @@ export default function DashboardView() {
 
         /* Desktop */
         @media (min-width: 1025px) {
-          .dash-chart-grid { grid-template-columns: 2fr 1fr !important; }
+          .dash-chart-grid { grid-template-columns: 1.8fr 2fr !important; }
         }
 
         /* Tablet */
@@ -506,7 +506,7 @@ export default function DashboardView() {
         </div>
 
         {/* ── Gráfico y Top Productos ───────────────────────── */}
-        <div className="dash-chart-grid dash-fade-3" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '16px', marginBottom: '20px' }}>
+        <div className="dash-chart-grid dash-fade-3" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 4fr)', gap: '20px', marginBottom: '20px' }}>
           {/* ── Gráfico de tendencia ───────────────────────── */}
           <div style={{ minWidth: 0, width: '100%' }}>
             <TrendChart data={getTendenciaConDatos()} loading={loading} showMockIfEmpty={false} />

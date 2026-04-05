@@ -159,7 +159,7 @@ export default function TrendChart({
         </div>
       ) : (
         <div className="w-full overflow-x-auto" style={{ height: '340px', display: 'flex', justifyContent: 'center' }}>
-          <LineChart width={1200} height={320} data={chartData} margin={{ top: 10, right: 80, left: 10, bottom: 10 }}>
+          <LineChart width={800} height={320} data={chartData} margin={{ top: 10, right: 80, left: 10, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
             <XAxis
               dataKey="fecha"

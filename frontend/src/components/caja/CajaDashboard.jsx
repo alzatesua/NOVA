@@ -99,7 +99,7 @@ const Skeleton = ({ w = '60%', h = 28, radius = 6 }) => (
 );
 
 /* ─── MetricCard ──────────────────────────────────────────────────────── */
-function MetricCard({ label, amount, icon, iconBg, iconColor, accentColor, badge, badgeUp, badgeNeutral, footerText, loading, delay = 0, colors = C }) {
+function MetricCard({ label, amount, icon, iconBg, iconColor, accentColor, badge, badgeUp, badgeNeutral, footerText, loading, delay = 0, colors = C, isDark = false }) {
   return (
     <div
       className="bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700"
@@ -107,13 +107,13 @@ function MetricCard({ label, amount, icon, iconBg, iconColor, accentColor, badge
         borderRadius: 12,
         borderLeft: `3px solid ${accentColor}`,
         padding: '18px 20px',
-        boxShadow: '0 1px 2px rgba(0,0,0,.04)',
+        boxShadow: isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,.04)',
         transition: 'box-shadow .15s, transform .15s',
         animation: `cd-slidein .3s ease ${delay}s both`,
         cursor: 'default',
       }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,.04)'; e.currentTarget.style.transform = 'none'; }}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = isDark ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 16px rgba(0,0,0,.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,.04)'; e.currentTarget.style.transform = 'none'; }}
     >
       {/* Top row */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
@@ -242,6 +242,7 @@ export default function CajaDashboard({ fecha, isAdmin, idSucursal, isDark = fal
           loading={loading}
           delay={0}
           colors={colors}
+          isDark={isDark}
         />
 
         {/* Total Entradas */}
@@ -258,6 +259,7 @@ export default function CajaDashboard({ fecha, isAdmin, idSucursal, isDark = fal
           loading={loading}
           delay={0.07}
           colors={colors}
+          isDark={isDark}
         />
 
         {/* Total Salidas */}
@@ -274,6 +276,7 @@ export default function CajaDashboard({ fecha, isAdmin, idSucursal, isDark = fal
           loading={loading}
           delay={0.14}
           colors={colors}
+          isDark={isDark}
         />
 
         {/* Saldo Actual */}
@@ -290,6 +293,7 @@ export default function CajaDashboard({ fecha, isAdmin, idSucursal, isDark = fal
           loading={loading}
           delay={0.21}
           colors={colors}
+          isDark={isDark}
         />
 
       </div>

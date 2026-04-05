@@ -32,7 +32,7 @@ const C = {
     blue:       '#3b82f6',
     blueDark:   '#2563eb',
     blueLight:  '#1e3a5f',
-    blueBorder: '#2563eb',
+    blueBorder: '#1e40af',
     text:       '#ffffff',
     textMid:    '#e2e8f0',
     textSub:    '#cbd5e1',
@@ -40,10 +40,10 @@ const C = {
     border:     '#334155',
     surface:    '#0f172a',
     bg:         '#020617',
-    green:      '#324fb1ff',
-    greenDark:  '#2563eb',
-    greenLight: '#2563eb',
-    greenBorder:'#2563eb',
+    green:      '#22c55e',
+    greenDark:  '#16a34a',
+    greenLight: '#14532d',
+    greenBorder:'#166534',
     red:        '#ef4444',
     redDark:    '#dc2626',
     redLight:   '#7f1d1d',
@@ -109,7 +109,7 @@ const CATEGORIAS = {
 };
 
 /* ─── Custom Dropdown ─────────────────────────────────────────────────── */
-function Dropdown({ value, onChange, options, placeholder = 'Seleccionar…', colors = C }) {
+function Dropdown({ value, onChange, options, placeholder = 'Seleccionar…', colors = C, isDark = false }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -122,47 +122,38 @@ function Dropdown({ value, onChange, options, placeholder = 'Seleccionar…', co
   const selected = options.find(o => o.value === value);
 
   return (
-    <div ref={ref} style={{ position: 'relative', userSelect: 'none' }}>
+    <div ref={ref} className="relative select-none">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          width: '100%', padding: '9px 12px', borderRadius: 8, cursor: 'pointer',
-          background: colors.surface, border: `1px solid ${open ? colors.blue : colors.border}`,
-          color: selected ? colors.text : colors.textMuted,
-          fontFamily: 'inherit', fontSize: 13, fontWeight: selected ? 500 : 400,
-          boxShadow: open ? `0 0 0 3px ${colors.blue}22` : 'none',
-          transition: 'border-color .15s, box-shadow .15s',
-          boxSizing: 'border-box',
-        }}
+        className={`flex items-center justify-between w-full px-3 py-2.5 rounded-lg cursor-pointer font-sans text-sm transition-all duration-150 border
+          ${selected ? 'font-medium' : 'font-normal'}
+          ${open
+            ? 'border-blue-500 bg-white dark:!bg-slate-800 text-gray-900 dark:!text-white ring-2 ring-blue-500/20'
+            : 'border-gray-300 dark:!border-slate-600 bg-white dark:!bg-slate-800 text-gray-900 dark:!text-white'
+          }
+        `}
       >
         <span>{selected ? selected.label : placeholder}</span>
-        <span style={{ color: colors.textMuted, transition: 'transform .18s', transform: open ? 'rotate(180deg)' : 'none', display: 'flex' }}>
+        <span className="text-gray-400 dark:!text-slate-500 transition-transform duration-180 flex" style={{ transform: open ? 'rotate(180deg)' : 'none' }}>
           <IcoChevron />
         </span>
       </button>
 
       {open && (
-        <div style={{
-          position: 'absolute', top: 'calc(100% + 5px)', left: 0, right: 0, zIndex: 9999,
-          background: colors.surface, border: `1px solid ${colors.border}`,
-          borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,.10)',
-          overflow: 'hidden', animation: 'rm-fadein .14s ease both',
-        }}>
+        <div className="absolute top-1.5 left-0 right-0 z-[9999] bg-white dark:!bg-slate-900 border border-gray-200 dark:!border-slate-700 rounded-xl shadow-lg overflow-hidden animate-[rm-fadein_0.14s_ease_both]">
           {options.map((o, i) => (
             <div
               key={o.value}
               onClick={() => { onChange(o.value); setOpen(false); }}
-              style={{
-                padding: '9px 12px', fontSize: 13, fontWeight: value === o.value ? 600 : 400,
-                color: value === o.value ? '#fff' : colors.textMid,
-                background: value === o.value ? colors.blue : 'transparent',
-                cursor: 'pointer', transition: 'background .1s',
-                borderRadius: i === 0 ? '9px 9px 0 0' : i === options.length - 1 ? '0 0 9px 9px' : 0,
-              }}
-              onMouseEnter={e => { if (value !== o.value) e.currentTarget.style.background = colors.blueLight; }}
-              onMouseLeave={e => { if (value !== o.value) e.currentTarget.style.background = 'transparent'; }}
+              className={`px-3 py-2.5 text-sm cursor-pointer transition-colors duration-100
+                ${value === o.value
+                  ? 'font-semibold bg-blue-600 text-white'
+                  : 'font-normal text-gray-700 dark:!text-slate-300 hover:bg-blue-50 dark:hover:!bg-blue-900/20'
+                }
+                ${i === 0 ? 'rounded-t-xl' : ''}
+                ${i === options.length - 1 ? 'rounded-b-xl' : ''}
+              `}
             >
               {o.label}
             </div>
@@ -260,8 +251,8 @@ export default function RegistroMovimiento({ idSucursal, onRegistroExitoso, isDa
   const accentBorder= esEntrada ? colors.greenBorder: colors.redBorder;
 
   const s = {
-    lbl:   { display: 'block', fontSize: 12, fontWeight: 600, color: colors.textMid, marginBottom: 5 },
-    input: { width: '100%', padding: '9px 12px', border: `1px solid ${colors.border}`, borderRadius: 8, fontSize: 13, color: colors.text, background: colors.surface, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', transition: 'border-color .15s, box-shadow .15s' },
+    lbl:   { display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 5 },
+    input: { width: '100%', padding: '9px 12px', borderRadius: 8, fontSize: 13, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', transition: 'border-color .15s, box-shadow .15s' },
     field: { marginBottom: 14 },
   };
 
@@ -270,46 +261,38 @@ export default function RegistroMovimiento({ idSucursal, onRegistroExitoso, isDa
       <style>{`
         @keyframes rm-spin    { to { transform: rotate(360deg); } }
         @keyframes rm-fadein  { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
-        .rm-input-focus:focus { border-color: ${C.blue} !important; box-shadow: 0 0 0 3px ${C.blue}22 !important; }
+        .rm-input-focus:focus { border-color: #2563eb !important; box-shadow: 0 0 0 3px rgba(37,99,235,0.15) !important; }
         .rm-type-btn:hover { opacity: .85; }
         .rm-submit-btn:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
         .rm-submit-btn:disabled { opacity: .6; cursor: not-allowed; }
-        .rm-file-zone:hover { border-color: ${C.blue}; background: ${C.blueLight}; }
       `}</style>
 
       {/* ── Toggle Entrada / Salida ── */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6,
-        background: colors.bg, border: `1px solid ${colors.border}`,
-        borderRadius: 10, padding: 4, marginBottom: 20,
-      }}>
+      <div className="grid grid-cols-2 gap-1.5 p-1 mb-5 rounded-xl bg-gray-100 dark:!bg-slate-800 border border-gray-200 dark:!border-slate-700">
         {[
-          { value: 'entrada', label: 'Entrada', icon: <IcoPlus />,  bg: colors.green,  shadow: '0 2px 8px rgba(22,163,74,.25)'  },
-          { value: 'salida',  label: 'Salida',  icon: <IcoMinus />, bg: colors.red,    shadow: '0 2px 8px rgba(220,38,38,.25)'  },
+          { value: 'entrada', label: 'Entrada', icon: <IcoPlus />,  bg: 'bg-green-600 dark:!bg-green-600',  shadow: 'shadow-green-600/25' },
+          { value: 'salida',  label: 'Salida',  icon: <IcoMinus />, bg: 'bg-red-600 dark:!bg-red-600',    shadow: 'shadow-red-600/25'  },
         ].map(opt => {
           const active = tipo === opt.value;
           return (
             <button
               key={opt.value}
               type="button"
-              className="rm-type-btn"
-              onClick={() => handleTipo(opt.value)}
+              className="rm-type-btn flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border-none cursor-pointer font-sans text-sm font-semibold transition-all duration-150"
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                padding: '9px 12px', borderRadius: 7, border: 'none', cursor: 'pointer',
-                fontFamily: 'inherit', fontSize: 13, fontWeight: 600,
-                background: active ? opt.bg : 'transparent',
-                color: active ? '#fff' : colors.textSub,
-                boxShadow: active ? opt.shadow : 'none',
-                transition: 'all .15s',
+                background: active ? (opt.value === 'entrada' ? '#16a34a' : '#dc2626') : 'transparent',
+                color: active ? '#fff' : isDark ? '#cbd5e1' : '#6b7280',
+                boxShadow: active ? (opt.value === 'entrada' ? '0 2px 8px rgba(22,163,74,.25)' : '0 2px 8px rgba(220,38,38,.25)') : 'none',
               }}
+              onClick={() => handleTipo(opt.value)}
             >
-              <span style={{
-                width: 20, height: 20, borderRadius: 5, flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: active ? 'rgba(255,255,255,.2)' : `${opt.bg}18`,
-                color: active ? '#fff' : opt.bg,
-              }}>
+              <span
+                className="w-5 h-5 rounded flex-shrink-0 flex items-center justify-center"
+                style={{
+                  background: active ? 'rgba(255,255,255,.2)' : (opt.value === 'entrada' ? 'rgba(22,163,74,.1)' : 'rgba(220,38,38,.1)'),
+                  color: active ? '#fff' : (opt.value === 'entrada' ? '#16a34a' : '#dc2626'),
+                }}
+              >
                 {opt.icon}
               </span>
               {opt.label}
@@ -318,66 +301,69 @@ export default function RegistroMovimiento({ idSucursal, onRegistroExitoso, isDa
         })}
       </div>
 
-      <div style={{ height: 1, background: colors.border, marginBottom: 18 }} />
+      <div className="h-px bg-gray-200 dark:!bg-slate-700 mb-4.5" />
 
       <form onSubmit={handleSubmit}>
 
         {/* Monto */}
         <div style={s.field}>
-          <label style={s.lbl}>Monto <span style={{ color: colors.red }}>*</span></label>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <span style={{ position: 'absolute', left: 12, fontSize: 13, fontWeight: 700, color: colors.textSub, pointerEvents: 'none', userSelect: 'none' }}>$</span>
+          <label className="block text-xs font-semibold text-gray-700 dark:!text-slate-400 mb-1.5">
+            Monto <span className="text-red-500">*</span>
+          </label>
+          <div className="relative flex items-center">
+            <span className="absolute left-3 text-sm font-bold text-gray-500 dark:!text-slate-500 pointer-events-none select-none">$</span>
             <input
               type="number" placeholder="0.00" min="0" step="0.01"
               value={monto} onChange={e => setMonto(e.target.value)}
-              className="rm-input-focus"
-              style={{ ...s.input, paddingLeft: 26, fontSize: 15, fontWeight: 700, letterSpacing: '-.2px' }}
+              className="rm-input-focus w-full px-3 py-2.5 rounded-lg text-sm font-bold tracking-tight pl-7 border border-gray-300 dark:!border-slate-600 bg-white dark:!bg-slate-800 text-gray-900 dark:!text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
             />
           </div>
         </div>
 
         {/* Categoría */}
         <div style={s.field}>
-          <label style={s.lbl}>Categoría <span style={{ color: colors.red }}>*</span></label>
-          <Dropdown value={categoria} onChange={setCategoria} options={CATEGORIAS[tipo]} placeholder="Seleccionar categoría…" colors={colors} />
+          <label className="block text-xs font-semibold text-gray-700 dark:!text-slate-400 mb-1.5">
+            Categoría <span className="text-red-500">*</span>
+          </label>
+          <Dropdown value={categoria} onChange={setCategoria} options={CATEGORIAS[tipo]} placeholder="Seleccionar categoría…" colors={colors} isDark={isDark} />
         </div>
 
         {/* Método de Pago */}
         <div style={s.field}>
-          <label style={s.lbl}>Método de Pago</label>
-          <Dropdown value={metodoPago} onChange={(v) => { setMetodoPago(v); setSoporte(null); setPreviewUrl(''); }} options={METODOS} colors={colors} />
+          <label className="block text-xs font-semibold text-gray-700 dark:!text-slate-400 mb-1.5">
+            Método de Pago
+          </label>
+          <Dropdown value={metodoPago} onChange={(v) => { setMetodoPago(v); setSoporte(null); setPreviewUrl(''); }} options={METODOS} colors={colors} isDark={isDark} />
         </div>
 
         {/* Comprobante (solo si no es efectivo) */}
         {metodoPago !== 'efectivo' && (
           <div style={s.field}>
-            <label style={s.lbl}>
-              Comprobante de Pago <span style={{ color: colors.red }}>*</span>
+            <label className="block text-xs font-semibold text-gray-700 dark:!text-slate-400 mb-1.5">
+              Comprobante de Pago <span className="text-red-500">*</span>
             </label>
             <input type="file" id="rm-file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
             <label
               htmlFor="rm-file"
-              className="rm-file-zone"
+              className="rm-file-zone flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-lg cursor-pointer transition-all border border-dashed border-gray-300 dark:!border-slate-600 bg-white dark:!bg-slate-800 text-gray-500 dark:!text-slate-400 text-sm font-medium hover:border-blue-500 dark:hover:!border-blue-500 hover:bg-blue-50 dark:hover:!bg-blue-900/20"
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                width: '100%', padding: '10px 12px', borderRadius: 8, boxSizing: 'border-box',
-                border: `1px dashed ${soporte ? colors.green : colors.border}`,
-                background: soporte ? colors.greenLight : colors.surface,
-                color: soporte ? colors.green : colors.textMuted,
-                fontSize: 13, fontWeight: soporte ? 600 : 400,
-                cursor: 'pointer', transition: 'all .15s',
+                borderStyle: 'dashed',
+                borderColor: soporte ? '#22c55e' : undefined,
+                background: soporte ? '#f0fdf4' : undefined,
+                color: soporte ? '#16a34a' : undefined,
+                fontWeight: soporte ? 600 : 400,
               }}
             >
               {soporte ? <><IcoCheck /> {soporte.name}</> : <><IcoUpload /> Subir comprobante</>}
             </label>
             {!soporte && (
-              <p style={{ fontSize: 11, color: colors.red, margin: '4px 0 0', fontWeight: 600 }}>
+              <p className="text-xs text-red-500 mt-1 font-semibold">
                 * Obligatorio para {METODOS.find(m => m.value === metodoPago)?.label || metodoPago}
               </p>
             )}
             {previewUrl && (
-              <div style={{ marginTop: 8, borderRadius: 8, overflow: 'hidden', border: `1px solid ${colors.border}` }}>
-                <img src={previewUrl} alt="Vista previa" style={{ width: '100%', maxHeight: 180, objectFit: 'contain', display: 'block' }} />
+              <div className="mt-2 rounded-lg overflow-hidden border border-gray-300 dark:!border-slate-600">
+                <img src={previewUrl} alt="Vista previa" className="w-full max-h-44 object-contain block" />
               </div>
             )}
           </div>
@@ -385,14 +371,15 @@ export default function RegistroMovimiento({ idSucursal, onRegistroExitoso, isDa
 
         {/* Descripción */}
         <div style={s.field}>
-          <label style={s.lbl}>Descripción <span style={{ color: colors.red }}>*</span></label>
+          <label className="block text-xs font-semibold text-gray-700 dark:!text-slate-400 mb-1.5">
+            Descripción <span className="text-red-500">*</span>
+          </label>
           <textarea
             placeholder="Describe el motivo del movimiento…"
             value={descripcion}
             onChange={e => setDescripcion(e.target.value)}
             rows={3}
-            className="rm-input-focus"
-            style={{ ...s.input, resize: 'vertical', lineHeight: 1.5, minHeight: 76 }}
+            className="rm-input-focus w-full px-3 py-2.5 rounded-lg text-sm border border-gray-300 dark:!border-slate-600 bg-white dark:!bg-slate-800 text-gray-900 dark:!text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-y min-h-19 leading-relaxed"
           />
         </div>
 
