@@ -412,11 +412,11 @@ export default function ConfiguracionView() {
   return (
     <div className="relative w-full">
       <div className="flex items-center gap-3 mb-6 mt-10">
-        <div className="w-10 h-10 rounded-xl bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
+        <div className="h-16 w-16 rounded-xl shadow-lg bg-[rgb(37,99,235)] bg-opacity-10 flex items-center justify-center">
           <i className='bx bx-cog text-xl text-[rgb(37,99,235)]'></i>
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:!text-slate-100 transition-colors duration-200">Configuración General</h2>
+          <h2 className="text-2xl font-bold text-slate-800 dark:!text-slate-100 transition-colors duration-200" style={{ marginTop: '0.625rem' }}>Configuración General</h2>
           <p className="text-slate-500 dark:!text-slate-400 text-sm transition-colors duration-200">Administra la configuración de tu sistema</p>
         </div>
       </div>

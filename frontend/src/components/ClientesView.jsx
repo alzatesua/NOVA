@@ -1904,12 +1904,10 @@ export default function ClientesView() {
 
       {/* Header */}
       <div className="flex items-center space-x-3">
-        <div className="p-3 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-xl shadow-lg">
-          <SparklesIcon className="h-6 w-6 text-white" />
-        </div>
+        <img src="/icono.png" alt="Icono" className="h-16 w-16 rounded-xl shadow-lg" style={{ marginTop: '0rem' }} />
         <div>
-          <h3 className="text-2xl font-bold text-slate-900 dark:!text-white" style={{ color: 'var(--tw-dark-text-white, #ffffff)' }}>Gestión de Clientes</h3>
-          <p className="text-sm text-slate-600 dark:!text-slate-300" style={{ color: 'var(--tw-dark-text-slate-300, #cbd5e1)' }}>Administra cupones y clientes</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:!text-white" style={{ color: 'var(--tw-dark-text-white, #ffffff)', marginTop: '0.625rem' }}>Gestión de Clientes</h3>
+          <p className="text-xs text-slate-600 dark:!text-slate-300 mt-1" style={{ color: 'var(--tw-dark-text-slate-300, #cbd5e1)', marginLeft: '0.3125rem' }}>Administra cupones y clientes</p>
         </div>
       </div>
 
