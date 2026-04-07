@@ -2,6 +2,7 @@
  * Formulario para Registrar Movimientos de Caja — Diseño Profesional
  */
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { registrarMovimientoCaja } from '../../services/api';
 import { showToast } from '../../utils/toast';
@@ -111,19 +112,69 @@ const CATEGORIAS = {
 /* ─── Custom Dropdown ─────────────────────────────────────────────────── */
 function Dropdown({ value, onChange, options, placeholder = 'Seleccionar…', colors = C, isDark = false }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
+  const buttonRef = useRef(null);
+  const dropdownRef = useRef(null);
+
+  // Función para calcular posición
+  const updatePosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+      setPosition({
+        top: rect.bottom + scrollTop + 4,
+        left: rect.left + scrollLeft,
+        width: rect.width
+      });
+    }
+  };
+
+  // Calcular posición cuando se abre
+  useEffect(() => {
+    if (open) {
+      updatePosition();
+    }
+  }, [open]);
+
+  // Actualizar posición al hacer scroll
+  useEffect(() => {
+    if (open) {
+      const handleScroll = () => {
+        updatePosition();
+      };
+
+      // Escuchar scroll en ventana
+      window.addEventListener('scroll', handleScroll, true);
+      window.addEventListener('resize', updatePosition);
+
+      return () => {
+        window.removeEventListener('scroll', handleScroll, true);
+        window.removeEventListener('resize', updatePosition);
+      };
+    }
+  }, [open]);
 
   useEffect(() => {
-    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
-  }, []);
+    const h = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target) &&
+          buttonRef.current && !buttonRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    if (open) {
+      document.addEventListener('mousedown', h);
+      return () => document.removeEventListener('mousedown', h);
+    }
+  }, [open]);
 
   const selected = options.find(o => o.value === value);
 
   return (
-    <div ref={ref} className="relative select-none">
+    <div className="relative select-none">
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen(o => !o)}
         className={`flex items-center justify-between w-full px-3 py-2.5 rounded-lg cursor-pointer font-sans text-sm transition-all duration-150 border
@@ -140,8 +191,19 @@ function Dropdown({ value, onChange, options, placeholder = 'Seleccionar…', co
         </span>
       </button>
 
-      {open && (
-        <div className="absolute top-1.5 left-0 right-0 z-[9999] bg-white dark:!bg-slate-900 border border-gray-200 dark:!border-slate-700 rounded-xl shadow-lg overflow-hidden animate-[rm-fadein_0.14s_ease_both]">
+      {open && createPortal(
+        <div
+          ref={dropdownRef}
+          className="z-[99999] bg-white dark:!bg-slate-900 border border-gray-200 dark:!border-slate-700 rounded-xl shadow-lg overflow-hidden animate-[rm-fadein_0.14s_ease_both]"
+          style={{
+            position: 'absolute',
+            top: `${position.top}px`,
+            left: `${position.left}px`,
+            width: `${position.width}px`,
+            maxHeight: '300px',
+            overflowY: 'auto'
+          }}
+        >
           {options.map((o, i) => (
             <div
               key={o.value}
@@ -158,7 +220,8 @@ function Dropdown({ value, onChange, options, placeholder = 'Seleccionar…', co
               {o.label}
             </div>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
@@ -170,6 +233,7 @@ export default function RegistroMovimiento({ idSucursal, onRegistroExitoso, isDa
 
   const [tipo,        setTipo]        = useState('entrada');
   const [monto,       setMonto]       = useState('');
+  const [montoDisplay,setMontoDisplay]= useState('$ 0');
   const [descripcion, setDescripcion] = useState('');
   const [metodoPago,  setMetodoPago]  = useState('efectivo');
   const [categoria,   setCategoria]   = useState('');
@@ -179,6 +243,44 @@ export default function RegistroMovimiento({ idSucursal, onRegistroExitoso, isDa
 
   // Dynamic colors
   const colors = isDark ? C.dark : C;
+
+  /* ─── Formateo Monetario Tipo Calculadora ──────────────────────────────────────────────── */
+
+  // Formatear número como calculadora (separadores de miles con punto)
+  const formatCalculatorStyle = (value) => {
+    if (!value || value === '' || value === '0') return '$ 0';
+
+    // Remover todo excepto números
+    let cleanValue = value.toString().replace(/[^0-9]/g, '');
+
+    if (cleanValue === '') return '$ 0';
+
+    // Formatear con separadores de miles (puntos)
+    const numValue = parseInt(cleanValue) || 0;
+    const formatted = numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+    return `$ ${formatted}`;
+  };
+
+  // Manejar cambio en el input tipo calculadora
+  const handleMontoChange = (e) => {
+    const inputValue = e.target.value;
+
+    // Remover todo excepto números y punto (el usuario puede escribir punto pero lo ignoramos para el formateo)
+    let cleanValue = inputValue.toString().replace(/[^0-9.]/g, '');
+
+    if (cleanValue === '' || cleanValue === '.') {
+      setMonto('');
+      setMontoDisplay('$ 0');
+      return;
+    }
+
+    // Guardar el valor numérico real
+    setMonto(cleanValue);
+
+    // Actualizar el valor formateado para mostrar
+    setMontoDisplay(formatCalculatorStyle(cleanValue));
+  };
 
   const handleTipo = (t) => { setTipo(t); setCategoria(''); };
 
@@ -214,7 +316,8 @@ export default function RegistroMovimiento({ idSucursal, onRegistroExitoso, isDa
       const response = await registrarMovimientoCaja(params);
       if (response.success) {
         showToast('success', 'Movimiento registrado exitosamente');
-        setMonto(''); setDescripcion(''); setCategoria('');
+        setMonto(''); setMontoDisplay('$ 0');
+        setDescripcion(''); setCategoria('');
         setSoporte(null); setPreviewUrl('');
         if (onRegistroExitoso) onRegistroExitoso();
       } else {
@@ -311,11 +414,19 @@ export default function RegistroMovimiento({ idSucursal, onRegistroExitoso, isDa
             Monto <span className="text-red-500">*</span>
           </label>
           <div className="relative flex items-center">
-            <span className="absolute left-3 text-sm font-bold text-gray-500 dark:!text-slate-500 pointer-events-none select-none">$</span>
+            <span className="absolute left-4 text-base font-bold text-white dark:!text-white pointer-events-none select-none">$</span>
             <input
-              type="number" placeholder="0.00" min="0" step="0.01"
-              value={monto} onChange={e => setMonto(e.target.value)}
-              className="rm-input-focus w-full px-3 py-2.5 rounded-lg text-sm font-bold tracking-tight pl-7 border border-gray-300 dark:!border-slate-600 bg-white dark:!bg-slate-800 text-gray-900 dark:!text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+              type="text"
+              placeholder="$ 0"
+              value={montoDisplay}
+              onChange={handleMontoChange}
+              className="rm-input-focus w-full px-3 py-2.5 rounded-lg text-base font-bold tracking-tight pl-12 border border-gray-300 dark:!border-slate-600 bg-white dark:!bg-slate-800 text-gray-900 dark:!text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+              style={{
+                paddingLeft: '3.5rem',
+                color: isDark ? '#ffffff' : '#111827',
+                fontWeight: '700',
+                letterSpacing: '0.01em'
+              }}
             />
           </div>
         </div>

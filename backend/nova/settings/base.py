@@ -120,9 +120,13 @@ REST_FRAMEWORK = {
 }
 
 # JWT configuration
+# Access token de 4 horas con refresh token de 7 días
+# El refresh proactivo del frontend renovará el token 5 minutos antes de expirar
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=4),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,  # Rotar refresh token al renovar
+    'BLACKLIST_AFTER_ROTATION': True,  # Invalidar refresh token antiguo
 }
 
 # CORS configuration

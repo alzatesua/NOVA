@@ -4,9 +4,9 @@
  * Refresca el access token automáticamente antes de que expire,
  * evitando errores 401 y mejorando la experiencia de usuario.
  *
- * Con access tokens de 8 horas, refresca 5 minutos antes:
- * - 8 horas = 480 minutos
- * - Refresca a los 475 minutos (7 horas 55 minutos)
+ * Con access tokens de 4 horas (240 minutos), refresca 5 minutos antes:
+ * - 4 horas = 240 minutos
+ * - Refresca a los 235 minutos (3 horas 55 minutos)
  */
 
 let refreshTimer = null;
@@ -102,6 +102,11 @@ async function refreshAccessToken() {
       localStorage.setItem('accessToken', data.access);
 
       console.log('✅ Token refrescado exitosamente (proactivo)');
+
+      // Disparar evento para que los componentes sepan que el token cambió
+      window.dispatchEvent(new CustomEvent('token:refreshed', {
+        detail: { token: data.access }
+      }));
 
       // Si ROTATE_REFRESH_TOKENS=True, guardar nuevo refresh token
       if (data.refresh) {

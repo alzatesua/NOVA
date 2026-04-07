@@ -87,7 +87,22 @@ export default function DashboardView() {
   const [dias, setDias] = useState(30);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => { loadDashboardData(); }, [dias]);
+  // Cargar datos al cambiar el período o cuando se refresca el token
+  useEffect(() => { loadDashboardData(); }, [dias, tokenUsuario]);
+
+  // Recargar datos cuando el token se refresca exitosamente
+  useEffect(() => {
+    const handleTokenRefreshed = () => {
+      console.log('🔄 Token refrescado, recargando datos del dashboard...');
+      loadDashboardData();
+    };
+
+    window.addEventListener('token:refreshed', handleTokenRefreshed);
+
+    return () => {
+      window.removeEventListener('token:refreshed', handleTokenRefreshed);
+    };
+  }, [tokenUsuario, dias]);
 
   const loadDashboardData = async () => {
     setLoading(true);

@@ -1,7 +1,7 @@
 /**
  * Vista principal de Caja — Diseño Profesional (mismo estilo que MoraView)
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import CajaDashboard from './caja/CajaDashboard';
 import MovimientosTable from './caja/MovimientosTable';
@@ -57,8 +57,8 @@ const IcoBuilding = () => (
   </svg>
 );
 const IcoChevron = () => (
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" width="11" height="11" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 6l4 4 4-4"/>
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" width="14" height="14" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+    <path d="M6 8l4 4 4-4"/>
   </svg>
 );
 const IcoRefresh = () => (
@@ -72,18 +72,300 @@ const IcoFilter = () => (
   </svg>
 );
 
+/* ─── Custom Dropdown Component ─────────────────────────────────────────── */
+function SucursalDropdown({ value, onChange, options, disabled, loading, isDark = false }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const selected = options.find(o => o.id === value);
+
+  // Cerrar al hacer clic fuera
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen]);
+
+  const handleSelect = (val) => {
+    onChange(val);
+    setIsOpen(false);
+  };
+
+  return (
+    <div ref={dropdownRef} style={{ position: 'relative' }}>
+      <div
+        onClick={() => !disabled && !loading && setIsOpen(!isOpen)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '8px',
+          padding: '10px 14px',
+          borderRadius: '8px',
+          minWidth: '200px',
+          cursor: disabled || loading ? 'not-allowed' : 'pointer',
+          backgroundColor: isDark ? '#1f2937' : '#ffffff',
+          border: `1px solid ${isOpen ? '#3b82f6' : (isDark ? '#374151' : '#d1d5db')}`,
+          color: isDark ? '#f9fafb' : '#111827',
+          fontSize: '13px',
+          fontWeight: 600,
+          transition: 'all 0.2s',
+          opacity: disabled || loading ? 0.5 : 1,
+          userSelect: 'none'
+        }}
+        onMouseEnter={(e) => {
+          if (!isOpen && !disabled && !loading) {
+            e.target.style.borderColor = isDark ? '#3b82f6' : '#93c5fd';
+            e.target.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isOpen && !disabled && !loading) {
+            e.target.style.borderColor = isDark ? '#374151' : '#d1d5db';
+            e.target.style.boxShadow = 'none';
+          }
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ color: isDark ? '#94a3b8' : '#6b7280', flexShrink: 0 }}>
+            <IcoBuilding />
+          </span>
+          <span>{selected ? selected.nombre : 'Todas las sedes'}</span>
+        </div>
+        <span style={{
+          transition: 'transform 0.2s',
+          transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+          color: isDark ? '#94a3b8' : '#6b7280'
+        }}>
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 8l4 4 4-4"/>
+          </svg>
+        </span>
+      </div>
+
+      {isOpen && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 8px)',
+            left: 0,
+            right: 0,
+            minWidth: '100%',
+            maxWidth: '320px',
+            backgroundColor: isDark ? '#0f172a' : '#ffffff',
+            border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
+            borderRadius: '12px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            zIndex: 100000,
+            maxHeight: '400px',
+            overflowY: 'auto',
+            animation: 'dropdownFadeIn 0.2s ease-out',
+            padding: '8px'
+          }}
+        >
+          <style>{`
+            @keyframes dropdownFadeIn {
+              from {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.95);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+              }
+            }
+            .dropdown-option {
+              padding: 12px 16px;
+              borderRadius: 8px;
+              cursor: pointer;
+              transition: all 0.15s;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              fontSize: '14px';
+              fontWeight: 500;
+              margin-bottom: 4px;
+            }
+            .dropdown-option:hover {
+              background-color: ${isDark ? '#1e3a5f' : '#eff6ff'} !important;
+            }
+            .dropdown-option-selected {
+              background-color: #3b82f6 !important;
+              color: #ffffff !important;
+            }
+          `}</style>
+
+          {/* Opción: Todas las sedes */}
+          <div
+            onClick={() => handleSelect(null)}
+            className="dropdown-option"
+            style={{
+              backgroundColor: value === null ? '#3b82f6' : 'transparent',
+              color: value === null ? '#ffffff' : (isDark ? '#e2e8f0' : '#374151'),
+            }}
+          >
+            <span style={{
+              width: '24px',
+              height: '24px',
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: value === null ? 'rgba(255,255,255,0.2)' : (isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(107, 114, 128, 0.1)'),
+              color: value === null ? '#fff' : (isDark ? '#94a3b8' : '#6b7280'),
+              flexShrink: 0
+            }}>
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+              </svg>
+            </span>
+            <span style={{ flex: 1 }}>Todas las sedes</span>
+            {value === null && (
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+              </svg>
+            )}
+          </div>
+
+          {/* Línea separadora */}
+          {options.length > 0 && (
+            <div style={{
+              height: '1px',
+              backgroundColor: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(226, 232, 240, 0.8)',
+              margin: '8px 0'
+            }} />
+          )}
+
+          {/* Opciones de sucursales */}
+          {options.map((sucursal) => (
+            <div
+              key={sucursal.id}
+              onClick={() => handleSelect(sucursal.id)}
+              className="dropdown-option"
+              style={{
+                backgroundColor: value === sucursal.id ? '#3b82f6' : 'transparent',
+                color: value === sucursal.id ? '#ffffff' : (isDark ? '#e2e8f0' : '#374151'),
+              }}
+            >
+              <span style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: value === sucursal.id ? 'rgba(255,255,255,0.2)' : (isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(107, 114, 128, 0.1)'),
+                color: value === sucursal.id ? '#fff' : (isDark ? '#94a3b8' : '#6b7280'),
+                flexShrink: 0
+              }}>
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+              </span>
+              <span style={{ flex: 1 }}>{sucursal.nombre}</span>
+              {value === sucursal.id && (
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                </svg>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Estilos globales mínimos (solo lo que inline no puede hacer) ────── */
 const STYLES = `
   @keyframes fadein { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
   .caja-section { animation: fadein .25s ease both; }
   .caja-tab:hover:not(.caja-tab-active) { background: var(--caja-blue-light, #eff6ff); color: var(--caja-blue, #2563eb); }
+  .dark .caja-tab:hover:not(.caja-tab-active) { background: var(--caja-blue-light, #1e3a5f); color: var(--caja-blue, #3b82f6); }
   .caja-tab-active { background: var(--caja-blue, #2563eb); color: #fff; }
   .caja-pill:focus-within { border-color: var(--caja-blue, #2563eb); box-shadow: 0 0 0 3px rgba(37,99,235,0.13); }
+  .dark .caja-pill:focus-within { border-color: var(--caja-blue-dark, #2563eb); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+
+  /* Modern Select Styles */
+  .modern-select {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+  }
+  .modern-select option {
+    background: var(--caja-surface, #ffffff) !important;
+    color: var(--caja-text, #111827) !important;
+    padding: 10px 14px !important;
+    font-weight: 500;
+    font-size: 14px;
+    border-bottom: 1px solid var(--caja-border, #e5e7eb);
+  }
+  .dark .modern-select option {
+    background: var(--caja-surface, #0f172a) !important;
+    color: var(--caja-text, #ffffff) !important;
+    border-bottom: 1px solid var(--caja-border, #334155);
+  }
+  .modern-select option:hover {
+    background: var(--caja-blue-light, #eff6ff) !important;
+  }
+  .dark .modern-select option:hover {
+    background: var(--caja-blue-light, #1e3a5f) !important;
+  }
+  .modern-select option:checked {
+    background: var(--caja-blue, #2563eb) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+  }
+  .dark .modern-select option:checked {
+    background: var(--caja-blue, #3b82f6) !important;
+    color: #ffffff !important;
+  }
+  .modern-select:focus {
+    outline: none !important;
+  }
+  .modern-select:focus ~ .select-chevron-modern {
+    transform: rotate(180deg);
+  }
+  .select-chevron-modern:hover {
+    transform: scale(1.1);
+  }
   .caja-chip:hover:not(.caja-chip-active) { border-color: var(--caja-blue, #2563eb); color: var(--caja-blue, #2563eb); background: var(--caja-blue-light, #eff6ff); }
   .caja-chip-active { background: var(--caja-blue, #2563eb); border-color: var(--caja-blue, #2563eb); color: #fff; }
   .caja-btn-ghost:hover { background: var(--caja-blue-light, #eff6ff); border-color: var(--caja-blue, #2563eb); color: var(--caja-blue, #2563eb); }
-  .caja-pill input[type="date"], .caja-pill select { background: transparent; border: none; outline: none; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--caja-text, #111827); cursor: pointer; padding: 0; appearance: none; -webkit-appearance: none; }
-  .caja-pill select { padding-right: 2px; }
+  .caja-pill input[type="date"], .caja-pill select { background: transparent !important; border: none !important; outline: none !important; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--caja-text, #111827) !important; cursor: pointer; padding: 0; appearance: none !important; -webkit-appearance: none !important; }
+  .caja-pill select { padding-right: 20px !important; position: relative; z-index: 1; }
+  .caja-pill select option { background: var(--caja-surface, #ffffff) !important; color: var(--caja-text, #111827) !important; padding: 10px 14px !important; font-weight: 500; font-size: 14px; border-bottom: 1px solid var(--caja-border, #e5e7eb); transition: background-color 0.15s ease; }
+  .dark .caja-pill select option { background: var(--caja-surface, #0f172a) !important; color: var(--caja-text, #ffffff) !important; border-bottom: 1px solid var(--caja-border, #334155); }
+  .caja-pill select option:hover { background: var(--caja-blue-light, #eff6ff) !important; }
+  .dark .caja-pill select option:hover { background: var(--caja-blue-light, #1e3a5f) !important; }
+  .caja-pill select option:checked { background: var(--caja-blue, #2563eb) !important; color: #ffffff !important; font-weight: 600; }
+  .dark .caja-pill select option:checked { background: var(--caja-blue, #3b82f6) !important; color: #ffffff !important; }
+  .caja-pill select:focus { outline: none !important; }
+  .caja-pill .select-chevron { position: relative; z-index: 0; margin-left: -18px !important; pointer-events: none; flex-shrink: 0; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); color: #6b7280 !important; }
+  .dark .caja-pill .select-chevron { color: #94a3b8 !important; }
+  .caja-pill select:focus ~ .select-chevron { transform: rotate(180deg); }
+
+  /* Custom scrollbar for dropdown in WebKit browsers */
+  .caja-pill select::-webkit-scrollbar { width: 8px; }
+  .caja-pill select::-webkit-scrollbar-track { background: var(--caja-bg, #f9fafb); border-radius: 4px; }
+  .caja-pill select::-webkit-scrollbar-thumb { background: var(--caja-border, #e5e7eb); border-radius: 4px; }
+  .caja-pill select::-webkit-scrollbar-thumb:hover { background: var(--caja-text-muted, #9ca3af); }
+  .dark .caja-pill select::-webkit-scrollbar-track { background: var(--caja-bg, #020617); }
+  .dark .caja-pill select::-webkit-scrollbar-thumb { background: var(--caja-border, #334155); }
+  .dark .caja-pill select::-webkit-scrollbar-thumb:hover { background: var(--caja-text-muted, #6b7280); }
 
   /* Ring effect IGUAL QUE PROVEEDORESVIEW */
   .caja-panel {
@@ -530,19 +812,57 @@ export default function CajaView() {
 
             {/* Sucursal (solo admin) */}
             {isAdmin && (
-              <label className="caja-pill ring-1 ring-slate-200 dark:!ring-slate-700 bg-white dark:!bg-slate-800" style={s.pill}>
-                <IcoBuilding />
+              <div className="modern-select-container" style={{ position: 'relative' }}>
                 <select
                   value={sucursalSeleccionada || ''}
-                  onChange={e => setSucursalSeleccionada(e.target.value ? parseInt(e.target.value) : null)}
+                  onChange={(e) => setSucursalSeleccionada(e.target.value ? parseInt(e.target.value) : null)}
                   disabled={loadingSucursales}
-                  className="text-gray-900 dark:!text-white"
+                  className="modern-select-input"
+                  style={{
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    padding: '10px 36px 10px 12px',
+                    borderRadius: '8px',
+                    border: `1px solid ${isDark ? '#374151' : '#d1d5db'}`,
+                    backgroundColor: isDark ? '#1f2937' : '#ffffff',
+                    color: isDark ? '#f9fafb' : '#111827',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    minWidth: '200px',
+                    cursor: loadingSucursales ? 'not-allowed' : 'pointer',
+                    opacity: loadingSucursales ? 0.5 : 1,
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20' fill='none' stroke='${encodeURIComponent(isDark ? '%2394a3b8' : '%236b7280')}' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 12px center',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.borderColor = isDark ? '#3b82f6' : '#93c5fd';
+                    e.target.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.borderColor = isDark ? '#374151' : '#d1d5db';
+                    e.target.style.boxShadow = 'none';
+                  }}
                 >
                   <option value="">Todas las sedes</option>
-                  {sucursales.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
+                  {sucursales.map(s => (
+                    <option
+                      key={s.id}
+                      value={s.id}
+                      style={{
+                        backgroundColor: isDark ? '#0f172a' : '#ffffff',
+                        color: isDark ? '#f9fafb' : '#111827',
+                        padding: '12px 16px',
+                        fontWeight: 500
+                      }}
+                    >
+                      {s.nombre}
+                    </option>
+                  ))}
                 </select>
-                <IcoChevron />
-              </label>
+              </div>
             )}
 
             {/* Tab switcher */}
