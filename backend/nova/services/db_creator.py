@@ -87,23 +87,17 @@ def crear_db(db_nombre, db_password, db_usuario, usuario_data):
         with open(ruta, 'r') as f:
             raw_sql = f.read()
 
+        # Remover comentarios para simplificar
         no_comments = re.sub(r'--.*?$', '', raw_sql, flags=re.MULTILINE)
-        errors = []
-        for part in no_comments.split(';'):
-            stmt = part.strip()
-            if not stmt or not re.match(r'^(CREATE|INSERT)', stmt, re.IGNORECASE):
-                continue
-            try:
-                print(f"➡️ Ejecutando: {stmt[:80]}...")
-                cur.execute(stmt)
-            except Exception as inner_e:
-                error_msg = f"Error ejecutando SQL:\n{stmt[:100]}\nDetalle: {inner_e}"
-                print(f"❌ {error_msg}")
-                errors.append(error_msg)
 
-        # Fail if there were any critical errors during table creation
-        if errors:
-            raise Exception(f"Se produjeron {len(errors)} errores al crear las tablas. Primer error: {errors[0]}")
+        try:
+            print("➡️ Ejecutando estructura.sql...")
+            cur.execute(no_comments)
+            print("✅ Estructura de base de datos creada exitosamente")
+        except Exception as e:
+            error_msg = f"Error ejecutando estructura.sql:\n{str(e)}"
+            print(f"❌ {error_msg}")
+            raise Exception(f"No se pudo crear la estructura de la base de datos: {error_msg}")
 
         # 4) Verificar que las tablas críticas existan
         tablas_criticas = [

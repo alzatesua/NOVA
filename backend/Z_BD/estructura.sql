@@ -27,22 +27,6 @@ CREATE TABLE IF NOT EXISTS login_usuario (
         ON DELETE SET NULL
 );
 
--- Tabla de relación many-to-many entre usuarios y bodegas
-CREATE TABLE IF NOT EXISTS login_usuario_bodega (
-    id SERIAL PRIMARY KEY,
-    usuario_id INTEGER NOT NULL
-        REFERENCES login_usuario(id_login_usuario) ON DELETE CASCADE,
-    bodega_id INTEGER NOT NULL
-        REFERENCES inventario_bodega(id) ON DELETE CASCADE,
-    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uniq_usuario_bodega UNIQUE (usuario_id, bodega_id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_usuario_bodega_usuario ON login_usuario_bodega(usuario_id);
-CREATE INDEX IF NOT EXISTS idx_usuario_bodega_bodega ON login_usuario_bodega(bodega_id);
-
-COMMENT ON TABLE login_usuario_bodega IS 'Relación many-to-many entre usuarios y bodegas para filtrado de productos';
-
 CREATE TABLE IF NOT EXISTS tipo_documento (
     id        SERIAL PRIMARY KEY,
     nombre    VARCHAR(50) NOT NULL UNIQUE
@@ -128,6 +112,22 @@ CREATE UNIQUE INDEX IF NOT EXISTS uniq_bodega_predeterminada_por_sucursal
 
 CREATE INDEX IF NOT EXISTS idx_bodega_sucursal_estatus ON inventario_bodega (sucursal_id, estatus);
 CREATE INDEX IF NOT EXISTS idx_bodega_sucursal_tipo   ON inventario_bodega (sucursal_id, tipo);
+
+-- Tabla de relación many-to-many entre usuarios y bodegas
+CREATE TABLE IF NOT EXISTS login_usuario_bodega (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL
+        REFERENCES login_usuario(id_login_usuario) ON DELETE CASCADE,
+    bodega_id INTEGER NOT NULL
+        REFERENCES inventario_bodega(id) ON DELETE CASCADE,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uniq_usuario_bodega UNIQUE (usuario_id, bodega_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_usuario_bodega_usuario ON login_usuario_bodega(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_usuario_bodega_bodega ON login_usuario_bodega(bodega_id);
+
+COMMENT ON TABLE login_usuario_bodega IS 'Relación many-to-many entre usuarios y bodegas para filtrado de productos';
 
 -- productos can now reference inventario_bodega
 CREATE TABLE IF NOT EXISTS productos (
@@ -260,6 +260,33 @@ COMMENT ON TABLE facturacion_cliente IS 'Clientes (Naturales y Jurídicos)';
 
 CREATE INDEX facturacion_numero_idx ON facturacion_cliente(numero_documento);
 CREATE INDEX facturacion_tipo_doc_idx ON facturacion_cliente(tipo_documento, numero_documento);
+
+-- Tabla de clientes de e-commerce (clientes_tienda)
+CREATE TABLE IF NOT EXISTS clientes_tienda (
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(254) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    rol VARCHAR(20) NOT NULL DEFAULT 'cliente',
+    estado VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+    cliente_id BIGINT,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ultimo_login TIMESTAMP,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_staff BOOLEAN NOT NULL DEFAULT FALSE,
+    is_superuser BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT chk_rol CHECK (rol IN ('cliente', 'admin', 'vendedor')),
+    CONSTRAINT chk_estado CHECK (estado IN ('activo', 'inactivo', 'pendiente'))
+);
+
+CREATE INDEX idx_clientes_tienda_email ON clientes_tienda(email);
+CREATE INDEX idx_clientes_tienda_estado ON clientes_tienda(estado);
+CREATE INDEX idx_clientes_tienda_cliente_id ON clientes_tienda(cliente_id);
+CREATE INDEX idx_clientes_tienda_rol ON clientes_tienda(rol);
+
+COMMENT ON TABLE clientes_tienda IS 'Clientes del e-commerce con autenticación';
+COMMENT ON COLUMN clientes_tienda.rol IS 'Rol del usuario: cliente, admin, vendedor';
+COMMENT ON COLUMN clientes_tienda.estado IS 'Estado del usuario: activo, inactivo, pendiente';
 
 CREATE TABLE facturacion_config (
     id BIGSERIAL PRIMARY KEY,

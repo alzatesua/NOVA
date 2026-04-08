@@ -127,101 +127,244 @@ export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursa
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Movimientos de Caja</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : movimientos.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No hay movimientos para mostrar
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Fecha/Hora</th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Tipo</th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Descripción</th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Método</th>
-                  <th className="text-right py-3 px-4 font-semibold text-sm">Monto</th>
-                  <th className="text-center py-3 px-4 font-semibold text-sm">Comprobante</th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Usuario</th>
-                </tr>
-              </thead>
-              <tbody>
-                {movimientos.map((mov, index) => (
-                  <tr key={mov.id || index} className="border-b hover:bg-muted/50 transition-colors">
-                    <td className="py-3 px-4 text-sm">{formatDateTime(mov.fecha_hora)}</td>
-                    <td className="py-3 px-4 text-sm">
-                      <span className={getTipoBadge(mov.tipo)}>
-                        {getTipoTexto(mov.tipo)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-sm">{mov.descripcion || '-'}</td>
-                    <td className="py-3 px-4 text-sm">{mov.metodo_pago || '-'}</td>
-                    <td className={`py-3 px-4 text-sm text-right font-semibold ${
-                      mov.tipo === 'entrada' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                    }`}>
-                      {mov.tipo === 'entrada' ? '+' : '-'}{formatCurrency(mov.monto)}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-center">
-                      {mov.soporte_pago_url ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setModalComprobante({ open: true, url: mov.soporte_pago_url })}
-                          className="inline-flex items-center gap-1"
-                        >
-                          <ViewIcon />
-                          Ver
-                        </Button>
-                      ) : mov.metodo_pago !== 'efectivo' ? (
-                        <span className="text-yellow-600 dark:text-yellow-400 text-xs">Pendiente</span>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">-</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-sm">{mov.usuario_nombre || '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+    <>
+      <style>{`
+        /* ─── Responsive Design para MovimientosTable ─────────────────────── */
 
-        {/* Paginación */}
-        {!loading && totalPaginas > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPagina(p => Math.max(1, p - 1))}
-              disabled={pagina === 1}
-            >
-              Anterior
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Página {pagina} de {totalPaginas}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
-              disabled={pagina === totalPaginas}
-            >
-              Siguiente
-            </Button>
+        /* ─── Desktop & Large Screens (≥ 1024px) ─────────────────────────── */
+        @media (min-width: 1024px) {
+          .movimientos-table-wrapper {
+            overflow-x: visible !important;
+          }
+        }
+
+        /* ─── Tablet & Small Desktop (768px - 1023px) ──────────────────────── */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .movimientos-table {
+            min-width: 900px !important;
+          }
+          /* Hide Usuario column */
+          .movimientos-table th:nth-child(7),
+          .movimientos-table td:nth-child(7) {
+            display: none;
+          }
+        }
+
+        /* ─── Mobile & Tablet Landscape (481px - 767px) ──────────────────── */
+        @media (min-width: 481px) and (max-width: 767px) {
+          .movimientos-table-wrapper {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+          }
+          .movimientos-table {
+            min-width: 700px !important;
+            font-size: 13px !important;
+          }
+          .movimientos-table th,
+          .movimientos-table td {
+            padding: 10px 12px !important;
+            font-size: 12px !important;
+          }
+          /* Hide Usuario and Descripción columns */
+          .movimientos-table th:nth-child(3),
+          .movimientos-table td:nth-child(3),
+          .movimientos-table th:nth-child(7),
+          .movimientos-table td:nth-child(7) {
+            display: none;
+          }
+          .movimientos-pagination {
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+          .movimientos-btn {
+            width: 100% !important;
+          }
+        }
+
+        /* ─── Mobile Portrait (≤ 480px) ──────────────────────────────────── */
+        @media (max-width: 480px) {
+          .movimientos-table-wrapper {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+          }
+          .movimientos-table {
+            min-width: 550px !important;
+            font-size: 12px !important;
+          }
+          .movimientos-table th,
+          .movimientos-table td {
+            padding: 8px 10px !important;
+            font-size: 11px !important;
+          }
+          .movimientos-table th {
+            font-size: 10px !important;
+            padding: 8px 10px !important;
+          }
+          /* Hide Método, Descripción and Usuario columns */
+          .movimientos-table th:nth-child(3),
+          .movimientos-table td:nth-child(3),
+          .movimientos-table th:nth-child(4),
+          .movimientos-table td:nth-child(4),
+          .movimientos-table th:nth-child(7),
+          .movimientos-table td:nth-child(7) {
+            display: none;
+          }
+          .movimientos-badge {
+            font-size: 9px !important;
+            padding: 2px 6px !important;
+          }
+          .movimientos-amount {
+            font-size: 11px !important;
+          }
+          .movimientos-btn-comprobante {
+            padding: 4px 8px !important;
+            font-size: 10px !important;
+          }
+          .movimientos-pagination {
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .movimientos-btn {
+            width: 100% !important;
+            font-size: 12px !important;
+            padding: 8px 12px !important;
+          }
+          .movimientos-page-info {
+            font-size: 11px !important;
+          }
+          .movimientos-modal {
+            padding: 16px !important;
+            margin: 8px !important;
+          }
+          .movimientos-modal-title {
+            font-size: 16px !important;
+          }
+          .movimientos-modal-content {
+            padding: 12px !important;
+          }
+        }
+
+        /* ─── Very small mobile (≤ 380px) ────────────────────────────────── */
+        @media (max-width: 380px) {
+          .movimientos-table {
+            min-width: 480px !important;
+          }
+          .movimientos-table th,
+          .movimientos-table td {
+            padding: 6px 8px !important;
+            font-size: 10px !important;
+          }
+          .movimientos-table th {
+            font-size: 9px !important;
+            padding: 6px 8px !important;
+          }
+          .movimientos-badge {
+            font-size: 8px !important;
+            padding: 2px 5px !important;
+          }
+          .movimientos-amount {
+            font-size: 10px !important;
+          }
+        }
+      `}</style>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Movimientos de Caja</CardTitle>
           </div>
-        )}
-      </CardContent>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : movimientos.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No hay movimientos para mostrar
+            </div>
+          ) : (
+            <div className="movimientos-table-wrapper overflow-x-auto">
+              <table className="movimientos-table w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4 font-semibold text-sm">Fecha/Hora</th>
+                    <th className="text-left py-3 px-4 font-semibold text-sm">Tipo</th>
+                    <th className="text-left py-3 px-4 font-semibold text-sm">Descripción</th>
+                    <th className="text-left py-3 px-4 font-semibold text-sm">Método</th>
+                    <th className="text-right py-3 px-4 font-semibold text-sm">Monto</th>
+                    <th className="text-center py-3 px-4 font-semibold text-sm">Comprobante</th>
+                    <th className="text-left py-3 px-4 font-semibold text-sm">Usuario</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {movimientos.map((mov, index) => (
+                    <tr key={mov.id || index} className="border-b hover:bg-muted/50 transition-colors">
+                      <td className="py-3 px-4 text-sm">{formatDateTime(mov.fecha_hora)}</td>
+                      <td className="py-3 px-4 text-sm">
+                        <span className={`movimientos-badge ${getTipoBadge(mov.tipo)}`}>
+                          {getTipoTexto(mov.tipo)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-sm">{mov.descripcion || '-'}</td>
+                      <td className="py-3 px-4 text-sm">{mov.metodo_pago || '-'}</td>
+                      <td className={`movimientos-amount py-3 px-4 text-sm text-right font-semibold ${
+                        mov.tipo === 'entrada' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {mov.tipo === 'entrada' ? '+' : '-'}{formatCurrency(mov.monto)}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-center">
+                        {mov.soporte_pago_url ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setModalComprobante({ open: true, url: mov.soporte_pago_url })}
+                            className="movimientos-btn-comprobante inline-flex items-center gap-1"
+                          >
+                            <ViewIcon />
+                            Ver
+                          </Button>
+                        ) : mov.metodo_pago !== 'efectivo' ? (
+                          <span className="text-yellow-600 dark:text-yellow-400 text-xs">Pendiente</span>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">-</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-sm">{mov.usuario_nombre || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Paginación */}
+          {!loading && totalPaginas > 1 && (
+            <div className="movimientos-pagination flex items-center justify-center gap-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPagina(p => Math.max(1, p - 1))}
+                disabled={pagina === 1}
+                className="movimientos-btn"
+              >
+                Anterior
+              </Button>
+              <span className="movimientos-page-info text-sm text-muted-foreground">
+                Página {pagina} de {totalPaginas}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
+                disabled={pagina === totalPaginas}
+                className="movimientos-btn"
+              >
+                Siguiente
+              </Button>
+            </div>
+          )}
+        </CardContent>
 
       {/* Modal para ver comprobante */}
       {modalComprobante.open && (
@@ -230,11 +373,11 @@ export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursa
           onClick={() => setModalComprobante({ open: false, url: null })}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl max-h-[90vh] overflow-hidden relative"
+            className="movimientos-modal bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl max-h-[90vh] overflow-hidden relative"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
-              <h3 className="text-lg font-semibold">Comprobante de Pago</h3>
+              <h3 className="movimientos-modal-title text-lg font-semibold">Comprobante de Pago</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -243,7 +386,7 @@ export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursa
                 <CloseIcon />
               </Button>
             </div>
-            <div className="p-4 overflow-auto max-h-[calc(90vh-80px)]">
+            <div className="movimientos-modal-content p-4 overflow-auto max-h-[calc(90vh-80px)]">
               <img
                 src={modalComprobante.url}
                 alt="Comprobante de pago"
@@ -254,5 +397,6 @@ export default function MovimientosTable({ fecha, filtroTipo, isAdmin, idSucursa
         </div>
       )}
     </Card>
+    </>
   );
 }

@@ -673,9 +673,7 @@ function CrearTienda() {
 
 
           {/* PASO 2: Confirmación y Activación */}
-          {step === 2 && confirmacionFinal && (() => {
-            const tiendaUrl = 'https://' + sub_dominio + '.nova.dagi.co/login';
-            return (
+          {step === 2 && confirmacionFinal && (
             <div className="bg-slate-900/60 backdrop-blur-2xl rounded-3xl border border-slate-800/50 shadow-2xl p-8 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 via-emerald-500/20 to-cyan-500/20 opacity-30"></div>
 
@@ -698,11 +696,11 @@ function CrearTienda() {
                   <p className="text-slate-400 text-sm mb-2">Tu tienda está disponible en:</p>
                   <a
                     className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-300 hover:to-cyan-300 transition-all"
-                    href={tiendaUrl}
+                    href={"https://" + sub_dominio + ".nova.dagi.co/login"}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {tiendaUrl}
+                    {"https://" + sub_dominio + ".nova.dagi.co/login"}
                   </a>
                 </div>
 
@@ -710,16 +708,17 @@ function CrearTienda() {
                   <Button
                       className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 px-8 rounded-xl font-semibold hover:from-blue-500 hover:to-cyan-500 shadow-lg shadow-blue-500/25 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
                       onClick={() => {
-                        window.location.href = tiendaUrl;
+                        const loginUrl = "https://" + sub_dominio + ".nova.dagi.co/login";
+                        window.location.href = loginUrl;
                       }}
                     >
                       Ir a iniciar sesión
-                  </Button>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-            );
-          })()}
+          )}
         </form>
       </div>
     </div>

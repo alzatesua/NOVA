@@ -102,7 +102,7 @@ const Skeleton = ({ w = '60%', h = 28, radius = 6 }) => (
 function MetricCard({ label, amount, icon, iconBg, iconColor, accentColor, badge, badgeUp, badgeNeutral, footerText, loading, delay = 0, colors = C, isDark = false }) {
   return (
     <div
-      className="bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700"
+      className="caja-metric-card bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700"
       style={{
         borderRadius: 12,
         borderLeft: `3px solid ${accentColor}`,
@@ -116,11 +116,11 @@ function MetricCard({ label, amount, icon, iconBg, iconColor, accentColor, badge
       onMouseLeave={e => { e.currentTarget.style.boxShadow = isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,.04)'; e.currentTarget.style.transform = 'none'; }}
     >
       {/* Top row */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: colors.textMuted }} className="dark:!text-slate-400">
+      <div className="caja-metric-top-row" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
+        <span className="caja-metric-label dark:!text-slate-400" style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: colors.textMuted }}>
           {label}
         </span>
-        <div style={{
+        <div className="caja-metric-icon" style={{
           width: 36, height: 36, borderRadius: 9, flexShrink: 0,
           background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
@@ -136,7 +136,7 @@ function MetricCard({ label, amount, icon, iconBg, iconColor, accentColor, badge
         </>
       ) : (
         <>
-          <div style={{
+          <div className="caja-metric-amount" style={{
             fontSize: 24, fontWeight: 800, letterSpacing: '-0.5px',
             color: accentColor, lineHeight: 1.1, marginBottom: 10,
           }}>
@@ -146,7 +146,7 @@ function MetricCard({ label, amount, icon, iconBg, iconColor, accentColor, badge
           {/* Footer badge + text */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             {badge && (
-              <span style={{
+              <span className="caja-metric-badge" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 4,
                 fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
                 background: badgeNeutral
@@ -161,7 +161,7 @@ function MetricCard({ label, amount, icon, iconBg, iconColor, accentColor, badge
               </span>
             )}
             {footerText && (
-              <span style={{ fontSize: 11, color: colors.textMuted, fontWeight: 500 }} className="dark:!text-slate-400">{footerText}</span>
+              <span className="caja-metric-footer dark:!text-slate-400" style={{ fontSize: 11, color: colors.textMuted, fontWeight: 500 }}>{footerText}</span>
             )}
           </div>
         </>
@@ -209,7 +209,7 @@ export default function CajaDashboard({ fecha, isAdmin, idSucursal, isDark = fal
   const saldoSubida  = diferencia >= 0;
 
   return (
-    <div style={{ fontFamily: "'Inter', -apple-system, sans-serif" }}>
+    <div style={{ fontFamily: "'Inter', -apple-system, sans-serif" }} className="caja-dashboard">
       <style>{`
         @keyframes cd-shimmer {
           0%   { background-position: -400px 0; }
@@ -219,9 +219,117 @@ export default function CajaDashboard({ fecha, isAdmin, idSucursal, isDark = fal
           from { opacity: 0; transform: translateY(10px); }
           to   { opacity: 1; transform: translateY(0); }
         }
+
+        /* ─── Responsive Grid Layout para MetricCards ───────────────────── */
+
+        /* ─── Desktop & Large Screens (≥ 1024px) ─────────────────────────── */
+        @media (min-width: 1024px) {
+          .caja-metrics-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 16px !important;
+          }
+        }
+
+        /* ─── Tablet (768px - 1023px) ──────────────────────────────────────── */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .caja-metrics-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 14px !important;
+          }
+        }
+
+        /* ─── Mobile & Tablet Landscape (481px - 767px) ──────────────────── */
+        @media (min-width: 481px) and (max-width: 767px) {
+          .caja-metrics-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          .caja-metric-card {
+            padding: 14px 16px !important;
+            border-radius: 10px !important;
+          }
+          .caja-metric-icon {
+            width: 32px !important;
+            height: 32px !important;
+          }
+          .caja-metric-label {
+            font-size: 10px !important;
+          }
+          .caja-metric-amount {
+            font-size: 20px !important;
+          }
+          .caja-metric-badge {
+            font-size: 10px !important;
+            padding: 2px 7px !important;
+          }
+          .caja-metric-footer {
+            font-size: 10px !important;
+          }
+        }
+
+        /* ─── Mobile Portrait (≤ 480px) ──────────────────────────────────── */
+        @media (max-width: 480px) {
+          .caja-metrics-grid {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+          }
+          .caja-metric-card {
+            padding: 12px 14px !important;
+            border-radius: 10px !important;
+          }
+          .caja-metric-top-row {
+            margin-bottom: 10px !important;
+          }
+          .caja-metric-label {
+            font-size: 10px !important;
+          }
+          .caja-metric-icon {
+            width: 30px !important;
+            height: 30px !important;
+            border-radius: 7px !important;
+          }
+          .caja-metric-amount {
+            font-size: 18px !important;
+            margin-bottom: 8px !important;
+          }
+          .caja-metric-badge {
+            font-size: 9px !important;
+            padding: 2px 6px !important;
+            gap: 3px !important;
+          }
+          .caja-metric-footer {
+            font-size: 9px !important;
+          }
+        }
+
+        /* ─── Very small mobile (≤ 380px) ────────────────────────────────── */
+        @media (max-width: 380px) {
+          .caja-metrics-grid {
+            gap: 8px !important;
+          }
+          .caja-metric-card {
+            padding: 10px 12px !important;
+          }
+          .caja-metric-amount {
+            font-size: 16px !important;
+          }
+          .caja-metric-label {
+            font-size: 9px !important;
+          }
+        }
+
+        /* ─── Extra small mobile (≤ 340px) ──────────────────────────────── */
+        @media (max-width: 340px) {
+          .caja-metric-card {
+            padding: 9px 11px !important;
+          }
+          .caja-metric-amount {
+            font-size: 15px !important;
+          }
+        }
       `}</style>
 
-      <div style={{
+      <div className="caja-metrics-grid" style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',
         gap: 16,

@@ -400,37 +400,293 @@ const STYLES = `
     border-bottom: 1px solid rgba(51, 65, 85, 0.5);
   }
 
-  /* Responsive grid layouts */
-  @media (min-width: 769px) {
+  /* ─── Responsive Design con Breakpoints Específicos ─────────────────── */
+
+  /* ─── 3xl / 4K (1920px+) ───────────────────────────────────────────── */
+  @media (min-width: 1920px) {
     .caja-grid-desktop {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) !important;
-      gap: clamp(12px, 2vw, 20px);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr) !important;
+      gap: 24px !important;
+    }
+    .caja-header {
+      padding: 16px 32px !important;
+    }
+    .caja-content {
+      padding: 24px 32px !important;
     }
   }
 
-  @media (max-width: 768px) {
+  /* ─── xl / desktop (1280px - 1535px) ────────────────────────────────── */
+  @media (min-width: 1280px) and (max-width: 1535px) {
     .caja-grid-desktop {
-      display: flex;
-      flex-direction: column;
-      gap: clamp(12px, 2vw, 20px);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) !important;
+      gap: 20px !important;
+    }
+  }
+
+  /* ─── lg / laptop (1024px - 1279px) ─────────────────────────────────── */
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .caja-grid-desktop {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) !important;
+      gap: 18px !important;
     }
     .caja-header {
-      flex-direction: column;
+      padding: 13px 24px !important;
+    }
+    .caja-content {
+      padding: 18px 24px !important;
+    }
+  }
+
+  /* ─── md / tablet (768px - 1023px) ──────────────────────────────────── */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .caja-grid-desktop {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 16px !important;
+    }
+    .caja-header {
+      padding: 12px 20px !important;
+      flex-direction: column !important;
       align-items: flex-start !important;
+      gap: 12px !important;
     }
     .caja-controls {
-      width: 100%;
-      justify-content: flex-start;
+      width: 100% !important;
+      justify-content: flex-start !important;
+      flex-wrap: wrap !important;
     }
     .caja-tab-bar {
-      width: 100%;
-      overflow-x: auto;
-      justify-content: flex-start;
+      width: 100% !important;
+      overflow-x: auto !important;
+      justify-content: flex-start !important;
     }
     .caja-tab {
-      flex: 0 0 auto;
-      min-width: max-content;
+      flex: 0 0 auto !important;
+      min-width: max-content !important;
+    }
+    .caja-content {
+      padding: 16px 20px !important;
+    }
+    .caja-pill {
+      min-width: 140px !important;
+    }
+  }
+
+  /* ─── sm / mobile-lg landscape (481px - 767px) ──────────────────────── */
+  @media (min-width: 481px) and (max-width: 767px) {
+    .caja-grid-desktop {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 14px !important;
+    }
+    .caja-header {
+      padding: 12px 16px !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 12px !important;
+    }
+    .caja-iconBox {
+      width: 34px !important;
+      height: 34px !important;
+    }
+    .caja-title {
+      font-size: 15px !important;
+    }
+    .caja-sub {
+      font-size: 11px !important;
+    }
+    .caja-controls {
+      width: 100% !important;
+      justify-content: flex-start !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 8px !important;
+    }
+    .caja-pill {
+      width: 100% !important;
+      justify-content: center !important;
+      min-width: auto !important;
+    }
+    .modern-select-input {
+      width: 100% !important;
+      min-width: auto !important;
+    }
+    .caja-tab-bar {
+      width: 100% !important;
+      overflow-x: auto !important;
+      justify-content: flex-start !important;
+      padding: 3px !important;
+    }
+    .caja-tab {
+      flex: 1 1 auto !important;
+      min-width: 100px !important;
+      font-size: 11px !important;
+      padding: 6px 10px !important;
+    }
+    .caja-content {
+      padding: 14px 16px !important;
+      gap: 16px !important;
+    }
+    .caja-panel {
+      border-radius: 10px !important;
+    }
+    .caja-panelHead {
+      padding: 11px 14px !important;
+      font-size: 12px !important;
+    }
+    .caja-panelTitle {
+      font-size: 12px !important;
+    }
+    .caja-filterBar {
+      padding: 10px 14px !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 8px !important;
+    }
+    .caja-chip {
+      font-size: 11px !important;
+      padding: 4px 10px !important;
+    }
+  }
+
+  /* ─── xs / mobile portrait (≤ 480px) ───────────────────────────────── */
+  @media (max-width: 480px) {
+    .caja-grid-desktop {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 12px !important;
+    }
+    .caja-header {
+      padding: 10px 12px !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 10px !important;
+    }
+    .caja-iconBox {
+      width: 32px !important;
+      height: 32px !important;
+    }
+    .caja-title {
+      font-size: 14px !important;
+      line-height: 1.3 !important;
+    }
+    .caja-sub {
+      font-size: 10px !important;
+      line-height: 1.4 !important;
+    }
+    .caja-controls {
+      width: 100% !important;
+      justify-content: flex-start !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 7px !important;
+    }
+    .caja-pill {
+      width: 100% !important;
+      justify-content: center !important;
+      padding: 7px 10px !important;
+      font-size: 12px !important;
+      min-width: auto !important;
+    }
+    .modern-select-input {
+      width: 100% !important;
+      min-width: auto !important;
+      padding: 8px 32px 8px 10px !important;
+      font-size: 12px !important;
+    }
+    .caja-tab-bar {
+      width: 100% !important;
+      overflow-x: auto !important;
+      justify-content: flex-start !important;
+      padding: 2px !important;
+      gap: 1px !important;
+    }
+    .caja-tab {
+      flex: 1 1 auto !important;
+      min-width: 80px !important;
+      font-size: 10px !important;
+      padding: 5px 8px !important;
+      gap: 4px !important;
+    }
+    .caja-content {
+      padding: 12px 12px !important;
+      gap: 14px !important;
+    }
+    .caja-panel {
+      border-radius: 10px !important;
+    }
+    .caja-panelHead {
+      padding: 10px 12px !important;
+      font-size: 11px !important;
+    }
+    .caja-panelTitle {
+      font-size: 11px !important;
+    }
+    .caja-filterBar {
+      padding: 8px 12px !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 7px !important;
+    }
+    .caja-filterLabel {
+      font-size: 9px !important;
+    }
+    .caja-chip {
+      font-size: 10px !important;
+      padding: 4px 10px !important;
+    }
+    .caja-btnGhost {
+      font-size: 10px !important;
+      padding: 5px 8px !important;
+    }
+  }
+
+  /* ─── Very small mobile (≤ 380px) ──────────────────────────────────── */
+  @media (max-width: 380px) {
+    .caja-header {
+      padding: 8px 10px !important;
+    }
+    .caja-iconBox {
+      width: 28px !important;
+      height: 28px !important;
+    }
+    .caja-title {
+      font-size: 13px !important;
+    }
+    .caja-sub {
+      font-size: 9px !important;
+    }
+    .caja-content {
+      padding: 10px 10px !important;
+      gap: 12px !important;
+    }
+    .caja-pill {
+      padding: 6px 8px !important;
+      font-size: 11px !important;
+    }
+    .caja-tab {
+      font-size: 9px !important;
+      padding: 4px 6px !important;
+      min-width: 70px !important;
+    }
+    .caja-panelHead {
+      padding: 8px 10px !important;
+    }
+    .caja-filterBar {
+      padding: 7px 10px !important;
+    }
+  }
+
+  /* ─── Extra small mobile (≤ 340px) ──────────────────────────────────── */
+  @media (max-width: 340px) {
+    .caja-tab {
+      min-width: 60px !important;
+      font-size: 8px !important;
+      padding: 4px 5px !important;
+    }
+    .caja-title {
+      font-size: 12px !important;
     }
   }
 
@@ -794,10 +1050,10 @@ export default function CajaView() {
         {/* ── HEADER ── */}
         <header style={s.header} className="caja-header bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 auto' }}>
-            <div style={s.iconBox} className="bg-blue-50 dark:!bg-blue-900/30 border border-blue-200 dark:!border-blue-700 text-blue-600 dark:!text-blue-400"><IcoCash /></div>
+            <div style={s.iconBox} className="caja-iconBox bg-blue-50 dark:!bg-blue-900/30 border border-blue-200 dark:!border-blue-700 text-blue-600 dark:!text-blue-400"><IcoCash /></div>
             <div>
-              <h1 style={s.title} className="text-gray-900 dark:!text-white">Control de Caja</h1>
-              <p style={s.sub} className="text-gray-600 dark:!text-slate-400">
+              <h1 style={s.title} className="caja-title text-gray-900 dark:!text-white">Control de Caja</h1>
+              <p style={s.sub} className="caja-sub text-gray-600 dark:!text-slate-400">
                 {isAdmin ? 'Gestiona todos los movimientos y cuadres de caja' : 'Vista limitada a tu sucursal asignada'}
               </p>
             </div>
@@ -882,7 +1138,7 @@ export default function CajaView() {
         </header>
 
         {/* ── CONTENT ── */}
-        <div style={s.content} className="bg-gray-50 dark:!bg-slate-950">
+        <div style={s.content} className="caja-content bg-gray-50 dark:!bg-slate-950">
 
           {/* Vista General */}
           {vista === 'general' && (
@@ -897,10 +1153,10 @@ export default function CajaView() {
               <div style={{ ...s.gridDesktop, marginTop: 20 }} className="caja-grid-desktop">
                 {/* Registro */}
                 <div style={s.panel} className="caja-panel bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700">
-                  <div style={s.panelHead} className="border-b border-gray-200 dark:!border-slate-700">
-                    <p style={s.panelTitle} className="dark:!text-white">Registrar Movimiento</p>
+                  <div style={s.panelHead} className="caja-panelHead border-b border-gray-200 dark:!border-slate-700">
+                    <p style={s.panelTitle} className="caja-panelTitle dark:!text-white">Registrar Movimiento</p>
                   </div>
-                  <div style={{ padding: 18 }}>
+                  <div style={{ padding: 'clamp(12px, 2vw, 18px)' }}>
                     <RegistroMovimiento
                       idSucursal={getSucursalFilter()}
                       onRegistroExitoso={handleRegistroExitoso}
@@ -911,7 +1167,7 @@ export default function CajaView() {
 
                 {/* Movimientos */}
                 <div style={s.panel} className="caja-panel bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700">
-                  <div style={s.panelHead} className="border-b border-gray-200 dark:!border-slate-700">
+                  <div style={s.panelHead} className="caja-panelHead border-b border-gray-200 dark:!border-slate-700">
                     <button className="caja-btn-ghost text-gray-700 dark:!text-slate-300 border border-gray-300 dark:!border-slate-600 hover:bg-blue-50 dark:hover:!bg-slate-800 hover:border-blue-500 dark:hover:!border-slate-500 hover:text-blue-600 dark:hover:!text-white" style={s.btnGhost} onClick={handleRefresh}>
                       <IcoRefresh /> Actualizar
                     </button>
@@ -932,8 +1188,8 @@ export default function CajaView() {
           {vista === 'movimientos' && (
             <div className="caja-section" key={`movimientos-${refreshKey}`}>
               <div style={s.panel} className="bg-white dark:!bg-slate-900 ring-1 ring-slate-200 dark:!ring-slate-700">
-                <div style={s.filterBar} className="border-b border-gray-200 dark:!border-slate-700">
-                  <span style={s.filterLabel} className="text-gray-500 dark:!text-slate-400"><IcoFilter /> Filtrar</span>
+                <div style={s.filterBar} className="caja-filterBar border-b border-gray-200 dark:!border-slate-700">
+                  <span style={s.filterLabel} className="caja-filterLabel text-gray-500 dark:!text-slate-400"><IcoFilter /> Filtrar</span>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     {filtroOptions.map(o => (
                       <button

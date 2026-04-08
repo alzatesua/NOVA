@@ -359,17 +359,181 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
 
   return (
     <>
+      <style>{`
+        /* ─── Responsive Design para CuadreCaja ──────────────────────────── */
+
+        /* ─── Desktop & Large Screens (≥ 1024px) ─────────────────────────── */
+        @media (min-width: 1024px) {
+          .cuadre-resumen-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .cuadre-transacciones-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+          }
+        }
+
+        /* ─── Tablet (768px - 1023px) ──────────────────────────────────────── */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .cuadre-resumen-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 14px !important;
+          }
+          .cuadre-transacciones-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+          }
+          .cuadre-metodo-item {
+            padding: 12px !important;
+          }
+        }
+
+        /* ─── Mobile & Tablet Landscape (481px - 767px) ──────────────────── */
+        @media (min-width: 481px) and (max-width: 767px) {
+          .cuadre-resumen-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          .cuadre-arqueo-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+          }
+          .cuadre-transacciones-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 12px !important;
+          }
+          .cuadre-resumen-card {
+            padding: 12px !important;
+          }
+          .cuadre-title {
+            font-size: 16px !important;
+          }
+          .cuadre-subtitle {
+            font-size: 14px !important;
+          }
+          .cuadre-amount {
+            font-size: 20px !important;
+          }
+          .cuadre-metodo-item {
+            padding: 10px !important;
+          }
+          .cuadre-trans-amount {
+            font-size: 18px !important;
+          }
+          .cuadre-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+          }
+          .cuadre-header-btn {
+            width: 100% !important;
+          }
+        }
+
+        /* ─── Mobile Portrait (≤ 480px) ──────────────────────────────────── */
+        @media (max-width: 480px) {
+          .cuadre-resumen-grid {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+          }
+          .cuadre-arqueo-grid {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+          }
+          .cuadre-transacciones-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 8px !important;
+          }
+          .cuadre-resumen-card {
+            padding: 12px !important;
+          }
+          .cuadre-title {
+            font-size: 15px !important;
+          }
+          .cuadre-subtitle {
+            font-size: 13px !important;
+          }
+          .cuadre-amount {
+            font-size: 18px !important;
+          }
+          .cuadre-arqueo-card {
+            padding: 10px !important;
+          }
+          .cuadre-metodo-item {
+            padding: 10px !important;
+          }
+          .cuadre-metodo-name {
+            font-size: 13px !important;
+          }
+          .cuadre-metodo-amounts {
+            font-size: 11px !important;
+          }
+          .cuadre-trans-amount {
+            font-size: 16px !important;
+          }
+          .cuadre-trans-label {
+            font-size: 10px !important;
+          }
+          .cuadre-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+          }
+          .cuadre-header-btn {
+            width: 100% !important;
+          }
+        }
+
+        /* ─── Very small mobile (≤ 380px) ────────────────────────────────── */
+        @media (max-width: 380px) {
+          .cuadre-resumen-grid {
+            gap: 8px !important;
+          }
+          .cuadre-resumen-card {
+            padding: 10px !important;
+          }
+          .cuadre-title {
+            font-size: 14px !important;
+          }
+          .cuadre-subtitle {
+            font-size: 12px !important;
+          }
+          .cuadre-amount {
+            font-size: 16px !important;
+          }
+          .cuadre-transacciones-grid {
+            gap: 6px !important;
+          }
+          .cuadre-trans-amount {
+            font-size: 14px !important;
+          }
+          .cuadre-metodo-item {
+            padding: 8px !important;
+          }
+        }
+
+        /* ─── Extra small mobile (≤ 340px) ──────────────────────────────── */
+        @media (max-width: 340px) {
+          .cuadre-transacciones-grid {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+          .cuadre-trans-amount {
+            font-size: 16px !important;
+          }
+        }
+      `}</style>
+
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="cuadre-header flex items-center justify-between">
             <CardTitle>Cuadre de Caja</CardTitle>
-            <div className="flex gap-2">
-              
+            <div className="cuadre-header-btn flex gap-2">
+
               <Button
                 variant="outline"
                 size="sm"
                 onClick={imprimirCuadre}
                 disabled={!cuadre}
+                className="w-full sm:w-auto"
               >
                 <PrinterIcon className="mr-2" />
                 Imprimir
@@ -386,27 +550,27 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
             <div className="space-y-6">
               {/* Resumen General */}
               <div className="space-y-3">
-                <h3 className="font-semibold text-lg">Resumen del Día</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg bg-muted/50">
+                <h3 className="cuadre-title font-semibold text-lg">Resumen del Día</h3>
+                <div className="cuadre-resumen-grid grid grid-cols-2 gap-4">
+                  <div className="cuadre-resumen-card p-4 rounded-lg bg-muted/50">
                     <p className="text-sm text-muted-foreground">Saldo Inicial</p>
-                    <p className="text-2xl font-bold">{formatCurrency(cuadre.saldo_inicial)}</p>
+                    <p className="cuadre-amount text-2xl font-bold">{formatCurrency(cuadre.saldo_inicial)}</p>
                   </div>
-                  <div className={`p-4 rounded-lg ${cuadre.total_entradas > 0 ? 'bg-green-50 dark:bg-green-950' : 'bg-muted/50'}`}>
+                  <div className={`cuadre-resumen-card p-4 rounded-lg ${cuadre.total_entradas > 0 ? 'bg-green-50 dark:bg-green-950' : 'bg-muted/50'}`}>
                     <p className="text-sm text-muted-foreground">Total Entradas</p>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    <p className="cuadre-amount text-2xl font-bold text-green-600 dark:text-green-400">
                       +{formatCurrency(cuadre.total_entradas)}
                     </p>
                   </div>
-                  <div className={`p-4 rounded-lg ${cuadre.total_salidas > 0 ? 'bg-red-50 dark:bg-red-950' : 'bg-muted/50'}`}>
+                  <div className={`cuadre-resumen-card p-4 rounded-lg ${cuadre.total_salidas > 0 ? 'bg-red-50 dark:bg-red-950' : 'bg-muted/50'}`}>
                     <p className="text-sm text-muted-foreground">Total Salidas</p>
-                    <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    <p className="cuadre-amount text-2xl font-bold text-red-600 dark:text-red-400">
                       -{formatCurrency(cuadre.total_salidas)}
                     </p>
                   </div>
-                  <div className="p-4 rounded-lg bg-primary/10">
+                  <div className="cuadre-resumen-card p-4 rounded-lg bg-primary/10">
                     <p className="text-sm text-muted-foreground">Saldo Esperado</p>
-                    <p className="text-2xl font-bold">{formatCurrency(cuadre.saldo_esperado)}</p>
+                    <p className="cuadre-amount text-2xl font-bold">{formatCurrency(cuadre.saldo_esperado)}</p>
                   </div>
                 </div>
               </div>
@@ -414,13 +578,13 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
               {/* Información de Arqueo si existe */}
               {cuadre.monto_arqueo && (
                 <div className="space-y-3 p-4 rounded-lg border">
-                  <h3 className="font-semibold text-lg">Resultado del Arqueo</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 rounded-lg bg-muted/50">
+                  <h3 className="cuadre-subtitle font-semibold text-lg">Resultado del Arqueo</h3>
+                  <div className="cuadre-arqueo-grid grid grid-cols-2 gap-4">
+                    <div className="cuadre-arqueo-card p-3 rounded-lg bg-muted/50">
                       <p className="text-sm text-muted-foreground">Monto Contado</p>
-                      <p className="text-xl font-bold">{formatCurrency(cuadre.monto_arqueo)}</p>
+                      <p className="cuadre-amount text-xl font-bold">{formatCurrency(cuadre.monto_arqueo)}</p>
                     </div>
-                    <div className={`p-3 rounded-lg ${
+                    <div className={`cuadre-arqueo-card p-3 rounded-lg ${
                       cuadre.diferencia === 0
                         ? 'bg-green-50 dark:bg-green-950'
                         : cuadre.diferencia > 0
@@ -428,7 +592,7 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
                           : 'bg-red-50 dark:bg-red-950'
                     }`}>
                       <p className="text-sm text-muted-foreground">Diferencia</p>
-                      <p className={`text-xl font-bold ${
+                      <p className={`cuadre-amount text-xl font-bold ${
                         cuadre.diferencia === 0
                           ? 'text-green-600 dark:text-green-400'
                           : cuadre.diferencia > 0
@@ -445,13 +609,13 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
               {/* Desglose por método de pago */}
               {cuadre.por_metodo && cuadre.por_metodo.length > 0 && (
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-lg">Por Método de Pago</h3>
+                  <h3 className="cuadre-subtitle font-semibold text-lg">Por Método de Pago</h3>
                   <div className="space-y-2">
                     {cuadre.por_metodo.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                      <div key={index} className="cuadre-metodo-item flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                         <div className="flex-1">
-                          <p className="font-medium">{item.metodo}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="cuadre-metodo-name font-medium">{item.metodo}</p>
+                          <p className="cuadre-metodo-amounts text-sm text-muted-foreground">
                             <span className="text-green-600 dark:text-green-400">+{formatCurrency(item.entradas)}</span>
                             {' / '}
                             <span className="text-red-600 dark:text-red-400">-{formatCurrency(item.salidas)}</span>
@@ -467,22 +631,22 @@ export default function CuadreCaja({ fecha, isAdmin, idSucursal }) {
               )}
 
               {/* Resumen de transacciones */}
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+              <div className="cuadre-transacciones-grid grid grid-cols-3 gap-4 pt-4 border-t">
                 <div className="text-center">
-                  <p className="text-2xl font-bold">{cuadre.total_transacciones || 0}</p>
-                  <p className="text-sm text-muted-foreground">Total Transacciones</p>
+                  <p className="cuadre-trans-amount text-2xl font-bold">{cuadre.total_transacciones || 0}</p>
+                  <p className="cuadre-trans-label text-sm text-muted-foreground">Total Transacciones</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  <p className="cuadre-trans-amount text-2xl font-bold text-green-600 dark:text-green-400">
                     {cuadre.cantidad_entradas || 0}
                   </p>
-                  <p className="text-sm text-muted-foreground">Entradas</p>
+                  <p className="cuadre-trans-label text-sm text-muted-foreground">Entradas</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  <p className="cuadre-trans-amount text-2xl font-bold text-red-600 dark:text-red-400">
                     {cuadre.cantidad_salidas || 0}
                   </p>
-                  <p className="text-sm text-muted-foreground">Salidas</p>
+                  <p className="cuadre-trans-label text-sm text-muted-foreground">Salidas</p>
                 </div>
               </div>
             </div>

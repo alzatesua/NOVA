@@ -350,70 +350,250 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
 
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <CardTitle>Arqueo de Caja</CardTitle>
-            {/* Indicador de estado de caja */}
-            {!loadingEstado && estadoCaja && (
-              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                cajaCerrada
-                  ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-                  : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-              }`}>
-                <span className={`w-2 h-2 rounded-full ${
-                  cajaCerrada ? 'bg-red-500' : 'bg-green-500'
-                }`}></span>
-                {cajaCerrada ? 'CAJA CERRADA' : 'CAJA ABIERTA'}
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {cajaCerrada && puedeReabrir && (
+    <>
+      <style>{`
+        /* ─── Responsive Design para ArqueoCaja ──────────────────────────── */
+
+        /* ─── Desktop & Large Screens (≥ 1024px) ─────────────────────────── */
+        @media (min-width: 1024px) {
+          .arqueo-billetes-grid {
+            grid-template-columns: repeat(7, 1fr) !important;
+          }
+          .arqueo-monedas-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+          }
+        }
+
+        /* ─── Tablet (768px - 1023px) ──────────────────────────────────────── */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .arqueo-billetes-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 12px !important;
+          }
+          .arqueo-monedas-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+          }
+          .arqueo-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+          }
+          .arqueo-header-btns {
+            width: 100% !important;
+            flex-wrap: wrap !important;
+          }
+          .arqueo-billete-input {
+            height: 48px !important;
+            font-size: 16px !important;
+          }
+        }
+
+        /* ─── Mobile & Tablet Landscape (481px - 767px) ──────────────────── */
+        @media (min-width: 481px) and (max-width: 767px) {
+          .arqueo-billetes-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 10px !important;
+          }
+          .arqueo-monedas-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+          }
+          .arqueo-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+          }
+          .arqueo-header-btns {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .arqueo-header-btn {
+            width: 100% !important;
+          }
+          .arqueo-billete-input {
+            height: 48px !important;
+            font-size: 16px !important;
+          }
+          .arqueo-metodo-grid {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+          .arqueo-metodo-grid > div:first-child {
+            grid-column: span 1 !important;
+          }
+          .arqueo-metodo-grid > div:nth-child(2) {
+            grid-column: span 1 !important;
+          }
+          .arqueo-actions {
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+          .arqueo-action-btn {
+            width: 100% !important;
+          }
+        }
+
+        /* ─── Mobile Portrait (≤ 480px) ──────────────────────────────────── */
+        @media (max-width: 480px) {
+          .arqueo-billetes-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px !important;
+          }
+          .arqueo-monedas-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px !important;
+          }
+          .arqueo-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+          }
+          .arqueo-title {
+            font-size: 16px !important;
+          }
+          .arqueo-status {
+            font-size: 11px !important;
+            padding: 4px 8px !important;
+          }
+          .arqueo-header-btns {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+          }
+          .arqueo-header-btn {
+            width: 100% !important;
+            font-size: 12px !important;
+            padding: 8px 12px !important;
+          }
+          .arqueo-billete-input {
+            height: 44px !important;
+            font-size: 14px !important;
+          }
+          .arqueo-label {
+            font-size: 10px !important;
+          }
+          .arqueo-sublabel {
+            font-size: 9px !important;
+          }
+          .arqueo-amount {
+            font-size: 18px !important;
+          }
+          .arqueo-metodo-grid {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+          .arqueo-metodo-grid > div:first-child {
+            grid-column: span 1 !important;
+          }
+          .arqueo-metodo-grid > div:nth-child(2) {
+            grid-column: span 1 !important;
+          }
+          .arqueo-actions {
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .arqueo-action-btn {
+            width: 100% !important;
+            font-size: 12px !important;
+          }
+          .arqueo-modal {
+            padding: 16px !important;
+          }
+          .arqueo-modal-title {
+            font-size: 16px !important;
+          }
+        }
+
+        /* ─── Very small mobile (≤ 380px) ────────────────────────────────── */
+        @media (max-width: 380px) {
+          .arqueo-billetes-grid {
+            gap: 6px !important;
+          }
+          .arqueo-monedas-grid {
+            gap: 6px !important;
+          }
+          .arqueo-title {
+            font-size: 15px !important;
+          }
+          .arqueo-billete-input {
+            height: 40px !important;
+            font-size: 13px !important;
+          }
+          .arqueo-label {
+            font-size: 9px !important;
+          }
+          .arqueo-amount {
+            font-size: 16px !important;
+          }
+        }
+      `}</style>
+
+      <Card>
+        <CardHeader>
+          <div className="arqueo-header flex items-center justify-between">
+            <div className="arqueo-header-info flex items-center gap-3">
+              <CardTitle className="arqueo-title">Arqueo de Caja</CardTitle>
+              {/* Indicador de estado de caja */}
+              {!loadingEstado && estadoCaja && (
+                <div className={`arqueo-status flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                  cajaCerrada
+                    ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+                    : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${
+                    cajaCerrada ? 'bg-red-500' : 'bg-green-500'
+                  }`}></span>
+                  {cajaCerrada ? 'CAJA CERRADA' : 'CAJA ABIERTA'}
+                </div>
+              )}
+            </div>
+            <div className="arqueo-header-btns flex items-center gap-2">
+              {cajaCerrada && puedeReabrir && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={manejarAbrirCaja}
+                  disabled={abriendoCaja}
+                  className="arqueo-header-btn border-amber-500 text-amber-700 hover:bg-amber-50 dark:border-amber-600 dark:text-amber-400"
+                >
+                  {abriendoCaja ? 'Abriendo...' : 'Reabrir Caja'}
+                </Button>
+              )}
+              {cajaCerrada && !puedeReabrir && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setMostrarModalSolicitud(true)}
+                  className="arqueo-header-btn border-blue-500 text-blue-700 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400"
+                >
+                  Solicitar Apertura
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={manejarAbrirCaja}
-                disabled={abriendoCaja}
-                className="border-amber-500 text-amber-700 hover:bg-amber-50 dark:border-amber-600 dark:text-amber-400"
+                onClick={cargarCuadre}
+                disabled={loading}
+                className="arqueo-header-btn"
               >
-                {abriendoCaja ? 'Abriendo...' : 'Reabrir Caja'}
+                <RefreshIcon className="mr-2" />
+                Actualizar
               </Button>
-            )}
-            {cajaCerrada && !puedeReabrir && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setMostrarModalSolicitud(true)}
-                className="border-blue-500 text-blue-700 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400"
-              >
-                Solicitar Apertura
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={cargarCuadre}
-              disabled={loading}
-            >
-              <RefreshIcon className="mr-2" />
-              Actualizar
-            </Button>
+            </div>
           </div>
-        </div>
-        {cajaCerrada && (
-          <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg">
-        
-            {estadoCaja?.fecha_cierre && (
-              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                Cerrada el: {new Date(estadoCaja.fecha_cierre).toLocaleString('es-CO')}
-                {estadoCaja?.cerrado_por && ` por ${estadoCaja.cerrado_por}`}
-              </p>
-            )}
-          </div>
-        )}
-      </CardHeader>
+          {cajaCerrada && (
+            <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg">
+
+              {estadoCaja?.fecha_cierre && (
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                  Cerrada el: {new Date(estadoCaja.fecha_cierre).toLocaleString('es-CO')}
+                  {estadoCaja?.cerrado_por && ` por ${estadoCaja.cerrado_por}`}
+                </p>
+              )}
+            </div>
+          )}
+        </CardHeader>
       <CardContent>
         {loading ? (
           <div className="flex items-center justify-center py-8">
@@ -453,7 +633,7 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
                 <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                 Billetes
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+              <div className="arqueo-billetes-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
                 {[
                   { valor: 100000, label: '$100.000' },
                   { valor: 50000, label: '$50.000' },
@@ -464,7 +644,7 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
                   { valor: 1000, label: '$1.000' },
                 ].map((billete) => (
                   <div key={billete.valor} className="space-y-1">
-                    <label className="text-xs font-medium text-muted-foreground text-center block">
+                    <label className="arqueo-label text-xs font-medium text-muted-foreground text-center block">
                       {billete.label}
                     </label>
                     <input
@@ -474,13 +654,13 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
                       onChange={(e) => actualizarDenominacion('billetes', billete.valor, e.target.value)}
                       min="0"
                       disabled={cajaCerrada}
-                      className={`flex h-14 w-full rounded-lg border border-input px-3 py-2 text-lg font-semibold text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      className={`arqueo-billete-input flex h-14 w-full rounded-lg border border-input px-3 py-2 text-lg font-semibold text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                         cajaCerrada
                           ? 'bg-muted cursor-not-allowed opacity-50'
                           : 'bg-background'
                       }`}
                     />
-                    <p className="text-xs text-muted-foreground text-right font-medium">
+                    <p className="arqueo-sublabel text-xs text-muted-foreground text-right font-medium">
                       {formatCurrency(
                         (parseInt(denominaciones.billetes[billete.valor].cantidad) || 0) * billete.valor
                       )}
@@ -506,7 +686,7 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
                 <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
                 Monedas
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="arqueo-monedas-grid grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   { valor: 1000, label: '$1.000' },
                   { valor: 500, label: '$500' },
@@ -514,7 +694,7 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
                   { valor: 100, label: '$100' },
                 ].map((moneda) => (
                   <div key={moneda.valor} className="space-y-1">
-                    <label className="text-xs font-medium text-muted-foreground text-center block">
+                    <label className="arqueo-label text-xs font-medium text-muted-foreground text-center block">
                       {moneda.label}
                     </label>
                     <input
@@ -524,13 +704,13 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
                       onChange={(e) => actualizarDenominacion('monedas', moneda.valor, e.target.value)}
                       min="0"
                       disabled={cajaCerrada}
-                      className={`flex h-14 w-full rounded-lg border border-input px-3 py-2 text-lg font-semibold text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      className={`arqueo-billete-input flex h-14 w-full rounded-lg border border-input px-3 py-2 text-lg font-semibold text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                         cajaCerrada
                           ? 'bg-muted cursor-not-allowed opacity-50'
                           : 'bg-background'
                       }`}
                     />
-                    <p className="text-xs text-muted-foreground text-right font-medium">
+                    <p className="arqueo-sublabel text-xs text-muted-foreground text-right font-medium">
                       {formatCurrency(
                         (parseInt(denominaciones.monedas[moneda.valor].cantidad) || 0) * moneda.valor
                       )}
@@ -558,7 +738,7 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
               </h3>
               <div className="space-y-3">
                 {otrosMetodos.map((metodo, index) => (
-                  <div key={index} className="grid grid-cols-12 gap-3 items-end">
+                  <div key={index} className="arqueo-metodo-grid grid grid-cols-12 gap-3 items-end">
                     <div className="col-span-5 space-y-1">
                       <label className="text-xs font-medium text-muted-foreground">
                         Tipo de Método
@@ -641,7 +821,7 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
               <div className="space-y-2">
                 <div className="flex justify-between text-lg">
                   <span className="font-medium">Total Contado:</span>
-                  <span className="font-bold text-2xl">{formatCurrency(totalArqueo)}</span>
+                  <span className="arqueo-amount font-bold text-2xl">{formatCurrency(totalArqueo)}</span>
                 </div>
 
                 {cuadre && (
@@ -680,11 +860,12 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
             </div>
 
             {/* Botones de acción */}
-            <div className="flex gap-3 justify-end">
+            <div className="arqueo-actions flex gap-3 justify-end">
               <Button
                 variant="outline"
                 onClick={limpiarFormulario}
                 disabled={submittingArqueo || cajaCerrada}
+                className="arqueo-action-btn"
               >
                 Limpiar Formulario
               </Button>
@@ -692,7 +873,7 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
                 onClick={realizarArqueo}
                 disabled={submittingArqueo || totalArqueo <= 0 || cajaCerrada}
                 size="lg"
-                className="min-w-[200px]"
+                className="arqueo-action-btn min-w-[200px]"
               >
                 {submittingArqueo ? (
                   <>Procesando...</>
@@ -711,8 +892,8 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
       {/* Modal para solicitud de apertura */}
       {mostrarModalSolicitud && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold mb-4">Solicitar Apertura de Caja</h3>
+          <div className="arqueo-modal bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 className="arqueo-modal-title text-lg font-semibold mb-4">Solicitar Apertura de Caja</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Esta solicitud será enviada a un administrador para su aprobación.
             </p>
@@ -752,5 +933,6 @@ export default function ArqueoCaja({ fecha, isAdmin, idSucursal }) {
         </div>
       )}
     </Card>
+    </>
   );
 }

@@ -309,7 +309,7 @@ function Login() {
                   {/* Email Input */}
                   <div className="space-y-2">
                     <label className="block text-slate-300 text-sm font-medium" htmlFor="correoUsuario">
-                      Correo electrónico o usuario
+                      Usuario
                     </label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

@@ -1,0 +1,83 @@
+@keyframes orb1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+@keyframes orb2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-30px, 30px) scale(0.9); }
+  66% { transform: translate(20px, -20px) scale(1.1); }
+}
+@keyframes orb3 {
+  0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+  50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); }
+}
+@keyframes sparkle1 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1) translate(10px, -10px); }
+}
+@keyframes sparkle2 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1) translate(-15px, 5px); }
+}
+@keyframes sparkle3 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1) translate(8px, 12px); }
+}
+@keyframes sparkle4 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1) translate(-12px, -8px); }
+}
+@keyframes sparkle5 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1) translate(15px, 10px); }
+}
+@keyframes sparkle6 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1) translate(-10px, -15px); }
+}
+@keyframes sparkle7 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1) translate(5px, 8px); }
+}
+@keyframes sparkle8 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1) translate(-8px, -5px); }
+}
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+  50% { transform: translate(30px, -40px) scale(1.2); opacity: 0.6; }
+}
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+  50% { transform: translate(-40px, 30px) scale(1.3); opacity: 0.6; }
+}
+@keyframes float3 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+  50% { transform: translate(20px, 40px) scale(1.1); opacity: 0.6; }
+}
+@keyframes float4 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.25; }
+  50% { transform: translate(-25px, -35px) scale(1.15); opacity: 0.5; }
+}
+@keyframes float5 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.25; }
+  50% { transform: translate(30px, 25px) scale(1.1); opacity: 0.55; }
+}
+
+.animate-orb1 { animation: orb1 15s ease-in-out infinite; }
+.animate-orb2 { animation: orb2 18s ease-in-out infinite; }
+.animate-orb3 { animation: orb3 20s linear infinite; }
+.animate-sparkle1 { animation: sparkle1 3s ease-in-out infinite; }
+.animate-sparkle2 { animation: sparkle2 4s ease-in-out infinite 0.5s; }
+.animate-sparkle3 { animation: sparkle3 3.5s ease-in-out infinite 1s; }
+.animate-sparkle4 { animation: sparkle4 4.5s ease-in-out infinite 1.5s; }
+.animate-sparkle5 { animation: sparkle5 3.2s ease-in-out infinite 2s; }
+.animate-sparkle6 { animation: sparkle6 3.8s ease-in-out infinite 0.8s; }
+.animate-sparkle7 { animation: sparkle7 4.2s ease-in-out infinite 1.2s; }
+.animate-sparkle8 { animation: sparkle8 3.6s ease-in-out infinite 1.8s; }
+.animate-float1 { animation: float1 8s ease-in-out infinite; }
+.animate-float2 { animation: float2 10s ease-in-out infinite; }
+.animate-float3 { animation: float3 9s ease-in-out infinite; }
+.animate-float4 { animation: float4 11s ease-in-out infinite; }
+.animate-float5 { animation: float5 9.5s ease-in-out infinite; }

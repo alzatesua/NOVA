@@ -175,28 +175,264 @@ export default function MoraView() {
 
   return (
     <div className="font-sans bg-gray-50 dark:!bg-slate-900 min-h-screen flex flex-col">
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}} .mora-card:hover{border-color:#2563eb!important;box-shadow:0 2px 8px rgba(37,99,235,.1)}`}</style>
+      <style>{`
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .mora-card:hover{border-color:#2563eb!important;box-shadow:0 2px 8px rgba(37,99,235,.1)}
+
+        /* ─── Responsive Design para MoraView ────────────────────────────── */
+
+        /* ─── Desktop & Large Screens (≥ 1024px) ─────────────────────────── */
+        @media (min-width: 1024px) {
+          .mora-stat-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+          }
+          .mora-content-grid {
+            grid-template-columns: 1fr 340px !important;
+          }
+        }
+
+        /* ─── Tablet (768px - 1023px) ──────────────────────────────────────── */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .mora-stat-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          .mora-content-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .mora-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+          }
+          .mora-header-tabs {
+            width: 100% !important;
+            overflow-x: auto !important;
+          }
+          .mora-header-btns {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .mora-tab-btn {
+            flex: 1 !important;
+            min-width: 120px !important;
+            justify-content: center !important;
+          }
+          .mora-refresh-btn {
+            width: 100% !important;
+          }
+        }
+
+        /* ─── Mobile & Tablet Landscape (481px - 767px) ──────────────────── */
+        @media (min-width: 481px) and (max-width: 767px) {
+          .mora-stat-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+          }
+          .mora-stat-card {
+            padding: 12px !important;
+          }
+          .mora-content-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .mora-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+            padding: 12px 16px !important;
+          }
+          .mora-title {
+            font-size: 16px !important;
+          }
+          .mora-subtitle {
+            font-size: 11px !important;
+          }
+          .mora-header-tabs {
+            width: 100% !important;
+            display: flex !important;
+            overflow-x: auto !important;
+          }
+          .mora-tab-btn {
+            flex: 1 !important;
+            padding: 8px 12px !important;
+            font-size: 12px !important;
+            min-width: 140px !important;
+          }
+          .mora-header-btns {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+          }
+          .mora-refresh-btn {
+            width: 100% !important;
+            padding: 10px 12px !important;
+          }
+          .mora-search {
+            padding: 12px 16px !important;
+          }
+          .mora-content {
+            padding: 16px !important;
+            gap: 16px !important;
+          }
+          .mora-details-panel {
+            position: static !important;
+          }
+        }
+
+        /* ─── Mobile Portrait (≤ 480px) ──────────────────────────────────── */
+        @media (max-width: 480px) {
+          .mora-stat-grid {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+          .mora-stat-card {
+            padding: 10px !important;
+          }
+          .mora-stat-icon {
+            width: 12px !important;
+            height: 12px !important;
+          }
+          .mora-stat-label {
+            font-size: 9px !important;
+          }
+          .mora-stat-value {
+            font-size: 14px !important;
+          }
+          .mora-stat-sub {
+            font-size: 9px !important;
+          }
+          .mora-content-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .mora-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+            padding: 10px 12px !important;
+          }
+          .mora-title {
+            font-size: 15px !important;
+          }
+          .mora-subtitle {
+            font-size: 10px !important;
+          }
+          .mora-header-tabs {
+            width: 100% !important;
+            display: flex !important;
+          }
+          .mora-tab-btn {
+            flex: 1 !important;
+            padding: 8px 10px !important;
+            font-size: 11px !important;
+            min-width: 120px !important;
+          }
+          .mora-header-btns {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+          }
+          .mora-refresh-btn {
+            width: 100% !important;
+            padding: 8px 10px !important;
+            font-size: 12px !important;
+          }
+          .mora-search {
+            padding: 10px 12px !important;
+          }
+          .mora-search-input {
+            font-size: 13px !important;
+            padding: 8px 36px 8px 10px !important;
+          }
+          .mora-content {
+            padding: 12px !important;
+            gap: 12px !important;
+          }
+          .mora-cliente-card {
+            padding: 10px !important;
+          }
+          .mora-cliente-icon {
+            width: 32px !important;
+            height: 32px !important;
+          }
+          .mora-cliente-name {
+            font-size: 13px !important;
+          }
+          .mora-cliente-doc {
+            font-size: 10px !important;
+          }
+          .mora-cliente-info {
+            font-size: 10px !important;
+          }
+          .mora-details-panel {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            z-index: 50 !important;
+            border-radius: 0 !important;
+          }
+          .mora-modal {
+            padding: 16px !important;
+            margin: 8px !important;
+          }
+          .mora-modal-title {
+            font-size: 14px !important;
+          }
+        }
+
+        /* ─── Very small mobile (≤ 380px) ────────────────────────────────── */
+        @media (max-width: 380px) {
+          .mora-stat-card {
+            padding: 8px !important;
+          }
+          .mora-stat-value {
+            font-size: 12px !important;
+          }
+          .mora-title {
+            font-size: 14px !important;
+          }
+          .mora-tab-btn {
+            padding: 7px 8px !important;
+            font-size: 10px !important;
+          }
+          .mora-cliente-card {
+            padding: 8px !important;
+          }
+          .mora-cliente-icon {
+            width: 28px !important;
+            height: 28px !important;
+          }
+          .mora-cliente-name {
+            font-size: 12px !important;
+          }
+          .mora-search {
+            padding: 8px 10px !important;
+          }
+        }
+      `}</style>
 
       {/* ── HEADER ── */}
-      <div className="bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700 px-7 py-3 flex items-center justify-between gap-3 flex-wrap">
+      <div className="mora-header bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700 px-7 py-3 flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h2 className="text-base font-bold text-gray-900 dark:!text-white m-0">Gestión de Crédito y Mora</h2>
-          <p className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5">Administra clientes en mora y control de deuda</p>
+          <h2 className="mora-title text-base font-bold text-gray-900 dark:!text-white m-0">Gestión de Crédito y Mora</h2>
+          <p className="mora-subtitle text-xs text-gray-500 dark:!text-slate-400 mt-0.5">Administra clientes en mora y control de deuda</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex gap-0.5 bg-gray-50 dark:!bg-slate-800 rounded-lg p-0.5 border border-gray-200 dark:!border-slate-700">
-            <button className={`flex items-center gap-1.5 px-5 py-2.5 rounded-md border-0 cursor-pointer text-sm font-semibold transition-all ${tabActiva === 'mora' ? 'bg-blue-600 text-white shadow-sm' : 'bg-transparent text-blue-600 dark:!text-blue-400'}`} onClick={() => setTabActiva('mora')}>
+        <div className="mora-header-btns flex items-center gap-2">
+          <div className="mora-header-tabs flex gap-0.5 bg-gray-50 dark:!bg-slate-800 rounded-lg p-0.5 border border-gray-200 dark:!border-slate-700">
+            <button className={`mora-tab-btn flex items-center gap-1.5 px-5 py-2.5 rounded-md border-0 cursor-pointer text-sm font-semibold transition-all ${tabActiva === 'mora' ? 'bg-blue-600 text-white shadow-sm' : 'bg-transparent text-blue-600 dark:!text-blue-400'}`} onClick={() => setTabActiva('mora')}>
               <ExclamationTriangleIcon style={{ width: 16, height: 16 }} />
               Clientes en Mora
               {clientesEnMora.length > 0 && <Badge>{clientesEnMora.length}</Badge>}
             </button>
-            <button className={`flex items-center gap-1.5 px-5 py-2.5 rounded-md border-0 cursor-pointer text-sm font-semibold transition-all ${tabActiva === 'deuda' ? 'bg-blue-600 text-white shadow-sm' : 'bg-transparent text-blue-600 dark:!text-blue-400'}`} onClick={() => setTabActiva('deuda')}>
+            <button className={`mora-tab-btn flex items-center gap-1.5 px-5 py-2.5 rounded-md border-0 cursor-pointer text-sm font-semibold transition-all ${tabActiva === 'deuda' ? 'bg-blue-600 text-white shadow-sm' : 'bg-transparent text-blue-600 dark:!text-blue-400'}`} onClick={() => setTabActiva('deuda')}>
               <ChartBarIcon style={{ width: 16, height: 16 }} />
               Deuda General
               {clientesConDeuda.length > 0 && <Badge>{clientesConDeuda.length}</Badge>}
             </button>
           </div>
-          <button className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-transparent text-blue-600 dark:!text-blue-400 border border-blue-300 dark:!border-blue-600 rounded-lg text-sm font-semibold cursor-pointer hover:bg-blue-50 dark:hover:!bg-blue-900/30" onClick={() => tabActiva === 'mora' ? cargarClientesEnMora() : cargarClientesConDeuda()}>
+          <button className="mora-refresh-btn inline-flex items-center gap-1.5 px-5 py-2.5 bg-transparent text-blue-600 dark:!text-blue-400 border border-blue-300 dark:!border-blue-600 rounded-lg text-sm font-semibold cursor-pointer hover:bg-blue-50 dark:hover:!bg-blue-900/30" onClick={() => tabActiva === 'mora' ? cargarClientesEnMora() : cargarClientesConDeuda()}>
             <ArrowPathIcon style={{ width: 16, height: 16 }} /> Actualizar
           </button>
         </div>
@@ -204,27 +440,27 @@ export default function MoraView() {
 
       {/* ── STAT CARDS ── */}
       {tabActiva === 'deuda' && resumenDeuda && (
-        <div className="grid grid-cols-4 gap-3.5 px-7 py-4 bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700">
+        <div className="mora-stat-grid grid grid-cols-4 gap-3.5 px-7 py-4 bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700">
           {[
             { label: 'Clientes con Deuda',  value: resumenDeuda.total_clientes_con_deuda,          accent: 'bg-blue-600',  icon: UsersIcon },
             { label: 'Deuda Total',          value: fmt(resumenDeuda.total_deuda_general),           accent: 'bg-purple-600', icon: CurrencyDollarIcon },
             { label: 'En Mora',              value: fmt(resumenDeuda.total_deuda_mora),               accent: 'bg-red-600',   icon: ExclamationTriangleIcon, sub: `${resumenDeuda.clientes_en_mora} clientes` },
             { label: 'Crédito Vigente',      value: fmt(resumenDeuda.total_deuda_credito_vigente),    accent: 'bg-green-600', icon: CheckIcon, sub: `${resumenDeuda.clientes_con_credito_vigente} clientes` },
           ].map((st, i) => (
-            <div key={i} className="bg-gray-50 dark:!bg-slate-800 rounded-lg p-3.5 border border-gray-200 dark:!border-slate-700 border-l-4" style={{ borderLeftColor: st.accent.replace('bg-', '').replace('-600', '') === 'blue' ? '#2563eb' : st.accent.replace('bg-', '').replace('-600', '') === 'purple' ? '#7c3aed' : st.accent.replace('bg-', '').replace('-600', '') === 'red' ? '#dc2626' : '#16a34a' }}>
+            <div key={i} className="mora-stat-card bg-gray-50 dark:!bg-slate-800 rounded-lg p-3.5 border border-gray-200 dark:!border-slate-700 border-l-4" style={{ borderLeftColor: st.accent.replace('bg-', '').replace('-600', '') === 'blue' ? '#2563eb' : st.accent.replace('bg-', '').replace('-600', '') === 'purple' ? '#7c3aed' : st.accent.replace('bg-', '').replace('-600', '') === 'red' ? '#dc2626' : '#16a34a' }}>
               <div className="flex items-center gap-1.5 mb-1.5">
-                <st.icon style={{ width: 14, height: 14 }} className={st.accent.replace('bg-', 'text-')} />
-                <span className="text-xs font-semibold text-gray-500 dark:!text-slate-400 uppercase tracking-wider">{st.label}</span>
+                <st.icon style={{ width: 14, height: 14 }} className={`mora-stat-icon ${st.accent.replace('bg-', 'text-')}`} />
+                <span className="mora-stat-label text-xs font-semibold text-gray-500 dark:!text-slate-400 uppercase tracking-wider">{st.label}</span>
               </div>
-              <div className="text-lg font-bold text-gray-900 dark:!text-white">{st.value}</div>
-              {st.sub && <div className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5">{st.sub}</div>}
+              <div className="mora-stat-value text-lg font-bold text-gray-900 dark:!text-white">{st.value}</div>
+              {st.sub && <div className="mora-stat-sub text-xs text-gray-500 dark:!text-slate-400 mt-0.5">{st.sub}</div>}
             </div>
           ))}
         </div>
       )}
 
       {/* ── BARRA DE BÚSQUEDA ── */}
-      <div className="px-7 py-3 bg-gray-50 dark:!bg-slate-800 border-b border-gray-200 dark:!border-slate-700">
+      <div className="mora-search px-7 py-3 bg-gray-50 dark:!bg-slate-800 border-b border-gray-200 dark:!border-slate-700">
         <div className="relative max-w-md mx-auto">
           <MagnifyingGlassIcon style={{ width: 18, height: 18 }} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
@@ -232,7 +468,7 @@ export default function MoraView() {
             placeholder="Buscar por nombre o número de documento..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white dark:!bg-slate-900 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+            className="mora-search-input w-full pl-10 pr-4 py-2.5 bg-white dark:!bg-slate-900 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
           />
           {busqueda && (
             <button
@@ -252,10 +488,10 @@ export default function MoraView() {
       </div>
 
       {/* ── CONTENT ── */}
-      <div className="flex-1 px-7 py-5 grid gap-5 items-start" style={{ gridTemplateColumns: clienteSeleccionado && resumenCliente ? '1fr 340px' : '1fr' }}>
+      <div className="mora-content mora-content-grid flex-1 px-7 py-5 grid gap-5 items-start" style={{ gridTemplateColumns: clienteSeleccionado && resumenCliente ? '1fr 340px' : '1fr' }}>
 
         {/* Lista */}
-        <div className="bg-white dark:!bg-slate-900 rounded-xl border border-gray-200 dark:!border-slate-700 overflow-hidden shadow-sm">
+        <div className="mora-clientes-list bg-white dark:!bg-slate-900 rounded-xl border border-gray-200 dark:!border-slate-700 overflow-hidden shadow-sm">
           <div className="px-6 py-3 border-b border-gray-200 dark:!border-slate-700 flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-blue-50 dark:!bg-blue-900/20 flex items-center justify-center flex-shrink-0">
               {tabActiva === 'mora'
@@ -288,20 +524,19 @@ export default function MoraView() {
                 {lista.map((cl) => {
                   const sel = clienteSeleccionado?.cliente_id === cl.cliente_id;
                   return (
-                    <div key={cl.cliente_id} className="mora-card p-3 rounded-lg cursor-pointer border transition-all"
-                      className={sel ? 'bg-blue-50 dark:!bg-blue-900/20 border-blue-500 dark:!border-blue-500' : 'bg-white dark:!bg-slate-900 border-gray-200 dark:!border-slate-700 hover:border-blue-500 dark:hover:!border-blue-500'}
+                    <div key={cl.cliente_id} className={`mora-cliente-card mora-card p-3 rounded-lg cursor-pointer border transition-all ${sel ? 'bg-blue-50 dark:!bg-blue-900/20 border-blue-500 dark:!border-blue-500' : 'bg-white dark:!bg-slate-900 border-gray-200 dark:!border-slate-700 hover:border-blue-500 dark:hover:!border-blue-500'}`}
                       onClick={() => verDetallesCliente(cl)}>
                       <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center"
+                        <div className="mora-cliente-icon w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center"
                           className={sel ? 'bg-blue-100 dark:!bg-blue-800 border-blue-200 dark:!border-blue-700' : 'bg-gray-50 dark:!bg-slate-800 border-gray-200 dark:!border-slate-700'}>
                           <UserIcon style={{ width: 16, height: 16 }} className={sel ? 'text-blue-600 dark:!text-blue-400' : 'text-gray-500 dark:!text-slate-400'} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
-                            <span className="font-semibold text-sm text-gray-900 dark:!text-white">{cl.nombre}</span>
+                            <span className="mora-cliente-name font-semibold text-sm text-gray-900 dark:!text-white">{cl.nombre}</span>
                             {cl.en_mora && <Badge color="#dc2626">MORA</Badge>}
                           </div>
-                          <p className="text-xs text-gray-500 dark:!text-slate-400 mb-2">{cl.numero_documento}</p>
+                          <p className="mora-cliente-doc text-xs text-gray-500 dark:!text-slate-400 mb-2">{cl.numero_documento}</p>
                           <div className="flex items-center gap-3 flex-wrap">
                             {tabActiva === 'mora' ? (
                               <>
@@ -332,7 +567,10 @@ export default function MoraView() {
 
         {/* Panel Detalles */}
         {clienteSeleccionado && resumenCliente && (
-          <div className="bg-white dark:!bg-slate-900 rounded-xl border border-gray-200 dark:!border-slate-700 overflow-hidden shadow-sm sticky top-5">
+          <>
+            {/* Backdrop for mobile */}
+            <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={cerrarDetalles}></div>
+            <div className="mora-details-panel bg-white dark:!bg-slate-900 rounded-xl border border-gray-200 dark:!border-slate-700 overflow-hidden shadow-sm sticky top-5 lg:relative lg:z-0 z-50">
             <div className="px-4.5 py-3 border-b border-gray-200 dark:!border-slate-700 flex justify-between items-center">
               <div>
                 <p className="text-sm font-semibold text-gray-900 dark:!text-white m-0">Detalle del Cliente</p>
@@ -447,16 +685,17 @@ export default function MoraView() {
               )}
             </div>
           </div>
+          </>
         )}
       </div>
 
       {/* ── MODAL ABONO ── */}
       {mostrarModalAbono && (
         <div className="fixed inset-0 bg-gray-900/45 dark:!bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:!bg-slate-900 rounded-xl shadow-2xl max-w-sm w-full overflow-hidden">
+          <div className="mora-modal bg-white dark:!bg-slate-900 rounded-xl shadow-2xl max-w-sm w-full overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-200 dark:!border-slate-700 flex justify-between items-center">
               <div>
-                <p className="text-sm font-bold text-gray-900 dark:!text-white m-0">Registrar Abono</p>
+                <p className="mora-modal-title text-sm font-bold text-gray-900 dark:!text-white m-0">Registrar Abono</p>
                 <p className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5">{clienteSeleccionado?.nombre}</p>
               </div>
               <button onClick={() => setMostrarModalAbono(false)} className="bg-transparent border-0 cursor-pointer p-1 text-gray-500 dark:!text-slate-400 rounded-md hover:bg-gray-100 dark:hover:!bg-slate-800">
@@ -530,7 +769,7 @@ export default function MoraView() {
       {/* ── MODAL SOPORTE ── */}
       {mostrarModalSoporte && soporteSeleccionado && (
         <div className="fixed inset-0 bg-gray-900/50 dark:!bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:!bg-slate-900 rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+          <div className="mora-modal bg-white dark:!bg-slate-900 rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-200 dark:!border-slate-700 flex justify-between items-center flex-shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 dark:!bg-blue-900/20 flex items-center justify-center">

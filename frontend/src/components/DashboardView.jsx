@@ -279,72 +279,37 @@ export default function DashboardView() {
         }
         .period-select:focus { outline: none; }
 
-        /* Desktop */
-        @media (min-width: 1025px) {
-          .dash-chart-grid { grid-template-columns: 1.8fr 2fr !important; }
+        /* ─── Desktop & Large Screens (≥ 1024px) ─────────────────────────── */
+        @media (min-width: 1024px) {
+          .dash-chart-grid { grid-template-columns: 1.8fr 2fr; }
         }
 
-        /* Tablet */
-        @media (max-width: 1024px) {
-          .dash-chart-grid { grid-template-columns: 1fr !important; }
-          .kpi-grid { grid-template-columns: repeat(4, 1fr) !important; }
+        /* ─── Tablet (768px - 1023px) ────────────────────────────────────── */
+        @media (max-width: 1023px) {
+          .dash-chart-grid { grid-template-columns: 1fr; }
         }
 
-        /* Small tablet */
-        @media (max-width: 768px) {
-          .dash-root { width: 100% !important; padding-left: 12px !important; padding-right: 12px !important; }
-          .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
-          .store-card { padding: 18px !important; width: 100% !important; box-sizing: border-box !important; }
+        /* ─── Mobile & Tablet Landscape (≤ 767px) ───────────────────────── */
+        @media (max-width: 767px) {
+          .store-card { padding: 18px 20px; }
           .store-card-inner { flex-direction: column !important; gap: 16px !important; }
-          .store-card-inner > div:first-child { flex-direction: column !important; align-items: center !important; text-align: center !important; gap: 12px !important; width: 100% !important; }
-          .store-card-inner > div:first-child > div:last-child { width: 100% !important; display: flex !important; justify-content: center !important; }
-          .store-card-inner > div:first-child > div:last-child span { font-size: 11px !important; word-break: break-all !important; white-space: normal !important; }
+          .store-info { flex-direction: column !important; align-items: center !important; text-align: center !important; gap: 12px !important; width: 100% !important; }
+          .store-url-badge { width: 100% !important; display: flex !important; justify-content: center !important; }
+          .store-url-badge span { font-size: 11px !important; word-break: break-all !important; white-space: normal !important; }
           .store-btn-group { flex-direction: column !important; width: 100% !important; gap: 8px !important; }
-          .store-btn { width: 100% !important; }
-          .dash-chart-grid { gap: 16px !important; }
+          .store-btn { width: 100% !important; justify-content: center !important; }
+          .dash-chart-grid { grid-template-columns: 1fr !important; }
         }
 
-        /* Mobile */
-        @media (max-width: 640px) {
-          .dash-root { padding-left: 10px !important; padding-right: 10px !important; padding-top: 12px !important; }
-          .store-card { padding: 16px !important; margin-bottom: 16px !important; }
-          .store-card-inner { gap: 14px !important; }
-          .store-card-inner > div:first-child h3 { font-size: 16px !important; line-height: 1.3 !important; }
-          .store-card-inner > div:first-child p { font-size: 12px !important; line-height: 1.4 !important; }
-          .store-card-inner > div:first-child > div:last-child { padding: 6px 10px !important; }
-          .store-card-inner > div:first-child > div:last-child span { font-size: 10px !important; }
-          .store-btn { padding: 11px 14px !important; font-size: 12px !important; }
-          .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-          .dash-chart-grid { gap: 12px !important; }
-          .period-select { flex: 1 !important; min-width: 0 !important; font-size: 12px !important; padding: 8px 32px 8px 10px !important; }
-        }
-
-        /* Small mobile */
+        /* ─── Mobile Portrait (≤ 480px) ──────────────────────────────────── */
         @media (max-width: 480px) {
-          .dash-root { padding-left: 8px !important; padding-right: 8px !important; }
-          .store-card { padding: 14px !important; }
-          .store-card-inner { gap: 12px !important; }
-          .store-card-inner > div:first-child > div:first-child { width: 44px !important; height: 44px !important; }
-          .store-card-inner > div:first-child > div:first-child svg { width: 22px !important; height: 22px !important; }
-          .store-card-inner > div:first-child h3 { font-size: 15px !important; }
-          .store-card-inner > div:first-child p { font-size: 11px !important; }
-          .store-btn { font-size: 11px !important; padding: 10px 12px !important; }
-          .store-btn svg { width: 14px !important; height: 14px !important; }
-          .kpi-grid { gap: 8px !important; }
-        }
-
-        /* Very small mobile */
-        @media (max-width: 380px) {
-          .dash-root { padding-left: 6px !important; padding-right: 6px !important; }
-          .store-card { padding: 12px !important; }
-          .store-card-inner > div:first-child h3 { font-size: 14px !important; }
-          .store-card-inner > div:first-child p { font-size: 10px !important; }
-          .store-btn { font-size: 10px !important; padding: 9px 10px !important; }
-        }
-
-        /* Extra small mobile - single column KPI */
-        @media (max-width: 340px) {
-          .kpi-grid { grid-template-columns: 1fr !important; }
+          .dash-root { padding-left: 10px; padding-right: 10px; }
+          .store-card { padding: 16px; margin-bottom: 16px; }
+          .store-card-inner { gap: 14px; }
+          .store-icon { width: 48px; height: 48px; }
+          .store-title { font-size: 16px; }
+          .store-description { font-size: 12px; }
+          .store-btn { font-size: 12px; padding: 11px 14px; }
         }
 
         /* Evitar scroll horizontal en todos los dispositivos */
@@ -419,8 +384,8 @@ export default function DashboardView() {
         >
           <div className="store-card-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px' }}>
             {/* Info */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', flex: 1, minWidth: 0 }}>
-              <div style={{
+            <div className="store-info" style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', flex: 1, minWidth: 0 }}>
+              <div className="store-icon" style={{
                 width: 52, height: 52, borderRadius: '12px', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: T.storeIconBg,
@@ -429,14 +394,14 @@ export default function DashboardView() {
               }}>
                 <StoreIcon />
               </div>
-              <div style={{ minWidth: 0 }}>
-                <h3 style={{ color: T.storeTitleColor, fontWeight: 800, fontSize: '18px', margin: '0 0 4px 0', letterSpacing: '-0.3px' }}>
+              <div className="store-content" style={{ minWidth: 0 }}>
+                <h3 className="store-title" style={{ color: T.storeTitleColor, fontWeight: 800, fontSize: '18px', margin: '0 0 4px 0', letterSpacing: '-0.3px' }}>
                   Mi Tienda Online
                 </h3>
-                <p style={{ color: T.storeSubColor, fontSize: '13px', margin: '0 0 12px 0', fontWeight: 500 }}>
+                <p className="store-description" style={{ color: T.storeSubColor, fontSize: '13px', margin: '0 0 12px 0', fontWeight: 500 }}>
                   Accede a tu tienda e-commerce y comparte la URL con tus clientes
                 </p>
-                <div style={{
+                <div className="store-url-badge" style={{
                   display: 'inline-flex', alignItems: 'center', gap: '8px',
                   background: T.storeUrlBg,
                   border: `1px solid ${T.storeUrlBorder}`,

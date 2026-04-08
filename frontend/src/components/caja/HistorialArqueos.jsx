@@ -176,213 +176,403 @@ export default function HistorialArqueos({ idSucursal }) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <CalendarIcon />
-            Historial de Arqueos
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={cargarHistorial}
-              disabled={loading || exporting}
-            >
-              <RefreshIcon className="mr-2" />
-              Actualizar
-            </Button>
+    <>
+      <style>{`
+        /* ─── Responsive Design para HistorialArqueos ────────────────────── */
 
-            {/* Botones de exportación */}
-            <Button
-              onClick={() => handleExport('excel')}
-              disabled={exporting}
-              className="bg-green-600 hover:bg-green-700 text-white"
-              size="sm"
-              title="Exportar a Excel (sin límite de registros)"
-            >
-              {exporting && exportType === 'excel' ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Exportando...
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Excel
-                </>
-              )}
-            </Button>
+        /* ─── Desktop & Large Screens (≥ 1024px) ─────────────────────────── */
+        @media (min-width: 1024px) {
+          .historial-table-wrapper {
+            overflow-x: visible !important;
+          }
+          .historial-filtros-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+          }
+        }
 
-            <Button
-              onClick={() => handleExport('pdf')}
-              disabled={exporting}
-              className="bg-red-600 hover:bg-red-700 text-white"
-              size="sm"
-              title="Exportar a PDF (sin límite de registros)"
-            >
-              {exporting && exportType === 'pdf' ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Exportando...
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                  PDF
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {/* Filtros */}
-        <div className="mb-6 p-4 bg-muted/50 rounded-lg space-y-4">
-          <h3 className="font-semibold text-sm">Filtros</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground block mb-1">
-                Fecha Desde
-              </label>
-              <input
-                type="date"
-                value={fechaDesde}
-                onChange={(e) => setFechaDesde(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground block mb-1">
-                Fecha Hasta
-              </label>
-              <input
-                type="date"
-                value={fechaHasta}
-                onChange={(e) => setFechaHasta(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground block mb-1">
-                Límite
-              </label>
-              <select
-                value={limite}
-                onChange={(e) => setLimite(parseInt(e.target.value))}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              >
-                <option value="20">Últimos 20</option>
-                <option value="50">Últimos 50</option>
-                <option value="100">Últimos 100</option>
-                <option value="200">Últimos 200</option>
-              </select>
-            </div>
-            <div className="flex items-end gap-2">
-              <Button
-                onClick={cargarHistorial}
-                disabled={loading}
-                className="flex-1"
-              >
-                Filtrar
-              </Button>
+        /* ─── Tablet (768px - 1023px) ──────────────────────────────────────── */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .historial-table {
+            min-width: 900px !important;
+          }
+          .historial-filtros-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          /* Hide Sucursal column */
+          .historial-table th:nth-child(8),
+          .historial-table td:nth-child(8) {
+            display: none;
+          }
+          .historial-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+          }
+          .historial-header-btns {
+            width: 100% !important;
+            flex-wrap: wrap !important;
+          }
+          .historial-export-btn {
+            flex: 1 !important;
+            min-width: 120px !important;
+          }
+        }
+
+        /* ─── Mobile & Tablet Landscape (481px - 767px) ──────────────────── */
+        @media (min-width: 481px) and (max-width: 767px) {
+          .historial-table-wrapper {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+          }
+          .historial-table {
+            min-width: 700px !important;
+            font-size: 13px !important;
+          }
+          .historial-table th,
+          .historial-table td {
+            padding: 10px 12px !important;
+            font-size: 12px !important;
+          }
+          .historial-filtros-grid {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+          }
+          .historial-filtros-btns {
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .historial-filtro-btn {
+            width: 100% !important;
+          }
+          /* Hide Hora, Usuario and Sucursal columns */
+          .historial-table th:nth-child(2),
+          .historial-table td:nth-child(2),
+          .historial-table th:nth-child(7),
+          .historial-table td:nth-child(7),
+          .historial-table th:nth-child(8),
+          .historial-table td:nth-child(8) {
+            display: none;
+          }
+          .historial-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+          }
+          .historial-header-btns {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .historial-export-btn {
+            width: 100% !important;
+          }
+        }
+
+        /* ─── Mobile Portrait (≤ 480px) ──────────────────────────────────── */
+        @media (max-width: 480px) {
+          .historial-table-wrapper {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+          }
+          .historial-table {
+            min-width: 550px !important;
+            font-size: 12px !important;
+          }
+          .historial-table th,
+          .historial-table td {
+            padding: 8px 10px !important;
+            font-size: 11px !important;
+          }
+          .historial-table th {
+            font-size: 10px !important;
+            padding: 8px 10px !important;
+          }
+          /* Hide Hora, Saldo Esperado, Usuario and Sucursal columns */
+          .historial-table th:nth-child(2),
+          .historial-table td:nth-child(2),
+          .historial-table th:nth-child(3),
+          .historial-table td:nth-child(3),
+          .historial-table th:nth-child(7),
+          .historial-table td:nth-child(7),
+          .historial-table th:nth-child(8),
+          .historial-table td:nth-child(8) {
+            display: none;
+          }
+          .historial-filtros {
+            padding: 12px !important;
+          }
+          .historial-filtros-grid {
+            gap: 8px !important;
+          }
+          .historial-filtro-input {
+            height: 36px !important;
+            font-size: 12px !important;
+          }
+          .historial-filtro-label {
+            font-size: 10px !important;
+          }
+          .historial-filtros-btns {
+            flex-direction: column !important;
+            gap: 6px !important;
+          }
+          .historial-filtro-btn {
+            width: 100% !important;
+            font-size: 11px !important;
+            padding: 8px 12px !important;
+          }
+          .historial-title {
+            font-size: 16px !important;
+          }
+          .historial-header-btns {
+            gap: 6px !important;
+          }
+          .historial-export-btn {
+            width: 100% !important;
+            font-size: 11px !important;
+            padding: 8px 10px !important;
+          }
+          .historial-total {
+            font-size: 11px !important;
+          }
+        }
+
+        /* ─── Very small mobile (≤ 380px) ────────────────────────────────── */
+        @media (max-width: 380px) {
+          .historial-table {
+            min-width: 480px !important;
+          }
+          .historial-table th,
+          .historial-table td {
+            padding: 6px 8px !important;
+            font-size: 10px !important;
+          }
+          .historial-table th {
+            font-size: 9px !important;
+            padding: 6px 8px !important;
+          }
+          .historial-filtros {
+            padding: 10px !important;
+          }
+          .historial-title {
+            font-size: 15px !important;
+          }
+          .historial-total {
+            font-size: 10px !important;
+          }
+        }
+      `}</style>
+
+      <Card>
+        <CardHeader>
+          <div className="historial-header flex items-center justify-between">
+            <CardTitle className="historial-title flex items-center gap-2">
+              <CalendarIcon />
+              Historial de Arqueos
+            </CardTitle>
+            <div className="historial-header-btns flex items-center gap-2">
               <Button
                 variant="outline"
-                onClick={limpiarFiltros}
-                disabled={loading}
+                size="sm"
+                onClick={cargarHistorial}
+                disabled={loading || exporting}
+                className="historial-export-btn"
               >
-                Limpiar
+                <RefreshIcon className="mr-2" />
+                Actualizar
+              </Button>
+
+              {/* Botones de exportación */}
+              <Button
+                onClick={() => handleExport('excel')}
+                disabled={exporting}
+                className="bg-green-600 hover:bg-green-700 text-white"
+                size="sm"
+                title="Exportar a Excel (sin límite de registros)"
+              >
+                {exporting && exportType === 'excel' ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Exportando...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Excel
+                  </>
+                )}
+              </Button>
+
+              <Button
+                onClick={() => handleExport('pdf')}
+                disabled={exporting}
+                className="bg-red-600 hover:bg-red-700 text-white"
+                size="sm"
+                title="Exportar a PDF (sin límite de registros)"
+              >
+                {exporting && exportType === 'pdf' ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Exportando...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    PDF
+                  </>
+                )}
               </Button>
             </div>
           </div>
-        </div>
+        </CardHeader>
+        <CardContent>
+          {/* Filtros */}
+          <div className="historial-filtros mb-6 p-4 bg-muted/50 rounded-lg space-y-4">
+            <h3 className="font-semibold text-sm">Filtros</h3>
+            <div className="historial-filtros-grid grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="historial-filtro-label text-xs font-medium text-muted-foreground block mb-1">
+                  Fecha Desde
+                </label>
+                <input
+                  type="date"
+                  value={fechaDesde}
+                  onChange={(e) => setFechaDesde(e.target.value)}
+                  className="historial-filtro-input flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="historial-filtro-label text-xs font-medium text-muted-foreground block mb-1">
+                  Fecha Hasta
+                </label>
+                <input
+                  type="date"
+                  value={fechaHasta}
+                  onChange={(e) => setFechaHasta(e.target.value)}
+                  className="historial-filtro-input flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="historial-filtro-label text-xs font-medium text-muted-foreground block mb-1">
+                  Límite
+                </label>
+                <select
+                  value={limite}
+                  onChange={(e) => setLimite(parseInt(e.target.value))}
+                  className="historial-filtro-input flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="20">Últimos 20</option>
+                  <option value="50">Últimos 50</option>
+                  <option value="100">Últimos 100</option>
+                  <option value="200">Últimos 200</option>
+                </select>
+              </div>
+              <div className="historial-filtros-btns flex items-end gap-2">
+                <Button
+                  onClick={cargarHistorial}
+                  disabled={loading}
+                  className="historial-filtro-btn flex-1"
+                >
+                  Filtrar
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={limpiarFiltros}
+                  disabled={loading}
+                  className="historial-filtro-btn"
+                >
+                  Limpiar
+                </Button>
+              </div>
+            </div>
+          </div>
 
-        {/* Tabla de historial */}
-        {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : arqueos.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No hay arqueos registrados con los filtros actuales.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Fecha</th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm">Hora</th>
-                  <th className="text-right py-3 px-4 font-semibold text-sm">Saldo Esperado</th>
-                  <th className="text-right py-3 px-4 font-semibold text-sm">Monto Contado</th>
-                  <th className="text-right py-3 px-4 font-semibold text-sm">Diferencia</th>
-                  <th className="text-center py-3 px-4 font-semibold text-sm">Estado</th>
-                  <th className="text-center py-3 px-4 font-semibold text-sm">Usuario</th>
-                  <th className="text-center py-3 px-4 font-semibold text-sm">Sucursal</th>
-                </tr>
-              </thead>
-              <tbody>
-                {arqueos.map((arqueo) => (
-                  <tr key={arqueo.id} className="border-b hover:bg-muted/50">
-                    <td className="py-3 px-4 text-sm">
-                      {formatDate(arqueo.fecha)}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">
-                      {formatDateTime(arqueo.fecha_hora_registro)}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-right font-medium">
-                      {formatCurrency(arqueo.saldo_esperado)}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-right font-medium">
-                      {formatCurrency(arqueo.monto_contado)}
-                    </td>
-                    <td className={`py-3 px-4 text-sm text-right font-semibold ${getDiferenciaColor(arqueo.diferencia)}`}>
-                      {parseFloat(arqueo.diferencia) >= 0 ? '+' : ''}{formatCurrency(arqueo.diferencia)}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        {arqueo.estado_caja === 'cerrada' ? (
-                          <>
-                            <LockClosedIcon />
-                            <span className="text-xs font-medium text-red-600 dark:text-red-400">Cerrada</span>
-                          </>
-                        ) : (
-                          <>
-                            <LockOpenIcon />
-                            <span className="text-xs font-medium text-green-600 dark:text-green-400">Abierta</span>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-center">
-                      <div className="text-xs">
-                        <div className="font-medium">{arqueo.usuario_nombre || '-'}</div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-center">
-                      <div className="text-xs">
-                        <div>{arqueo.sucursal_nombre || '-'}</div>
-                      </div>
-                    </td>
+          {/* Tabla de historial */}
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : arqueos.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No hay arqueos registrados con los filtros actuales.
+            </div>
+          ) : (
+            <div className="historial-table-wrapper overflow-x-auto">
+              <table className="historial-table w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4 font-semibold text-sm">Fecha</th>
+                    <th className="text-left py-3 px-4 font-semibold text-sm">Hora</th>
+                    <th className="text-right py-3 px-4 font-semibold text-sm">Saldo Esperado</th>
+                    <th className="text-right py-3 px-4 font-semibold text-sm">Monto Contado</th>
+                    <th className="text-right py-3 px-4 font-semibold text-sm">Diferencia</th>
+                    <th className="text-center py-3 px-4 font-semibold text-sm">Estado</th>
+                    <th className="text-center py-3 px-4 font-semibold text-sm">Usuario</th>
+                    <th className="text-center py-3 px-4 font-semibold text-sm">Sucursal</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {arqueos.map((arqueo) => (
+                    <tr key={arqueo.id} className="border-b hover:bg-muted/50">
+                      <td className="py-3 px-4 text-sm">
+                        {formatDate(arqueo.fecha)}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-muted-foreground">
+                        {formatDateTime(arqueo.fecha_hora_registro)}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-right font-medium">
+                        {formatCurrency(arqueo.saldo_esperado)}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-right font-medium">
+                        {formatCurrency(arqueo.monto_contado)}
+                      </td>
+                      <td className={`py-3 px-4 text-sm text-right font-semibold ${getDiferenciaColor(arqueo.diferencia)}`}>
+                        {parseFloat(arqueo.diferencia) >= 0 ? '+' : ''}{formatCurrency(arqueo.diferencia)}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          {arqueo.estado_caja === 'cerrada' ? (
+                            <>
+                              <LockClosedIcon />
+                              <span className="text-xs font-medium text-red-600 dark:text-red-400">Cerrada</span>
+                            </>
+                          ) : (
+                            <>
+                              <LockOpenIcon />
+                              <span className="text-xs font-medium text-green-600 dark:text-green-400">Abierta</span>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-center">
+                        <div className="text-xs">
+                          <div className="font-medium">{arqueo.usuario_nombre || '-'}</div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-center">
+                        <div className="text-xs">
+                          <div>{arqueo.sucursal_nombre || '-'}</div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-        {/* Total de registros */}
-        {!loading && arqueos.length > 0 && (
-          <div className="mt-4 text-sm text-muted-foreground text-center">
-            Mostrando {arqueos.length} de {total} arqueos
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          {/* Total de registros */}
+          {!loading && arqueos.length > 0 && (
+            <div className="historial-total mt-4 text-sm text-muted-foreground text-center">
+              Mostrando {arqueos.length} de {total} arqueos
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </>
   );
 }
