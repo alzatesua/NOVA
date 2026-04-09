@@ -61,32 +61,6 @@ ALLOWED_HOSTS = [
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-
-    # Renderizado (para API en navegador y JSON en frontend)
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-    ),
-
-    # Manejador de errores
-    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
-
-    # Autenticación: COMENTAR SessionAuthentication para APIs puras
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',  # ← Comentar esta línea
-        'rest_framework.authentication.BasicAuthentication',
-    ),
-
-    # Permisos por defecto
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
-    ),
-}
-
-
 
 
 
@@ -162,6 +136,11 @@ DATABASES = {
         'PASSWORD': os.environ.get('DB_PASSWORD', 'zuleta18'),
         'HOST': os.environ.get('DB_HOST', 'db'),
         'PORT': os.environ.get('DB_PORT', '5432'),
+        'CONN_MAX_AGE': 600,  # Persistir conexiones por 10 minutos
+        'OPTIONS': {
+            'connect_timeout': 10,
+            'options': '-c statement_timeout=30000',  # 30s query timeout
+        },
     },
 }
 
@@ -280,6 +259,92 @@ SIMPLE_JWT = {
 
 #dominio
 BASE_DOMAIN = os.environ.get('BASE_DOMAIN', 'nova.dagi.co')  # dominio principal
+
+
+# ============================================
+# CACHE CONFIGURATION - REDIS
+# ============================================
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': os.environ.get('REDIS_URL', 'redis://redis:6379/1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CONNECTION_POOL_KWARGS': {
+                'max_connections': 50,
+                'retry_on_timeout': True,
+            },
+            'SOCKET_CONNECT_TIMEOUT': 5,
+            'SOCKET_TIMEOUT': 5,
+        },
+        'KEY_PREFIX': 'nova',
+        'TIMEOUT': 300,  # 5 minutos por defecto
+    },
+    'locmem': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# Cache de sesiones en Redis
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+
+
+# ============================================
+# DATABASE CONNECTION POOLING
+# ============================================
+# Habilitar persistencia de conexiones para reducir overhead
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ============================================
+# MIDDLEWARE OPTIMIZATION
+# ============================================
+# Orden optimizado de middleware para mejor rendimiento
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',  # Cache middleware
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'main_dashboard.middleware.DisableCSRFForAPIMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',  # Cache middleware
+]
+
+
+# ============================================
+# REST FRAMEWORK OPTIMIZATION
+# ============================================
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
+    ),
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/minute',  # Aumentado de 30/min
+        'user': '500/minute',  # Aumentado de 100/min
+    },
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 50,  # Aumentado de 20
+}
 
 
 CORS_ALLOW_HEADERS = list(default_headers) + [

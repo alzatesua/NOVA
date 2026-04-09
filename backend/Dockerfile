@@ -33,4 +33,18 @@ EXPOSE 8000
 
 # Run the application
 ENTRYPOINT ["./entrypoint.sh"]
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "nova.wsgi:application"]
+CMD ["gunicorn", \
+     "--bind", "0.0.0.0:8000", \
+     "--workers", "8", \
+     "--threads", "4", \
+     "--worker-class", "gthread", \
+     "--worker-connections", "1000", \
+     "--max-requests", "5000", \
+     "--max-requests-jitter", "500", \
+     "--timeout", "30", \
+     "--graceful-timeout", "30", \
+     "--backlog", "2048", \
+     "--log-level", "info", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-", \
+     "nova.wsgi:application"]

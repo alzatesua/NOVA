@@ -295,71 +295,71 @@ export default function KardexInline({ productos }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Encabezado */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <ClipboardDocumentListIcon style={{ width: 28, height: 28 }} />
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <ClipboardDocumentListIcon style={{ width: 20, height: 20 }} className="sm:hidden" />
+            <ClipboardDocumentListIcon style={{ width: 24, height: 24 }} className="hidden sm:block lg:hidden" />
+            <ClipboardDocumentListIcon style={{ width: 28, height: 28 }} className="hidden lg:block" />
             Kardex de Inventario
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
             Realiza el conteo físico de inventario y compara con el stock del sistema
           </p>
         </div>
       </div>
 
       {/* Estado actual */}
-
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 border border-slate-200 dark:!border-slate-800">
-          <div className="text-sm text-slate-600 dark:text-slate-400">Total Productos</div>
-          <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{productos.length}</div>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white dark:!bg-slate-900 rounded-lg p-3 sm:p-4 border border-slate-200 dark:!border-slate-800">
+          <div className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400">Total Productos</div>
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">{productos.length}</div>
         </div>
-        <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 border border-slate-200 dark:!border-slate-800">
-          <div className="text-sm text-slate-600 dark:text-slate-400">Contados</div>
-          <div className="text-2xl font-bold text-blue-600">
+        <div className="bg-white dark:!bg-slate-900 rounded-lg p-3 sm:p-4 border border-slate-200 dark:!border-slate-800">
+          <div className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400">Contados</div>
+          <div className="text-xl sm:text-2xl font-bold text-blue-600">
             {Object.values(productosConteo).filter(v => v !== '' && v !== null && v !== undefined).length}
           </div>
         </div>
-        <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 border border-slate-200 dark:!border-slate-800">
-          <div className="text-sm text-slate-600 dark:text-slate-400">Por Contar</div>
-          <div className="text-2xl font-bold text-orange-600">
+        <div className="bg-white dark:!bg-slate-900 rounded-lg p-3 sm:p-4 border border-slate-200 dark:!border-slate-800">
+          <div className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400">Por Contar</div>
+          <div className="text-xl sm:text-2xl font-bold text-orange-600">
             {productos.length - Object.values(productosConteo).filter(v => v !== '' && v !== null && v !== undefined).length}
           </div>
         </div>
-        <div className="bg-white dark:!bg-slate-900 rounded-lg p-4 border border-slate-200 dark:!border-slate-800">
-          <div className="text-sm text-slate-600 dark:text-slate-400">Stock Total</div>
-          <div className="text-2xl font-bold text-emerald-600">
+        <div className="bg-white dark:!bg-slate-900 rounded-lg p-3 sm:p-4 border border-slate-200 dark:!border-slate-800">
+          <div className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400">Stock Total</div>
+          <div className="text-xl sm:text-2xl font-bold text-emerald-600">
             {productos.reduce((sum, p) => sum + (parseInt(p.stock) || 0), 0)}
           </div>
         </div>
       </div>
 
       {/* Controles */}
-      <div className="flex flex-wrap gap-4 items-center justify-between bg-white dark:!bg-slate-900 rounded-lg p-4 border border-slate-200 dark:!border-slate-800">
-        <div className="flex items-center gap-4 flex-1 flex-wrap">
-          <div className="relative flex-1 min-w-[200px]">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" style={{ width: 20, height: 20 }} />
+      <div className="flex flex-col gap-3 sm:gap-4 bg-white dark:!bg-slate-900 rounded-lg p-3 sm:p-4 border border-slate-200 dark:!border-slate-800">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+          <div className="relative flex-1 min-w-[150px] sm:min-w-[200px]">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" style={{ width: 18, height: 18 }} />
             <input
               type="text"
               placeholder="Buscar por nombre, SKU o código..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:!border-slate-600 rounded-lg bg-white dark:!bg-slate-800 text-slate-900 dark:text-slate-100"
+              className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 border border-slate-300 dark:!border-slate-600 rounded-lg bg-white dark:!bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
             />
           </div>
 
           {/* Selector de sede */}
           {loadingSucursales ? (
-            <div className="text-sm text-slate-500">Cargando sedes...</div>
+            <div className="text-xs sm:text-sm text-slate-500 flex items-center">Cargando sedes...</div>
           ) : esAdminBackend ? (
-            <div className="relative min-w-[180px]">
+            <div className="relative min-w-[140px] sm:min-w-[180px] w-full sm:w-auto">
               <select
                 value={sucursalSeleccionada || ''}
                 onChange={(e) => setSucursalSeleccionada(e.target.value ? parseInt(e.target.value) : null)}
-                className="pl-10 pr-8 py-2 border border-slate-300 dark:!border-slate-600 rounded-lg bg-white dark:!bg-slate-800 text-slate-900 dark:text-slate-100 appearance-none cursor-pointer text-sm"
+                className="w-full pl-9 sm:pl-10 pr-8 py-2 border border-slate-300 dark:!border-slate-600 rounded-lg bg-white dark:!bg-slate-800 text-slate-900 dark:text-slate-100 appearance-none cursor-pointer text-xs sm:text-sm"
               >
                 <option value="">Todas las sedes</option>
                 {sucursales.map(s => (
@@ -378,18 +378,18 @@ export default function KardexInline({ productos }) {
               </div>
             </div>
           ) : (
-            <div className="px-3 py-2 bg-blue-50 dark:!bg-blue-900/20 border border-blue-200 dark:!border-blue-800 rounded-lg text-sm text-blue-700 dark:!text-blue-300 flex items-center gap-2">
+            <div className="px-3 py-2 bg-blue-50 dark:!bg-blue-900/20 border border-blue-200 dark:!border-blue-800 rounded-lg text-xs sm:text-sm text-blue-700 dark:!text-blue-300 flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
               <span className="font-medium">Sede:</span>
-              <span>{sucursales.find(s => s.id === sucursalSeleccionada)?.nombre || 'Todas'}</span>
+              <span className="truncate">{sucursales.find(s => s.id === sucursalSeleccionada)?.nombre || 'Todas'}</span>
             </div>
           )}
 
           <button
             onClick={reiniciarConteo}
-            className="px-4 py-2 bg-slate-200 dark:!bg-slate-700 text-slate-700 dark:!text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors"
+            className="px-3 sm:px-4 py-2 bg-slate-200 dark:!bg-slate-700 text-slate-700 dark:!text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:!bg-slate-600 transition-colors text-xs sm:text-sm"
           >
             Reiniciar
           </button>
@@ -398,9 +398,10 @@ export default function KardexInline({ productos }) {
           <button
             onClick={procesarKardex}
             disabled={procesando}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
           >
-            <ClipboardDocumentListIcon style={{ width: 20, height: 20 }} />
+            <ClipboardDocumentListIcon style={{ width: 18, height: 18 }} className="sm:hidden" />
+            <ClipboardDocumentListIcon style={{ width: 20, height: 20 }} className="hidden sm:block" />
             {procesando ? 'Procesando...' : 'Procesar Kardex'}
           </button>
         </div>
@@ -409,52 +410,54 @@ export default function KardexInline({ productos }) {
       {/* Reporte de resultados */}
       {mostrarReporte && resultadoKardex && (
         <div className="bg-white dark:!bg-slate-900 rounded-lg border border-slate-200 dark:!border-slate-800 overflow-hidden">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
                 Resultados del Kardex
               </h3>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto">
                 <button
                   onClick={exportarPDF}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                  className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
-                  <DocumentArrowDownIcon style={{ width: 18, height: 18 }} />
+                  <DocumentArrowDownIcon style={{ width: 16, height: 16 }} className="sm:hidden" />
+                  <DocumentArrowDownIcon style={{ width: 18, height: 18 }} className="hidden sm:block" />
                   PDF
                 </button>
                 <button
                   onClick={exportarExcel}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                  className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
-                  <DocumentArrowDownIcon style={{ width: 18, height: 18 }} />
+                  <DocumentArrowDownIcon style={{ width: 16, height: 16 }} className="sm:hidden" />
+                  <DocumentArrowDownIcon style={{ width: 18, height: 18 }} className="hidden sm:block" />
                   Excel
                 </button>
               </div>
             </div>
 
             {/* Resumen */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className={`p-4 rounded-lg ${resultadoKardex.productosConDiferencia === 0 ? 'bg-emerald-50 dark:!bg-emerald-900/20' : 'bg-amber-50 dark:!bg-amber-900/20'}`}>
-                <div className="text-sm text-slate-600 dark:text-slate-400">Precisión</div>
-                <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+              <div className={`p-3 sm:p-4 rounded-lg ${resultadoKardex.productosConDiferencia === 0 ? 'bg-emerald-50 dark:!bg-emerald-900/20' : 'bg-amber-50 dark:!bg-amber-900/20'}`}>
+                <div className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400">Precisión</div>
+                <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
                   {resultadoKardex.porcentajePrecision}%
                 </div>
               </div>
-              <div className="bg-blue-50 dark:!bg-blue-900/20 p-4 rounded-lg">
-                <div className="text-sm text-slate-600 dark:text-slate-400">Contados</div>
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              <div className="bg-blue-50 dark:!bg-blue-900/20 p-3 sm:p-4 rounded-lg">
+                <div className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400">Contados</div>
+                <div className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {resultadoKardex.productosContados}
                 </div>
               </div>
-              <div className="bg-emerald-50 dark:!bg-emerald-900/20 p-4 rounded-lg">
-                <div className="text-sm text-slate-600 dark:text-slate-400">Cuadrados</div>
-                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              <div className="bg-emerald-50 dark:!bg-emerald-900/20 p-3 sm:p-4 rounded-lg">
+                <div className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400">Cuadrados</div>
+                <div className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                   {resultadoKardex.productosCuadrados}
                 </div>
               </div>
-              <div className="bg-red-50 dark:!bg-red-900/20 p-4 rounded-lg">
-                <div className="text-sm text-slate-600 dark:text-slate-400">Con Diferencia</div>
-                <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+              <div className="bg-red-50 dark:!bg-red-900/20 p-3 sm:p-4 rounded-lg">
+                <div className="text-[10px] sm:text-sm text-slate-600 dark:text-slate-400">Con Diferencia</div>
+                <div className="text-xl sm:text-2xl font-bold text-red-600 dark:text-red-400">
                   {resultadoKardex.productosConDiferencia}
                 </div>
               </div>
@@ -463,47 +466,47 @@ export default function KardexInline({ productos }) {
             {/* Diferencias */}
             {resultadoKardex.diferencias.length > 0 ? (
               <div>
-                <h4 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
-                  <ExclamationTriangleIcon className="text-amber-500" style={{ width: 20, height: 20 }} />
+                <h4 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2 text-sm sm:text-base">
+                  <ExclamationTriangleIcon className="text-amber-500" style={{ width: 18, height: 18 }} />
                   Diferencias Detectadas ({resultadoKardex.diferencias.length})
                 </h4>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <table className="w-full text-xs sm:text-sm">
                     <thead className="bg-slate-100 dark:!bg-slate-800">
                       <tr>
-                        <th className="px-4 py-2 text-left">Producto</th>
-                        <th className="px-4 py-2 text-center">Sistema</th>
-                        <th className="px-4 py-2 text-center">Físico</th>
-                        <th className="px-4 py-2 text-center">Diferencia</th>
-                        <th className="px-4 py-2 text-right">Valor</th>
+                        <th className="px-2 sm:px-4 py-2 text-left">Producto</th>
+                        <th className="px-2 sm:px-4 py-2 text-center hidden sm:table-cell">Sistema</th>
+                        <th className="px-2 sm:px-4 py-2 text-center">Físico</th>
+                        <th className="px-2 sm:px-4 py-2 text-center">Diferencia</th>
+                        <th className="px-2 sm:px-4 py-2 text-right">Valor</th>
                       </tr>
                     </thead>
                     <tbody>
                       {resultadoKardex.diferencias.map((diff, index) => (
                         <tr key={index} className="border-t border-slate-200 dark:!border-slate-700">
-                          <td className="px-4 py-2">
-                            <div className="font-medium text-slate-900 dark:text-slate-100">
+                          <td className="px-2 sm:px-4 py-2">
+                            <div className="font-medium text-slate-900 dark:text-slate-100 text-xs sm:text-sm">
                               {diff.producto.nombre}
                             </div>
-                            <div className="text-xs text-slate-500">
+                            <div className="text-[10px] sm:text-xs text-slate-500 hidden sm:block">
                               {diff.producto.sku || diff.producto.codigo_barras || 'N/A'}
                             </div>
                           </td>
-                          <td className="px-4 py-2 text-center text-slate-600 dark:text-slate-400">
+                          <td className="px-2 sm:px-4 py-2 text-center text-slate-600 dark:text-slate-400 hidden sm:table-cell">
                             {diff.cantidadSistema}
                           </td>
-                          <td className="px-4 py-2 text-center text-slate-900 dark:text-slate-100">
+                          <td className="px-2 sm:px-4 py-2 text-center text-slate-900 dark:text-slate-100">
                             {diff.cantidadFisica}
                           </td>
-                          <td className={`px-4 py-2 text-center font-semibold ${
+                          <td className={`px-2 sm:px-4 py-2 text-center font-semibold text-xs sm:text-sm ${
                             diff.tipo === 'sobrante'
                               ? 'text-emerald-600'
                               : 'text-red-600'
                           }`}>
                             {diff.diferencia > 0 ? '+' : ''}{diff.diferencia}
-                            <span className="text-xs ml-1">({diff.tipo})</span>
+                            <span className="text-[10px] sm:text-xs ml-1">({diff.tipo})</span>
                           </td>
-                          <td className="px-4 py-2 text-right text-slate-900 dark:text-slate-100">
+                          <td className="px-2 sm:px-4 py-2 text-right text-slate-900 dark:text-slate-100 text-xs sm:text-sm">
                             ${diff.valorDiferencia.toLocaleString()}
                           </td>
                         </tr>
@@ -513,10 +516,10 @@ export default function KardexInline({ productos }) {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8">
-                <CheckCircleIcon className="mx-auto text-emerald-500 mb-2" style={{ width: 48, height: 48 }} />
-                <p className="text-emerald-600 font-semibold">¡Inventario Cuadrado!</p>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">
+              <div className="text-center py-6 sm:py-8">
+                <CheckCircleIcon className="mx-auto text-emerald-500 mb-2" style={{ width: 36, height: 36 }} />
+                <p className="text-emerald-600 font-semibold text-sm sm:text-base">¡Inventario Cuadrado!</p>
+                <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
                   Todos los productos contados coinciden con el stock del sistema
                 </p>
               </div>
@@ -528,54 +531,54 @@ export default function KardexInline({ productos }) {
       {/* Tabla de productos para conteo */}
       {!mostrarReporte && (
         <div className="bg-white dark:!bg-slate-900 rounded-lg border border-slate-200 dark:!border-slate-800 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <table className="w-full text-xs sm:text-sm">
               <thead className="bg-slate-100 dark:!bg-slate-800">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-100">Producto</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-900 dark:text-slate-100">SKU</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-900 dark:text-slate-100">Stock Sistema</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-900 dark:text-slate-100">Conteo Físico</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-900 dark:text-slate-100">Acción</th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-slate-900 dark:text-slate-100">Producto</th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-slate-900 dark:text-slate-100 hidden sm:table-cell">SKU</th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-slate-900 dark:text-slate-100">Stock</th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-slate-900 dark:text-slate-100">Conteo</th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-slate-900 dark:text-slate-100">Acción</th>
                 </tr>
               </thead>
               <tbody>
                 {productosFiltrados.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-4 py-8 text-center text-slate-500">
+                    <td colSpan="5" className="px-4 py-6 sm:py-8 text-center text-slate-500 text-xs sm:text-sm">
                       No se encontraron productos
                     </td>
                   </tr>
                 ) : (
                   productosFiltrados.map((producto) => (
                     <tr key={producto.id} className="border-t border-slate-200 dark:!border-slate-700 hover:bg-slate-50 dark:hover:!bg-slate-800">
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-slate-900 dark:text-slate-100">
+                      <td className="px-2 sm:px-4 py-2 sm:py-3">
+                        <div className="font-medium text-slate-900 dark:text-slate-100 text-xs sm:text-sm">
                           {producto.nombre}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-center text-slate-600 dark:text-slate-400">
+                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-center text-slate-600 dark:text-slate-400 hidden sm:table-cell">
                         {producto.sku || producto.codigo_barras || 'N/A'}
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:!bg-blue-900 text-blue-800 dark:text-blue-200">
+                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
+                        <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-blue-100 dark:!bg-blue-900 text-blue-800 dark:text-blue-200">
                           {parseInt(producto.stock) || 0}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 sm:px-4 py-2 sm:py-3">
                         <input
                           type="number"
                           min="0"
                           value={productosConteo[producto.id] || ''}
                           onChange={(e) => handleCantidadChange(producto.id, e.target.value)}
                           placeholder="0"
-                          className="w-24 px-3 py-1 border border-slate-300 dark:!border-slate-600 rounded-lg bg-white dark:!bg-slate-800 text-slate-900 dark:text-slate-100 text-center"
+                          className="w-16 sm:w-24 px-2 sm:px-3 py-1 border border-slate-300 dark:!border-slate-600 rounded-lg bg-white dark:!bg-slate-800 text-slate-900 dark:text-slate-100 text-center text-xs sm:text-sm"
                         />
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
                         <button
                           onClick={() => handleConteoRapido(producto)}
-                          className="px-3 py-1 bg-emerald-100 dark:!bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200 dark:hover:!bg-emerald-800 transition-colors text-sm font-medium"
+                          className="px-2 sm:px-3 py-1 bg-emerald-100 dark:!bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200 dark:hover:!bg-emerald-800 transition-colors text-xs sm:text-sm font-medium"
                         >
                           Igualar
                         </button>

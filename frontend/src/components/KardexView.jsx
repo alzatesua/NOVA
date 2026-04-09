@@ -406,16 +406,316 @@ export default function KardexView() {
 
   return (
     <div className="font-sans bg-gray-50 dark:!bg-slate-900 min-h-screen">
+      <style>{`
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        /* ─── Responsive Design para KardexView ────────────────────────────── */
+
+        /* ─── Desktop & Large Screens (≥ 1024px) ─────────────────────────── */
+        @media (min-width: 1024px) {
+          .kardex-stats-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+          }
+          .kardex-report-metrics {
+            grid-template-columns: repeat(4, 1fr) !important;
+          }
+        }
+
+        /* ─── Tablet (768px - 1023px) ──────────────────────────────────────── */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .kardex-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          .kardex-report-metrics {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .kardex-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+          }
+          .kardex-filters {
+            flex-direction: column !important;
+            gap: 12px !important;
+          }
+          .kardex-sucursal-select {
+            width: 100% !important;
+            min-width: auto !important;
+          }
+        }
+
+        /* ─── Mobile & Tablet Landscape (481px - 767px) ──────────────────── */
+        @media (min-width: 481px) and (max-width: 767px) {
+          .kardex-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+          }
+          .kardex-stat-card {
+            padding: 12px !important;
+          }
+          .kardex-report-metrics {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+          }
+          .kardex-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+            padding: 12px 16px !important;
+          }
+          .kardex-title {
+            font-size: 18px !important;
+          }
+          .kardex-subtitle {
+            font-size: 11px !important;
+          }
+          .kardex-refresh-btn {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+          .kardex-filters {
+            flex-direction: column !important;
+            gap: 10px !important;
+            padding: 12px 16px !important;
+          }
+          .kardex-search {
+            width: 100% !important;
+          }
+          .kardex-sucursal-select {
+            width: 100% !important;
+            min-width: auto !important;
+          }
+          .kardex-filtro-cat {
+            width: 100% !important;
+          }
+          .kardex-btn-clear {
+            width: 100% !important;
+          }
+          .kardex-actions {
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+          .kardex-action-btn {
+            width: 100% !important;
+          }
+          .kardex-report-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+            padding: 16px !important;
+          }
+          .kardex-report-metric {
+            padding: 10px !important;
+          }
+          .kardex-report-actions {
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+          .kardex-report-btn {
+            width: 100% !important;
+          }
+          .kardex-table th:nth-child(4),
+          .kardex-table td:nth-child(4) {
+            display: none !important;
+          }
+        }
+
+        /* ─── Mobile Portrait (≤ 480px) ──────────────────────────────────── */
+        @media (max-width: 480px) {
+          .kardex-stats-grid {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+          .kardex-stat-card {
+            padding: 10px !important;
+          }
+          .kardex-stat-icon {
+            width: 32px !important;
+            height: 32px !important;
+          }
+          .kardex-stat-label {
+            font-size: 9px !important;
+          }
+          .kardex-stat-value {
+            font-size: 18px !important;
+          }
+          .kardex-report-metrics {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+          .kardex-report-metric {
+            padding: 8px !important;
+          }
+          .kardex-report-metric-value {
+            font-size: 20px !important;
+          }
+          .kardex-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+            padding: 10px 12px !important;
+          }
+          .kardex-header-icon {
+            width: 40px !important;
+            height: 40px !important;
+          }
+          .kardex-header-icon svg {
+            width: 20px !important;
+            height: 20px !important;
+          }
+          .kardex-title {
+            font-size: 16px !important;
+          }
+          .kardex-subtitle {
+            font-size: 10px !important;
+          }
+          .kardex-refresh-btn {
+            width: 100% !important;
+            padding: 10px 12px !important;
+            font-size: 13px !important;
+            justify-content: center !important;
+          }
+          .kardex-filters {
+            flex-direction: column !important;
+            gap: 8px !important;
+            padding: 10px 12px !important;
+          }
+          .kardex-search-input {
+            font-size: 13px !important;
+            padding: 8px 36px 8px 10px !important;
+          }
+          .kardex-sucursal-select {
+            width: 100% !important;
+            font-size: 13px !important;
+            padding: 8px 36px 8px 10px !important;
+          }
+          .kardex-filtro-cat {
+            width: 100% !important;
+            font-size: 13px !important;
+            padding: 8px 10px !important;
+          }
+          .kardex-btn-clear {
+            width: 100% !important;
+            padding: 8px 10px !important;
+            font-size: 13px !important;
+          }
+          .kardex-actions {
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .kardex-action-btn {
+            width: 100% !important;
+            padding: 10px 12px !important;
+            font-size: 13px !important;
+          }
+          .kardex-report-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+            padding: 12px !important;
+          }
+          .kardex-report-icon {
+            width: 40px !important;
+            height: 40px !important;
+          }
+          .kardex-report-icon svg {
+            width: 20px !important;
+            height: 20px !important;
+          }
+          .kardex-report-title {
+            font-size: 16px !important;
+          }
+          .kardex-report-metric {
+            padding: 8px !important;
+          }
+          .kardex-report-metric-value {
+            font-size: 18px !important;
+          }
+          .kardex-report-actions {
+            flex-direction: column !important;
+            gap: 8px !important;
+            padding: 12px !important;
+          }
+          .kardex-report-btn {
+            width: 100% !important;
+            padding: 8px 10px !important;
+            font-size: 13px !important;
+          }
+          .kardex-table th:nth-child(2),
+          .kardex-table td:nth-child(2),
+          .kardex-table th:nth-child(4),
+          .kardex-table td:nth-child(4) {
+            display: none !important;
+          }
+          .kardex-table th:nth-child(5),
+          .kardex-table td:nth-child(5) {
+            font-size: 10px !important;
+            padding: 8px 6px !important;
+          }
+          .kardex-historial-item {
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .kardex-historial-icon {
+            width: 32px !important;
+            height: 32px !important;
+          }
+          .kardex-historial-icon svg {
+            width: 16px !important;
+            height: 16px !important;
+          }
+        }
+
+        /* ─── Very small mobile (≤ 380px) ────────────────────────────────── */
+        @media (max-width: 380px) {
+          .kardex-stat-card {
+            padding: 8px !important;
+          }
+          .kardex-stat-icon {
+            width: 28px !important;
+            height: 28px !important;
+          }
+          .kardex-stat-value {
+            font-size: 16px !important;
+          }
+          .kardex-title {
+            font-size: 15px !important;
+          }
+          .kardex-refresh-btn {
+            padding: 8px 10px !important;
+            font-size: 12px !important;
+          }
+          .kardex-search-input,
+          .kardex-sucursal-select,
+          .kardex-filtro-cat {
+            font-size: 12px !important;
+          }
+          .kardex-action-btn,
+          .kardex-report-btn {
+            padding: 8px 10px !important;
+            font-size: 12px !important;
+          }
+          .kardex-report-title {
+            font-size: 14px !important;
+          }
+          .kardex-report-metric-value {
+            font-size: 16px !important;
+          }
+        }
+      `}</style>
+
       {/* Header */}
-      <div className="bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700 px-7 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
-              <ClipboardDocumentListIcon style={{ width: 24, height: 24 }} className="text-white" />
+      <div className="bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700 px-4 sm:px-6 lg:px-7 py-3 sm:py-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-xl bg-blue-600 flex items-center justify-center">
+              <ClipboardDocumentListIcon style={{ width: 20, height: 20 }} className="text-white sm:hidden" />
+              <ClipboardDocumentListIcon style={{ width: 24, height: 24 }} className="text-white hidden sm:block" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:!text-white">Kardex de Inventario</h1>
-              <p className="text-sm text-gray-500 dark:!text-slate-400">Conteo físico y ajuste de inventario</p>
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:!text-white">Kardex de Inventario</h1>
+              <p className="text-xs sm:text-sm text-gray-500 dark:!text-slate-400">Conteo físico y ajuste de inventario</p>
             </div>
           </div>
           <button
@@ -426,64 +726,65 @@ export default function KardexView() {
               }
               cargarProductos(sucursalFiltroActivo);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
           >
-            <ArrowPathIcon style={{ width: 18, height: 18 }} />
-            Actualizar
+            <ArrowPathIcon style={{ width: 16, height: 16 }} className="sm:hidden" />
+            <ArrowPathIcon style={{ width: 18, height: 18 }} className="hidden sm:block" />
+            <span className="hidden sm:inline">Actualizar</span>
           </button>
         </div>
       </div>
 
       <div className="px-7 py-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white dark:!bg-slate-900 rounded-xl p-5 border border-gray-200 dark:!border-slate-700">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="bg-white dark:!bg-slate-900 rounded-xl p-3 sm:p-4 lg:p-5 border border-gray-200 dark:!border-slate-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-500 dark:!text-slate-400 uppercase tracking-wide">Total Productos</p>
-                <p className="text-2xl font-bold text-gray-900 dark:!text-white mt-1">{productos.length}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:!text-slate-400 uppercase tracking-wide">Total Productos</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:!text-white mt-1">{productos.length}</p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-blue-50 dark:!bg-blue-900/20 flex items-center justify-center">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-lg bg-blue-50 dark:!bg-blue-900/20 flex items-center justify-center">
                 <ClipboardDocumentListIcon style={{ width: 24, height: 24 }} className="text-blue-600 dark:!text-blue-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:!bg-slate-900 rounded-xl p-5 border border-gray-200 dark:!border-slate-700">
+          <div className="kardex-stat-card bg-white dark:!bg-slate-900 rounded-xl p-5 border border-gray-200 dark:!border-slate-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-500 dark:!text-slate-400 uppercase tracking-wide">Contados</p>
-                <p className="text-2xl font-bold text-green-600 dark:!text-green-400 mt-1">
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:!text-slate-400 uppercase tracking-wide">Contados</p>
+                <p className="text-xl sm:text-2xl font-bold text-green-600 dark:!text-green-400 mt-1">
                   {Object.values(productosConteo).filter(v => v !== '').length}
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-green-50 dark:!bg-green-900/20 flex items-center justify-center">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-lg bg-green-50 dark:!bg-green-900/20 flex items-center justify-center">
                 <CheckCircleIcon style={{ width: 24, height: 24 }} className="text-green-600 dark:!text-green-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:!bg-slate-900 rounded-xl p-5 border border-gray-200 dark:!border-slate-700">
+          <div className="kardex-stat-card bg-white dark:!bg-slate-900 rounded-xl p-5 border border-gray-200 dark:!border-slate-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-500 dark:!text-slate-400 uppercase tracking-wide">Sin Contar</p>
-                <p className="text-2xl font-bold text-gray-600 dark:!text-slate-400 mt-1">
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:!text-slate-400 uppercase tracking-wide">Sin Contar</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-600 dark:!text-slate-400 mt-1">
                   {productos.length - Object.values(productosConteo).filter(v => v !== '').length}
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-gray-50 dark:!bg-slate-800 flex items-center justify-center">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-lg bg-gray-50 dark:!bg-slate-800 flex items-center justify-center">
                 <ExclamationCircleIcon style={{ width: 24, height: 24 }} className="text-gray-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:!bg-slate-900 rounded-xl p-5 border border-gray-200 dark:!border-slate-700">
+          <div className="kardex-stat-card bg-white dark:!bg-slate-900 rounded-xl p-5 border border-gray-200 dark:!border-slate-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-500 dark:!text-slate-400 uppercase tracking-wide">Historial</p>
-                <p className="text-2xl font-bold text-purple-600 dark:!text-purple-400 mt-1">{historialAjustes.length}</p>
+                <p className="kardex-stat-label text-xs text-gray-500 dark:!text-slate-400 uppercase tracking-wide">Historial</p>
+                <p className="kardex-stat-value text-2xl font-bold text-purple-600 dark:!text-purple-400 mt-1">{historialAjustes.length}</p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-purple-50 dark:!bg-purple-900/20 flex items-center justify-center">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-lg bg-purple-50 dark:!bg-purple-900/20 flex items-center justify-center">
                 <CalendarIcon style={{ width: 24, height: 24 }} className="text-purple-600 dark:!text-purple-400" />
               </div>
             </div>
@@ -491,16 +792,17 @@ export default function KardexView() {
         </div>
 
         {/* Filtros y búsqueda */}
-        <div className="bg-white dark:!bg-slate-900 rounded-xl p-4 border border-gray-200 dark:!border-slate-700 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
+        <div className="bg-white dark:!bg-slate-900 rounded-xl p-3 sm:p-4 border border-gray-200 dark:!border-slate-700 mb-4 sm:mb-6">
+          <div className="flex flex-col md:flex-row gap-3 sm:gap-4">
             <div className="flex-1 relative">
-              <MagnifyingGlassIcon style={{ width: 18, height: 18 }} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <MagnifyingGlassIcon style={{ width: 16, height: 16 }} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 sm:block hidden" />
+              <MagnifyingGlassIcon style={{ width: 18, height: 18 }} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 sm:hidden" />
               <input
                 type="text"
                 placeholder="Buscar por nombre o código..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:!bg-slate-800 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 bg-gray-50 dark:!bg-slate-800 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               />
             </div>
 
@@ -511,7 +813,7 @@ export default function KardexView() {
                   value={sucursalSeleccionada ?? ''}
                   onChange={handleSucursalChange}
                   disabled={loadingSucursales}
-                  className="pl-10 pr-8 py-2.5 bg-gray-50 dark:!bg-slate-800 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 appearance-none cursor-pointer min-w-[180px]"
+                  className="pl-9 sm:pl-10 pr-8 py-2 sm:py-2.5 bg-gray-50 dark:!bg-slate-800 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 appearance-none cursor-pointer min-w-[140px] sm:min-w-[180px] w-full sm:w-auto"
                 >
                   <option value="">Todas las sedes</option>
                   {sucursales.map(s => (
@@ -530,19 +832,19 @@ export default function KardexView() {
                 </div>
               </div>
             ) : (
-              <div className="px-4 py-2.5 bg-blue-50 dark:!bg-blue-900/20 border border-blue-200 dark:!border-blue-800 rounded-lg text-sm text-blue-700 dark:!text-blue-300 flex items-center gap-2">
+              <div className="px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-50 dark:!bg-blue-900/20 border border-blue-200 dark:!border-blue-800 rounded-lg text-sm text-blue-700 dark:!text-blue-300 flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
-                <span className="font-medium">Sede:</span>
-                <span>{sucursales.find(s => s.id === sucursalFiltroActivo)?.nombre || 'Cargando...'}</span>
+                <span className="font-medium text-xs sm:text-sm">Sede:</span>
+                <span className="text-xs sm:text-sm">{sucursales.find(s => s.id === sucursalFiltroActivo)?.nombre || 'Cargando...'}</span>
               </div>
             )}
 
             <select
               value={filtroCategoria}
               onChange={(e) => setFiltroCategoria(e.target.value)}
-              className="px-4 py-2.5 bg-gray-50 dark:!bg-slate-800 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50 dark:!bg-slate-800 border border-gray-300 dark:!border-slate-600 rounded-lg text-sm text-gray-900 dark:!text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full sm:w-auto"
             >
               <option value="">Todas las categorías</option>
               {categorias.map(cat => (
@@ -560,7 +862,7 @@ export default function KardexView() {
                 setResultadoKardex(null);
                 setMostrarReporte(false);
               }}
-              className="px-4 py-2.5 bg-gray-100 dark:!bg-slate-800 text-gray-700 dark:!text-slate-300 rounded-lg text-sm hover:bg-gray-200 dark:hover:!bg-slate-700 transition-colors"
+              className="px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-100 dark:!bg-slate-800 text-gray-700 dark:!text-slate-300 rounded-lg text-sm hover:bg-gray-200 dark:hover:!bg-slate-700 transition-colors w-full sm:w-auto"
             >
               Limpiar filtros
             </button>
@@ -569,13 +871,14 @@ export default function KardexView() {
 
         {/* Acciones principales */}
         {!mostrarReporte && (
-          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 mb-4 sm:mb-6">
             <button
               onClick={procesarKardex}
               disabled={Object.values(productosConteo).filter(v => v !== '').length === 0}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+              className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm sm:text-base"
             >
-              <ClipboardDocumentListIcon style={{ width: 20, height: 20 }} />
+              <ClipboardDocumentListIcon style={{ width: 18, height: 18 }} className="sm:hidden" />
+              <ClipboardDocumentListIcon style={{ width: 20, height: 20 }} className="hidden sm:block" />
               Procesar Kardex
             </button>
             <button
@@ -585,7 +888,7 @@ export default function KardexView() {
                 setProductosConteo(conteosRapidos);
                 showToast('success', 'Conteo rápido completado');
               }}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+              className="px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold text-sm sm:text-base"
             >
               Conteo Rápido
             </button>
@@ -594,32 +897,36 @@ export default function KardexView() {
 
         {/* Reporte de Kardex */}
         {mostrarReporte && resultadoKardex && (
-          <div className="bg-white dark:!bg-slate-900 rounded-xl border border-gray-200 dark:!border-slate-700 mb-6 overflow-hidden">
-            <div className={`p-6 border-b ${
+          <div className="bg-white dark:!bg-slate-900 rounded-xl border border-gray-200 dark:!border-slate-700 mb-4 sm:mb-6 overflow-hidden">
+            <div className={`p-4 sm:p-6 border-b ${
               resultadoKardex.productosConDiferencia === 0
                 ? 'bg-green-50 dark:!bg-green-900/20 border-green-200 dark:!border-green-800'
                 : 'bg-amber-50 dark:!bg-amber-900/20 border-amber-200 dark:!border-amber-800'
             }`}>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3 sm:gap-4">
                   {resultadoKardex.productosConDiferencia === 0 ? (
-                    <div className="w-16 h-16 rounded-full bg-green-100 dark:!bg-green-800 flex items-center justify-center">
-                      <CheckCircleIcon style={{ width: 32, height: 32 }} className="text-green-600 dark:!text-green-400" />
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full bg-green-100 dark:!bg-green-800 flex items-center justify-center flex-shrink-0">
+                      <CheckCircleIcon style={{ width: 24, height: 24 }} className="text-green-600 dark:!text-green-400 sm:hidden" />
+                      <CheckCircleIcon style={{ width: 28, height: 28 }} className="text-green-600 dark:!text-green-400 hidden sm:block lg:hidden" />
+                      <CheckCircleIcon style={{ width: 32, height: 32 }} className="text-green-600 dark:!text-green-400 hidden lg:block" />
                     </div>
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-amber-100 dark:!bg-amber-800 flex items-center justify-center">
-                      <ExclamationTriangleIcon style={{ width: 32, height: 32 }} className="text-amber-600 dark:!text-amber-400" />
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full bg-amber-100 dark:!bg-amber-800 flex items-center justify-center flex-shrink-0">
+                      <ExclamationTriangleIcon style={{ width: 24, height: 24 }} className="text-amber-600 dark:!text-amber-400 sm:hidden" />
+                      <ExclamationTriangleIcon style={{ width: 28, height: 28 }} className="text-amber-600 dark:!text-amber-400 hidden sm:block lg:hidden" />
+                      <ExclamationTriangleIcon style={{ width: 32, height: 32 }} className="text-amber-600 dark:!text-amber-400 hidden lg:block" />
                     </div>
                   )}
                   <div>
-                    <h2 className={`text-2xl font-bold ${
+                    <h2 className={`text-lg sm:text-xl lg:text-2xl font-bold ${
                       resultadoKardex.productosConDiferencia === 0
                         ? 'text-green-700 dark:!text-green-300'
                         : 'text-amber-700 dark:!text-amber-300'
                     }`}>
                       {resultadoKardex.productosConDiferencia === 0 ? '¡Inventario Cuadrado!' : 'Se Detectaron Diferencias'}
                     </h2>
-                    <p className={`text-sm ${
+                    <p className={`text-xs sm:text-sm ${
                       resultadoKardex.productosConDiferencia === 0
                         ? 'text-green-600 dark:!text-green-400'
                         : 'text-amber-600 dark:!text-amber-400'
@@ -630,32 +937,33 @@ export default function KardexView() {
                 </div>
                 <button
                   onClick={() => { setMostrarReporte(false); setResultadoKardex(null); }}
-                  className="p-2 hover:bg-black/5 dark:hover:!bg-white/10 rounded-lg transition-colors"
+                  className="self-end sm:self-auto p-2 hover:bg-black/5 dark:hover:!bg-white/10 rounded-lg transition-colors"
                 >
-                  <XMarkIcon style={{ width: 24, height: 24 }} className="text-gray-500 dark:!text-slate-400" />
+                  <XMarkIcon style={{ width: 20, height: 20 }} className="text-gray-500 dark:!text-slate-400 sm:hidden" />
+                  <XMarkIcon style={{ width: 24, height: 24 }} className="text-gray-500 dark:!text-slate-400 hidden sm:block" />
                 </button>
               </div>
             </div>
 
             {/* Métricas */}
-            <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-gray-50 dark:!bg-slate-800 rounded-lg">
-                <p className="text-3xl font-bold text-blue-600 dark:!text-blue-400">{resultadoKardex.productosCuadrados}</p>
-                <p className="text-xs text-gray-500 dark:!text-slate-400 mt-1">Cuadrados</p>
+            <div className="p-4 sm:p-6 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="text-center p-3 sm:p-4 bg-gray-50 dark:!bg-slate-800 rounded-lg">
+                <p className="text-2xl sm:text-3xl font-bold text-blue-600 dark:!text-blue-400">{resultadoKardex.productosCuadrados}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:!text-slate-400 mt-1">Cuadrados</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 dark:!bg-slate-800 rounded-lg">
-                <p className="text-3xl font-bold text-amber-600 dark:!text-amber-400">{resultadoKardex.productosConDiferencia}</p>
-                <p className="text-xs text-gray-500 dark:!text-slate-400 mt-1">Con diferencia</p>
+              <div className="text-center p-3 sm:p-4 bg-gray-50 dark:!bg-slate-800 rounded-lg">
+                <p className="text-2xl sm:text-3xl font-bold text-amber-600 dark:!text-amber-400">{resultadoKardex.productosConDiferencia}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:!text-slate-400 mt-1">Con diferencia</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 dark:!bg-slate-800 rounded-lg">
-                <p className="text-3xl font-bold text-purple-600 dark:!text-purple-400">{resultadoKardex.porcentajePrecision}%</p>
-                <p className="text-xs text-gray-500 dark:!text-slate-400 mt-1">Precisión</p>
+              <div className="text-center p-3 sm:p-4 bg-gray-50 dark:!bg-slate-800 rounded-lg">
+                <p className="text-2xl sm:text-3xl font-bold text-purple-600 dark:!text-purple-400">{resultadoKardex.porcentajePrecision}%</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:!text-slate-400 mt-1">Precisión</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 dark:!bg-slate-800 rounded-lg">
-                <p className="text-3xl font-bold text-red-600 dark:!text-red-400">
+              <div className="text-center p-3 sm:p-4 bg-gray-50 dark:!bg-slate-800 rounded-lg">
+                <p className="text-lg sm:text-3xl font-bold text-red-600 dark:!text-red-400">
                   ${resultadoKardex.valorTotalDiferencias.toLocaleString('es-CO')}
                 </p>
-                <p className="text-xs text-gray-500 dark:!text-slate-400 mt-1">Valor diferencias</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:!text-slate-400 mt-1">Valor diferencias</p>
               </div>
             </div>
 
@@ -664,7 +972,7 @@ export default function KardexView() {
               <div className="p-6 border-t border-gray-200 dark:!border-slate-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:!text-white mb-4">Detalle de Diferencias</h3>
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="kardex-table w-full">
                     <thead>
                       <tr className="border-b border-gray-200 dark:!border-slate-700">
                         <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 dark:!text-slate-400 uppercase">Producto</th>
@@ -710,31 +1018,31 @@ export default function KardexView() {
             )}
 
             {/* Acciones del reporte */}
-            <div className="p-6 border-t border-gray-200 dark:!border-slate-700 flex flex-col sm:flex-row gap-3">
+            <div className="kardex-report-actions p-6 border-t border-gray-200 dark:!border-slate-700 flex flex-col sm:flex-row gap-3">
               <button
                 onClick={guardarAjuste}
                 disabled={guardando}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                className="kardex-report-btn flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
               >
                 {guardando ? 'Guardando...' : 'Guardar Ajuste'}
               </button>
               <button
                 onClick={exportarPDF}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+                className="kardex-report-btn flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
               >
                 <DocumentArrowDownIcon style={{ width: 18, height: 18 }} />
                 PDF
               </button>
               <button
                 onClick={exportarExcel}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                className="kardex-report-btn flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
               >
                 <DocumentArrowDownIcon style={{ width: 18, height: 18 }} />
                 Excel
               </button>
               <button
                 onClick={() => { setMostrarReporte(false); setResultadoKardex(null); }}
-                className="px-4 py-2.5 bg-gray-100 dark:!bg-slate-800 text-gray-700 dark:!text-slate-300 rounded-lg hover:bg-gray-200 dark:hover:!bg-slate-700 transition-colors font-semibold"
+                className="kardex-report-btn px-4 py-2.5 bg-gray-100 dark:!bg-slate-800 text-gray-700 dark:!text-slate-300 rounded-lg hover:bg-gray-200 dark:hover:!bg-slate-700 transition-colors font-semibold"
               >
                 Nuevo Conteo
               </button>
@@ -779,7 +1087,7 @@ export default function KardexView() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="kardex-table w-full">
                   <thead>
                     <tr className="border-b border-gray-200 dark:!border-slate-700 bg-gray-50 dark:!bg-slate-800">
                       <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 dark:!text-slate-400 uppercase">Producto</th>
@@ -864,10 +1172,10 @@ export default function KardexView() {
             </div>
             <div className="divide-y divide-gray-200 dark:!divide-slate-700">
               {historialAjustes.slice(0, 5).map((ajuste, index) => (
-                <div key={index} className="p-4 hover:bg-gray-50 dark:hover:!bg-slate-800/50 transition-colors">
+                <div key={index} className="kardex-historial-item p-4 hover:bg-gray-50 dark:hover:!bg-slate-800/50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-full bg-purple-100 dark:!bg-purple-800 flex items-center justify-center flex-shrink-0">
+                      <div className="kardex-historial-icon w-10 h-10 rounded-full bg-purple-100 dark:!bg-purple-800 flex items-center justify-center flex-shrink-0">
                         <CalendarIcon style={{ width: 20, height: 20 }} className="text-purple-600 dark:!text-purple-400" />
                       </div>
                       <div>

@@ -128,13 +128,19 @@ export default function SucursalesForm({ onCreated }) {
   };
 
   return (
-    <div className="bg-white dark:!bg-slate-900 p-8 rounded-xl shadow-lg max-w-4xl mx-auto w-full">
-      <h4 className="text-2xl font-semibold mb-6 text-gray-900 dark:!text-white">Nueva Sucursal</h4>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="w-full">
+      {/* Header */}
+      <div className="mb-6">
+        <h4 className="text-xl sm:text-2xl font-bold text-white">Nueva Sucursal</h4>
+        <p className="text-[10px] sm:text-xs text-slate-400 mt-1">Completa los datos de la sucursal</p>
+      </div>
+
+      {/* Formulario */}
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
 
         {/* País */}
         <div className="flex flex-col">
-          <label htmlFor="pais" className="mb-2 text-sm font-medium text-gray-700 dark:!text-slate-300 select-none">País</label>
+          <label htmlFor="pais" className="mb-1.5 sm:mb-2 text-[10px] sm:text-xs font-medium text-slate-300 select-none">País *</label>
           <select
             id="pais"
             name="pais"
@@ -142,14 +148,19 @@ export default function SucursalesForm({ onCreated }) {
             onChange={e => setSelectedPais(e.target.value)}
             disabled={loading || isLoadingPaises}
             required
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:!border-slate-600 bg-gray-50 dark:!bg-slate-800 dark:!text-white
-              focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 hover:border-blue-400"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border text-[10px] sm:text-xs transition duration-300"
+            style={{
+              border: '1px solid',
+              borderColor: '#1a1d3d',
+              backgroundColor: '#0f1229',
+              color: '#ffffff'
+            }}
           >
-            <option value="" disabled className="dark:!bg-slate-800">
-              {isLoadingPaises ? 'Cargando países...' : 'Seleccione un país'}
+            <option value="" disabled>
+              {isLoadingPaises ? 'Cargando...' : 'Seleccione país'}
             </option>
             {paises.map(pais => (
-              <option key={pais.id} value={pais.id} className="dark:!bg-slate-800">
+              <option key={pais.id} value={pais.id}>
                 {pais.name}
               </option>
             ))}
@@ -158,7 +169,7 @@ export default function SucursalesForm({ onCreated }) {
 
         {/* Ciudad */}
         <div className="flex flex-col">
-          <label htmlFor="ciudad" className="mb-2 text-sm font-medium text-gray-700 dark:!text-slate-300 select-none">Ciudad</label>
+          <label htmlFor="ciudad" className="mb-1.5 sm:mb-2 text-[10px] sm:text-xs font-medium text-slate-300 select-none">Ciudad *</label>
           <select
             id="ciudad"
             name="ciudad"
@@ -166,14 +177,19 @@ export default function SucursalesForm({ onCreated }) {
             onChange={e => setSelectedCiudad(e.target.value)}
             disabled={loading || isLoadingCiudades || !selectedPais}
             required
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:!border-slate-600 bg-gray-50 dark:!bg-slate-800 dark:!text-white
-              focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 hover:border-blue-400"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border text-[10px] sm:text-xs transition duration-300"
+            style={{
+              border: '1px solid',
+              borderColor: '#1a1d3d',
+              backgroundColor: '#0f1229',
+              color: '#ffffff'
+            }}
           >
-            <option value="" disabled className="dark:!bg-slate-800">
-              {isLoadingCiudades ? 'Cargando ciudades...' : 'Seleccione una ciudad'}
+            <option value="" disabled>
+              {isLoadingCiudades ? 'Cargando...' : 'Seleccione ciudad'}
             </option>
             {ciudades.map(ciudad => (
-              <option key={ciudad.id} value={ciudad.id} className="dark:!bg-slate-800">
+              <option key={ciudad.id} value={ciudad.id}>
                 {ciudad.name}
               </option>
             ))}
@@ -182,7 +198,7 @@ export default function SucursalesForm({ onCreated }) {
 
         {/* Municipio / Región */}
         <div className="flex flex-col">
-          <label htmlFor="region" className="mb-2 text-sm font-medium text-gray-700 dark:!text-slate-300 select-none">Municipio</label>
+          <label htmlFor="region" className="mb-1.5 sm:mb-2 text-[10px] sm:text-xs font-medium text-slate-300 select-none">Municipio *</label>
           <select
             id="region"
             name="region"
@@ -190,14 +206,19 @@ export default function SucursalesForm({ onCreated }) {
             onChange={e => setSelectedRegion(e.target.value)}
             disabled={loading || isLoadingRegiones || !selectedCiudad}
             required
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:!border-slate-600 bg-gray-50 dark:!bg-slate-800 dark:!text-white
-              focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 hover:border-blue-400"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border text-[10px] sm:text-xs transition duration-300"
+            style={{
+              border: '1px solid',
+              borderColor: '#1a1d3d',
+              backgroundColor: '#0f1229',
+              color: '#ffffff'
+            }}
           >
-            <option value="" disabled className="dark:!bg-slate-800">
-              {isLoadingRegiones ? 'Cargando municipios...' : 'Seleccione un municipio'}
+            <option value="" disabled>
+              {isLoadingRegiones ? 'Cargando...' : 'Seleccione municipio'}
             </option>
             {regiones.map(region => (
-              <option key={region.id} value={region.id} className="dark:!bg-slate-800">
+              <option key={region.id} value={region.id}>
                 {region.name}
               </option>
             ))}
@@ -206,46 +227,53 @@ export default function SucursalesForm({ onCreated }) {
 
         {/* Nombre */}
         <div className="flex flex-col">
-          <label htmlFor="nombre" className="mb-2 text-sm font-medium text-gray-700 dark:!text-slate-300 select-none">Nombre</label>
+          <label htmlFor="nombre" className="mb-1.5 sm:mb-2 text-[10px] sm:text-xs font-medium text-slate-300 select-none">Nombre *</label>
           <input
             id="nombre"
             name="nombre"
             required
             placeholder="Nombre de la sucursal"
             disabled={loading}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:!border-slate-600 bg-gray-50 dark:!bg-slate-800 dark:!text-white
-              focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 placeholder-gray-400 dark:!placeholder-slate-400 hover:border-blue-400"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border text-[10px] sm:text-xs transition duration-300"
+            style={{
+              border: '1px solid',
+              borderColor: '#1a1d3d',
+              backgroundColor: '#0f1229',
+              color: '#ffffff'
+            }}
           />
         </div>
 
         {/* Dirección */}
-        <div className="flex flex-col md:col-span-2 lg:col-span-2">
-          <label htmlFor="direccion" className="mb-2 text-sm font-medium text-gray-700 dark:!text-slate-300 select-none">Dirección</label>
+        <div className="flex flex-col sm:col-span-2 lg:col-span-2">
+          <label htmlFor="direccion" className="mb-1.5 sm:mb-2 text-[10px] sm:text-xs font-medium text-slate-300 select-none">Dirección *</label>
           <input
             id="direccion"
             name="direccion"
             required
             placeholder="Dirección completa"
             disabled={loading}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:!border-slate-600 bg-gray-50 dark:!bg-slate-800 dark:!text-white
-              focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 placeholder-gray-400 dark:!placeholder-slate-400 hover:border-blue-400"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border text-[10px] sm:text-xs transition duration-300"
+            style={{
+              border: '1px solid',
+              borderColor: '#1a1d3d',
+              backgroundColor: '#0f1229',
+              color: '#ffffff'
+            }}
           />
         </div>
 
         {/* Botón */}
-        <div className="md:col-span-2 lg:col-span-3 flex justify-end">
+        <div className="sm:col-span-2 lg:col-span-3 flex justify-end">
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center justify-center
-              px-7 py-3 bg-blue-600 text-white dark:text-blue-100 font-semibold rounded-lg shadow-md
-              hover:bg-blue-700 dark:hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
-              transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 lg:px-7 py-2 sm:py-3 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] text-white text-[10px] sm:text-xs font-semibold rounded-lg shadow-md hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>
                 <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  className="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-white"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -257,10 +285,15 @@ export default function SucursalesForm({ onCreated }) {
                     d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
                   ></path>
                 </svg>
-                Enviando…
+                <span>Enviando...</span>
               </>
             ) : (
-              'Crear Sucursal'
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span>Crear Sucursal</span>
+              </>
             )}
           </button>
         </div>

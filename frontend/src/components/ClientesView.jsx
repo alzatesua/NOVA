@@ -119,35 +119,35 @@ function Modal({ isOpen, onClose, title, subtitle, icon: Icon, iconColor = 'from
 
             {/* Header */}
             <div
-              className="sticky top-0 p-3 sm:p-4 md:p-6 z-10"
+              className="sticky top-0 p-2 sm:p-3 lg:p-4 xl:p-6 z-10"
               style={{
                 backgroundColor: '#0B0D26',
                 borderBottom: '1px solid',
                 borderColor: '#1a1d3d'
               }}
             >
-              <div className="flex items-center justify-between gap-2 sm:gap-4">
-                <div className="flex items-center space-x-3">
-                  <div className={`p-2 bg-gradient-to-br ${iconColor} rounded-lg`}>
-                    <Icon className="h-5 w-5 text-white" />
+              <div className="flex items-center justify-between gap-2 sm:gap-3 lg:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <div className={`p-1.5 sm:p-2 bg-gradient-to-br ${iconColor} rounded-lg flex-shrink-0`}>
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
-                  <div>
-                    <h2 className="text-base sm:text-lg md:text-2xl font-bold" style={{ color: '#ffffff' }}>{title}</h2>
-                    {subtitle && <p className="text-sm" style={{ color: '#cbd5e1' }}>{subtitle}</p>}
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-sm sm:text-base lg:text-lg xl:text-2xl font-bold truncate" style={{ color: '#ffffff' }}>{title}</h2>
+                    {subtitle && <p className="text-[10px] sm:text-xs sm:block hidden truncate" style={{ color: '#cbd5e1' }}>{subtitle}</p>}
                   </div>
                 </div>
                 <button
                   onClick={onClose}
                   style={{ color: '#94a3b8' }}
-                  className="hover:opacity-70 transition-colors flex-shrink-0"
+                  className="hover:opacity-70 transition-colors flex-shrink-0 p-1"
                 >
-                  <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                 </button>
               </div>
             </div>
 
             {/* Body */}
-            <div className="p-3 sm:p-4 md:p-6 overflow-y-auto relative z-10" style={{ maxHeight: 'calc(70vh - 60px)' }}>
+            <div className="p-2 sm:p-3 lg:p-4 xl:p-6 overflow-y-auto relative z-10" style={{ maxHeight: 'calc(70vh - 60px)' }}>
               <div style={{ color: '#f1f5f9' }}>
                 {children}
               </div>
@@ -155,7 +155,7 @@ function Modal({ isOpen, onClose, title, subtitle, icon: Icon, iconColor = 'from
 
             {/* Footer */}
             {footer && (
-              <div className="p-3 sm:p-4 md:p-6 relative z-10" style={{ borderTop: '1px solid', borderColor: '#1a1d3d', backgroundColor: '#0B0D26' }}>
+              <div className="p-2 sm:p-3 lg:p-4 xl:p-6 relative z-10" style={{ borderTop: '1px solid', borderColor: '#1a1d3d', backgroundColor: '#0B0D26' }}>
                 {footer}
               </div>
             )}
@@ -180,14 +180,14 @@ function StatCard({ title, value, icon: Icon, color, bgColor }) {
   const bgColorClass = colorClasses[color] || colorClasses.blue;
 
   return (
-    <div className="bg-white dark:!bg-slate-900 rounded-lg shadow-sm px-5 py-4 hover:shadow-md transition-all duration-200 border border-slate-200 dark:!border-slate-800">
-      <div className="flex items-center gap-4">
-        <div className={`flex-shrink-0 p-3 rounded-lg ${bgColorClass} text-white shadow-sm`}>
-          <Icon className="h-6 w-6" />
+    <div className="bg-white dark:!bg-slate-900 rounded-lg shadow-sm px-3 sm:px-4 lg:px-5 py-2 sm:py-3 lg:py-4 hover:shadow-md transition-all duration-200 border border-slate-200 dark:!border-slate-800">
+      <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+        <div className={`flex-shrink-0 p-1.5 sm:p-2 lg:p-3 rounded-lg ${bgColorClass} text-white shadow-sm`}>
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
         </div>
-        <div className="flex-1">
-          <p className="text-sm font-medium text-slate-600 dark:!text-slate-400">{title}</p>
-          <p className="text-2xl font-bold text-slate-900 dark:!text-slate-100">{value}</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] sm:text-xs lg:text-sm font-medium text-slate-600 dark:!text-slate-400 truncate">{title}</p>
+          <p className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:!text-slate-100 truncate">{value}</p>
         </div>
       </div>
     </div>
@@ -199,15 +199,15 @@ function EmptyState({ icon: Icon, title, subtitle }) {
   const isDarkMode = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark-mode');
 
   return (
-    <div className="text-center py-14">
+    <div className="text-center py-8 sm:py-10 lg:py-14">
       <div
-        className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
+        className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full mb-3 sm:mb-4"
         style={{ backgroundColor: isDarkMode ? '#2a2a2a' : '#f1f5f9' }}
       >
-        <Icon className="h-8 w-8" style={{ color: isDarkMode ? '#cccccc' : '#94a3b8' }} />
+        <Icon className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8" style={{ color: isDarkMode ? '#cccccc' : '#94a3b8' }} />
       </div>
-      <p className="font-medium" style={{ color: isDarkMode ? '#f5f5f5' : '#475569' }}>{title}</p>
-      {subtitle && <p className="text-sm mt-1" style={{ color: isDarkMode ? '#cccccc' : '#94a3b8' }}>{subtitle}</p>}
+      <p className="font-medium text-sm sm:text-base" style={{ color: isDarkMode ? '#f5f5f5' : '#475569' }}>{title}</p>
+      {subtitle && <p className="text-[10px] sm:text-xs lg:text-sm mt-1" style={{ color: isDarkMode ? '#cccccc' : '#94a3b8' }}>{subtitle}</p>}
     </div>
   );
 }
@@ -224,12 +224,12 @@ function LoadingSpinner({ color = 'blue', text = 'Cargando...' }) {
   };
 
   return (
-    <div className="text-center py-12">
+    <div className="text-center py-8 sm:py-10 lg:py-12">
       <div
-        className="inline-block animate-spin rounded-full h-9 w-9 border-4 border-t-transparent"
+        className="inline-block animate-spin rounded-full h-7 w-7 sm:h-8 sm:w-8 lg:h-9 lg:w-9 border-3 sm:border-4 border-t-transparent"
         style={{ borderColor: colorMap[color] || colorMap.blue, borderTopColor: 'transparent' }}
       ></div>
-      <p className="mt-3 font-medium" style={{ color: isDarkMode ? '#cccccc' : '#64748b' }}>{text}</p>
+      <p className="mt-2 sm:mt-3 font-medium text-[10px] sm:text-xs lg:text-sm" style={{ color: isDarkMode ? '#cccccc' : '#64748b' }}>{text}</p>
     </div>
   );
 }
@@ -237,12 +237,12 @@ function LoadingSpinner({ color = 'blue', text = 'Cargando...' }) {
 /** Tabla de Asignaciones con modo oscuro forzado */
 function AsignacionesTable({ loading, clienteCupones, onRefresh, onUsarCupon }) {
   if (loading) {
-    return <LoadingSpinner color="blue" text="Cargando asignaciones..." />;
+    return <LoadingSpinner color="blue" text="Cargando..." />;
   }
 
   if (clienteCupones.length === 0) {
     return (
-      <div className="bg-white dark:!bg-slate-900 rounded-2xl shadow-sm p-8">
+      <div className="bg-white dark:!bg-slate-900 rounded-2xl shadow-sm p-4 sm:p-6 lg:p-8">
         <EmptyState icon={TicketIcon} title="No hay cupones asignados" subtitle="Comienza asignando cupones a tus clientes" />
       </div>
     );
@@ -251,35 +251,36 @@ function AsignacionesTable({ loading, clienteCupones, onRefresh, onUsarCupon }) 
   return (
     <div className="bg-white dark:!bg-slate-900 rounded-2xl shadow-sm overflow-hidden ring-1 ring-slate-200 dark:!ring-slate-700">
       {/* Header */}
-      <div className="p-6 flex items-center justify-between border-b border-slate-200 dark:!border-slate-700 bg-white dark:!bg-slate-900">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-lg">
-            <GiftIcon className="h-5 w-5 text-white" />
+      <div className="p-3 sm:p-4 lg:p-6 flex items-center justify-between gap-2 border-b border-slate-200 dark:!border-slate-700 bg-white dark:!bg-slate-900 flex-wrap">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <div className="p-1.5 sm:p-2 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-lg flex-shrink-0">
+            <GiftIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
-          <div>
-            <h4 className="text-lg font-semibold text-slate-900 dark:!text-white">Cupones Asignados</h4>
-            <p className="text-sm text-slate-600 dark:!text-slate-300">Gestiona las asignaciones activas</p>
+          <div className="min-w-0 flex-1">
+            <h4 className="text-sm sm:text-base lg:text-lg font-semibold text-slate-900 dark:!text-white truncate">Cupones Asignados</h4>
+            <p className="text-[10px] sm:text-xs sm:block hidden text-slate-600 dark:!text-slate-300 truncate">Gestiona las asignaciones activas</p>
           </div>
         </div>
         <button
           onClick={onRefresh}
-          className="flex items-center space-x-2 px-4 py-2 bg-[rgb(37,99,235)] hover:bg-[rgb(29,78,216)] text-white rounded-xl font-medium transition-all shadow-sm hover:shadow-md"
+          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-[rgb(37,99,235)] hover:bg-[rgb(29,78,216)] text-white rounded-lg sm:rounded-xl font-medium transition-all shadow-sm hover:shadow-md flex-shrink-0 text-[10px] sm:text-xs"
         >
-          <ArrowPathIcon className="h-4 w-4" />
-          <span>Actualizar</span>
+          <ArrowPathIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="hidden xs:inline">Actualizar</span>
+          <span className="xs:hidden">↻</span>
         </button>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto bg-white dark:!bg-slate-900">
-        <table className="w-full text-sm">
+        <table className="w-full text-[10px] sm:text-xs lg:text-sm">
           <thead className="bg-slate-50 dark:!bg-slate-800">
             <tr>
-              <th className="px-6 py-4 text-left font-semibold text-slate-700 dark:!text-white">Cliente</th>
-              <th className="px-6 py-4 text-left font-semibold text-slate-700 dark:!text-white">Cupón</th>
-              <th className="px-6 py-4 text-left font-semibold text-slate-700 dark:!text-white">Disponibles</th>
-              <th className="px-6 py-4 text-left font-semibold text-slate-700 dark:!text-white">Estado</th>
-              <th className="px-6 py-4 text-right font-semibold text-slate-700 dark:!text-white">Acciones</th>
+              <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 text-left font-semibold text-slate-700 dark:!text-white">Cliente</th>
+              <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 text-left font-semibold text-slate-700 dark:!text-white">Cupón</th>
+              <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 text-left font-semibold text-slate-700 dark:!text-white hidden sm:table-cell">Disp.</th>
+              <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 text-left font-semibold text-slate-700 dark:!text-white hidden md:table-cell">Estado</th>
+              <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 text-right font-semibold text-slate-700 dark:!text-white">Acciones</th>
             </tr>
           </thead>
           <tbody className="bg-white dark:!bg-slate-900 divide-y divide-slate-100 dark:!divide-slate-700">
@@ -288,45 +289,46 @@ function AsignacionesTable({ loading, clienteCupones, onRefresh, onUsarCupon }) 
                 key={cc.id}
                 className="transition-colors hover:bg-slate-50 dark:hover:!bg-slate-800"
               >
-                <td className="px-6 py-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-full flex items-center justify-center flex-shrink-0">
-                      <UserIcon className="h-5 w-5 text-white" />
+                <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
+                  <div className="flex items-center gap-1.5 sm:gap-3">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <UserIcon className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-white" />
                     </div>
-                    <p className="font-medium text-slate-900 dark:!text-white">
+                    <p className="font-medium text-slate-900 dark:!text-white text-[9px] sm:text-xs lg:text-sm truncate">
                       {cc.cliente_tienda_email || 'N/A'}
                     </p>
                   </div>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center space-x-2">
-                    <TagIcon className="h-4 w-4 text-blue-500" />
-                    <span className="font-medium text-slate-900 dark:!text-white">{cc.cupon_detalle?.nombre || 'N/A'}</span>
+                <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <TagIcon className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 flex-shrink-0" />
+                    <span className="font-medium text-slate-900 dark:!text-white text-[9px] sm:text-xs lg:text-sm truncate">{cc.cupon_detalle?.nombre || 'N/A'}</span>
                   </div>
                 </td>
-                <td className="px-6 py-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-[rgb(37,99,235)]/20 dark:!bg-[rgb(37,99,235)]/30 text-[rgb(37,99,235)] dark:!text-[rgb(96,165,250)]">
+                <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 hidden sm:table-cell">
+                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-[rgb(37,99,235)]/20 dark:!bg-[rgb(37,99,235)]/30 text-[rgb(37,99,235)] dark:!text-[rgb(96,165,250)]">
                     {cc.cantidad_disponible}
                   </span>
                 </td>
-                <td className="px-6 py-4">
-                  <span className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 hidden md:table-cell">
+                  <span className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-xs font-semibold ${
                     cc.activo
                       ? 'bg-green-100 text-green-800 dark:!bg-green-900 dark:!text-green-300'
                       : 'bg-red-100 text-red-800 dark:!bg-red-900 dark:!text-red-300'
                   }`}>
-                    {cc.activo ? <CheckIcon className="h-3 w-3" /> : <XMarkIcon className="h-3 w-3" />}
+                    {cc.activo ? <CheckIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> : <XMarkIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />}
                     <span>{cc.activo ? 'Activo' : 'Inactivo'}</span>
                   </span>
                 </td>
-                <td className="px-6 py-4 text-right">
+                <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 text-right">
                   {cc.activo && cc.cantidad_disponible > 0 && (
                     <button
                       onClick={() => onUsarCupon(cc.id)}
-                      className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] text-white rounded-xl text-xs font-medium transition-all shadow-sm hover:shadow-md"
+                      className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 lg:px-4 py-1 sm:py-2 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] text-white rounded-lg sm:rounded-xl text-[9px] sm:text-xs font-medium transition-all shadow-sm hover:shadow-md"
                     >
-                      <SparklesIcon className="h-4 w-4" />
-                      <span>Usar Cupón</span>
+                      <SparklesIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden xs:inline">Usar Cupón</span>
+                      <span className="xs:hidden">Usar</span>
                     </button>
                   )}
                 </td>
@@ -421,11 +423,11 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
       icon={UserIcon}
       iconColor="from-[rgb(37,99,235)] to-[rgb(29,78,216)]"
     >
-      <div className="space-y-5">
+      <div className="space-y-3 sm:space-y-4 lg:space-y-5">
         {/* Buscador y botón nuevo cliente */}
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <div className="relative flex-1">
-            <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: '#94a3b8' }} />
+            <MagnifyingGlassIcon className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5" style={{ color: '#94a3b8' }} />
             <input
               type="text"
               value={searchQuery}
@@ -437,14 +439,14 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
                 backgroundColor: '#0f1229',
                 color: '#ffffff'
               }}
-              className="w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-[rgb(37,99,235)] focus:outline-none transition-all"
+              className="w-full pl-9 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 rounded-xl focus:ring-2 focus:ring-[rgb(37,99,235)] focus:outline-none transition-all text-[10px] sm:text-xs"
             />
           </div>
           <button
             onClick={onNuevoCliente}
-            className="flex items-center space-x-2 px-5 py-3 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl font-medium transition-all shadow-sm hover:shadow-md flex-shrink-0"
+            className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-5 py-2 sm:py-3 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl font-medium transition-all shadow-sm hover:shadow-md flex-shrink-0 text-[10px] sm:text-xs"
           >
-            <PlusIcon className="h-5 w-5" />
+            <PlusIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span>Nuevo</span>
           </button>
         </div>
@@ -461,13 +463,13 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
               backgroundColor: '#0f1229'
             }}
           >
-            <table className="w-full text-sm">
+            <table className="w-full text-[10px] sm:text-xs">
               <thead style={{ backgroundColor: '#1a1d3d' }}>
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold" style={{ color: '#ffffff' }}>Cliente</th>
-                  <th className="px-4 py-3 text-left font-semibold" style={{ color: '#ffffff' }}>Documento</th>
-                  <th className="px-4 py-3 text-left font-semibold" style={{ color: '#ffffff' }}>Tipo</th>
-                  <th className="px-4 py-3 text-right font-semibold" style={{ color: '#ffffff' }}>Acciones</th>
+                  <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left font-semibold" style={{ color: '#ffffff' }}>Cliente</th>
+                  <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left font-semibold hidden sm:table-cell" style={{ color: '#ffffff' }}>Documento</th>
+                  <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-left font-semibold hidden md:table-cell" style={{ color: '#ffffff' }}>Tipo</th>
+                  <th className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-right font-semibold" style={{ color: '#ffffff' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody style={{ backgroundColor: '#0f1229' }}>
@@ -480,20 +482,20 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     onClick={() => onEditarCliente(cliente)}
                   >
-                    <td className="px-4 py-3">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-full flex items-center justify-center flex-shrink-0">
-                          <UserIcon className="h-4 w-4 text-white" />
+                    <td className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-full flex items-center justify-center flex-shrink-0">
+                          <UserIcon className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                         </div>
-                        <p className="font-medium truncate max-w-[140px]" style={{ color: '#ffffff' }}>
+                        <p className="font-medium truncate text-[9px] sm:text-xs" style={{ color: '#ffffff' }}>
                           {cliente.tipo_persona === 'JUR' ? cliente.razon_social : `${cliente.primer_nombre || ''} ${cliente.apellidos || ''}`}
                         </p>
                       </div>
                     </td>
-                    <td className="px-4 py-3" style={{ color: '#94a3b8' }}>{cliente.numero_documento}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 hidden sm:table-cell" style={{ color: '#94a3b8', fontSize: '10px' }}>{cliente.numero_documento}</td>
+                    <td className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 hidden md:table-cell">
                       <span
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold"
+                        className="inline-flex items-center px-2 py-1 rounded-full text-[9px] sm:text-xs font-semibold"
                         style={{
                           backgroundColor: cliente.tipo_persona === 'JUR' ? '#1e3a8a' : '#581c87',
                           color: cliente.tipo_persona === 'JUR' ? '#93c5fd' : '#d8b4fe'
@@ -502,14 +504,14 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
                         {cliente.tipo_persona === 'JUR' ? 'Jurídica' : 'Natural'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end space-x-2">
+                    <td className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-right">
+                      <div className="flex items-center justify-end gap-1 sm:gap-2">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             onEditarCliente(cliente);
                           }}
-                          className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                          className="inline-flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[9px] sm:text-xs font-medium transition-colors"
                           style={{
                             backgroundColor: '#312e81',
                             color: '#a5b4fc'
@@ -517,15 +519,15 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
                           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3730a3'}
                           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#312e81'}
                         >
-                          <PencilIcon className="h-3.5 w-3.5" />
-                          <span>Editar</span>
+                          <PencilIcon className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
+                          <span className="hidden sm:inline">Editar</span>
                         </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             onVerCupones(cliente);
                           }}
-                          className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                          className="inline-flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[9px] sm:text-xs font-medium transition-colors"
                           style={{
                             backgroundColor: '#581c87',
                             color: '#d8b4fe'
@@ -533,8 +535,8 @@ function GestionClientesModal({ isOpen, onClose, clientes, loading, searchQuery,
                           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6b21a8'}
                           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#581c87'}
                         >
-                          <TicketIcon className="h-3.5 w-3.5" />
-                          <span>Ver Cupones</span>
+                          <TicketIcon className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
+                          <span className="hidden sm:inline">Cupones</span>
                         </button>
                       </div>
                     </td>
@@ -646,41 +648,41 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
 
             {/* Header */}
             <div
-              className="sticky top-0 p-3 sm:p-4 md:p-6 z-10"
+              className="sticky top-0 p-2 sm:p-3 lg:p-4 xl:p-6 z-10"
               style={{
                 backgroundColor: '#0B0D26',
                 borderBottom: '1px solid',
                 borderColor: '#1a1d3d'
               }}
             >
-              <div className="flex items-center justify-between gap-2 sm:gap-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-lg">
-                    <GiftIcon className="h-5 w-5 text-white" />
+              <div className="flex items-center justify-between gap-2 sm:gap-3 lg:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <div className="p-1.5 sm:p-2 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-lg flex-shrink-0">
+                    <GiftIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
-                  <div>
-                    <h2 className="text-base sm:text-lg md:text-xl font-bold" style={{ color: '#ffffff' }}>Asignar Cupón a Cliente</h2>
-                    <p className="text-sm" style={{ color: '#cbd5e1' }}>Selecciona un cliente y un cupón</p>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-sm sm:text-base lg:text-xl font-bold truncate" style={{ color: '#ffffff' }}>Asignar Cupón a Cliente</h2>
+                    <p className="text-[10px] sm:text-xs sm:block hidden truncate" style={{ color: '#cbd5e1' }}>Selecciona un cliente y un cupón</p>
                   </div>
                 </div>
                 <button
                   onClick={onClose}
                   style={{ color: '#94a3b8' }}
-                  className="hover:opacity-70 transition-colors flex-shrink-0"
+                  className="hover:opacity-70 transition-colors flex-shrink-0 p-1"
                 >
-                  <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                 </button>
               </div>
             </div>
 
             {/* Body */}
-            <div className="p-3 sm:p-4 md:p-6 overflow-y-auto relative z-10" style={{ maxHeight: 'calc(70vh - 60px)' }}>
-              <form onSubmit={onSubmit} className="space-y-4">
+            <div className="p-2 sm:p-3 lg:p-4 xl:p-6 overflow-y-auto relative z-10" style={{ maxHeight: 'calc(70vh - 60px)' }}>
+              <form onSubmit={onSubmit} className="space-y-3 sm:space-y-4">
                 {/* Buscador de cliente */}
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: '#ffffff' }}>Buscar Cliente</label>
+                  <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={{ color: '#ffffff' }}>Buscar Cliente</label>
                   <div className="relative">
-                    <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: '#94a3b8' }} />
+                    <MagnifyingGlassIcon className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5" style={{ color: '#94a3b8' }} />
                     <input
                       type="text"
                       value={searchQuery}
@@ -692,17 +694,17 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
                         backgroundColor: '#0f1229',
                         color: '#ffffff'
                       }}
-                      className="w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                      className="w-full pl-9 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all text-[10px] sm:text-xs"
                     />
                   </div>
                 </div>
 
                 {/* Lista de clientes */}
                 {loading ? (
-                  <LoadingSpinner color="blue" text="Buscando clientes..." />
+                  <LoadingSpinner color="blue" text="Buscando..." />
                 ) : clientes.length > 0 ? (
                   <div
-                    className="rounded-xl overflow-hidden max-h-52 overflow-y-auto"
+                    className="rounded-xl overflow-hidden max-h-40 sm:max-h-52 overflow-y-auto"
                     style={{
                       border: '1px solid',
                       borderColor: '#1a1d3d',
@@ -713,7 +715,7 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
                       <div
                         key={cliente.id}
                         onClick={() => onSelectCliente(cliente.id)}
-                        className="p-4 cursor-pointer transition-all"
+                        className="p-2 sm:p-3 lg:p-4 cursor-pointer transition-all"
                         style={{
                           borderBottom: '1px solid',
                           borderColor: '#1a1d3d',
@@ -733,17 +735,17 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
                           }
                         }}
                       >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-9 h-9 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-full flex items-center justify-center flex-shrink-0">
-                            <UserIcon className="h-4 w-4 text-white" />
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 bg-gradient-to-br from-[rgb(37,99,235)] to-[rgb(29,78,216)] rounded-full flex items-center justify-center flex-shrink-0">
+                            <UserIcon className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate" style={{ color: '#ffffff' }}>
+                            <p className="font-medium truncate text-[9px] sm:text-xs" style={{ color: '#ffffff' }}>
                               {cliente.email || cliente.nombre || 'Cliente'}
                             </p>
-                            <p className="text-sm" style={{ color: '#94a3b8' }}>ID: {cliente.id}</p>
+                            <p className="text-[9px] sm:text-xs" style={{ color: '#94a3b8' }}>ID: {cliente.id}</p>
                           </div>
-                          {selectedCliente === cliente.id && <CheckIcon className="h-5 w-5 text-blue-400 flex-shrink-0" />}
+                          {selectedCliente === cliente.id && <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400 flex-shrink-0" />}
                         </div>
                       </div>
                     ))}
@@ -754,7 +756,7 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
 
                 {/* Seleccionar cupón */}
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: '#ffffff' }}>Seleccionar Cupón</label>
+                  <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={{ color: '#ffffff' }}>Seleccionar Cupón</label>
                   <select
                     value={selectedCupon || ''}
                     onChange={(e) => onSelectCupon(Number(e.target.value))}
@@ -764,7 +766,7 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
                       backgroundColor: '#0f1229',
                       color: '#ffffff'
                     }}
-                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all text-[10px] sm:text-xs"
                     required
                   >
                     <option value="">-- Selecciona un cupón --</option>
@@ -778,7 +780,7 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
 
                 {/* Cantidad */}
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: '#ffffff' }}>Cantidad a Asignar</label>
+                  <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={{ color: '#ffffff' }}>Cantidad a Asignar</label>
                   <input
                     type="number"
                     min="1"
@@ -790,13 +792,13 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
                       backgroundColor: '#0f1229',
                       color: '#ffffff'
                     }}
-                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all text-[10px] sm:text-xs"
                     required
                   />
                 </div>
 
                 {/* Acciones */}
-                <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:gap-4 pt-2">
                   <button
                     type="button"
                     onClick={onClose}
@@ -804,16 +806,16 @@ function AsignarCuponModal({ isOpen, onClose, clientes, cupones, loading, search
                       backgroundColor: '#1a1d3d',
                       color: '#ffffff'
                     }}
-                    className="py-3 rounded-xl font-semibold transition-all hover:opacity-80"
+                    className="py-2 sm:py-3 rounded-xl font-semibold transition-all hover:opacity-80 text-[10px] sm:text-xs"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={!selectedCliente || !selectedCupon}
-                    className="py-3 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
+                    className="py-2 sm:py-3 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-1 sm:gap-2 text-[10px] sm:text-xs"
                   >
-                    <GiftIcon className="h-5 w-5" />
+                    <GiftIcon className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
                     <span>Asignar</span>
                   </button>
                 </div>
@@ -883,7 +885,7 @@ function CiudadSelector({ value, onChange, token, label = "Ciudad" }) {
 
   return (
     <div>
-      <label className="block text-sm font-semibold text-slate-700 dark:!text-slate-300 mb-2">{label} *</label>
+      <label className="block text-[10px] sm:text-xs font-semibold text-slate-700 dark:!text-slate-300 mb-1 sm:mb-2">{label} *</label>
       <Select
         value={valorActual}
         onChange={(opcion) => onChange(opcion ? opcion.value : '')}
@@ -899,8 +901,8 @@ function CiudadSelector({ value, onChange, token, label = "Ciudad" }) {
         classNamePrefix="react-select"
         components={{
           DropdownIndicator: () => (
-            <div className="p-2 text-slate-400 dark:!text-slate-500">
-              <ChevronDownIcon className="h-5 w-5" />
+            <div className="p-1.5 sm:p-2 text-slate-400 dark:!text-slate-500">
+              <ChevronDownIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           ),
           IndicatorSeparator: () => null,
@@ -915,7 +917,7 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
   // Función auxiliar para clases de input con error
   const clasesInput = (campo) => {
     const tieneError = errores[campo];
-    return `w-full px-4 py-3 ${tieneError ? 'pr-10' : ''} border rounded-xl focus:ring-2 focus:outline-none transition-all ${
+    return `w-full px-3 sm:px-4 py-2 sm:py-3 ${tieneError ? 'pr-10' : ''} border rounded-xl focus:ring-2 focus:outline-none transition-all text-[10px] sm:text-xs ${
       tieneError
         ? 'border-red-500 text-red-900 focus:ring-red-500 focus:border-red-500'
         : 'focus:ring-indigo-500'
@@ -947,15 +949,20 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
       icon={UserIcon}
       iconColor="from-[rgb(37,99,235)] to-[rgb(29,78,216)]"
     >
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-3 sm:space-y-4">
         <style>{`
           .react-select-container {
-            font-size: 0.875rem;
+            font-size: 0.75rem;
+          }
+          @media (min-width: 640px) {
+            .react-select-container {
+              font-size: 0.875rem;
+            }
           }
         `}</style>
         {/* Tipo de persona */}
         <div>
-          <label className="block text-sm font-semibold mb-2" style={labelStyle}>Tipo de Persona *</label>
+          <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={labelStyle}>Tipo de Persona *</label>
           <select
             required
             value={cliente.tipo_persona}
@@ -966,14 +973,14 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
             <option value="NAT">Natural</option>
             <option value="JUR">Jurídica (Empresa)</option>
           </select>
-          {mostrarError('tipo_persona') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('tipo_persona')}</p>}
+          {mostrarError('tipo_persona') && <p className="mt-1 text-[9px] sm:text-xs text-red-600 dark:!text-red-400">{mostrarError('tipo_persona')}</p>}
         </div>
 
         {cliente.tipo_persona === 'NAT' ? (
           // Persona Natural
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
             <div>
-              <label className="block text-sm font-semibold mb-2" style={labelStyle}>Primer Nombre *</label>
+              <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={labelStyle}>Primer Nombre *</label>
               <input
                 type="text"
                 required={cliente.tipo_persona === 'NAT'}
@@ -983,10 +990,10 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
                 style={getInputStyle('primer_nombre')}
                 className={clasesInput('primer_nombre')}
               />
-              {mostrarError('primer_nombre') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('primer_nombre')}</p>}
+              {mostrarError('primer_nombre') && <p className="mt-1 text-[9px] sm:text-xs text-red-600 dark:!text-red-400">{mostrarError('primer_nombre')}</p>}
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2" style={labelStyle}>Segundo Nombre</label>
+              <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={labelStyle}>Segundo Nombre</label>
               <input
                 type="text"
                 value={cliente.segundo_nombre}
@@ -995,10 +1002,10 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
                 style={getInputStyle('segundo_nombre')}
                 className={clasesInput('segundo_nombre')}
               />
-              {mostrarError('segundo_nombre') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('segundo_nombre')}</p>}
+              {mostrarError('segundo_nombre') && <p className="mt-1 text-[9px] sm:text-xs text-red-600 dark:!text-red-400">{mostrarError('segundo_nombre')}</p>}
             </div>
-            <div className="col-span-2">
-              <label className="block text-sm font-semibold mb-2" style={labelStyle}>Apellidos *</label>
+            <div className="col-span-1 sm:col-span-2">
+              <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={labelStyle}>Apellidos *</label>
               <input
                 type="text"
                 required={cliente.tipo_persona === 'NAT'}
@@ -1008,13 +1015,13 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
                 style={getInputStyle('apellidos')}
                 className={clasesInput('apellidos')}
               />
-              {mostrarError('apellidos') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('apellidos')}</p>}
+              {mostrarError('apellidos') && <p className="mt-1 text-[9px] sm:text-xs text-red-600 dark:!text-red-400">{mostrarError('apellidos')}</p>}
             </div>
           </div>
         ) : (
           // Persona Jurídica
           <div>
-            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Razón Social *</label>
+            <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={labelStyle}>Razón Social *</label>
             <input
               type="text"
               required={cliente.tipo_persona === 'JUR'}
@@ -1024,14 +1031,14 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
               style={getInputStyle('razon_social')}
               className={clasesInput('razon_social')}
             />
-            {mostrarError('razon_social') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('razon_social')}</p>}
+            {mostrarError('razon_social') && <p className="mt-1 text-[9px] sm:text-xs text-red-600 dark:!text-red-400">{mostrarError('razon_social')}</p>}
           </div>
         )}
 
         {/* Tipo y número de documento */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
           <div>
-            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Tipo Documento *</label>
+            <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={labelStyle}>Tipo Documento *</label>
             <select
               required
               value={cliente.tipo_documento}
@@ -1045,10 +1052,10 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
               <option value="TI">Tarjeta de Identidad</option>
               <option value="PP">Pasaporte</option>
             </select>
-            {mostrarError('tipo_documento') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('tipo_documento')}</p>}
+            {mostrarError('tipo_documento') && <p className="mt-1 text-[9px] sm:text-xs text-red-600 dark:!text-red-400">{mostrarError('tipo_documento')}</p>}
           </div>
           <div className="relative">
-            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Número Documento *</label>
+            <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={labelStyle}>Número Documento *</label>
             <input
               type="text"
               required
@@ -1059,16 +1066,16 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
               className={clasesInput('numero_documento')}
             />
             {mostrarError('numero_documento') && (
-              <ExclamationTriangleIcon className="absolute right-3 top-[2.4rem] h-5 w-5 text-red-500 pointer-events-none" />
+              <ExclamationTriangleIcon className="absolute right-3 top-[2rem] sm:top-[2.4rem] h-4 w-4 sm:h-5 sm:w-5 text-red-500 pointer-events-none" />
             )}
-            {mostrarError('numero_documento') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{mostrarError('numero_documento')}</p>}
+            {mostrarError('numero_documento') && <p className="mt-1 text-[9px] sm:text-xs text-red-600 dark:!text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />{mostrarError('numero_documento')}</p>}
           </div>
         </div>
 
         {/* Información de contacto */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="col-span-2 relative">
-            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Correo Electrónico *</label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
+          <div className="col-span-1 sm:col-span-2 relative">
+            <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={labelStyle}>Correo Electrónico *</label>
             <input
               type="email"
               required
@@ -1079,12 +1086,12 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
               className={clasesInput('correo')}
             />
             {mostrarError('correo') && (
-              <ExclamationTriangleIcon className="absolute right-3 top-[2.4rem] h-5 w-5 text-red-500 pointer-events-none" />
+              <ExclamationTriangleIcon className="absolute right-3 top-[2rem] sm:top-[2.4rem] h-4 w-4 sm:h-5 sm:w-5 text-red-500 pointer-events-none" />
             )}
-            {mostrarError('correo') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{mostrarError('correo')}</p>}
+            {mostrarError('correo') && <p className="mt-1 text-[9px] sm:text-xs text-red-600 dark:!text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />{mostrarError('correo')}</p>}
           </div>
           <div className="relative">
-            <label className="block text-sm font-semibold mb-2" style={labelStyle}>Teléfono *</label>
+            <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={labelStyle}>Teléfono *</label>
             <input
               type="tel"
               required
@@ -1095,24 +1102,24 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
               className={clasesInput('telefono')}
             />
             {mostrarError('telefono') && (
-              <ExclamationTriangleIcon className="absolute right-3 top-[2.4rem] h-5 w-5 text-red-500 pointer-events-none" />
+              <ExclamationTriangleIcon className="absolute right-3 top-[2rem] sm:top-[2.4rem] h-4 w-4 sm:h-5 sm:w-5 text-red-500 pointer-events-none" />
             )}
-            {mostrarError('telefono') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-3 w-3" />{mostrarError('telefono')}</p>}
+            {mostrarError('telefono') && <p className="mt-1 text-[9px] sm:text-xs text-red-600 dark:!text-red-400 flex items-center gap-1"><ExclamationTriangleIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />{mostrarError('telefono')}</p>}
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 sm:col-span-2">
             <CiudadSelector
               value={cliente.ciudad}
               onChange={(valor) => onChange({ ...cliente, ciudad: valor })}
               token={token}
               label="Ciudad"
             />
-            {mostrarError('ciudad') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('ciudad')}</p>}
+            {mostrarError('ciudad') && <p className="mt-1 text-[9px] sm:text-xs text-red-600 dark:!text-red-400">{mostrarError('ciudad')}</p>}
           </div>
         </div>
 
         {/* Dirección */}
         <div>
-          <label className="block text-sm font-semibold mb-2" style={labelStyle}>Dirección</label>
+          <label className="block text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2" style={labelStyle}>Dirección</label>
           <input
             type="text"
             value={cliente.direccion}
@@ -1121,11 +1128,11 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
             style={getInputStyle('direccion')}
             className={clasesInput('direccion')}
           />
-          {mostrarError('direccion') && <p className="mt-1 text-xs text-red-600 dark:!text-red-400">{mostrarError('direccion')}</p>}
+          {mostrarError('direccion') && <p className="mt-1 text-[9px] sm:text-xs text-red-600 dark:!text-red-400">{mostrarError('direccion')}</p>}
         </div>
 
         {/* Acciones */}
-        <div className="grid grid-cols-2 gap-4 pt-2">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:gap-4 pt-2">
           <button
             type="button"
             onClick={onClose}
@@ -1133,22 +1140,22 @@ function CrearEditarClienteModal({ isOpen, onClose, onSubmit, cliente, onChange,
               backgroundColor: '#1a1d3d',
               color: '#ffffff'
             }}
-            className="py-3 rounded-xl font-semibold transition-all hover:opacity-80"
+            className="py-2 sm:py-3 rounded-xl font-semibold transition-all hover:opacity-80 text-[10px] sm:text-xs"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="py-3 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
+            className="py-2 sm:py-3 bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-1 sm:gap-2 text-[10px] sm:text-xs"
           >
             {esEdicion ? (
               <>
-                <PencilIcon className="h-5 w-5" />
+                <PencilIcon className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
                 <span>Guardar Cambios</span>
               </>
             ) : (
               <>
-                <PlusIcon className="h-5 w-5" />
+                <PlusIcon className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
                 <span>Crear Cliente</span>
               </>
             )}
@@ -1903,50 +1910,54 @@ export default function ClientesView() {
     <div className="w-full space-y-6">
 
       {/* Header */}
-      <div className="flex items-center space-x-3">
-        <img src="/icono.png" alt="Icono" className="h-16 w-16 rounded-xl shadow-lg" style={{ marginTop: '0rem' }} />
-        <div>
-          <h3 className="text-2xl font-bold text-slate-900 dark:!text-white" style={{ color: 'var(--tw-dark-text-white, #ffffff)', marginTop: '0.625rem' }}>Gestión de Clientes</h3>
-          <p className="text-xs text-slate-600 dark:!text-slate-300 mt-1" style={{ color: 'var(--tw-dark-text-slate-300, #cbd5e1)', marginLeft: '0.3125rem' }}>Administra cupones y clientes</p>
+      <div className="flex items-center gap-2 sm:gap-3">
+        <img src="/icono.png" alt="Icono" className="h-10 w-10 sm:h-12 sm:w-12 lg:h-16 lg:w-16 rounded-xl shadow-lg" style={{ marginTop: '0rem' }} />
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:!text-white truncate" style={{ color: 'var(--tw-dark-text-white, #ffffff)', marginTop: '0.625rem' }}>Gestión de Clientes</h3>
+          <p className="text-[10px] sm:text-xs text-slate-600 dark:!text-slate-300 mt-1 truncate" style={{ color: 'var(--tw-dark-text-slate-300, #cbd5e1)', marginLeft: '0.3125rem' }}>Administra cupones y clientes</p>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
         {stats.map((s, i) => <StatCard key={i} {...s} />)}
       </div>
 
       {/* Acciones principales */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2 sm:gap-3">
         <button
           onClick={handleNuevoCliente}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] text-white shadow-sm hover:shadow-md hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] transition-all duration-200"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-5 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-medium bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] text-white shadow-sm hover:shadow-md hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] transition-all duration-200"
         >
-          <PlusIcon className="h-4 w-4" />
-          <span>Nuevo Cliente</span>
+          <PlusIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="hidden xs:inline">Nuevo Cliente</span>
+          <span className="xs:hidden">Nuevo</span>
         </button>
         <button
           onClick={() => setModalGestion(true)}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-white dark:!bg-slate-800 dark:!text-white text-slate-600 hover:bg-[rgb(37,99,235)]/10 dark:hover:!bg-[rgb(37,99,235)]/30 hover:text-[rgb(37,99,235)] dark:hover:!text-[rgb(96,165,250)] ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-[rgb(37,99,235)] transition-all duration-200"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-5 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-medium bg-white dark:!bg-slate-800 dark:!text-white text-slate-600 hover:bg-[rgb(37,99,235)]/10 dark:hover:!bg-[rgb(37,99,235)]/30 hover:text-[rgb(37,99,235)] dark:hover:!text-[rgb(96,165,250)] ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-[rgb(37,99,235)] transition-all duration-200"
         >
-          <UserIcon className="h-4 w-4" />
-          <span>Gestión Clientes</span>
+          <UserIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="hidden xs:inline">Gestión Clientes</span>
+          <span className="xs:hidden">Clientes</span>
         </button>
 
         <button
           onClick={() => setModalAsignar(true)}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-white dark:!bg-slate-800 dark:!text-white text-slate-600 hover:bg-[rgb(37,99,235)]/10 dark:hover:!bg-[rgb(37,99,235)]/30 hover:text-[rgb(37,99,235)] dark:hover:!text-[rgb(96,165,250)] ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-[rgb(37,99,235)] transition-all duration-200"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-5 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-medium bg-white dark:!bg-slate-800 dark:!text-white text-slate-600 hover:bg-[rgb(37,99,235)]/10 dark:hover:!bg-[rgb(37,99,235)]/30 hover:text-[rgb(37,99,235)] dark:hover:!text-[rgb(96,165,250)] ring-1 ring-slate-200 dark:ring-slate-700 hover:ring-[rgb(37,99,235)] transition-all duration-200"
         >
-          <GiftIcon className="h-4 w-4" />
-          <span>Asignar Cupón</span>
+          <GiftIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="hidden xs:inline">Asignar Cupón</span>
+          <span className="xs:hidden">Asignar</span>
         </button>
 
         <button
           onClick={() => setModalCrearCupon(true)}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] text-white shadow-sm hover:shadow-md hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] transition-all duration-200"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-5 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-medium bg-gradient-to-r from-[rgb(37,99,235)] to-[rgb(29,78,216)] text-white shadow-sm hover:shadow-md hover:from-[rgb(29,78,216)] hover:to-[rgb(30,64,175)] transition-all duration-200"
         >
-          <PlusIcon className="h-4 w-4" />
-          <span>Crear Cupón</span>
+          <PlusIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="hidden xs:inline">Crear Cupón</span>
+          <span className="xs:hidden">Cupón</span>
         </button>
       </div>
 

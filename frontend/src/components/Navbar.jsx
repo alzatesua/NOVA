@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
-import { MoonIcon, SunIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { MoonIcon, SunIcon, Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import PerfilModal from './PerfilModal';
 
 export default function Navbar({ rol: propRol, onViewChange, onLogout, currentView, mobileMenuOpen, setMobileMenuOpen }) {
   const adminButtons = ['dashboard', 'usuarios', 'sucursales', 'productos', 'clientes', 'configuracion', 'facturacion', 'caja', 'mora', 'proveedores'];
@@ -27,13 +28,24 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
   const isDark = theme === 'dark';
   const list = rol === 'admin' ? adminButtons : operarioButtons;
 
+  const handlePerfilSave = ({ nombre, foto }) => {
+    setPerfilPhoto(foto);
+    setPerfilModalOpen(false);
+    setProfileOpen(false);
+    // Aquí puedes agregar lógica adicional como actualizar el contexto de autenticación
+    // o recargar la página para reflejar los cambios
+    window.location.reload(); // Recargar para actualizar el nombre en todas partes
+  };
+
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [perfilModalOpen, setPerfilModalOpen] = useState(false);
   const profileRef = useRef(null);
   const mobileRef = useRef(null);
   const [avatarBg, setAvatarBg] = useState('');
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
   const profileButtonRef = useRef(null);
+  const [perfilPhoto, setPerfilPhoto] = useState(null);
 
   // Sincronizar el estado local con el prop del padre
   React.useEffect(() => {
@@ -56,7 +68,15 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
     const color1 = `hsl(${randomHue()}, 70%, 50%)`;
     const color2 = `hsl(${(randomHue() + 60) % 360}, 70%, 50%)`;
     setAvatarBg(`linear-gradient(135deg, ${color1}, ${color2})`);
-  }, []);
+
+    // Cargar foto de perfil si existe
+    if (usuario) {
+      const savedPhoto = localStorage.getItem(`foto_perfil_${usuario}`);
+      if (savedPhoto) {
+        setPerfilPhoto(savedPhoto);
+      }
+    }
+  }, [usuario]);
 
   // Calcular la posición del dropdown cuando se abre y cuando se hace scroll
   const updateDropdownPosition = () => {
@@ -324,12 +344,26 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
                   height: '38px', width: '38px', borderRadius: '50%',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: '#fff', fontWeight: 700, fontSize: '15px',
-                  background: avatarBg,
+                  background: perfilPhoto ? 'transparent' : avatarBg,
                   border: `2px solid ${isDark ? 'rgba(14,165,233,0.5)' : 'rgba(2,132,199,0.5)'}`,
                   boxShadow: isDark ? '0 0 16px rgba(14,165,233,0.4)' : '0 0 14px rgba(2,132,199,0.3)',
                   flexShrink: 0,
+                  overflow: 'hidden',
+                  position: 'relative',
                 }}>
-                  {usuario ? usuario.charAt(0).toUpperCase() : 'U'}
+                  {perfilPhoto ? (
+                    <img
+                      src={perfilPhoto}
+                      alt="Perfil"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                    />
+                  ) : (
+                    <span>{usuario ? usuario.charAt(0).toUpperCase() : 'U'}</span>
+                  )}
                 </div>
                 <div style={{ textAlign: 'left' }}>
                   <p style={{ color: isDark ? '#e2e8f0' : '#1e293b', fontWeight: 600, fontSize: '13px', lineHeight: 1.2, margin: 0 }}>
@@ -386,6 +420,33 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
             <p style={{ color: isDark ? '#e2e8f0' : '#1e293b', fontWeight: 700, fontSize: '14px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{usuario}</p>
             <p style={{ color: '#0ea5e9', fontSize: '11px', marginTop: '3px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>{rol}</p>
           </div>
+
+          {/* Opción: Configurar Perfil */}
+          <button
+            onClick={() => { setPerfilModalOpen(true); }}
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              color: isDark ? '#e2e8f0' : '#1e293b',
+              fontSize: '13px',
+              fontWeight: 500,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderRadius: '6px',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = isDark ? '#1e293b' : '#f1f5f9'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <span>Configurar Perfil</span>
+            <UserCircleIcon style={{ height: 17, width: 17, color: '#0ea5e9', flexShrink: 0 }} />
+          </button>
+
+          {/* Divider */}
+          <div style={{ height: '1px', background: isDark ? '#334155' : '#e2e8f0', margin: '4px 0' }} />
 
           {/* Opción: Cambiar tema */}
           <button
@@ -493,17 +554,48 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
               height: '40px', width: '40px', borderRadius: '50%', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: '#fff', fontWeight: 700, fontSize: '16px',
-              background: avatarBg,
+              background: perfilPhoto ? 'transparent' : avatarBg,
               border: `2px solid ${isDark ? 'rgba(14,165,233,0.5)' : 'rgba(2,132,199,0.5)'}`,
               boxShadow: isDark ? '0 0 16px rgba(14,165,233,0.4)' : '0 0 14px rgba(2,132,199,0.3)',
+              overflow: 'hidden',
+              position: 'relative',
             }}>
-              {usuario ? usuario.charAt(0).toUpperCase() : 'U'}
+              {perfilPhoto ? (
+                <img
+                  src={perfilPhoto}
+                  alt="Perfil"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                />
+              ) : (
+                <span>{usuario ? usuario.charAt(0).toUpperCase() : 'U'}</span>
+              )}
             </div>
             <div>
               <p style={{ color: isDark ? '#e2e8f0' : '#1e293b', fontWeight: 600, fontSize: '14px', margin: 0 }}>{usuario || 'Usuario'}</p>
               <p style={{ color: '#0ea5e9', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>{rol}</p>
             </div>
           </div>
+
+          <button
+            onClick={() => { setPerfilModalOpen(true); setMobileOpen(false); }}
+            style={{
+              width: '100%', textAlign: 'left', padding: '12px 24px',
+              border: 'none', cursor: 'pointer', background: 'transparent',
+              fontSize: '14px', fontWeight: 500,
+              color: isDark ? '#e2e8f0' : '#1e293b',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = isDark ? '#1e293b' : '#f1f5f9'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <span>Configurar Perfil</span>
+            <UserCircleIcon style={{ height: 18, width: 18, color: '#0ea5e9' }} />
+          </button>
 
           <button
             onClick={toggleTheme}
@@ -540,6 +632,14 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
           </button>
         </div>
       )}
+
+      {/* Modal de Configuración de Perfil */}
+      <PerfilModal
+        isOpen={perfilModalOpen}
+        onClose={() => setPerfilModalOpen(false)}
+        usuario={usuario}
+        onSave={handlePerfilSave}
+      />
 
       {/* RESPONSIVE CSS */}
       <style>{`

@@ -395,9 +395,9 @@ export default function SucursalesGrid() {
             <MagnifyingGlassIcon className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
           </div>
 
-          {/* Filtros rápidos y botón nueva sucursal
+          
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex gap-2">
+            {/* <div className="flex gap-2">
               {['Todas', 'Activas', 'Inactivas'].map((label) => (
                 <button
                   key={label}
@@ -411,7 +411,7 @@ export default function SucursalesGrid() {
                   {label}
                 </button>
               ))}
-            </div>
+            </div>*/}
 
             <button
               onClick={() => setShowCreateForm((f) => !f)}
@@ -420,14 +420,11 @@ export default function SucursalesGrid() {
               <PlusIcon className="h-4 w-4 mr-1.5" />
               {showCreateForm ? 'Cancelar' : 'Nueva Sucursal'}
             </button>
-          </div>*/}
+          </div>
 
           {/* Modal crear sucursal */}
           {showCreateForm && (
             <Modal onClose={() => setShowCreateForm(false)}>
-              <h4 className="text-2xl font-semibold mb-4 text-gray-900 dark:!text-white">
-                Crea tu nueva sucursal
-              </h4>
               <SucursalesForm
                 onCreated={() => {
                   reload();
