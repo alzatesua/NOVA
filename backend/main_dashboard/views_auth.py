@@ -294,6 +294,37 @@ class LoginView(APIView):
         )
 
         if not serializer.is_valid():
+            # ── Registrar intento fallido de login e-commerce ────────────────
+            try:
+                from .models import HistorialLogin
+                email = request.data.get('email', 'desconocido')
+
+                # Obtener IP del usuario
+                x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                if x_forwarded_for:
+                    direccion_ip = x_forwarded_for.split(',')[0].strip()
+                else:
+                    direccion_ip = request.META.get('REMOTE_ADDR', 'Desconocida')
+
+                # Obtener user agent
+                user_agent = request.META.get('HTTP_USER_AGENT', 'Desconocido')
+
+                # Crear registro de intento fallido
+                HistorialLogin.objects.using(alias).create(
+                    usuario_id=0,  # No se pudo autenticar
+                    usuario_correo=email,
+                    usuario_nombre=email.split('@')[0] if '@' in email else email,
+                    fecha_hora_login=timezone.now(),
+                    direccion_ip=direccion_ip,
+                    user_agent=user_agent,
+                    exitoso=False,
+                    fallo_reason=str(serializer.errors)
+                )
+            except Exception as hist_err:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error al registrar intento fallido e-commerce: {str(hist_err)}")
+            # ──────────────────────────────────────────────────────────────
             return Response({
                 'detail': serializer.errors
             }, status=status.HTTP_401_UNAUTHORIZED)
@@ -304,6 +335,42 @@ class LoginView(APIView):
             # Actualizar ultimo_login
             user.ultimo_login = timezone.now()
             user.save(using=alias, update_fields=['ultimo_login'])
+
+            # ── Registrar historial de login ─────────────────────────────
+            try:
+                from .models import HistorialLogin
+
+                # Obtener IP del usuario
+                x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                if x_forwarded_for:
+                    direccion_ip = x_forwarded_for.split(',')[0].strip()
+                else:
+                    direccion_ip = request.META.get('REMOTE_ADDR', 'Desconocida')
+
+                # Obtener user agent
+                user_agent = request.META.get('HTTP_USER_AGENT', 'Desconocido')
+
+                # Obtener nombre de usuario (usar email si no hay nombre específico)
+                usuario_nombre = user.primer_nombre if user.primer_nombre else user.email.split('@')[0]
+
+                # Crear registro de historial login
+                HistorialLogin.objects.using(alias).create(
+                    usuario_id=user.id,
+                    usuario_correo=user.email,
+                    usuario_nombre=usuario_nombre,
+                    fecha_hora_login=timezone.now(),
+                    direccion_ip=direccion_ip,
+                    user_agent=user_agent,
+                    exitoso=True,
+                    duracion_segundos=None
+                )
+
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error al registrar historial de login e-commerce: {str(e)}")
+                # No fallar el login si falla el registro del historial
+            # ──────────────────────────────────────────────────────────────
 
             # Generar tokens
             refresh = RefreshToken.for_user(user)

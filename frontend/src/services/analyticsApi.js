@@ -284,3 +284,10 @@ export function fetchExistenciasPorBodega(authData, params = {}) {
 export function fetchComparativaPeriodos(authData, params = {}) {
   return fetchAnalytics('/comparativa-periodos/', authData, { params });
 }
+
+/**
+ * Historial de Login
+ */
+export function fetchHistorialLogin(authData, params = {}) {
+  return fetchAnalytics('/historial-login/', authData, { params });
+}

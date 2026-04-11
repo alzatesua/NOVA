@@ -25,4 +25,10 @@ urlpatterns = [
 
     # Comparativa
     path('comparativa-periodos/', views.comparativa_periodos, name='comparativa_periodos'),
+
+    # Historial de Login
+    path('historial-login/', views.historial_login, name='historial_login'),
+
+    # Test: Insertar datos de prueba en historial
+    path('test-insertar-historial-login/', views.test_insertar_historial_login, name='test_insertar_historial_login'),
 ]

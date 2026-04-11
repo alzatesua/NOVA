@@ -2875,6 +2875,118 @@ class SolicitudAperturaCaja(models.Model):
         self.observaciones_admin = observaciones
         self.save(update_fields=['estado', 'aprobado_por', 'fecha_procesamiento', 'observaciones_admin'])
 
+
 # ============================================================================
-# FIN DEL MODELO DE SOLICITUDES
+# MODELO DE HISTORIAL DE LOGIN
+# ============================================================================
+
+class HistorialLogin(models.Model):
+    """
+    Modelo para registrar el historial de inicio y cierre de sesión de los usuarios.
+    Almacena información detallada sobre accesos, IPs, tiempos de conexión, etc.
+
+    Nota: Este modelo está en la base de datos de cada tienda (tenant),
+    no en la base de datos principal (nova).
+    """
+    id_historial = models.BigAutoField(primary_key=True)
+
+    # Referencia al usuario (en la base de datos principal nova)
+    # Guardamos el ID para poder hacer join si es necesario
+    usuario_id = models.IntegerField(
+        db_column='usuario_id',
+        help_text='ID del usuario en la tabla login_usuario (base de datos principal)'
+    )
+    usuario_correo = models.CharField(
+        max_length=255,
+        db_column='usuario_correo',
+        help_text='Correo del usuario para referencia rápida'
+    )
+    usuario_nombre = models.CharField(
+        max_length=100,
+        db_column='usuario_nombre',
+        help_text='Nombre de usuario para referencia rápida'
+    )
+
+    # Información de la sesión
+    fecha_hora_login = models.DateTimeField(
+        db_column='fecha_hora_login',
+        help_text="Fecha y hora de inicio de sesión",
+        db_index=True
+    )
+    fecha_hora_logout = models.DateTimeField(
+        db_column='fecha_hora_logout',
+        blank=True,
+        null=True,
+        help_text="Fecha y hora de cierre de sesión"
+    )
+
+    # Información de conexión
+    direccion_ip = models.CharField(
+        max_length=45,
+        db_column='direccion_ip',
+        blank=True,
+        null=True,
+        help_text="Dirección IP del usuario (IPv4 o IPv6)"
+    )
+    user_agent = models.TextField(
+        db_column='user_agent',
+        blank=True,
+        null=True,
+        help_text="User agent del navegador"
+    )
+
+    # Estado y resultados
+    exitoso = models.BooleanField(
+        db_column='exitoso',
+        default=True,
+        help_text="Indica si el login fue exitoso"
+    )
+    fallo_reason = models.CharField(
+        max_length=255,
+        db_column='fallo_reason',
+        blank=True,
+        null=True,
+        help_text="Razón del fallo si no fue exitoso"
+    )
+
+    # Tiempo de sesión
+    duracion_segundos = models.IntegerField(
+        db_column='duracion_segundos',
+        blank=True,
+        null=True,
+        help_text="Duración de la sesión en segundos"
+    )
+
+    # Metadata
+    creado_en = models.DateTimeField(auto_now_add=True, db_column='creado_en')
+
+    class Meta:
+        db_table = 'historial_login'
+        verbose_name = 'Historial de Login'
+        verbose_name_plural = 'Historiales de Login'
+        ordering = ['-fecha_hora_login']
+        indexes = [
+            models.Index(fields=['usuario_id']),
+            models.Index(fields=['fecha_hora_login']),
+            models.Index(fields=['direccion_ip']),
+            models.Index(fields=['-fecha_hora_login', 'usuario_id']),
+            models.Index(fields=['exitoso']),
+        ]
+
+    def __str__(self):
+        return f"{self.usuario_nombre} - {self.fecha_hora_login.strftime('%Y-%m-%d %H:%M')} - {self.direccion_ip or 'Sin IP'}"
+
+    def calcular_duracion(self):
+        """Calcula y actualiza la duración de la sesión en segundos."""
+        if self.fecha_hora_login and self.fecha_hora_logout:
+            from datetime import datetime
+            delta = self.fecha_hora_logout - self.fecha_hora_login
+            self.duracion_segundos = int(delta.total_seconds())
+            self.save(update_fields=['duracion_segundos'])
+        return self.duracion_segundos
+
+
+# ============================================================================
+# FIN DEL MODELO DE HISTORIAL DE LOGIN
+# ============================================================================
 # ============================================================================

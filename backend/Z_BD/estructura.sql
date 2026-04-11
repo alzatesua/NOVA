@@ -1298,3 +1298,34 @@ COMMENT ON COLUMN producto_variantes.activo IS 'Indica si la variante está acti
 COMMENT ON COLUMN producto_variantes.es_predeterminado IS 'Marcar como variante por defecto';
 COMMENT ON COLUMN producto_variantes.imagen_variante IS 'URL de imagen específica de esta variante';
 
+
+
+
+
+
+
+
+
+
+
+-- CREATE TABLE historial_login (
+--     id_historial BIGSERIAL PRIMARY KEY,
+--     usuario_id INTEGER NOT NULL,
+--     usuario_correo VARCHAR(255) NOT NULL,
+--     usuario_nombre VARCHAR(100) NOT NULL,
+--     fecha_hora_login TIMESTAMP NOT NULL,
+--     fecha_hora_logout TIMESTAMP NULL,
+--     direccion_ip VARCHAR(45) NULL,
+--     user_agent TEXT NULL,
+--     exitoso BOOLEAN NOT NULL DEFAULT TRUE,
+--     fallo_reason VARCHAR(255) NULL,
+--     duracion_segundos INTEGER NULL,
+--     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- );
+
+
+-- CREATE INDEX historial_l_usuario_2c5cff_idx ON historial_login(usuario_id);
+-- CREATE INDEX historial_l_fecha_h_8fa8ac_idx ON historial_login(fecha_hora_login);
+-- CREATE INDEX historial_l_direcci_1745f7_idx ON historial_login(direccion_ip);
+-- CREATE INDEX historial_l_fecha_h_3d798d_idx ON historial_login(fecha_hora_login DESC, usuario_id);
+-- CREATE INDEX historial_l_exitoso_98cab1_idx ON historial_login(exitoso);

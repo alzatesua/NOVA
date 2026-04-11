@@ -152,6 +152,73 @@ def login_view(request):
         user.token = token_jwt
         user.save(using=alias)
 
+        # ── Registrar historial de login ─────────────────────────────
+        logger.info(f"=== INICIANDO REGISTRO DE HISTORIAL LOGIN ===")
+        try:
+            from main_dashboard.models import HistorialLogin
+            from django.utils import timezone
+
+            logger.info(f"Usuario: {user.usuario} (ID: {user.id})")
+            logger.info(f"Alias de BD: {alias}")
+
+            # Obtener IP del usuario
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                direccion_ip = x_forwarded_for.split(',')[0].strip()
+            else:
+                direccion_ip = request.META.get('REMOTE_ADDR', 'Desconocida')
+
+            # Obtener user agent
+            user_agent = request.META.get('HTTP_USER_AGENT', 'Desconocido')
+
+            logger.info(f"IP: {direccion_ip}")
+            logger.info(f"User Agent: {user_agent[:100] if len(user_agent) > 100 else user_agent}...")
+
+            # Verificar que el modelo HistorialLogin existe
+            logger.info(f"Modelo HistorialLogin: {HistorialLogin}")
+            logger.info(f"Tabla en BD: {HistorialLogin._meta.db_table}")
+
+            # Verificar que la tabla existe antes de intentar crear el registro
+            from django.db import ProgrammingError
+            from django.db.utils import ConnectionDoesNotExist
+
+            try:
+                # Intentar contar registros primero para verificar que la tabla existe
+                count = HistorialLogin.objects.using(alias).count()
+                logger.info(f"La tabla existe. Total de registros actuales: {count}")
+            except Exception as tabla_error:
+                logger.error(f"❌ ERROR: La tabla 'historial_login' NO EXISTE en la base de datos '{alias}'")
+                logger.error(f"Error: {str(tabla_error)}")
+                logger.error(f"")
+                logger.error(f"📝 SOLUCIÓN: Ejecuta el siguiente SQL en la base de datos:")
+                logger.error(f"   psql -U postgres -d {tienda.db_nombre} -f Z_BD/crear_historial_login.sql")
+                logger.error(f"")
+                raise Exception(
+                    f"La tabla 'historial_login' no existe. Ejecuta: psql -U postgres -d {tienda.db_nombre} -f Z_BD/crear_historial_login.sql"
+                )
+
+            # Crear registro de historial login
+            historial = HistorialLogin.objects.using(alias).create(
+                usuario_id=user.id,
+                usuario_correo=user.correo_usuario,
+                usuario_nombre=user.usuario,
+                fecha_hora_login=timezone.now(),
+                direccion_ip=direccion_ip,
+                user_agent=user_agent,
+                exitoso=True,
+                duracion_segundos=None
+            )
+
+            logger.info(f"✅ Historial de login registrado EXITOSAMENTE. ID: {historial.id_historial}")
+
+        except Exception as e:
+            logger.error(f"❌ ERROR CRÍTICO al registrar historial de login: {str(e)}")
+            logger.error(f"Tipo de error: {type(e).__name__}")
+            import traceback
+            traceback.print_exc()
+            # IMPORTANTE: No fallar el login si falla el registro del historial
+        # ──────────────────────────────────────────────────────────────
+
         # Generar tokens de simplejwt para refresh
         refresh = RefreshToken.for_user(user)
 
@@ -229,6 +296,46 @@ def login_view(request):
 
 
     except ValueError as ve:
+        # ── Registrar intento fallido de login ─────────────────────────────
+        try:
+            from main_dashboard.models import HistorialLogin
+            from django.utils import timezone
+            from nova.models import Dominios, Tiendas
+
+            # Intentar obtener alias para registrar el fallo
+            if subdom:
+                try:
+                    dominio_obj = Dominios.objects.filter(dominio__icontains=subdom).first()
+                    if dominio_obj and dominio_obj.tienda:
+                        tienda = dominio_obj.tienda
+                        alias = str(tienda.id)
+
+                        # Obtener IP del usuario
+                        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                        if x_forwarded_for:
+                            direccion_ip = x_forwarded_for.split(',')[0].strip()
+                        else:
+                            direccion_ip = request.META.get('REMOTE_ADDR', 'Desconocida')
+
+                        # Obtener user agent
+                        user_agent = request.META.get('HTTP_USER_AGENT', 'Desconocido')
+
+                        # Crear registro de intento fallido
+                        HistorialLogin.objects.using(alias).create(
+                            usuario_id=0,  # No se encontró el usuario
+                            usuario_correo=usuario if usuario else 'desconocido',
+                            usuario_nombre=usuario if usuario else 'desconocido',
+                            fecha_hora_login=timezone.now(),
+                            direccion_ip=direccion_ip,
+                            user_agent=user_agent,
+                            exitoso=False,
+                            fallo_reason=str(ve)
+                        )
+                except Exception as login_err:
+                    logger.error(f"Error al registrar intento fallido: {str(login_err)}")
+        except Exception as hist_err:
+            logger.error(f"Error general al registrar historial de fallo: {str(hist_err)}")
+        # ──────────────────────────────────────────────────────────────
         return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         import traceback; traceback.print_exc()

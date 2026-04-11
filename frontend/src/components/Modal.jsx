@@ -4,12 +4,44 @@ import { createPortal } from 'react-dom';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 
 export default function Modal({ children, onClose }) {
+  // Prevenir propagación de scroll dentro del modal
+  const handleWheel = (e) => {
+    const target = e.currentTarget;
+    const isScrollingDown = e.deltaY > 0;
+    const isAtBottom = target.scrollHeight - target.scrollTop <= target.clientHeight;
+    const isAtTop = target.scrollTop === 0;
+
+    // Si estamos en el top y scrolleamos hacia arriba, o en el bottom y scrolleamos hacia abajo
+    if ((isAtTop && !isScrollingDown) || (isAtBottom && isScrollingDown)) {
+      e.preventDefault();
+    }
+  };
+
+  // Prevenir scroll en el backdrop
+  const handleBackdropClick = (e) => {
+    e.stopPropagation();
+    onClose();
+  };
+
+  // Prevenir propagación de eventos de touch/scroll
+  const handleTouchMove = (e) => {
+    const target = e.currentTarget;
+    const isScrollingDown = e.touches[0].clientY < (e.touches[1]?.clientY || 0);
+    const isAtBottom = target.scrollHeight - target.scrollTop <= target.clientHeight;
+    const isAtTop = target.scrollTop === 0;
+
+    if ((isAtTop && !isScrollingDown) || (isAtBottom && isScrollingDown)) {
+      e.preventDefault();
+    }
+  };
+
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4"
       role="dialog"
       aria-modal="true"
-      onClick={onClose}
+      onClick={handleBackdropClick}
+      style={{ backdropFilter: 'blur(4px)' }}
     >
       <div
         className="
@@ -31,6 +63,8 @@ export default function Modal({ children, onClose }) {
           borderColor: '#1a1d3d'
         }}
         onClick={e => e.stopPropagation()}
+        onWheel={handleWheel}
+        onTouchMove={handleTouchMove}
       >
         {/* Estilos para animaciones de destellos */}
         <style>{`

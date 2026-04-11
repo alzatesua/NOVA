@@ -1,0 +1,49 @@
+/* Animaciones de destellos para modales */
+@keyframes sparkle1 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1) translate(10px, -10px); }
+}
+
+@keyframes sparkle2 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1) translate(-15px, 5px); }
+}
+
+@keyframes sparkle3 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1) translate(8px, 12px); }
+}
+
+@keyframes sparkle4 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1) translate(-12px, -8px); }
+}
+
+@keyframes sparkle5 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1.2) translate(12px, -8px); }
+}
+
+@keyframes sparkle6 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1.2) translate(-10px, 10px); }
+}
+
+@keyframes sparkle7 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1.5) translate(15px, -15px); }
+}
+
+@keyframes sparkle8 {
+  0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1.5) translate(-18px, 12px); }
+}
+
+.animate-sparkle1 { animation: sparkle1 3s ease-in-out infinite; }
+.animate-sparkle2 { animation: sparkle2 4s ease-in-out infinite 0.5s; }
+.animate-sparkle3 { animation: sparkle3 3.5s ease-in-out infinite 1s; }
+.animate-sparkle4 { animation: sparkle4 4.5s ease-in-out infinite 1.5s; }
+.animate-sparkle5 { animation: sparkle5 2.8s ease-in-out infinite 0.3s; }
+.animate-sparkle6 { animation: sparkle6 3.1s ease-in-out infinite 0.7s; }
+.animate-sparkle7 { animation: sparkle7 3.5s ease-in-out infinite 0.2s; }
+.animate-sparkle8 { animation: sparkle8 3.2s ease-in-out infinite 1.3s; }
