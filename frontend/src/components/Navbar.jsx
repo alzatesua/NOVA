@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { MoonIcon, SunIcon, Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import PerfilModal from './PerfilModal';
+import { cargarPerfilCompleto } from '../utils/perfilStorage';
 
 export default function Navbar({ rol: propRol, onViewChange, onLogout, currentView, mobileMenuOpen, setMobileMenuOpen }) {
   const adminButtons = ['dashboard', 'usuarios', 'sucursales', 'productos', 'clientes', 'configuracion', 'facturacion', 'caja', 'mora', 'proveedores'];
@@ -30,11 +31,9 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
 
   const handlePerfilSave = ({ nombre, foto }) => {
     setPerfilPhoto(foto);
+    setNombrePersonalizado(nombre);
     setPerfilModalOpen(false);
     setProfileOpen(false);
-    // Aquí puedes agregar lógica adicional como actualizar el contexto de autenticación
-    // o recargar la página para reflejar los cambios
-    window.location.reload(); // Recargar para actualizar el nombre en todas partes
   };
 
   const [profileOpen, setProfileOpen] = useState(false);
@@ -46,6 +45,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
   const profileButtonRef = useRef(null);
   const [perfilPhoto, setPerfilPhoto] = useState(null);
+  const [nombrePersonalizado, setNombrePersonalizado] = useState(null);
 
   // Sincronizar el estado local con el prop del padre
   React.useEffect(() => {
@@ -69,12 +69,20 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
     const color2 = `hsl(${(randomHue() + 60) % 360}, 70%, 50%)`;
     setAvatarBg(`linear-gradient(135deg, ${color1}, ${color2})`);
 
-    // Cargar foto de perfil si existe
+    // Cargar perfil usando función auxiliar
     if (usuario) {
-      const savedPhoto = localStorage.getItem(`foto_perfil_${usuario}`);
-      if (savedPhoto) {
-        setPerfilPhoto(savedPhoto);
-      }
+      const perfil = cargarPerfilCompleto(usuario);
+
+      console.log('Navbar - Cargando perfil para usuario:', usuario);
+      console.log('Foto encontrada:', perfil.foto ? 'Sí' : 'No');
+      console.log('Nombre encontrado:', perfil.nombre || 'No');
+
+      setPerfilPhoto(perfil.foto);
+      setNombrePersonalizado(perfil.nombre);
+    } else {
+      // Resetear si no hay usuario
+      setPerfilPhoto(null);
+      setNombrePersonalizado(null);
     }
   }, [usuario]);
 
@@ -367,7 +375,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
                 </div>
                 <div style={{ textAlign: 'left' }}>
                   <p style={{ color: isDark ? '#e2e8f0' : '#1e293b', fontWeight: 600, fontSize: '13px', lineHeight: 1.2, margin: 0 }}>
-                    {usuario || 'Usuario'}
+                    {nombrePersonalizado || usuario || 'Usuario'}
                   </p>
                   <p style={{ color: '#0ea5e9', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
                     {rol}
@@ -417,7 +425,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
         >
           {/* Header con usuario */}
           <div style={{ padding: '12px 14px', borderBottom: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`, marginBottom: '4px' }}>
-            <p style={{ color: isDark ? '#e2e8f0' : '#1e293b', fontWeight: 700, fontSize: '14px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{usuario}</p>
+            <p style={{ color: isDark ? '#e2e8f0' : '#1e293b', fontWeight: 700, fontSize: '14px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nombrePersonalizado || usuario}</p>
             <p style={{ color: '#0ea5e9', fontSize: '11px', marginTop: '3px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>{rol}</p>
           </div>
 

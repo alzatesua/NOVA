@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { XMarkIcon, CameraIcon, UserIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { guardarPerfilCompleto, cargarPerfilCompleto, eliminarFotoPerfil } from '../utils/perfilStorage';
 
 export default function PerfilModal({ isOpen, onClose, usuario, onSave }) {
   const [nombre, setNombre] = useState(usuario || '');
@@ -8,16 +9,25 @@ export default function PerfilModal({ isOpen, onClose, usuario, onSave }) {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    // Cargar foto existente si la hay
-    const savedPhoto = localStorage.getItem(`foto_perfil_${usuario}`);
-    if (savedPhoto) {
-      setPreviewUrl(savedPhoto);
-    }
-  }, [usuario]);
+    if (!usuario) return;
 
-  useEffect(() => {
-    setNombre(usuario || '');
-  }, [usuario]);
+    console.log('PerfilModal - Cargando datos para usuario:', usuario);
+
+    // Cargar foto y nombre usando funciones auxiliares
+    const perfil = cargarPerfilCompleto(usuario);
+
+    if (perfil.foto) {
+      setPreviewUrl(perfil.foto);
+    } else {
+      setPreviewUrl(null);
+    }
+
+    if (perfil.nombre) {
+      setNombre(perfil.nombre);
+    } else {
+      setNombre(usuario || '');
+    }
+  }, [usuario, isOpen]); // isOpen para recargar cuando se abre el modal
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -48,7 +58,7 @@ export default function PerfilModal({ isOpen, onClose, usuario, onSave }) {
   const handleRemovePhoto = () => {
     setFotoPerfil(null);
     setPreviewUrl(null);
-    localStorage.removeItem(`foto_perfil_${usuario}`);
+    eliminarFotoPerfil(usuario);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -60,19 +70,35 @@ export default function PerfilModal({ isOpen, onClose, usuario, onSave }) {
       return;
     }
 
-    // Guardar foto en localStorage si hay una nueva
-    if (fotoPerfil && previewUrl) {
-      localStorage.setItem(`foto_perfil_${usuario}`, previewUrl);
-    }
+    const nombreGuardar = nombre.trim();
 
-    onSave({
-      nombre: nombre.trim(),
+    console.log('Guardando perfil...');
+    console.log('Usuario:', usuario);
+    console.log('Nombre:', nombreGuardar);
+    console.log('Foto:', previewUrl ? 'Sí' : 'No');
+
+    // Usar función auxiliar para guardar
+    const exito = guardarPerfilCompleto(usuario, {
+      nombre: nombreGuardar,
       foto: previewUrl
     });
+
+    if (exito) {
+      console.log('✅ Perfil guardado exitosamente');
+      onSave({
+        nombre: nombreGuardar,
+        foto: previewUrl
+      });
+    } else {
+      console.error('❌ Error al guardar perfil');
+      alert('Hubo un error al guardar el perfil. Por favor intenta nuevamente.');
+    }
   };
 
   const handleClose = () => {
-    setNombre(usuario || '');
+    // Recargar perfil actual del localStorage
+    const perfil = cargarPerfilCompleto(usuario);
+    setNombre(perfil.nombre || usuario || '');
     setFotoPerfil(null);
     // No reseteamos previewUrl para mantener la foto existente
     onClose();

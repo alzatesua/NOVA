@@ -16,13 +16,33 @@ export function useAuth() {
     // Verificar autenticación - usar token_usuario como principal
     const tokenToUse = tokenUsuario || accessToken;
     if (!rol || !tokenToUse) {
-      localStorage.clear();
+      // Limpiar solo claves de autenticación, preservar perfil
+      limpiarAuth();
       navigate('/login');
     }
   }, [rol, tokenUsuario, accessToken, navigate]);
 
+  const limpiarAuth = () => {
+    // Claves de autenticación que deben limpiarse
+    const clavesAuth = [
+      'rol',
+      'token_usuario',
+      'auth_access_token',
+      'accessToken',
+      'auth_usuario',
+      'usuario',
+      'tienda',
+      'id_sucursal',
+      'auth_refresh_token',
+      'refreshToken'
+    ];
+
+    clavesAuth.forEach(clave => localStorage.removeItem(clave));
+  };
+
   const logout = () => {
-    localStorage.clear();
+    // Limpiar solo autenticación, preservar perfil del usuario
+    limpiarAuth();
     navigate('/login');
   };
 

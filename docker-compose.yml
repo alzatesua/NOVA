@@ -170,6 +170,10 @@ services:
   nginx:
     build: ./nginx
     container_name: nova-nginx-1
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
     ports:
       - "80:80"
       - "443:443"

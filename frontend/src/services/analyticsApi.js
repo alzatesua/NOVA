@@ -179,8 +179,21 @@ export async function fetchAnalytics(endpoint, authData, options = {}) {
 
       // Si el error es REFRESH_TOKEN_EXPIRED, ya se manejó en refreshAccessToken
       if (refreshError.message !== 'REFRESH_TOKEN_EXPIRED') {
-        // Para otros errores, limpiar sesión y redirigir
-        localStorage.clear();
+        // Para otros errores, limpiar solo sesión y redirigir
+        // NO borrar datos de perfil del usuario
+        const clavesAuth = [
+          'auth_access_token',
+          'auth_refresh_token',
+          'auth_usuario',
+          'token_usuario',
+          'accessToken',
+          'refresh_token',
+          'rol',
+          'tienda',
+          'id_sucursal'
+        ];
+
+        clavesAuth.forEach(clave => localStorage.removeItem(clave));
         window.location.href = '/login';
       }
 
