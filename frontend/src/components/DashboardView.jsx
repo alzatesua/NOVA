@@ -14,6 +14,7 @@ import TrendChart from './dashboard/TrendChart';
 import TopProductsTable from './dashboard/TopProductsTable';
 import LoginHistoryChart from './dashboard/LoginHistoryChart';
 import LoginHistoryTable from './dashboard/LoginHistoryTable';
+import Modal from './Modal';
 
 // ── Iconos ──────────────────────────────────────────────────────
 const MoneyIcon = () => (
@@ -180,21 +181,37 @@ export default function DashboardView() {
   };
 
   const loadLoginHistory = async () => {
+    console.log('🔄 Cargando historial de login...');
+    console.log('📊 authData:', authData);
+    console.log('📅 días:', dias);
+
     setLoginHistoryLoading(true);
     try {
       const data = await fetchHistorialLogin(authData, { dias });
+
+      console.log('✅ Datos recibidos:', data);
+      console.log('📈 Historial:', data?.historial?.length || 0, 'registros');
+      console.log('📊 Gráfica:', data?.grafica?.length || 0, 'puntos');
+      console.log('📈 Estadísticas:', data?.estadisticas);
+
       setLoginHistoryData(data);
     } catch (error) {
-      console.error('Error al cargar historial de login:', error);
+      console.error('❌ Error al cargar historial de login:', error);
       setLoginHistoryData({ historial: [], grafica: [], estadisticas: {} });
     } finally {
       setLoginHistoryLoading(false);
     }
   };
 
-  // Cargar historial de login cuando se muestra la sección
+  // Cargar historial de login cuando se abre el modal
   useEffect(() => {
+    console.log('🔍 useEffect triggered - showLoginHistory:', showLoginHistory, 'loginHistoryData:', loginHistoryData);
+
     if (showLoginHistory && !loginHistoryData) {
+      console.log('🚀 Cargando historial de login...');
+      loadLoginHistory();
+    } else if (showLoginHistory && loginHistoryData && dias) {
+      console.log('♻️  Recargando historial por cambio de período...');
       loadLoginHistory();
     }
   }, [showLoginHistory, dias]);
@@ -406,17 +423,16 @@ export default function DashboardView() {
 
           <button
             onClick={() => {
-              setShowLoginHistory(!showLoginHistory);
-              if (!showLoginHistory && !loginHistoryData) {
+              setShowLoginHistory(true);
+              if (!loginHistoryData) {
                 loadLoginHistory();
               }
             }}
             className="store-btn"
             style={{
-              background: showLoginHistory ? T.btnPrimaryBg : T.btnSecondaryBg,
-              color: showLoginHistory ? T.btnPrimaryColor : T.btnSecondaryColor,
-              border: `1px solid ${showLoginHistory ? 'transparent' : T.btnSecondaryBorder}`,
-              boxShadow: showLoginHistory ? T.btnPrimaryShadow : 'none',
+              background: T.btnSecondaryBg,
+              color: T.btnSecondaryColor,
+              border: `1px solid ${T.btnSecondaryBorder}`,
               padding: '9px 16px',
               fontSize: '13px',
               display: 'flex',
@@ -424,76 +440,116 @@ export default function DashboardView() {
               gap: '7px',
             }}
             onMouseEnter={e => {
-              if (!showLoginHistory) {
-                e.currentTarget.style.background = T.btnSecondaryHover;
-              } else {
-                e.currentTarget.style.background = T.btnPrimaryHover;
-              }
+              e.currentTarget.style.background = T.btnSecondaryHover;
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.background = showLoginHistory ? T.btnPrimaryBg : T.btnSecondaryBg;
+              e.currentTarget.style.background = T.btnSecondaryBg;
             }}
           >
             <HistoryIcon />
-            {showLoginHistory ? 'Ocultar Historial' : 'Historial de Login'}
+            Historial de Login
           </button>
         </div>
 
-        {/* ── Historial de Login ─────────────────────────── */}
+        {/* ── Modal de Historial de Login ─────────────────────────── */}
         {showLoginHistory && (
-          <>
-            {/* Estadísticas rápidas */}
-            {loginHistoryData?.estadisticas && (
-              <div className="dash-fade" style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                gap: '12px',
-                marginBottom: '20px',
-              }}>
-                <StatCard
-                  title="Total Logins"
-                  value={loginHistoryData.estadisticas.total_logins}
-                  color="blue"
-                  loading={loginHistoryLoading}
-                />
-                <StatCard
-                  title="Exitosos"
-                  value={loginHistoryData.estadisticas.logins_exitosos}
-                  color="green"
-                  loading={loginHistoryLoading}
-                />
-                <StatCard
-                  title="Fallidos"
-                  value={loginHistoryData.estadisticas.logins_fallidos}
-                  color="red"
-                  loading={loginHistoryLoading}
-                />
-                <StatCard
-                  title="Sesiones Activas"
-                  value={loginHistoryData.estadisticas.sesiones_activas}
-                  color="purple"
-                  loading={loginHistoryLoading}
-                />
+          <Modal onClose={() => setShowLoginHistory(false)}>
+            <div style={{ color: '#e2e8f0' }}>
+              {/* Título */}
+              <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+                <h2 style={{
+                  fontSize: '24px',
+                  fontWeight: '700',
+                  marginBottom: '8px',
+                  background: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>
+                  Historial de Inicios de Sesión
+                </h2>
+                <p style={{ fontSize: '14px', color: '#94a3b8' }}>
+                  Últimos 30 días de actividad de usuarios
+                </p>
               </div>
-            )}
 
-            {/* Gráfica y Tabla */}
-            <div className="dash-chart-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '20px', marginBottom: '20px' }}>
-              <div style={{ minWidth: 0, width: '100%' }}>
-                <LoginHistoryChart
-                  data={loginHistoryData?.grafica || []}
-                  loading={loginHistoryLoading}
-                  showMockIfEmpty={false}
-                />
-              </div>
-              <div style={{ minWidth: 0, width: '100%', maxHeight: '350px', overflowY: 'auto' }}>
-                <LoginHistoryTable
-                  data={loginHistoryData?.historial || []}
-                  loading={loginHistoryLoading}
-                />
+              {/* Estadísticas rápidas */}
+              {loginHistoryData?.estadisticas && (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                  gap: '12px',
+                  marginBottom: '24px',
+                }}>
+                  <div style={{
+                    background: 'rgba(14,165,233,0.08)',
+                    border: '1px solid rgba(14,165,233,0.2)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>Total Logins</div>
+                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#38bdf8' }}>
+                      {loginHistoryLoading ? '...' : loginHistoryData.estadisticas.total_logins}
+                    </div>
+                  </div>
+                  <div style={{
+                    background: 'rgba(34,197,94,0.08)',
+                    border: '1px solid rgba(34,197,94,0.2)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>Exitosos</div>
+                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#22c55e' }}>
+                      {loginHistoryLoading ? '...' : loginHistoryData.estadisticas.logins_exitosos}
+                    </div>
+                  </div>
+                  <div style={{
+                    background: 'rgba(239,68,68,0.08)',
+                    border: '1px solid rgba(239,68,68,0.2)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>Fallidos</div>
+                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#ef4444' }}>
+                      {loginHistoryLoading ? '...' : loginHistoryData.estadisticas.logins_fallidos}
+                    </div>
+                  </div>
+                  <div style={{
+                    background: 'rgba(168,85,247,0.08)',
+                    border: '1px solid rgba(168,85,247,0.2)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>Sesiones Activas</div>
+                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#a855f7' }}>
+                      {loginHistoryLoading ? '...' : loginHistoryData.estadisticas.sesiones_activas}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Gráfica y Tabla */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '20px' }}>
+                <div style={{ minWidth: 0, width: '100%' }}>
+                  <LoginHistoryChart
+                    data={loginHistoryData?.grafica || []}
+                    loading={loginHistoryLoading}
+                    showMockIfEmpty={false}
+                  />
+                </div>
+                <div style={{ minWidth: 0, width: '100%', maxHeight: '400px', overflowY: 'auto' }}>
+                  <LoginHistoryTable
+                    data={loginHistoryData?.historial || []}
+                    loading={loginHistoryLoading}
+                  />
+                </div>
               </div>
             </div>
-          </>
+          </Modal>
         )}
 
         {/* ── Tienda E-commerce ─────────────────────────── */}

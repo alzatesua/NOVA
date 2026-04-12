@@ -8,6 +8,7 @@ from rest_framework import status
 from datetime import datetime, timedelta
 from django.utils import timezone
 from decimal import Decimal
+from django.db import models
 
 from .services import VentasService, InventarioService, KPICalculator
 from .serializers import (
@@ -587,6 +588,13 @@ def historial_login(request):
         - token: str (requerido)
         - subdominio: str (opcional si se usa subdomain en Host)
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
+    logger.info("=" * 70)
+    logger.info("📊 ENDPOINT HISTORIAL_LOGIN INVOCADO")
+    logger.info("=" * 70)
+
     try:
         from nova.models import Dominios
         from main_dashboard.models import HistorialLogin
@@ -599,12 +607,18 @@ def historial_login(request):
         token = request.query_params.get('token')
         subdom = request.query_params.get('subdominio')
 
+        logger.info(f"📝 Parámetros recibidos:")
+        logger.info(f"   - usuario: {usuario}")
+        logger.info(f"   - subdominio: {subdom}")
+
         # Si no hay subdominio, usar el host
         if not subdom:
             host = request.get_host().split(':')[0]
             subdom = host.split('.')[0].lower()
+            logger.info(f"   - subdominio del host: {subdom}")
 
         if not usuario or not token:
+            logger.error("❌ Faltan credenciales")
             return Response(
                 {'error': 'usuario y token son requeridos'},
                 status=status.HTTP_401_UNAUTHORIZED
@@ -616,23 +630,46 @@ def historial_login(request):
         ).select_related('tienda').first()
 
         if not dominio_obj:
+            logger.error(f"❌ Dominio no encontrado: {subdom}")
             return Response(
                 {'error': 'Dominio no válido'},
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
         tienda = dominio_obj.tienda
-
-        # Obtener el alias de la base de datos del tenant
         alias = str(tienda.id)
+
+        logger.info(f"✅ Tienda encontrada: {tienda.nombre_tienda}")
+        logger.info(f"🗄️  Alias BD: {alias}")
+
+        # Conectar a la BD de la tienda dinámicamente
+        from nova.utils.db import conectar_db_tienda
+        conectar_db_tienda(alias, tienda)
+        logger.info(f"✅ Conexión a BD establecida")
 
         # Obtener parámetros
         dias = int(request.query_params.get('dias', 30))
         usuario_id = request.query_params.get('usuario_id')
 
+        logger.info(f"📅 Período: {dias} días")
+
         # Calcular rango de fechas
         fecha_fin = timezone.now()
         fecha_inicio = fecha_fin - timedelta(days=dias)
+
+        # Verificar que la tabla existe
+        try:
+            total_count = HistorialLogin.objects.using(alias).count()
+            logger.info(f"✅ Tabla existe. Total de registros: {total_count}")
+        except Exception as tabla_error:
+            logger.error(f"❌ ERROR: La tabla 'historial_login' no existe: {str(tabla_error)}")
+            return Response(
+                {
+                    'error': 'La tabla historial_login no existe en la base de datos de la tienda',
+                    'detalle': 'Ejecuta: psql -U postgres -d ' + tienda.db_nombre + ' -f Z_BD/crear_historial_login.sql'
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
         # Construir query base usando la base de datos del tenant
         queryset = HistorialLogin.objects.using(alias).filter(
@@ -646,6 +683,8 @@ def historial_login(request):
 
         # Ordenar por fecha descendente
         queryset = queryset.order_by('-fecha_hora_login')
+
+        logger.info(f"📊 Registros en el período: {queryset.count()}")
 
         # Obtener datos
         historial = queryset.values(
@@ -676,14 +715,14 @@ def historial_login(request):
                 'duracion_segundos': item['duracion_segundos'],
                 'usuario': item['usuario_nombre'],
                 'correo_usuario': item['usuario_correo'],
-                'rol': 'admin'  # Por defecto, puedes obtenerlo de nova.LoginUsuario si lo necesitas
+                'rol': 'admin'
             })
 
         # Calcular estadísticas para la gráfica
-        # Logins por día
-        from django.db.models import TruncDate
-        logins_por_dia = queryset.annotate(
-            fecha=TruncDate('fecha_hora_login')
+        # Logins por día (usando extracción de fecha SQL directa)
+        from django.db.models import Count
+        logins_por_dia = queryset.extra(
+            select={'fecha': 'DATE(fecha_hora_login)'}
         ).values('fecha').annotate(
             total_logins=Count('id_historial'),
             logins_exitosos=Count('id_historial', filter=Q(exitoso=True)),
@@ -711,6 +750,15 @@ def historial_login(request):
             ).aggregate(promedio=Avg('duracion_segundos'))['promedio'] or 0
         }
 
+        logger.info(f"📊 Estadísticas calculadas:")
+        logger.info(f"   - Total logins: {stats['total_logins']}")
+        logger.info(f"   - Exitosos: {stats['logins_exitosos']}")
+        logger.info(f"   - Fallidos: {stats['logins_fallidos']}")
+        logger.info(f"   - Sesiones activas: {stats['sesiones_activas']}")
+        logger.info(f"   - Duración promedio: {stats['duracion_promedio']} segundos")
+
+        logger.info("=" * 70)
+
         return Response({
             'historial': historial_list,
             'grafica': grafica_data,
@@ -718,6 +766,9 @@ def historial_login(request):
         }, status=status.HTTP_200_OK)
 
     except Exception as e:
+        logger.error(f"❌ ERROR: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return Response(
             {'error': f'Error al obtener historial de login: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR

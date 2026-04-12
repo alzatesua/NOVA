@@ -487,8 +487,381 @@ export default function MoraView() {
         )}
       </div>
 
+      {/* ── MODAL DETALLES DEL CLIENTE ── */}
+      {clienteSeleccionado && resumenCliente && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4" onClick={cerrarDetalles}>
+          <div
+            className="relative w-full max-w-sm sm:max-w-2xl lg:max-w-5xl xl:max-w-screen-2xl max-h-[85vh] overflow-y-auto rounded-2xl shadow-2xl animate-fadeIn"
+            style={{
+              backgroundColor: '#0B0D26',
+              border: '1px solid',
+              borderColor: '#1a1d3d'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Estilos para animaciones de destellos */}
+            <style>{`
+              @keyframes sparkle1 {
+                0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+                50% { opacity: 1; transform: scale(1) translate(10px, -10px); }
+              }
+              @keyframes sparkle2 {
+                0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+                50% { opacity: 1; transform: scale(1) translate(-15px, 5px); }
+              }
+              @keyframes sparkle3 {
+                0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+                50% { opacity: 1; transform: scale(1) translate(8px, 12px); }
+              }
+              @keyframes sparkle4 {
+                0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+                50% { opacity: 1; transform: scale(1) translate(-12px, -8px); }
+              }
+              @keyframes sparkle5 {
+                0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+                50% { opacity: 1; transform: scale(1.2) translate(12px, -8px); }
+              }
+              @keyframes sparkle6 {
+                0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+                50% { opacity: 1; transform: scale(1.2) translate(-10px, 10px); }
+              }
+              @keyframes sparkle7 {
+                0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+                50% { opacity: 1; transform: scale(1.5) translate(15px, -15px); }
+              }
+              @keyframes sparkle8 {
+                0%, 100% { opacity: 0; transform: scale(0) translate(0, 0); }
+                50% { opacity: 1; transform: scale(1.5) translate(-18px, 12px); }
+              }
+              @keyframes fadeIn {
+                from { opacity: 0; transform: scale(0.95); }
+                to { opacity: 1; transform: scale(1); }
+              }
+              .animate-sparkle1 { animation: sparkle1 3s ease-in-out infinite; }
+              .animate-sparkle2 { animation: sparkle2 4s ease-in-out infinite 0.5s; }
+              .animate-sparkle3 { animation: sparkle3 3.5s ease-in-out infinite 1s; }
+              .animate-sparkle4 { animation: sparkle4 4.5s ease-in-out infinite 1.5s; }
+              .animate-sparkle5 { animation: sparkle5 2.8s ease-in-out infinite 0.3s; }
+              .animate-sparkle6 { animation: sparkle6 3.1s ease-in-out infinite 0.7s; }
+              .animate-sparkle7 { animation: sparkle7 3.5s ease-in-out infinite 0.2s; }
+              .animate-sparkle8 { animation: sparkle8 3.2s ease-in-out infinite 1.3s; }
+              .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
+            `}</style>
+
+            {/* Destellos animados */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+              {/* Pequeños destellos - 1px */}
+              <div className="absolute top-[10%] left-[5%] w-1 h-1 rounded-full animate-sparkle1" style={{ backgroundColor: '#93c5fd' }}></div>
+              <div className="absolute top-[20%] left-[15%] w-1 h-1 rounded-full animate-sparkle2" style={{ backgroundColor: '#67e8f9' }}></div>
+              <div className="absolute top-[30%] right-[10%] w-1 h-1 rounded-full animate-sparkle3" style={{ backgroundColor: '#c4b5fd' }}></div>
+              <div className="absolute top-[40%] right-[20%] w-1 h-1 rounded-full animate-sparkle4" style={{ backgroundColor: '#bfdbfe' }}></div>
+              <div className="absolute top-[60%] left-[8%] w-1 h-1 rounded-full animate-sparkle1" style={{ backgroundColor: '#a5f3fc' }}></div>
+              <div className="absolute top-[70%] right-[15%] w-1 h-1 rounded-full animate-sparkle2" style={{ backgroundColor: '#ddd6fe' }}></div>
+              <div className="absolute top-[80%] left-[12%] w-1 h-1 rounded-full animate-sparkle3" style={{ backgroundColor: '#93c5fd' }}></div>
+              <div className="absolute top-[90%] right-[8%] w-1 h-1 rounded-full animate-sparkle4" style={{ backgroundColor: '#67e8f9' }}></div>
+
+              {/* Destellos medios - 2px */}
+              <div className="absolute top-[25%] left-[30%] w-2 h-2 rounded-full animate-sparkle5" style={{ backgroundColor: '#60a5fa' }}></div>
+              <div className="absolute top-[50%] right-[25%] w-2 h-2 rounded-full animate-sparkle6" style={{ backgroundColor: '#22d3ee' }}></div>
+              <div className="absolute top-[75%] left-[35%] w-2 h-2 rounded-full animate-sparkle1" style={{ backgroundColor: '#a78bfa' }}></div>
+
+              {/* Destellos grandes - 3px */}
+              <div className="absolute top-[35%] left-[50%] w-3 h-3 rounded-full animate-sparkle7" style={{ backgroundColor: '#60a5fa' }}></div>
+              <div className="absolute top-[65%] right-[45%] w-3 h-3 rounded-full animate-sparkle8" style={{ backgroundColor: '#22d3ee' }}></div>
+            </div>
+
+            {/* Header */}
+            <div
+              className="relative z-10 px-6 py-5 border-b flex items-center gap-4"
+              style={{ borderColor: '#1a1d3d', background: 'linear-gradient(to right, #2563eb, #3b82f6)' }}
+            >
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <UserIcon style={{ width: 24, height: 24 }} className="text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-white m-0">Detalles del Cliente</h3>
+                <p className="text-sm mt-1" style={{ color: 'rgba(219, 234, 254, 0.8)' }}>
+                  {resumenCliente.cliente.nombre}
+                </p>
+              </div>
+              <button
+                onClick={cerrarDetalles}
+                className="bg-transparent border-0 cursor-pointer p-2 text-white rounded-lg hover:bg-white/20 transition-all"
+              >
+                <XMarkIcon style={{ width: 20, height: 20 }} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="relative z-10 p-6 space-y-6">
+              {/* Resumen de deuda */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  resumenCliente.cliente.dias_mora !== undefined && {
+                    label: 'Días en mora',
+                    value: `${resumenCliente.cliente.dias_mora} días`,
+                    color: resumenCliente.cliente.dias_mora > 30 ? '#dc2626' : '#22c55e',
+                    bgColor: resumenCliente.cliente.dias_mora > 30 ? 'rgba(220, 38, 38, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+                    borderColor: resumenCliente.cliente.dias_mora > 30 ? 'rgba(220, 38, 38, 0.2)' : 'rgba(34, 197, 94, 0.2)'
+                  },
+                  resumenCliente.deuda && {
+                    label: 'Deuda total',
+                    value: fmt(resumenCliente.deuda.deuda_total),
+                    color: '#3b82f6',
+                    bgColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: 'rgba(59, 130, 246, 0.2)'
+                  },
+                  resumenCliente.deuda && {
+                    label: 'Facturas crédito',
+                    value: fmt(resumenCliente.deuda.total_facturas_credito),
+                    color: '#a855f7',
+                    bgColor: 'rgba(168, 85, 247, 0.1)',
+                    borderColor: 'rgba(168, 85, 247, 0.2)'
+                  },
+                  resumenCliente.deuda && {
+                    label: 'Total abonado',
+                    value: fmt(resumenCliente.deuda.total_abonos),
+                    color: '#22c55e',
+                    bgColor: 'rgba(34, 197, 94, 0.1)',
+                    borderColor: 'rgba(34, 197, 94, 0.2)'
+                  }
+                ].filter(Boolean).map((stat, i) => (
+                  <div
+                    key={i}
+                    className="rounded-lg p-4 border"
+                    style={{ backgroundColor: stat.bgColor, borderColor: stat.borderColor }}
+                  >
+                    <p className="text-xs font-semibold mb-2" style={{ color: stat.color }}>
+                      {stat.label}
+                    </p>
+                    <p className="text-2xl font-bold" style={{ color: stat.color }}>
+                      {stat.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Información del cliente */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#cbd5e1' }}>
+                    Nombre del Cliente
+                  </label>
+                  <div className="px-4 py-3 rounded-lg border" style={{ backgroundColor: '#0f1229', borderColor: '#1a1d3d', color: '#ffffff' }}>
+                    {resumenCliente.cliente.nombre}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#cbd5e1' }}>
+                    Número de Documento
+                  </label>
+                  <div className="px-4 py-3 rounded-lg border" style={{ backgroundColor: '#0f1229', borderColor: '#1a1d3d', color: '#ffffff' }}>
+                    {resumenCliente.cliente.numero_documento}
+                  </div>
+                </div>
+
+                {resumenCliente.cliente.telefono && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#cbd5e1' }}>
+                      Teléfono
+                    </label>
+                    <div className="px-4 py-3 rounded-lg border" style={{ backgroundColor: '#0f1229', borderColor: '#1a1d3d', color: '#ffffff' }}>
+                      {resumenCliente.cliente.telefono}
+                    </div>
+                  </div>
+                )}
+
+                {resumenCliente.cliente.direccion && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#cbd5e1' }}>
+                      Dirección
+                    </label>
+                    <div className="px-4 py-3 rounded-lg border" style={{ backgroundColor: '#0f1229', borderColor: '#1a1d3d', color: '#ffffff' }}>
+                      {resumenCliente.cliente.direccion}
+                    </div>
+                  </div>
+                )}
+
+                {resumenCliente.cliente.fecha_ultimo_pago && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#cbd5e1' }}>
+                      Último Pago
+                    </label>
+                    <div className="px-4 py-3 rounded-lg border" style={{ backgroundColor: '#0f1229', borderColor: '#1a1d3d', color: '#ffffff' }}>
+                      {fmtDate(resumenCliente.cliente.fecha_ultimo_pago)}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#cbd5e1' }}>
+                    Estado
+                  </label>
+                  <div className="px-4 py-3 rounded-lg border flex items-center gap-2" style={{ backgroundColor: '#0f1229', borderColor: '#1a1d3d' }}>
+                    <span className={`inline-flex items-center text-sm font-medium px-3 py-1 rounded-full ${
+                      resumenCliente.cliente.en_mora
+                        ? 'bg-red-600 text-white'
+                        : 'bg-green-600 text-white'
+                    }`}>
+                      {resumenCliente.cliente.en_mora ? 'En Mora' : 'Al Día'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Acciones */}
+              <div className="flex gap-3">
+                <button
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-white border-0 rounded-lg font-semibold cursor-pointer transition-all"
+                  style={{ background: 'linear-gradient(to right, #2563eb, #3b82f6)' }}
+                  onClick={() => setMostrarModalAbono(true)}
+                  disabled={procesando}
+                >
+                  <CurrencyDollarIcon style={{ width: 18, height: 18 }} />
+                  Registrar Abono
+                </button>
+                {tabActiva === 'mora' && resumenCliente.cliente.dias_mora > 30 && (
+                  <button
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-white border-0 rounded-lg font-semibold cursor-pointer transition-all"
+                    style={{ background: 'linear-gradient(to right, #16a34a, #22c55e)' }}
+                    onClick={handleQuitarMora}
+                    disabled={procesando}
+                  >
+                    <CheckIcon style={{ width: 18, height: 18 }} />
+                    Quitar Mora
+                  </button>
+                )}
+              </div>
+
+              {/* Productos Fiados */}
+              <div>
+                <h4 className="text-lg font-bold mb-4" style={{ color: '#e2e8f0' }}>
+                  Productos a Crédito
+                </h4>
+                {resumenCliente.productos_fiados?.length > 0 ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                    {resumenCliente.productos_fiados.map((pr, i) => (
+                      <div
+                        key={`${pr.factura_id}-${i}`}
+                        className="rounded-lg p-4 border"
+                        style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}
+                      >
+                        <div className="flex justify-between items-start gap-3 mb-3">
+                          <div className="flex-1">
+                            <p className="font-semibold text-base mb-2" style={{ color: '#e2e8f0' }}>
+                              {pr.producto_nombre}
+                            </p>
+                            <div className="flex flex-wrap gap-2 text-sm" style={{ color: '#cbd5e1' }}>
+                              <span>SKU: {pr.producto_sku || '—'}</span>
+                              <span>x{pr.cantidad}</span>
+                              <span>{fmt(pr.valor_unitario)} c/u</span>
+                            </div>
+                          </div>
+                          <p className="font-bold text-lg" style={{ color: '#3b82f6' }}>
+                            {fmt(pr.valor_total)}
+                          </p>
+                        </div>
+                        <div className="flex justify-between pt-3 border-t" style={{ borderColor: 'rgba(59, 130, 246, 0.2)' }}>
+                          <span className="text-sm" style={{ color: '#94a3b8' }}>
+                            Factura: {pr.numero_factura}
+                          </span>
+                          <span className="text-sm" style={{ color: '#94a3b8' }}>
+                            {fmtDate(pr.fecha_venta)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-6 rounded-lg border" style={{ backgroundColor: '#1e293b', borderColor: '#334155' }}>
+                    <p className="text-sm" style={{ color: '#94a3b8' }}>
+                      Sin productos a crédito
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Historial de Abonos */}
+              <div>
+                <h4 className="text-lg font-bold mb-4" style={{ color: '#e2e8f0' }}>
+                  Historial de Abonos
+                </h4>
+                {resumenCliente.abonos?.length > 0 ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                    {resumenCliente.abonos.map((ab) => (
+                      <div
+                        key={ab.abono_id || ab.id}
+                        className="rounded-lg p-4 border"
+                        style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.2)' }}
+                      >
+                        <div className="flex justify-between items-start gap-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <p className="font-bold text-lg" style={{ color: '#22c55e' }}>
+                                {fmt(ab.monto)}
+                              </p>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', borderColor: 'rgba(34, 197, 94, 0.2)' }}>
+                                {ab.metodo_pago}
+                              </span>
+                            </div>
+                            <p className="text-sm" style={{ color: '#94a3b8' }}>
+                              {fmtDate(ab.fecha_abono)}
+                            </p>
+                            {ab.observaciones && (
+                              <p className="text-sm italic mt-2" style={{ color: '#cbd5e1' }}>
+                                "{ab.observaciones}"
+                              </p>
+                            )}
+                            {ab.registrado_por && (
+                              <p className="text-xs mt-1" style={{ color: '#64748b' }}>
+                                Por: {ab.registrado_por}
+                              </p>
+                            )}
+                          </div>
+                          {ab.soporte_pago && (
+                            <button
+                              onClick={() => { setSoporteSeleccionado(ab.soporte_pago); setMostrarModalSoporte(true); }}
+                              className="bg-transparent border-0 rounded-md p-2 cursor-pointer transition-colors"
+                              style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}
+                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)'}
+                              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)'}
+                            >
+                              <EyeIcon style={{ width: 18, height: 18 }} className="text-blue-400" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-6 rounded-lg border" style={{ backgroundColor: '#1e293b', borderColor: '#334155' }}>
+                    <p className="text-sm" style={{ color: '#94a3b8' }}>
+                      Sin abonos registrados
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="relative z-10 px-6 py-4 border-t flex justify-end" style={{ borderColor: '#1a1d3d' }}>
+              <button
+                onClick={cerrarDetalles}
+                className="px-6 py-2.5 text-white rounded-lg font-medium transition-all border"
+                style={{ borderColor: '#1a1d3d', backgroundColor: '#0f1229' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1e293b'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0f1229'}
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── CONTENT ── */}
-      <div className="mora-content mora-content-grid flex-1 px-7 py-5 grid gap-5 items-start" style={{ gridTemplateColumns: clienteSeleccionado && resumenCliente ? '1fr 340px' : '1fr' }}>
+      <div className="mora-content mora-content-grid flex-1 px-7 py-5 grid gap-5 items-start" style={{ gridTemplateColumns: '1fr' }}>
 
         {/* Lista */}
         <div className="mora-clientes-list bg-white dark:!bg-slate-900 rounded-xl border border-gray-200 dark:!border-slate-700 overflow-hidden shadow-sm">
@@ -563,129 +936,6 @@ export default function MoraView() {
             )}
           </div>
         </div>
-
-        {/* Panel Detalles */}
-        {clienteSeleccionado && resumenCliente && (
-          <>
-            {/* Backdrop for mobile */}
-            <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={cerrarDetalles}></div>
-            <div className="mora-details-panel bg-white dark:!bg-slate-900 rounded-xl border border-gray-200 dark:!border-slate-700 overflow-hidden shadow-sm sticky top-5 lg:relative lg:z-0 z-50">
-            <div className="px-4.5 py-3 border-b border-gray-200 dark:!border-slate-700 flex justify-between items-center">
-              <div>
-                <p className="text-sm font-semibold text-gray-900 dark:!text-white m-0">Detalle del Cliente</p>
-                <p className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5 max-w-[220px] whitespace-nowrap overflow-hidden text-ellipsis">{resumenCliente.cliente.nombre}</p>
-              </div>
-              <button onClick={cerrarDetalles} className="bg-transparent border-0 cursor-pointer p-1 text-gray-500 dark:!text-slate-400 rounded-md hover:bg-gray-100 dark:hover:!bg-slate-800">
-                <XMarkIcon style={{ width: 18, height: 18 }} />
-              </button>
-            </div>
-
-            <div className="p-3.5 max-h-[calc(100vh-200px)] overflow-y-auto flex flex-col gap-3">
-
-              {/* Resumen */}
-              <div className="bg-gray-50 dark:!bg-slate-800 rounded-lg p-3 border border-gray-200 dark:!border-slate-700">
-                {[
-                  resumenCliente.cliente.dias_mora !== undefined && { label: 'Días en mora', value: `${resumenCliente.cliente.dias_mora} días`, color: resumenCliente.cliente.dias_mora > 30 ? 'text-red-600 dark:!text-red-400' : 'text-green-600 dark:!text-green-400' },
-                  resumenCliente.deuda && { label: 'Deuda total', value: fmt(resumenCliente.deuda.deuda_total), color: 'text-blue-600 dark:!text-blue-400', bold: true },
-                  resumenCliente.deuda && { label: 'Facturas crédito', value: fmt(resumenCliente.deuda.total_facturas_credito), color: 'text-gray-900 dark:!text-white' },
-                  resumenCliente.deuda && { label: 'Total abonado', value: fmt(resumenCliente.deuda.total_abonos), color: 'text-gray-900 dark:!text-white' },
-                  resumenCliente.cliente.fecha_ultimo_pago && { label: 'Último pago', value: fmtDate(resumenCliente.cliente.fecha_ultimo_pago), color: 'text-gray-900 dark:!text-white' },
-                ].filter(Boolean).map((row, i, arr) => (
-                  <div key={i} className="flex justify-between items-center py-1.5 border-b last:border-0 border-gray-200 dark:!border-slate-700">
-                    <span className="text-xs text-gray-600 dark:!text-slate-400">{row.label}</span>
-                    <span className={`text-sm ${row.bold ? 'font-bold' : 'font-semibold'} ${row.color}`}>{row.value}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Acciones */}
-              <div className="flex gap-2">
-                <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 text-white border-0 rounded-lg text-xs font-semibold cursor-pointer hover:bg-blue-700 disabled:opacity-60" onClick={() => setMostrarModalAbono(true)} disabled={procesando}>
-                  <CurrencyDollarIcon style={{ width: 14, height: 14 }} /> Registrar Abono
-                </button>
-                {tabActiva === 'mora' && resumenCliente.cliente.dias_mora > 30 && (
-                  <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-green-600 text-white border-0 rounded-lg text-xs font-semibold cursor-pointer hover:bg-green-700 disabled:opacity-60" onClick={handleQuitarMora} disabled={procesando}>
-                    <CheckIcon style={{ width: 14, height: 14 }} /> Quitar Mora
-                  </button>
-                )}
-              </div>
-
-              {/* Abonos */}
-              <div>
-                <p className="text-sm font-semibold text-gray-900 dark:!text-white mb-2">Historial de Abonos</p>
-                {resumenCliente.abonos?.length > 0 ? (
-                  <div className="flex flex-col gap-1.5">
-                    {resumenCliente.abonos.map((ab) => (
-                      <div key={ab.abono_id || ab.id} className="bg-green-50 dark:!bg-green-900/20 border border-green-200 dark:!border-green-800 rounded-lg p-2.5">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-bold text-green-600 dark:!text-green-400 text-sm m-0">{fmt(ab.monto)}</p>
-                            <p className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5">{fmtDate(ab.fecha_abono)}</p>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Badge color="#16a34a">{ab.metodo_pago}</Badge>
-                            {ab.soporte_pago && (
-                              <button onClick={() => { setSoporteSeleccionado(ab.soporte_pago); setMostrarModalSoporte(true); }}
-                                className="bg-blue-50 dark:!bg-blue-900/20 border-0 rounded-md p-1 cursor-pointer text-blue-600 dark:!text-blue-400 hover:bg-blue-100 dark:hover:!bg-blue-900/30">
-                                <EyeIcon style={{ width: 12, height: 12 }} />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        {ab.observaciones && <p className="text-xs text-gray-600 dark:!text-slate-400 mt-1 italic">"{ab.observaciones}"</p>}
-                        {ab.registrado_por && <p className="text-xs text-gray-500 dark:!text-slate-400 mt-0.5">Por: {ab.registrado_por}</p>}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-3.5 bg-gray-50 dark:!bg-slate-800 rounded-lg border border-gray-200 dark:!border-slate-700">
-                    <p className="text-xs text-gray-500 dark:!text-slate-400 m-0">Sin abonos registrados</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Productos fiados */}
-              <div>
-                <p className="text-sm font-semibold text-gray-900 dark:!text-white mb-2">Productos a Crédito</p>
-                {resumenCliente.productos_fiados?.length > 0 ? (
-                  <div className="flex flex-col gap-1.5">
-                    {resumenCliente.productos_fiados.map((pr, i) => (
-                      <div key={`${pr.factura_id}-${i}`} className="bg-blue-50 dark:!bg-blue-900/20 border border-blue-200 dark:!border-blue-800 rounded-lg p-2.5">
-                        <div className="flex justify-between items-start gap-2">
-                          <div className="flex-1">
-                            <p className="font-semibold text-gray-900 dark:!text-white text-sm m-0">{pr.producto_nombre}</p>
-                            <div className="flex gap-2 mt-1 flex-wrap">
-                              <span className="text-xs text-gray-600 dark:!text-slate-400">SKU: {pr.producto_sku || '—'}</span>
-                              <span className="text-xs text-gray-600 dark:!text-slate-400">x{pr.cantidad}</span>
-                              <span className="text-xs text-gray-600 dark:!text-slate-400">{fmt(pr.valor_unitario)} c/u</span>
-                            </div>
-                          </div>
-                          <p className="font-bold text-blue-600 dark:!text-blue-400 text-sm m-0">{fmt(pr.valor_total)}</p>
-                        </div>
-                        <div className="flex justify-between mt-2 pt-2 border-t border-blue-200 dark:!border-blue-800">
-                          <span className="text-xs text-gray-500 dark:!text-slate-400">Factura: {pr.numero_factura}</span>
-                          <span className="text-xs text-gray-500 dark:!text-slate-400">{fmtDate(pr.fecha_venta)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-3.5 bg-gray-50 dark:!bg-slate-800 rounded-lg border border-gray-200 dark:!border-slate-700">
-                    <p className="text-xs text-gray-500 dark:!text-slate-400 m-0">Sin productos a crédito</p>
-                  </div>
-                )}
-              </div>
-
-              {resumenCliente.total_abonado && resumenCliente.total_abonado !== '0' && (
-                <div className="bg-green-50 dark:!bg-green-900/20 border border-green-200 dark:!border-green-800 rounded-lg p-3 flex justify-between items-center">
-                  <span className="text-sm font-semibold text-green-600 dark:!text-green-400">Total Abonado</span>
-                  <span className="text-base font-extrabold text-green-600 dark:!text-green-400">{fmt(resumenCliente.total_abonado)}</span>
-                </div>
-              )}
-            </div>
-          </div>
-          </>
-        )}
       </div>
 
       {/* ── MODAL ABONO ── */}

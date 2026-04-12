@@ -181,16 +181,16 @@ export default function RecibirTraslado({
     : (recibirForm?.trasladoId ? 1 : 0);
 
   return (
-    <div className="bg-white dark:!bg-slate-900 rounded-2xl shadow-xl border border-gray-100 dark:!border-slate-800 overflow-hidden">
+    <div className="rounded-2xl shadow-xl border overflow-hidden" style={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-6 text-white">
+      <div className="p-6 text-white" style={{ background: 'linear-gradient(to right, #2563eb, #3b82f6)' }}>
         <div className="flex items-center gap-4">
           <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
             <ArchiveBoxArrowDownIcon className="w-6 h-6" />
           </div>
           <div className="flex-1">
             <h3 className="text-2xl font-bold">Recibir Traslado</h3>
-            <p className="text-blue-100 mt-1">
+            <p className="mt-1" style={{ color: 'rgba(219, 234, 254, 0.8)' }}>
               Acepta y procesa traslados que han sido enviados a tu bodega
             </p>
           </div>
@@ -198,17 +198,23 @@ export default function RecibirTraslado({
       </div>
 
       <form ref={formRef} onSubmit={manejarEnvio} className="p-6 space-y-6">
-        
+
         {/* Selector de modo */}
-        <div className="flex gap-2 p-1 bg-gray-100 dark:!bg-slate-800 rounded-xl">
+        <div className="flex gap-2 p-1 rounded-xl" style={{ backgroundColor: '#1e293b' }}>
           <button
             type="button"
             onClick={() => setModoSeleccion('manual')}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
               modoSeleccion === 'manual'
-                ? 'bg-white text-gray-900 dark:!text-slate-100 shadow-sm'
-                : 'text-gray-600 dark:!text-slate-400 hover:text-gray-900 dark:!text-slate-100'
+                ? 'shadow-sm'
+                : ''
             }`}
+            style={{
+              backgroundColor: modoSeleccion === 'manual' ? '#0f172a' : 'transparent',
+              color: modoSeleccion === 'manual' ? '#e2e8f0' : '#94a3b8'
+            }}
+            onMouseEnter={(e) => {if(modoSeleccion !== 'manual') e.currentTarget.style.backgroundColor = '#334155';}}
+            onMouseLeave={(e) => {if(modoSeleccion !== 'manual') e.currentTarget.style.backgroundColor = 'transparent';}}
           >
             <DocumentTextIcon className="w-4 h-4" />
             Ingreso Manual
@@ -218,9 +224,15 @@ export default function RecibirTraslado({
             onClick={() => setModoSeleccion('lista')}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
               modoSeleccion === 'lista'
-                ? 'bg-white text-gray-900 dark:!text-slate-100 shadow-sm'
-                : 'text-gray-600 dark:!text-slate-400 hover:text-gray-900 dark:!text-slate-100'
+                ? 'shadow-sm'
+                : ''
             }`}
+            style={{
+              backgroundColor: modoSeleccion === 'lista' ? '#0f172a' : 'transparent',
+              color: modoSeleccion === 'lista' ? '#e2e8f0' : '#94a3b8'
+            }}
+            onMouseEnter={(e) => {if(modoSeleccion !== 'lista') e.currentTarget.style.backgroundColor = '#334155';}}
+            onMouseLeave={(e) => {if(modoSeleccion !== 'lista') e.currentTarget.style.backgroundColor = 'transparent';}}
           >
             <MagnifyingGlassIcon className="w-4 h-4" />
             Seleccionar de Lista
@@ -230,13 +242,13 @@ export default function RecibirTraslado({
         {modoSeleccion === 'manual' ? (
           /* Modo Manual */
           <div className="space-y-4">
-            <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+            <div className="rounded-xl p-4 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
               <div className="flex items-start gap-3">
-                <InformationCircleIcon className="w-5 h-5 text-blue-600 mt-0.5" />
+                <InformationCircleIcon className="w-5 h-5 mt-0.5" style={{ color: '#3b82f6' }} />
                 <div>
-                  <h4 className="font-semibold text-blue-900 mb-1">Ingreso Manual</h4>
-                  <p className="text-sm text-blue-700">
-                    Ingresa manualmente el ID del traslado que deseas recibir. 
+                  <h4 className="font-semibold mb-1" style={{ color: '#1e40af' }}>Ingreso Manual</h4>
+                  <p className="text-sm" style={{ color: '#1d4ed8' }}>
+                    Ingresa manualmente el ID del traslado que deseas recibir.
                     Asegúrate de que el traslado haya sido enviado previamente.
                   </p>
                 </div>
@@ -244,7 +256,7 @@ export default function RecibirTraslado({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700 dark:!text-slate-300">
+              <label className="block text-sm font-semibold" style={{ color: '#cbd5e1' }}>
                 ID del Traslado *
               </label>
               <input
@@ -252,10 +264,11 @@ export default function RecibirTraslado({
                 value={recibirForm?.trasladoId || ''}
                 onChange={(e) => manejarSeleccionTraslado(e.target.value)}
                 placeholder="Ejemplo: 12345"
-                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 transition-all"
+                style={{ backgroundColor: '#1e293b', border: '2px solid #334155', color: '#e2e8f0' }}
                 required
               />
-              <p className="text-xs text-gray-500 dark:text-slate-500">
+              <p className="text-xs" style={{ color: '#64748b' }}>
                 Ingresa el número de ID del traslado que quieres recibir
               </p>
             </div>
@@ -266,19 +279,23 @@ export default function RecibirTraslado({
             {/* Barra de búsqueda y toggle múltiple */}
             <div className="flex gap-3">
               <div className="relative flex-1">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#64748b' }} />
                 <input
                   type="text"
                   value={filtro}
                   onChange={(e) => setFiltro(e.target.value)}
                   placeholder="Buscar por ID, bodega, producto..."
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:!bg-slate-800 border border-gray-200 dark:!border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 transition-all"
+                  style={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#e2e8f0' }}
                 />
                 {filtro && (
                   <button
                     type="button"
                     onClick={() => setFiltro('')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:!text-slate-400"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                    style={{ color: '#64748b' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#94a3b8'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = '#64748b'}
                   >
                     <XCircleIcon className="w-5 h-5" />
                   </button>
@@ -287,11 +304,24 @@ export default function RecibirTraslado({
               <button
                 type="button"
                 onClick={toggleSeleccionMultiple}
-                className={`px-4 py-3 rounded-xl border-2 font-medium transition-all flex items-center gap-2 ${
-                  seleccionandoMultiple
-                    ? 'bg-purple-50 border-purple-500 text-purple-700'
-                    : 'bg-white border-gray-300 text-gray-700 dark:!text-slate-300 hover:border-gray-400'
-                }`}
+                className="px-4 py-3 rounded-xl border-2 font-medium transition-all flex items-center gap-2"
+                style={{
+                  backgroundColor: seleccionandoMultiple ? 'rgba(168, 85, 247, 0.1)' : '#0f172a',
+                  borderColor: seleccionandoMultiple ? '#a855f7' : '#334155',
+                  color: seleccionandoMultiple ? '#a855f7' : '#cbd5e1'
+                }}
+                onMouseEnter={(e) => {
+                  if(!seleccionandoMultiple) {
+                    e.currentTarget.style.backgroundColor = '#1e293b';
+                    e.currentTarget.style.borderColor = '#475569';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if(!seleccionandoMultiple) {
+                    e.currentTarget.style.backgroundColor = '#0f172a';
+                    e.currentTarget.style.borderColor = '#334155';
+                  }
+                }}
               >
                 <Squares2X2Icon className="w-5 h-5" />
                 {seleccionandoMultiple ? 'Múltiple' : 'Simple'}
@@ -300,34 +330,34 @@ export default function RecibirTraslado({
 
             {/* Estadísticas */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                <div className="text-2xl font-bold text-blue-600">{trasladosParaRecibir.length}</div>
-                <div className="text-sm text-blue-600">Disponibles</div>
+              <div className="rounded-lg p-4 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
+                <div className="text-2xl font-bold" style={{ color: '#3b82f6' }}>{trasladosParaRecibir.length}</div>
+                <div className="text-sm" style={{ color: '#60a5fa' }}>Disponibles</div>
               </div>
-              <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                <div className="text-2xl font-bold text-blue-600">
+              <div className="rounded-lg p-4 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
+                <div className="text-2xl font-bold" style={{ color: '#3b82f6' }}>
                   {trasladosParaRecibir.filter(t => esReciente(t.enviado_en || t.creado_en)).length}
                 </div>
-                <div className="text-sm text-blue-600">Recientes</div>
+                <div className="text-sm" style={{ color: '#60a5fa' }}>Recientes</div>
               </div>
-              <div className="bg-purple-50 rounded-lg p-4 border border-purple-100">
-                <div className="text-2xl font-bold text-purple-600">{totalSeleccionados}</div>
-                <div className="text-sm text-purple-600">Seleccionados</div>
+              <div className="rounded-lg p-4 border" style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)', borderColor: 'rgba(168, 85, 247, 0.2)' }}>
+                <div className="text-2xl font-bold" style={{ color: '#a855f7' }}>{totalSeleccionados}</div>
+                <div className="text-sm" style={{ color: '#c084fc' }}>Seleccionados</div>
               </div>
             </div>
 
             {/* Lista de traslados */}
-            <div className="border border-gray-200 rounded-xl overflow-hidden max-h-[500px] overflow-y-auto">
+            <div className="border rounded-xl overflow-hidden max-h-[500px] overflow-y-auto" style={{ borderColor: '#1e293b' }}>
               {isLoadingTraslados ? (
                 <div className="p-8 text-center">
                   <div className="inline-flex items-center gap-3">
-                    <div className="w-6 h-6 border-2 border-gray-300 dark:!border-slate-700 border-t-green-500 rounded-full animate-spin"></div>
-                    <span className="text-gray-600 dark:!text-slate-400">Cargando traslados disponibles...</span>
+                    <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: '#334155', borderTopColor: '#22c55e' }}></div>
+                    <span style={{ color: '#94a3b8' }}>Cargando traslados disponibles...</span>
                   </div>
                 </div>
               ) : errorTraslados ? (
                 <div className="p-8 text-center">
-                  <div className="text-red-600 bg-red-50 rounded-lg p-4 border border-red-200">
+                  <div className="rounded-lg p-4 border" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)', color: '#dc2626' }}>
                     <ExclamationTriangleIcon className="w-8 h-8 mx-auto mb-2" />
                     <h4 className="font-semibold mb-2">Error al cargar traslados</h4>
                     <p className="text-sm">
@@ -337,11 +367,11 @@ export default function RecibirTraslado({
                 </div>
               ) : !trasladosParaRecibir.length ? (
                 <div className="p-8 text-center">
-                  <div className="text-gray-500 dark:text-slate-500">
-                    <ArchiveBoxArrowDownIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <div style={{ color: '#64748b' }}>
+                    <ArchiveBoxArrowDownIcon className="w-12 h-12 mx-auto mb-3" style={{ color: '#475569' }} />
                     <h4 className="font-medium mb-2">No hay traslados disponibles</h4>
                     <p className="text-sm">
-                      {filtro 
+                      {filtro
                         ? "No se encontraron traslados que coincidan con tu búsqueda."
                         : "No tienes traslados pendientes de recibir en este momento."
                       }
@@ -349,7 +379,7 @@ export default function RecibirTraslado({
                   </div>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y" style={{ borderColor: '#1e293b' }}>
                   {trasladosParaRecibir.map((traslado) => {
                     const estadoInfo = obtenerEstadoVisual(traslado.estado);
                     const fechaEnvio = traslado.enviado_en || traslado.creado_en;
@@ -357,17 +387,36 @@ export default function RecibirTraslado({
                     const seleccionado = seleccionandoMultiple
                       ? trasladosSeleccionados.includes(traslado.id)
                       : String(recibirForm?.trasladoId) === String(traslado.id);
-                    
+
                     const totalProductos = traslado.lineas?.length || 0;
                     const totalCantidad = traslado.lineas?.reduce((sum, l) => sum + (l.cantidad || 0), 0) || 0;
-                    
+
+                    const getEstadoStyle = (estado) => {
+                      const styles = {
+                        'BOR': { backgroundColor: 'rgba(234, 179, 8, 0.1)', color: '#eab308', borderColor: 'rgba(234, 179, 8, 0.2)' },
+                        'ENV': { backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderColor: 'rgba(59, 130, 246, 0.2)' },
+                        'REC': { backgroundColor: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', borderColor: 'rgba(34, 197, 94, 0.2)' }
+                      };
+                      return styles[estado] || { backgroundColor: 'rgba(107, 114, 128, 0.1)', color: '#6b7280', borderColor: 'rgba(107, 114, 128, 0.2)' };
+                    };
+
+                    const estadoStyle = getEstadoStyle(traslado.estado);
+
                     return (
-                      <div key={String(traslado.id)} className="hover:bg-gray-50 transition-colors">
+                      <div
+                        key={String(traslado.id)}
+                        className="transition-colors"
+                        style={{ borderBottom: '1px solid #1e293b' }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1e293b'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
                         <div
                           onClick={() => manejarSeleccionTraslado(traslado.id)}
-                          className={`p-4 cursor-pointer ${
-                            seleccionado ? 'bg-blue-50 border-l-4 border-green-500' : ''
-                          } ${reciente ? 'bg-blue-50/30' : ''}`}
+                          className={`p-4 cursor-pointer ${seleccionado ? 'border-l-4' : ''} ${reciente ? '' : ''}`}
+                          style={{
+                            borderLeftColor: seleccionado ? '#22c55e' : 'transparent',
+                            backgroundColor: seleccionado ? 'rgba(59, 130, 246, 0.1)' : (reciente ? 'rgba(59, 130, 246, 0.05)' : 'transparent')
+                          }}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex items-start gap-3 flex-1">
@@ -377,57 +426,59 @@ export default function RecibirTraslado({
                                   checked={seleccionado}
                                   onChange={() => manejarSeleccionTraslado(traslado.id)}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="mt-1.5 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                  className="mt-1.5 w-4 h-4 rounded focus:ring-2"
+                                  style={{ backgroundColor: '#1e293b', border: '2px solid #334155' }}
                                 />
                               ) : (
-                                <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ${
-                                  seleccionado ? 'bg-blue-500' : 'bg-gray-300'
-                                }`} />
+                                <div
+                                  className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0`}
+                                  style={{ backgroundColor: seleccionado ? '#3b82f6' : '#475569' }}
+                                />
                               )}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-semibold text-gray-900 dark:!text-slate-100">
+                                  <span className="font-semibold" style={{ color: '#e2e8f0' }}>
                                     Traslado #{traslado.id}
                                   </span>
                                   {reciente && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800 border border-blue-200">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
                                       Reciente
                                     </span>
                                   )}
                                   {traslado.usar_bodega_transito && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-purple-100 text-purple-800 border border-purple-200">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs border" style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)', color: '#a855f7', borderColor: 'rgba(168, 85, 247, 0.2)' }}>
                                       Con tránsito
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-sm text-gray-600 dark:!text-slate-400 mt-1">
+                                <div className="text-sm mt-1" style={{ color: '#cbd5e1' }}>
                                   <span className="font-medium">{obtenerNombreBodega(traslado.bodega_origen_id)}</span>
                                   <span className="mx-2">→</span>
                                   <span className="font-medium">{obtenerNombreBodega(traslado.bodega_destino_id)}</span>
                                 </div>
                                 <div className="flex items-center gap-4 mt-2 text-sm">
-                                  <div className="flex items-center gap-1 text-gray-600 dark:!text-slate-400">
+                                  <div className="flex items-center gap-1" style={{ color: '#cbd5e1' }}>
                                     <CubeIcon className="w-4 h-4" />
                                     <span>{totalProductos} producto{totalProductos !== 1 ? 's' : ''}</span>
                                   </div>
-                                  <div className="text-gray-500 dark:text-slate-500">
+                                  <div style={{ color: '#94a3b8' }}>
                                     Total: {totalCantidad} unidad{totalCantidad !== 1 ? 'es' : ''}
                                   </div>
                                 </div>
                                 {traslado.observaciones && (
-                                  <div className="text-sm text-gray-500 dark:text-slate-500 mt-1 truncate">
+                                  <div className="text-sm mt-1 truncate" style={{ color: '#94a3b8' }}>
                                     {traslado.observaciones}
                                   </div>
                                 )}
                               </div>
                             </div>
                             <div className="text-right ml-4 flex-shrink-0 flex flex-col gap-2">
-                              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs border ${estadoInfo.color}`}>
+                              <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs border" style={estadoStyle}>
                                 <estadoInfo.icono className="w-3 h-3" />
                                 {estadoInfo.texto}
                               </div>
                               {fechaEnvio && (
-                                <div className="text-xs text-gray-500 dark:text-slate-500">
+                                <div className="text-xs" style={{ color: '#94a3b8' }}>
                                   {toRelative(fechaEnvio)}
                                 </div>
                               )}
@@ -437,17 +488,17 @@ export default function RecibirTraslado({
 
                         {/* Detalles expandibles */}
                         {mostrarDetalles === traslado.id && traslado.lineas?.length > 0 && (
-                          <div className="px-4 pb-4 bg-gray-50 border-t border-gray-200 dark:!border-slate-700">
-                            <div className="text-xs font-semibold text-gray-700 dark:!text-slate-300 mb-2 mt-3">
+                          <div className="px-4 pb-4 border-t" style={{ backgroundColor: '#1e293b', borderColor: '#334155' }}>
+                            <div className="text-xs font-semibold mb-2 mt-3" style={{ color: '#cbd5e1' }}>
                               Productos en este traslado:
                             </div>
                             <div className="space-y-1">
                               {traslado.lineas.map((linea, idx) => (
                                 <div key={idx} className="flex justify-between items-center text-sm py-1">
-                                  <span className="text-gray-700 dark:!text-slate-300">{linea.producto_nombre || `Producto ${linea.producto}`}</span>
-                                  <div className="flex items-center gap-3 text-gray-600 dark:!text-slate-400">
+                                  <span style={{ color: '#e2e8f0' }}>{linea.producto_nombre || `Producto ${linea.producto}`}</span>
+                                  <div className="flex items-center gap-3" style={{ color: '#cbd5e1' }}>
                                     <span>Cantidad: {linea.cantidad}</span>
-                                    <span className="text-amber-600">Pendiente: {linea.pendiente_por_recibir || 0}</span>
+                                    <span style={{ color: '#f59e0b' }}>Pendiente: {linea.pendiente_por_recibir || 0}</span>
                                   </div>
                                 </div>
                               ))}
@@ -463,7 +514,10 @@ export default function RecibirTraslado({
                               e.stopPropagation();
                               setMostrarDetalles(mostrarDetalles === traslado.id ? null : traslado.id);
                             }}
-                            className="w-full px-4 py-2 text-xs text-gray-600 dark:!text-slate-400 hover:text-gray-900 dark:!text-slate-100 hover:bg-gray-100 transition-colors border-t border-gray-200 dark:!border-slate-700"
+                            className="w-full px-4 py-2 text-xs transition-colors border-t"
+                            style={{ color: '#94a3b8', borderColor: '#1e293b' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.color = '#e2e8f0'; e.currentTarget.style.backgroundColor = '#1e293b'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.backgroundColor = 'transparent'; }}
                           >
                             {mostrarDetalles === traslado.id ? '▲ Ocultar productos' : '▼ Ver productos'}
                           </button>
@@ -477,11 +531,11 @@ export default function RecibirTraslado({
 
             {/* Resumen de selección */}
             {totalSeleccionados > 0 && (
-              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <div className="rounded-lg p-4 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <CheckCircleIcon className="w-5 h-5 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-800">
+                    <CheckCircleIcon className="w-5 h-5" style={{ color: '#3b82f6' }} />
+                    <span className="text-sm font-medium" style={{ color: '#3b82f6' }}>
                       {seleccionandoMultiple
                         ? `${totalSeleccionados} traslado${totalSeleccionados !== 1 ? 's' : ''} seleccionado${totalSeleccionados !== 1 ? 's' : ''}`
                         : `Traslado #${recibirForm.trasladoId} seleccionado`
@@ -492,7 +546,10 @@ export default function RecibirTraslado({
                     <button
                       type="button"
                       onClick={() => setTrasladosSeleccionados([])}
-                      className="text-xs text-blue-700 hover:text-green-900 underline"
+                      className="text-xs underline transition-colors"
+                      style={{ color: '#2563eb' }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#1d4ed8'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = '#2563eb'}
                     >
                       Limpiar selección
                     </button>
@@ -504,18 +561,24 @@ export default function RecibirTraslado({
         )}
 
         {/* Footer con botones */}
-        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:!border-slate-700">
+        <div className="flex justify-end gap-3 pt-6 border-t" style={{ borderColor: '#1e293b' }}>
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-3 text-gray-700 dark:!text-slate-300 font-medium bg-white border-2 border-gray-300 dark:!border-slate-700 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-400 dark:hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all"
+            className="px-6 py-3 font-medium border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all"
+            style={{ color: '#cbd5e1', backgroundColor: 'transparent', borderColor: '#334155' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#334155'; e.currentTarget.style.borderColor = '#475569'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = '#334155'; }}
           >
             Cerrar
           </button>
           <button
             type="submit"
             disabled={recibirLoading || totalSeleccionados === 0}
-            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-xl shadow-lg hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="px-8 py-3 text-white font-semibold rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            style={{ background: 'linear-gradient(to right, #2563eb, #3b82f6)' }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #16a34a, #22c55e)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #2563eb, #3b82f6)'}
           >
             {recibirLoading ? (
               <div className="flex items-center gap-2">
