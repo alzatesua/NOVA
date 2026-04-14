@@ -11,7 +11,8 @@ import { showToast } from '../utils/toast';
 import {
   ExclamationTriangleIcon, UserIcon, XMarkIcon, CheckIcon,
   CurrencyDollarIcon, CalendarIcon, DocumentTextIcon,
-  ChartBarIcon, UsersIcon, EyeIcon, PhotoIcon, ArrowPathIcon, MagnifyingGlassIcon
+  ChartBarIcon, UsersIcon, EyeIcon, PhotoIcon, ArrowPathIcon, MagnifyingGlassIcon,
+  CubeIcon
 } from '@heroicons/react/24/outline';
 
 /* ─── Paleta ─────────────────────────────────────────────────────────── */
@@ -95,6 +96,31 @@ export default function MoraView() {
   useEffect(() => {
     tabActiva === 'mora' ? cargarClientesEnMora() : cargarClientesConDeuda();
   }, [tabActiva]);
+
+  // Bloquear scroll cuando el modal está abierto
+  useEffect(() => {
+    if (clienteSeleccionado) {
+      // Bloquear scroll en el body
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${window.scrollY}px`;
+    } else {
+      // Restaurar scroll
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+    };
+  }, [clienteSeleccionado]);
 
   const cargarClientesEnMora = async () => {
     setLoading(true);
@@ -187,7 +213,7 @@ export default function MoraView() {
             grid-template-columns: repeat(4, 1fr) !important;
           }
           .mora-content-grid {
-            grid-template-columns: 1fr 340px !important;
+            grid-template-columns: 1fr !important;
           }
         }
 
@@ -195,7 +221,7 @@ export default function MoraView() {
         @media (min-width: 768px) and (max-width: 1023px) {
           .mora-stat-grid {
             grid-template-columns: repeat(2, 1fr) !important;
-            gap: 12px !important;
+            gap: 8px !important;
           }
           .mora-content-grid {
             grid-template-columns: 1fr !important;
@@ -203,7 +229,7 @@ export default function MoraView() {
           .mora-header {
             flex-direction: column !important;
             align-items: flex-start !important;
-            gap: 12px !important;
+            gap: 10px !important;
           }
           .mora-header-tabs {
             width: 100% !important;
@@ -228,10 +254,7 @@ export default function MoraView() {
         @media (min-width: 481px) and (max-width: 767px) {
           .mora-stat-grid {
             grid-template-columns: repeat(2, 1fr) !important;
-            gap: 10px !important;
-          }
-          .mora-stat-card {
-            padding: 12px !important;
+            gap: 6px !important;
           }
           .mora-content-grid {
             grid-template-columns: 1fr !important;
@@ -275,32 +298,13 @@ export default function MoraView() {
             padding: 16px !important;
             gap: 16px !important;
           }
-          .mora-details-panel {
-            position: static !important;
-          }
         }
 
         /* ─── Mobile Portrait (≤ 480px) ──────────────────────────────────── */
         @media (max-width: 480px) {
           .mora-stat-grid {
-            grid-template-columns: 1fr !important;
-            gap: 8px !important;
-          }
-          .mora-stat-card {
-            padding: 10px !important;
-          }
-          .mora-stat-icon {
-            width: 12px !important;
-            height: 12px !important;
-          }
-          .mora-stat-label {
-            font-size: 9px !important;
-          }
-          .mora-stat-value {
-            font-size: 14px !important;
-          }
-          .mora-stat-sub {
-            font-size: 9px !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 6px !important;
           }
           .mora-content-grid {
             grid-template-columns: 1fr !important;
@@ -349,63 +353,18 @@ export default function MoraView() {
             gap: 12px !important;
           }
           .mora-cliente-card {
-            padding: 10px !important;
-          }
-          .mora-cliente-icon {
-            width: 32px !important;
-            height: 32px !important;
-          }
-          .mora-cliente-name {
-            font-size: 13px !important;
-          }
-          .mora-cliente-doc {
-            font-size: 10px !important;
-          }
-          .mora-cliente-info {
-            font-size: 10px !important;
-          }
-          .mora-details-panel {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            z-index: 50 !important;
-            border-radius: 0 !important;
-          }
-          .mora-modal {
-            padding: 16px !important;
-            margin: 8px !important;
-          }
-          .mora-modal-title {
-            font-size: 14px !important;
+            padding: 12px !important;
           }
         }
 
         /* ─── Very small mobile (≤ 380px) ────────────────────────────────── */
         @media (max-width: 380px) {
-          .mora-stat-card {
-            padding: 8px !important;
-          }
-          .mora-stat-value {
-            font-size: 12px !important;
-          }
           .mora-title {
             font-size: 14px !important;
           }
           .mora-tab-btn {
             padding: 7px 8px !important;
             font-size: 10px !important;
-          }
-          .mora-cliente-card {
-            padding: 8px !important;
-          }
-          .mora-cliente-icon {
-            width: 28px !important;
-            height: 28px !important;
-          }
-          .mora-cliente-name {
-            font-size: 12px !important;
           }
           .mora-search {
             padding: 8px 10px !important;
@@ -440,20 +399,20 @@ export default function MoraView() {
 
       {/* ── STAT CARDS ── */}
       {tabActiva === 'deuda' && resumenDeuda && (
-        <div className="mora-stat-grid grid grid-cols-4 gap-3.5 px-7 py-4 bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700">
+        <div className="mora-stat-grid grid grid-cols-4 gap-3 px-6 py-3 bg-white dark:!bg-slate-900 border-b border-gray-200 dark:!border-slate-700">
           {[
             { label: 'Clientes con Deuda',  value: resumenDeuda.total_clientes_con_deuda,          accent: 'bg-blue-600',  icon: UsersIcon },
             { label: 'Deuda Total',          value: fmt(resumenDeuda.total_deuda_general),           accent: 'bg-purple-600', icon: CurrencyDollarIcon },
             { label: 'En Mora',              value: fmt(resumenDeuda.total_deuda_mora),               accent: 'bg-red-600',   icon: ExclamationTriangleIcon, sub: `${resumenDeuda.clientes_en_mora} clientes` },
             { label: 'Crédito Vigente',      value: fmt(resumenDeuda.total_deuda_credito_vigente),    accent: 'bg-green-600', icon: CheckIcon, sub: `${resumenDeuda.clientes_con_credito_vigente} clientes` },
           ].map((st, i) => (
-            <div key={i} className="mora-stat-card bg-gray-50 dark:!bg-slate-800 rounded-lg p-3.5 border border-gray-200 dark:!border-slate-700 border-l-4" style={{ borderLeftColor: st.accent.replace('bg-', '').replace('-600', '') === 'blue' ? '#2563eb' : st.accent.replace('bg-', '').replace('-600', '') === 'purple' ? '#7c3aed' : st.accent.replace('bg-', '').replace('-600', '') === 'red' ? '#dc2626' : '#16a34a' }}>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <st.icon style={{ width: 14, height: 14 }} className={`mora-stat-icon ${st.accent.replace('bg-', 'text-')}`} />
+            <div key={i} className="mora-stat-card bg-gray-50 dark:!bg-slate-800 rounded-lg px-4 py-3 border border-gray-200 dark:!border-slate-700 border-l-2" style={{ borderLeftColor: st.accent.replace('bg-', '').replace('-600', '') === 'blue' ? '#2563eb' : st.accent.replace('bg-', '').replace('-600', '') === 'purple' ? '#7c3aed' : st.accent.replace('bg-', '').replace('-600', '') === 'red' ? '#dc2626' : '#16a34a' }}>
+              <div className="flex items-center gap-2 mb-2">
+                <st.icon style={{ width: 16, height: 16 }} className={`mora-stat-icon ${st.accent.replace('bg-', 'text-')}`} />
                 <span className="mora-stat-label text-xs font-semibold text-gray-500 dark:!text-slate-400 uppercase tracking-wider">{st.label}</span>
               </div>
               <div className="mora-stat-value text-lg font-bold text-gray-900 dark:!text-white">{st.value}</div>
-              {st.sub && <div className="mora-stat-sub text-xs text-gray-500 dark:!text-slate-400 mt-0.5">{st.sub}</div>}
+              {st.sub && <div className="mora-stat-sub text-xs text-gray-500 dark:!text-slate-400 mt-1">{st.sub}</div>}
             </div>
           ))}
         </div>
@@ -489,7 +448,12 @@ export default function MoraView() {
 
       {/* ── MODAL DETALLES DEL CLIENTE ── */}
       {clienteSeleccionado && resumenCliente && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4" onClick={cerrarDetalles}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4"
+          onClick={cerrarDetalles}
+          onWheel={e => e.stopPropagation()}
+          onTouchMove={e => e.stopPropagation()}
+        >
           <div
             className="relative w-full max-w-sm sm:max-w-2xl lg:max-w-5xl xl:max-w-screen-2xl max-h-[85vh] overflow-y-auto rounded-2xl shadow-2xl animate-fadeIn"
             style={{
@@ -498,6 +462,25 @@ export default function MoraView() {
               borderColor: '#1a1d3d'
             }}
             onClick={e => e.stopPropagation()}
+            onWheel={e => {
+              const modal = e.currentTarget;
+              const isAtTop = modal.scrollTop === 0;
+              const isAtBottom = modal.scrollHeight - modal.scrollTop <= modal.clientHeight + 1;
+
+              if ((e.deltaY < 0 && isAtTop) || (e.deltaY > 0 && isAtBottom)) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
+            onTouchMove={e => {
+              const modal = e.currentTarget;
+              const touch = e.touches[0];
+              const elementAtPoint = document.elementFromPoint(touch.clientX, touch.clientY);
+              if (elementAtPoint === modal || modal.contains(elementAtPoint)) {
+                return;
+              }
+              e.preventDefault();
+            }}
           >
             {/* Estilos para animaciones de destellos */}
             <style>{`
@@ -711,24 +694,24 @@ export default function MoraView() {
               </div>
 
               {/* Acciones */}
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <button
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-white border-0 rounded-lg font-semibold cursor-pointer transition-all"
+                  className="flex-1 flex items-center justify-center gap-3 px-6 py-4 text-white border-0 rounded-lg font-bold cursor-pointer transition-all text-base"
                   style={{ background: 'linear-gradient(to right, #2563eb, #3b82f6)' }}
                   onClick={() => setMostrarModalAbono(true)}
                   disabled={procesando}
                 >
-                  <CurrencyDollarIcon style={{ width: 18, height: 18 }} />
+                  <CurrencyDollarIcon style={{ width: 20, height: 20 }} />
                   Registrar Abono
                 </button>
                 {tabActiva === 'mora' && resumenCliente.cliente.dias_mora > 30 && (
                   <button
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-white border-0 rounded-lg font-semibold cursor-pointer transition-all"
+                    className="flex-1 flex items-center justify-center gap-3 px-6 py-4 text-white border-0 rounded-lg font-bold cursor-pointer transition-all text-base"
                     style={{ background: 'linear-gradient(to right, #16a34a, #22c55e)' }}
                     onClick={handleQuitarMora}
                     disabled={procesando}
                   >
-                    <CheckIcon style={{ width: 18, height: 18 }} />
+                    <CheckIcon style={{ width: 20, height: 20 }} />
                     Quitar Mora
                   </button>
                 )}
@@ -897,33 +880,107 @@ export default function MoraView() {
                 {lista.map((cl) => {
                   const sel = clienteSeleccionado?.cliente_id === cl.cliente_id;
                   return (
-                    <div key={cl.cliente_id} className={`mora-cliente-card mora-card p-3 rounded-lg cursor-pointer border transition-all ${sel ? 'bg-blue-50 dark:!bg-blue-900/20 border-blue-500 dark:!border-blue-500' : 'bg-white dark:!bg-slate-900 border-gray-200 dark:!border-slate-700 hover:border-blue-500 dark:hover:!border-blue-500'}`}
+                    <div key={cl.cliente_id} className={`mora-cliente-card mora-card p-4 rounded-lg cursor-pointer border transition-all ${sel ? 'bg-blue-50 dark:!bg-blue-900/20 border-blue-500 dark:!border-blue-500' : 'bg-white dark:!bg-slate-900 border-gray-200 dark:!border-slate-700 hover:border-blue-500 dark:hover:!border-blue-500'}`}
                       onClick={() => verDetallesCliente(cl)}>
-                      <div className="flex items-start gap-3">
-                        <div className={`mora-cliente-icon w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center ${sel ? 'bg-blue-100 dark:!bg-blue-800 border-blue-200 dark:!border-blue-700' : 'bg-gray-50 dark:!bg-slate-800 border-gray-200 dark:!border-slate-700'}`}>
-                          <UserIcon style={{ width: 16, height: 16 }} className={sel ? 'text-blue-600 dark:!text-blue-400' : 'text-gray-500 dark:!text-slate-400'} />
+                      <div className="flex items-start gap-4">
+                        <div className={`mora-cliente-icon w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center ${sel ? 'bg-blue-100 dark:!bg-blue-800 border-blue-200 dark:!border-blue-700' : 'bg-gray-50 dark:!bg-slate-800 border-gray-200 dark:!border-slate-700'}`}>
+                          <UserIcon style={{ width: 20, height: 20 }} className={sel ? 'text-blue-600 dark:!text-blue-400' : 'text-gray-500 dark:!text-slate-400'} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="mora-cliente-name font-semibold text-sm text-gray-900 dark:!text-white">{cl.nombre}</span>
-                            {cl.en_mora && <Badge color="#dc2626">MORA</Badge>}
+                          <div className="flex items-center justify-between gap-3 mb-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="mora-cliente-name font-semibold text-base text-gray-900 dark:!text-white">{cl.nombre}</span>
+                              {cl.en_mora && <Badge color="#dc2626">MORA</Badge>}
+                            </div>
+                            <span className={`flex items-center gap-1 text-lg font-bold ${tabActiva === 'deuda' ? 'text-blue-600 dark:!text-blue-400' : cl.dias_mora > 60 ? 'text-red-600 dark:!text-red-400' : 'text-amber-600 dark:!text-amber-400'}`}>
+                              {tabActiva === 'deuda' ? (
+                                <><CurrencyDollarIcon style={{ width: 16, height: 16 }} />{fmt(cl.deuda_total)}</>
+                              ) : (
+                                <><CalendarIcon style={{ width: 16, height: 16 }} />{cl.dias_mora} días</>
+                              )}
+                            </span>
                           </div>
-                          <p className="mora-cliente-doc text-xs text-gray-500 dark:!text-slate-400 mb-2">{cl.numero_documento}</p>
-                          <div className="flex items-center gap-3 flex-wrap">
-                            {tabActiva === 'mora' ? (
+                          <p className="mora-cliente-doc text-sm text-gray-500 dark:!text-slate-400 mb-3">{cl.numero_documento}</p>
+
+                          {/* Información adicional en grid */}
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-sm">
+                            {tabActiva === 'deuda' ? (
                               <>
-                                <span className={`flex items-center gap-1 text-xs font-semibold ${cl.dias_mora > 60 ? 'text-red-600 dark:!text-red-400' : 'text-amber-600 dark:!text-amber-400'}`}>
-                                  <CalendarIcon style={{ width: 12, height: 12 }} />{cl.dias_mora} días en mora
-                                </span>
-                                {cl.fecha_ultimo_pago && <span className="text-xs text-gray-500 dark:!text-slate-400">Último pago: {fmtDate(cl.fecha_ultimo_pago)}</span>}
+                                {cl.total_facturas_credito !== '0' && (
+                                  <div className="flex items-center gap-2">
+                                    <DocumentTextIcon style={{ width: 14, height: 14 }} className="text-gray-400 dark:!text-slate-500" />
+                                    <div>
+                                      <p className="text-xs text-gray-400 dark:!text-slate-500">Facturas</p>
+                                      <p className="font-semibold text-gray-700 dark:!text-slate-300">{fmt(cl.total_facturas_credito)}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {cl.total_abonos && cl.total_abonos !== '0' && (
+                                  <div className="flex items-center gap-2">
+                                    <CheckIcon style={{ width: 14, height: 14 }} className="text-green-500 dark:!text-green-400" />
+                                    <div>
+                                      <p className="text-xs text-gray-400 dark:!text-slate-500">Abonado</p>
+                                      <p className="font-semibold text-green-600 dark:!text-green-400">{fmt(cl.total_abonos)}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {cl.total_productos_fiados > 0 && (
+                                  <div className="flex items-center gap-2">
+                                    <CubeIcon style={{ width: 14, height: 14 }} className="text-purple-500 dark:!text-purple-400" />
+                                    <div>
+                                      <p className="text-xs text-gray-400 dark:!text-slate-500">Productos</p>
+                                      <p className="font-semibold text-purple-600 dark:!text-purple-400">{cl.total_productos_fiados}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {cl.en_mora && (
+                                  <div className="flex items-center gap-2">
+                                    <ExclamationTriangleIcon style={{ width: 14, height: 14 }} className="text-red-500 dark:!text-red-400" />
+                                    <div>
+                                      <p className="text-xs text-gray-400 dark:!text-slate-500">Estado</p>
+                                      <p className="font-semibold text-red-600 dark:!text-red-400">En Mora</p>
+                                    </div>
+                                  </div>
+                                )}
                               </>
                             ) : (
                               <>
-                                <span className="flex items-center gap-1 text-sm font-bold text-blue-600 dark:!text-blue-400">
-                                  <CurrencyDollarIcon style={{ width: 12, height: 12 }} />{fmt(cl.deuda_total)}
-                                </span>
-                                {cl.total_facturas_credito !== '0' && <span className="text-xs text-gray-500 dark:!text-slate-400">Facturas: {fmt(cl.total_facturas_credito)}</span>}
-                                {cl.total_productos_fiados > 0 && <Badge color="#7c3aed">{cl.total_productos_fiados} productos</Badge>}
+                                {cl.deuda_total && (
+                                  <div className="flex items-center gap-2">
+                                    <CurrencyDollarIcon style={{ width: 14, height: 14 }} className="text-blue-500 dark:!text-blue-400" />
+                                    <div>
+                                      <p className="text-xs text-gray-400 dark:!text-slate-500">Deuda</p>
+                                      <p className="font-semibold text-blue-600 dark:!text-blue-400">{fmt(cl.deuda_total)}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {cl.fecha_ultimo_pago && (
+                                  <div className="flex items-center gap-2">
+                                    <CalendarIcon style={{ width: 14, height: 14 }} className="text-gray-400 dark:!text-slate-500" />
+                                    <div>
+                                      <p className="text-xs text-gray-400 dark:!text-slate-500">Último pago</p>
+                                      <p className="font-semibold text-gray-700 dark:!text-slate-300">{fmtDate(cl.fecha_ultimo_pago)}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {cl.total_facturas_credito !== '0' && (
+                                  <div className="flex items-center gap-2">
+                                    <DocumentTextIcon style={{ width: 14, height: 14 }} className="text-gray-400 dark:!text-slate-500" />
+                                    <div>
+                                      <p className="text-xs text-gray-400 dark:!text-slate-500">Facturas</p>
+                                      <p className="font-semibold text-gray-700 dark:!text-slate-300">{fmt(cl.total_facturas_credito)}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {cl.total_productos_fiados > 0 && (
+                                  <div className="flex items-center gap-2">
+                                    <CubeIcon style={{ width: 14, height: 14 }} className="text-purple-500 dark:!text-purple-400" />
+                                    <div>
+                                      <p className="text-xs text-gray-400 dark:!text-slate-500">Productos</p>
+                                      <p className="font-semibold text-purple-600 dark:!text-purple-400">{cl.total_productos_fiados}</p>
+                                    </div>
+                                  </div>
+                                )}
                               </>
                             )}
                           </div>

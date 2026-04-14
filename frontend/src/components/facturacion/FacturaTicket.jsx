@@ -78,11 +78,100 @@ export default function FacturaTicket({ factura, formato = '80mm', empresaInfo =
   const cambio    = parseFloat(factura.cambio           || 0);
 
   return (
-    <div
-      id="factura-ticket"
-      className={`${anchoClase} ${textoBase} bg-white border border-gray-200 rounded-lg shadow-lg`}
-      style={{ fontFamily: "'IBM Plex Mono', monospace" }}
-    >
+    <>
+      {/* Estilos específicos para impresión */}
+      <style>{`
+        @media print {
+          /* Eliminar todos los márgenes de página */
+          @page {
+            margin: 0;
+            padding: 0;
+            size: auto;
+          }
+
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
+          /* Ocultar botón de imprimir */
+          .no-print {
+            display: none !important;
+          }
+
+          /* Asegurar que el ticket sea visible y pegado arriba */
+          #factura-ticket {
+            display: block !important;
+            visibility: visible !important;
+            margin: 0 !important;
+            padding: 5px !important;
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            position: relative !important;
+            top: 0 !important;
+          }
+
+          /* Eliminar padding del encabezado para que quede más arriba */
+          #factura-ticket > div:first-child {
+            padding-top: 2px !important;
+            padding-bottom: 2px !important;
+          }
+
+          /* Todos los elementos del ticket deben ser visibles */
+          #factura-ticket * {
+            visibility: visible !important;
+            display: inherit !important;
+          }
+
+          /* Blanco y negro - eliminar colores */
+          #factura-ticket {
+            background: white !important;
+            color: black !important;
+          }
+
+          #factura-ticket *,
+          #factura-ticket *::before,
+          #factura-ticket *::after {
+            background-color: white !important;
+            color: black !important;
+            border-color: #ccc !important;
+          }
+
+          /* Textos específicos en negro */
+          #factura-ticket .text-white,
+          #factura-ticket .text-blue-50,
+          #factura-ticket .text-blue-100,
+          #factura-ticket .text-sky-700,
+          #factura-ticket .text-gray-400,
+          #factura-ticket .text-gray-500,
+          #factura-ticket .text-gray-600,
+          #factura-ticket .text-gray-700,
+          #factura-ticket .text-gray-800,
+          #factura-ticket .text-gray-900 {
+            color: black !important;
+          }
+
+          /* Eliminar fondos de color */
+          #factura-ticket .bg-blue-600,
+          #factura-ticket .bg-blue-700,
+          #factura-ticket .bg-sky-400,
+          #factura-ticket .bg-sky-50,
+          #factura-ticket .bg-sky-500,
+          #factura-ticket .from-blue-600,
+          #factura-ticket .to-blue-700,
+          #factura-ticket .from-sky-400,
+          #factura-ticket .bg-gradient-to-r {
+            background-color: white !important;
+            background: white !important;
+          }
+        }
+      `}</style>
+      <div
+        id="factura-ticket"
+        className={`${anchoClase} ${textoBase} bg-white border border-gray-200 rounded-lg shadow-lg`}
+        style={{ fontFamily: "'IBM Plex Mono', monospace" }}
+      >
       {/* ── ENCABEZADO ── */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-3 text-center print:bg-blue-700" style={{ printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }}>
         <div className="flex items-center justify-center gap-2 mb-1">
@@ -250,6 +339,7 @@ export default function FacturaTicket({ factura, formato = '80mm', empresaInfo =
           🖨 IMPRIMIR TICKET
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

@@ -41,6 +41,8 @@ export default function Modal({ children, onClose }) {
       role="dialog"
       aria-modal="true"
       onClick={handleBackdropClick}
+      onWheel={e => e.stopPropagation()}
+      onTouchMove={e => e.stopPropagation()}
       style={{ backdropFilter: 'blur(4px)' }}
     >
       <div

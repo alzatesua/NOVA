@@ -19,8 +19,10 @@ import ClienteSelector from './ClienteSelector';
 import ProductoSelectorPOS from './ProductoSelectorPOS';
 import { fetchFormasPago, crearFactura, verificarMoraCliente } from '../../services/api';
 import { showToast } from '../../utils/toast';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
+  const { theme } = useTheme();
   const [pasoActual, setPasoActual] = useState(1);
   const [cliente, setCliente] = useState(null);
   const [productos, setProductos] = useState([]);
@@ -628,7 +630,34 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
   };
 
   return (
-    <div className="space-y-2 sm:space-y-3">
+    <>
+      <style jsx>{`
+        /* Estilos específicos para modo oscuro */
+        .dark-mode-select {
+          background-color: ${theme === 'dark' ? '#0f172a' : '#ffffff'} !important;
+          color: ${theme === 'dark' ? '#f1f5f9' : '#0f172a'} !important;
+          border-color: ${theme === 'dark' ? '#3b82f6' : '#93c5fd'} !important;
+        }
+        .dark-mode-select-purple {
+          background-color: ${theme === 'dark' ? '#0f172a' : '#ffffff'} !important;
+          color: ${theme === 'dark' ? '#f1f5f9' : '#0f172a'} !important;
+          border-color: ${theme === 'dark' ? '#a855f7' : '#d8b4fe'} !important;
+        }
+        .dark-mode-btn {
+          background-color: ${theme === 'dark' ? '#1e293b' : '#f8fafc'} !important;
+          color: ${theme === 'dark' ? '#e2e8f0' : '#334155'} !important;
+          border-color: ${theme === 'dark' ? '#475569' : '#cbd5e1'} !important;
+        }
+        .dark-mode-btn:hover {
+          background-color: ${theme === 'dark' ? '#334155' : '#f1f5f9'} !important;
+          border-color: ${theme === 'dark' ? '#64748b' : '#94a3b8'} !important;
+        }
+        .dark-mode-select option {
+          background-color: ${theme === 'dark' ? '#1e293b' : '#ffffff'} !important;
+          color: ${theme === 'dark' ? '#f1f5f9' : '#0f172a'} !important;
+        }
+      `}</style>
+      <div className="space-y-2 sm:space-y-3">
       {/* Indicador de pasos horizontal - Compacto */}
       <div className="bg-white dark:!bg-slate-900 rounded-lg shadow-sm p-2 sm:p-3 border border-slate-200 dark:!border-slate-800">
         <div className="flex items-center justify-between gap-1 sm:gap-2">
@@ -720,11 +749,28 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 <button
                   type="button"
                   onClick={() => setTipoFactura('contado')}
-                  className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all border-2 ${
                     tipoFactura === 'contado'
-                      ? 'bg-green-600 text-white shadow-md'
-                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-2 border-slate-200 dark:border-slate-700 hover:border-green-400 dark:hover:border-green-600'
+                      ? 'bg-green-600 text-white shadow-md hover:bg-green-700'
+                      : 'bg-slate-50 text-slate-700 border-slate-300 hover:bg-green-50 hover:border-green-400'
                   }`}
+                  style={tipoFactura !== 'contado' && theme === 'dark' ? {
+                    backgroundColor: '#1e293b',
+                    color: '#e2e8f0',
+                    borderColor: '#475569'
+                  } : {}}
+                  onMouseEnter={(e) => {
+                    if (tipoFactura !== 'contado' && theme === 'dark') {
+                      e.currentTarget.style.backgroundColor = '#334155';
+                      e.currentTarget.style.borderColor = '#64748b';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (tipoFactura !== 'contado' && theme === 'dark') {
+                      e.currentTarget.style.backgroundColor = '#1e293b';
+                      e.currentTarget.style.borderColor = '#475569';
+                    }
+                  }}
                 >
                   <CreditCardIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">Contado</span>
@@ -734,11 +780,28 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 <button
                   type="button"
                   onClick={() => setTipoFactura('credito')}
-                  className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all border-2 ${
                     tipoFactura === 'credito'
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-600'
+                      ? 'bg-blue-600 text-white shadow-md hover:bg-blue-700'
+                      : 'bg-slate-50 text-slate-700 border-slate-300 hover:bg-blue-50 hover:border-blue-400'
                   }`}
+                  style={tipoFactura !== 'credito' && theme === 'dark' ? {
+                    backgroundColor: '#1e293b',
+                    color: '#e2e8f0',
+                    borderColor: '#475569'
+                  } : {}}
+                  onMouseEnter={(e) => {
+                    if (tipoFactura !== 'credito' && theme === 'dark') {
+                      e.currentTarget.style.backgroundColor = '#334155';
+                      e.currentTarget.style.borderColor = '#64748b';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (tipoFactura !== 'credito' && theme === 'dark') {
+                      e.currentTarget.style.backgroundColor = '#1e293b';
+                      e.currentTarget.style.borderColor = '#475569';
+                    }
+                  }}
                 >
                   <DocumentCheckIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">Crédito</span>
@@ -831,7 +894,12 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                                   max={fila.disponible}
                                   value={fila.cantidad}
                                   onChange={(e) => actualizarCantidad(fila.fila_id, e.target.value)}
-                                  className="w-full px-1.5 sm:px-2 py-1 text-[10px] sm:text-xs border border-slate-200 dark:!border-slate-700 rounded text-center focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:!bg-slate-900 text-slate-900 dark:!text-slate-100"
+                                  className="w-full px-1.5 sm:px-2 py-1 text-[10px] sm:text-xs border rounded text-center focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold"
+                                  style={
+                                    theme === 'dark'
+                                      ? { backgroundColor: '#0f172a', color: '#f1f5f9', borderColor: '#475569' }
+                                      : { backgroundColor: '#ffffff', color: '#0f172a', borderColor: '#cbd5e1' }
+                                  }
                                 />
                               </div>
                               <div>
@@ -938,14 +1006,19 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 {/* Configuración para ventas a crédito */}
                 <div className="space-y-2 sm:space-y-3 mb-2 sm:mb-3">
                   {/* Día de pago */}
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 sm:p-3 border border-blue-200 dark:border-blue-800">
-                    <label className="block text-[10px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 sm:mb-2">
+                  <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-2 sm:p-3 border border-blue-200 dark:border-blue-700">
+                    <label className="block text-[10px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1 sm:mb-2">
                       Día de pago del mes
                     </label>
                     <select
                       value={diaPago}
                       onChange={(e) => setDiaPago(e.target.value)}
-                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-sm border-2 border-blue-200 dark:border-blue-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-sm border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 font-semibold cursor-pointer"
+                      style={
+                        theme === 'dark'
+                          ? { backgroundColor: '#0f172a', color: '#f1f5f9', borderColor: '#3b82f6' }
+                          : { backgroundColor: '#ffffff', color: '#0f172a', borderColor: '#93c5fd' }
+                      }
                       required
                     >
                       <option value="">Seleccionar día...</option>
@@ -955,20 +1028,25 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                         </option>
                       ))}
                     </select>
-                    <p className="text-[9px] sm:text-xs text-blue-700 dark:text-blue-400 mt-1 sm:mt-1.5">
+                    <p className="text-[9px] sm:text-xs text-blue-700 dark:text-blue-300 mt-1 sm:mt-1.5">
                       Cliente paga el día {diaPago || '__'} de cada mes.
                     </p>
                   </div>
 
                   {/* Cuotas */}
-                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-2 sm:p-3 border border-purple-200 dark:border-purple-800">
-                    <label className="block text-[10px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 sm:mb-2">
+                  <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-2 sm:p-3 border border-purple-200 dark:border-purple-700">
+                    <label className="block text-[10px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1 sm:mb-2">
                       Número de cuotas
                     </label>
                     <select
                       value={cuotas}
                       onChange={(e) => setCuotas(e.target.value)}
-                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-sm border-2 border-purple-200 dark:border-purple-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-sm border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 font-semibold cursor-pointer"
+                      style={
+                        theme === 'dark'
+                          ? { backgroundColor: '#0f172a', color: '#f1f5f9', borderColor: '#a855f7' }
+                          : { backgroundColor: '#ffffff', color: '#0f172a', borderColor: '#d8b4fe' }
+                      }
                       required
                     >
                       <option value="">Seleccionar cuotas...</option>
@@ -978,7 +1056,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                         </option>
                       ))}
                     </select>
-                    <p className="text-[9px] sm:text-xs text-purple-700 dark:text-purple-400 mt-1 sm:mt-1.5">
+                    <p className="text-[9px] sm:text-xs text-purple-700 dark:text-purple-300 mt-1 sm:mt-1.5">
                       Valor/cuota: <strong>${cuotas ? (calcularTotal() / parseInt(cuotas)).toFixed(2) : '0.00'}</strong>
                     </p>
                   </div>
@@ -1001,7 +1079,12 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                       <select
                         value={pago.forma_pago || ''}
                         onChange={(e) => actualizarPago(index, 'forma_pago', parseInt(e.target.value))}
-                        className="w-full px-2 py-1.5 text-[10px] sm:text-xs border-2 border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                        className="w-full px-2 py-1.5 text-[10px] sm:text-xs border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                        style={
+                          theme === 'dark'
+                            ? { backgroundColor: '#0f172a', color: '#f1f5f9', borderColor: '#475569' }
+                            : { backgroundColor: '#ffffff', color: '#0f172a', borderColor: '#cbd5e1' }
+                        }
                         required
                       >
                         <option value="">Método de pago...</option>
@@ -1018,7 +1101,12 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                           value={pago.monto}
                           onChange={(e) => actualizarPago(index, 'monto', e.target.value)}
                           placeholder="Monto"
-                          className="flex-1 sm:flex-none sm:w-28 px-2 py-1.5 text-[10px] sm:text-xs border-2 border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                          className="flex-1 sm:flex-none sm:w-28 px-2 py-1.5 text-[10px] sm:text-xs border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold"
+                          style={
+                            theme === 'dark'
+                              ? { backgroundColor: '#0f172a', color: '#f1f5f9', borderColor: '#475569' }
+                              : { backgroundColor: '#ffffff', color: '#0f172a', borderColor: '#cbd5e1' }
+                          }
                           required
                         />
 
@@ -1027,7 +1115,12 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                           value={pago.referencia}
                           onChange={(e) => actualizarPago(index, 'referencia', e.target.value)}
                           placeholder="Ref. (opc)"
-                          className="flex-1 px-2 py-1.5 text-[10px] sm:text-xs border-2 border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                          className="flex-1 px-2 py-1.5 text-[10px] sm:text-xs border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style={
+                            theme === 'dark'
+                              ? { backgroundColor: '#0f172a', color: '#f1f5f9', borderColor: '#475569' }
+                              : { backgroundColor: '#ffffff', color: '#0f172a', borderColor: '#cbd5e1' }
+                          }
                         />
 
                         {pagos.length > 1 && (
@@ -1199,9 +1292,14 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
                 <textarea
                   value={observaciones}
                   onChange={(e) => setObservaciones(e.target.value)}
-                  className="w-full px-1.5 sm:px-2 py-1 sm:py-1.5 text-[10px] sm:text-xs border-2 border-slate-200 dark:!border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white dark:!bg-slate-800 text-slate-900 dark:!text-slate-100"
+                  className="w-full px-1.5 sm:px-2 py-1 sm:py-1.5 text-[10px] sm:text-xs border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   rows={2}
                   placeholder="Notas adicionales..."
+                  style={
+                    theme === 'dark'
+                      ? { backgroundColor: '#0f172a', color: '#f1f5f9', borderColor: '#475569' }
+                      : { backgroundColor: '#ffffff', color: '#0f172a', borderColor: '#cbd5e1' }
+                  }
                 />
               </div>
             </div>
@@ -1332,6 +1430,7 @@ export default function FacturaForm({ bodegaId, sucursalId, onFacturaCreada }) {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

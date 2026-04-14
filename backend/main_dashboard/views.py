@@ -28,6 +28,9 @@ from jwt import decode as jwt_decode, ExpiredSignatureError, InvalidTokenError
 
 # views.py
 import traceback
+
+# 🔒 Seguridad: Importar psycopg2.sql para prevenir SQL injection en identificadores dinámicos
+from psycopg2 import sql
 from django.utils.text import slugify
 import uuid
 import logging
@@ -120,9 +123,13 @@ def obtener_info_tienda(request):
             return Response({'error': 'Nombre de tabla inválido'}, status=400)
 
         with connections[alias].cursor() as cursor:
+            # 🔒 SEGURIDAD: Prevenir SQL injection con psycopg2.sql
+            table_identifier = sql.Identifier(tabla)
+
             if tabla == 'productos' and sucursal_id:
                 # 👇 Solo si es productos e id_sucursal fue enviado
-                cursor.execute(f"SELECT * FROM {tabla} WHERE sucursal_id = %s", [sucursal_id])
+                query = sql.SQL("SELECT * FROM {} WHERE sucursal_id = %s").format(table_identifier)
+                cursor.execute(query, [sucursal_id])
             elif tabla == 'inventario_bodega':
                 # 📦 Filtrar bodegas según el rol del usuario
                 # Nuevo parámetro 'todas_las_bodegas' para obtener TODAS las bodegas (sin filtro de asignación)
@@ -134,25 +141,20 @@ def obtener_info_tienda(request):
                     # 🔓 Modo especial: Traer TODAS las bodegas (sin filtro de asignación)
                     if excluir_sucursal_id is not None:
                         # ✅ Bodegas de OTRAS sucursales (excluyendo la actual)
-                        cursor.execute(
-                            f"SELECT * FROM {tabla} WHERE sucursal_id != %s AND estatus = TRUE",
-                            [excluir_sucursal_id]
-                        )
+                        query = sql.SQL("SELECT * FROM {} WHERE sucursal_id != %s AND estatus = TRUE").format(table_identifier)
+                        cursor.execute(query, [excluir_sucursal_id])
                     elif sucursal_id:
                         # Traer todas las bodegas de una sucursal específica
-                        cursor.execute(
-                            f"SELECT * FROM {tabla} WHERE sucursal_id = %s AND estatus = TRUE",
-                            [sucursal_id]
-                        )
+                        query = sql.SQL("SELECT * FROM {} WHERE sucursal_id = %s AND estatus = TRUE").format(table_identifier)
+                        cursor.execute(query, [sucursal_id])
                     elif user.id_sucursal_default:
                         # Traer todas las bodegas de la sucursal default del usuario
-                        cursor.execute(
-                            f"SELECT * FROM {tabla} WHERE sucursal_id = %s AND estatus = TRUE",
-                            [user.id_sucursal_default_id]
-                        )
+                        query = sql.SQL("SELECT * FROM {} WHERE sucursal_id = %s AND estatus = TRUE").format(table_identifier)
+                        cursor.execute(query, [user.id_sucursal_default_id])
                     else:
                         # Traer todas las bodegas de todas las sucursales
-                        cursor.execute(f"SELECT * FROM {tabla} WHERE estatus = TRUE")
+                        query = sql.SQL("SELECT * FROM {} WHERE estatus = TRUE").format(table_identifier)
+                        cursor.execute(query)
                 elif user.rol in ['admin', 'almacen']:
                     # Admin y almacén: filtra por sucursal específica si se envía, si no, por su sucursal default
                     if sucursal_id:
@@ -169,24 +171,36 @@ def obtener_info_tienda(request):
                         )
                     else:
                         # Si no tiene sucursal default, traer todas
-                        cursor.execute(f"SELECT * FROM {tabla} WHERE estatus = TRUE")
+                        query = sql.SQL("SELECT * FROM {} WHERE estatus = TRUE").format(table_identifier)
+                        cursor.execute(query)
                 elif user.rol in ['vendedor', 'operario']:
                     # Vendedor y operario: solo sus bodegas asignadas de su sucursal
-                    # Primero filtrar por sucursal si se envió
-                    sucursal_filter = ""
-                    params = [user.id]
                     if sucursal_id:
-                        sucursal_filter = " AND b.sucursal_id = %s"
-                        params.append(sucursal_id)
+                        # 🔒 SEGURIDAD: Query parametrizada con filtro de sucursal
+                        query = sql.SQL("""
+                            SELECT b.* FROM inventario_bodega b
+                            INNER JOIN login_usuario_bodega lub ON b.id = lub.id_bodega
+                            WHERE lub.id_login_usuario = %s AND b.estatus = TRUE AND b.sucursal_id = %s
+                        """)
+                        params = [user.id, sucursal_id]
                     elif user.id_sucursal_default:
-                        sucursal_filter = " AND b.sucursal_id = %s"
-                        params.append(user.id_sucursal_default_id)
+                        # 🔒 SEGURIDAD: Query parametrizada con sucursal default
+                        query = sql.SQL("""
+                            SELECT b.* FROM inventario_bodega b
+                            INNER JOIN login_usuario_bodega lub ON b.id = lub.id_bodega
+                            WHERE lub.id_login_usuario = %s AND b.estatus = TRUE AND b.sucursal_id = %s
+                        """)
+                        params = [user.id, user.id_sucursal_default_id]
+                    else:
+                        # 🔒 SEGURIDAD: Query parametrizada sin filtro de sucursal
+                        query = sql.SQL("""
+                            SELECT b.* FROM inventario_bodega b
+                            INNER JOIN login_usuario_bodega lub ON b.id = lub.id_bodega
+                            WHERE lub.id_login_usuario = %s AND b.estatus = TRUE
+                        """)
+                        params = [user.id]
 
-                    cursor.execute(f"""
-                        SELECT b.* FROM inventario_bodega b
-                        INNER JOIN login_usuario_bodega lub ON b.id = lub.id_bodega
-                        WHERE lub.id_login_usuario = %s AND b.estatus = TRUE{sucursal_filter}
-                    """, params)
+                    cursor.execute(query, params)
                 else:
                     # Otros roles: todas las bodegas activas (o filtradas por sucursal si se envía)
                     if sucursal_id:
@@ -195,9 +209,11 @@ def obtener_info_tienda(request):
                             [sucursal_id]
                         )
                     else:
-                        cursor.execute(f"SELECT * FROM {tabla} WHERE estatus = TRUE")
+                        query = sql.SQL("SELECT * FROM {} WHERE estatus = TRUE").format(table_identifier)
+                        cursor.execute(query)
             else:
-                cursor.execute(f"SELECT * FROM {tabla}")
+                query = sql.SQL("SELECT * FROM {}").format(table_identifier)
+                cursor.execute(query)
 
             columns = [col[0] for col in cursor.description]
             rows = cursor.fetchall()
@@ -477,7 +493,10 @@ def obtener_info_tienda_sin_filtro(request):
             return Response({'error': 'Nombre de tabla inválido'}, status=400)
 
         with connections[alias].cursor() as cursor:
-            cursor.execute(f"SELECT * FROM {tabla}")
+            # 🔒 SEGURIDAD: Prevenir SQL injection con psycopg2.sql
+            table_identifier = sql.Identifier(tabla)
+            query = sql.SQL("SELECT * FROM {}").format(table_identifier)
+            cursor.execute(query)
 
             columns = [col[0] for col in cursor.description]
             rows = cursor.fetchall()
@@ -844,7 +863,10 @@ def actualizar_datos_tienda(request):
                 if int(stock) <= 5:
                     # Obtener el nombre del producto de la base de datos
                     with connections[alias].cursor() as cursor:
-                        cursor.execute(f"SELECT nombre FROM productos WHERE {filtro_columna} = %s", [filtro_valor])
+                        # 🔒 SEGURIDAD: Usar Identifier para el nombre de columna
+                        column_identifier = sql.Identifier(filtro_columna)
+                        query = sql.SQL("SELECT nombre FROM productos WHERE {} = %s").format(column_identifier)
+                        cursor.execute(query, [filtro_valor])
                         result = cursor.fetchone()
                         nombre_producto = result[0] if result else "Desconocido"
 

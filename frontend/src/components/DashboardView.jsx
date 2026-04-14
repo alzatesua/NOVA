@@ -216,6 +216,31 @@ export default function DashboardView() {
     }
   }, [showLoginHistory, dias]);
 
+  // Bloquear scroll cuando el modal de historial está abierto
+  useEffect(() => {
+    if (showLoginHistory) {
+      // Bloquear scroll en el body
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${window.scrollY}px`;
+    } else {
+      // Restaurar scroll
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+    };
+  }, [showLoginHistory]);
+
   // ── Tema tokens ──────────────────────────────────────────────
   const T = isDark ? {
     pageBg: 'transparent',
