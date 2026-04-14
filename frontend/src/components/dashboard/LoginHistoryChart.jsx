@@ -30,6 +30,38 @@ export default function LoginHistoryChart({ data = [], loading = false, showMock
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  // Detectar tamaño de pantalla para ajustes responsive
+  const [screenSize, setScreenSize] = React.useState('desktop');
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width <= 767) {
+        setScreenSize('mobile');
+      } else if (width <= 1023) {
+        setScreenSize('tablet');
+      } else {
+        setScreenSize('desktop');
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Altura responsive del gráfico
+  const getChartHeight = () => {
+    switch (screenSize) {
+      case 'mobile':
+        return '220px';
+      case 'tablet':
+        return '280px';
+      default:
+        return '350px';
+    }
+  };
+
   // Generar datos de prueba si está vacío
   const getChartData = () => {
     if (data && data.length > 0) {
@@ -72,8 +104,8 @@ export default function LoginHistoryChart({ data = [], loading = false, showMock
         fill: true,
         tension: 0.4,
         borderWidth: 2,
-        pointRadius: 3,
-        pointHoverRadius: 5,
+        pointRadius: screenSize === 'mobile' ? 2 : 3,
+        pointHoverRadius: screenSize === 'mobile' ? 4 : 5,
       },
       {
         label: 'Intentos Fallidos',
@@ -83,8 +115,8 @@ export default function LoginHistoryChart({ data = [], loading = false, showMock
         fill: true,
         tension: 0.4,
         borderWidth: 2,
-        pointRadius: 3,
-        pointHoverRadius: 5,
+        pointRadius: screenSize === 'mobile' ? 2 : 3,
+        pointHoverRadius: screenSize === 'mobile' ? 4 : 5,
       },
     ],
   };
@@ -99,14 +131,14 @@ export default function LoginHistoryChart({ data = [], loading = false, showMock
     plugins: {
       legend: {
         display: true,
-        position: 'top',
+        position: screenSize === 'mobile' ? 'bottom' : 'top',
         labels: {
           color: isDark ? '#94a3b8' : '#475569',
           font: {
             family: "'Sora', sans-serif",
-            size: 12,
+            size: screenSize === 'mobile' ? 10 : 12,
           },
-          padding: 15,
+          padding: screenSize === 'mobile' ? 10 : 15,
           usePointStyle: true,
         },
       },
@@ -116,8 +148,14 @@ export default function LoginHistoryChart({ data = [], loading = false, showMock
         bodyColor: isDark ? '#94a3b8' : '#475569',
         borderColor: isDark ? 'rgba(14, 165, 233, 0.2)' : 'rgba(14, 165, 233, 0.3)',
         borderWidth: 1,
-        padding: 12,
+        padding: screenSize === 'mobile' ? 8 : 12,
         displayColors: true,
+        titleFont: {
+          size: screenSize === 'mobile' ? 11 : 13,
+        },
+        bodyFont: {
+          size: screenSize === 'mobile' ? 10 : 12,
+        },
         callbacks: {
           footer: (tooltipItems) => {
             let sum = 0;
@@ -139,7 +177,7 @@ export default function LoginHistoryChart({ data = [], loading = false, showMock
           color: isDark ? '#94a3b8' : '#475569',
           font: {
             family: "'Sora', sans-serif",
-            size: 11,
+            size: screenSize === 'mobile' ? 9 : 11,
           },
         },
       },
@@ -153,7 +191,7 @@ export default function LoginHistoryChart({ data = [], loading = false, showMock
           color: isDark ? '#94a3b8' : '#475569',
           font: {
             family: "'Sora', sans-serif",
-            size: 11,
+            size: screenSize === 'mobile' ? 9 : 11,
           },
           precision: 0,
         },
@@ -168,7 +206,7 @@ export default function LoginHistoryChart({ data = [], loading = false, showMock
         border: `1px solid ${isDark ? 'rgba(14,165,233,0.18)' : 'rgba(14,165,233,0.25)'}`,
         borderRadius: '16px',
         padding: '24px',
-        height: '350px',
+        height: getChartHeight(),
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -211,7 +249,7 @@ export default function LoginHistoryChart({ data = [], loading = false, showMock
         border: `1px solid ${isDark ? 'rgba(14,165,233,0.18)' : 'rgba(14,165,233,0.25)'}`,
         borderRadius: '16px',
         padding: '24px',
-        height: '350px',
+        height: getChartHeight(),
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -233,7 +271,7 @@ export default function LoginHistoryChart({ data = [], loading = false, showMock
       border: `1px solid ${isDark ? 'rgba(14,165,233,0.18)' : 'rgba(14,165,233,0.25)'}`,
       borderRadius: '16px',
       padding: '24px',
-      height: '350px',
+      height: getChartHeight(),
     }}>
       <h3 style={{
         color: isDark ? '#e2e8f0' : '#0c4a6e',

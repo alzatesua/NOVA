@@ -408,6 +408,36 @@ export default function DashboardView() {
             padding-right: clamp(8px, 2vw, 12px) !important;
           }
         }
+
+        /* ─── Responsive: Login History Modal ───────────────────────── */
+        /* Estadísticas rápidas - 4 columnas desktop, 2 tablet, 1 móvil */
+        @media (min-width: 768px) {
+          .login-stats-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+          }
+        }
+        @media (min-width: 481px) and (max-width: 767px) {
+          .login-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .login-stats-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+
+        /* Gráfico y Tabla - 2 columnas desktop, 1 móvil/tablet */
+        @media (min-width: 1024px) {
+          .login-chart-grid {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+          }
+        }
+        @media (max-width: 1023px) {
+          .login-chart-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
       `}</style>
 
       <div className="dash-root" style={{
@@ -479,7 +509,7 @@ export default function DashboardView() {
         {/* ── Modal de Historial de Login ─────────────────────────── */}
         {showLoginHistory && (
           <Modal onClose={() => setShowLoginHistory(false)}>
-            <div style={{ color: '#e2e8f0' }}>
+            <div style={{ color: '#e2e8f0', marginTop: '8px' }}>
               {/* Título */}
               <div style={{ marginBottom: '24px', textAlign: 'center' }}>
                 <h2 style={{
@@ -500,9 +530,9 @@ export default function DashboardView() {
 
               {/* Estadísticas rápidas */}
               {loginHistoryData?.estadisticas && (
-                <div style={{
+                <div className="login-stats-grid" style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
                   gap: '12px',
                   marginBottom: '24px',
                 }}>
@@ -558,7 +588,7 @@ export default function DashboardView() {
               )}
 
               {/* Gráfica y Tabla */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '20px' }}>
+              <div className="login-chart-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '20px' }}>
                 <div style={{ minWidth: 0, width: '100%' }}>
                   <LoginHistoryChart
                     data={loginHistoryData?.grafica || []}
