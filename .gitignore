@@ -22,3 +22,9 @@ build/
 
 .env
 *.env
+.claude/
+*.sh
+docker-compose.yml
+*.sql
+*.env
+.env
