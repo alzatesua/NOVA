@@ -34,3 +34,5 @@ docker-compose.dev.yml.example
 
 # OS
 .DS_Store
+# Docs internos
+[A-Z]*.md
