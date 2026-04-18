@@ -1,47 +1,47 @@
 // src/components/bodegas/sections/CrearBodega.jsx
 import React from 'react';
 import { BuildingStorefrontIcon, StarIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import '../../../styles/bodegas-responsive.css';
 
 export default function CrearBodega({ bodegaForm, setBodegaForm, bodegaLoading, onCrearBodega, onClose }) {
   return (
-    <div style={{
+    <div className="rounded-xl p-3 sm:p-4 md:p-5 border" style={{
       backgroundColor: '#0f172a',
-      border: '1px solid #1e293b',
-      borderRadius: '12px',
-      padding: '20px'
+      borderColor: '#1e293b'
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-        <div style={{
-          padding: '8px',
-          background: 'linear-gradient(to bottom right, rgb(37,99,235), rgb(59,130,246))',
-          borderRadius: '8px'
+      <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+        <div className="p-2 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg" style={{
+          width: 'clamp(2.5rem, 5vw, 3rem)',
+          height: 'clamp(2.5rem, 5vw, 3rem)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
-          <BuildingStorefrontIcon style={{ width: '16px', height: '16px', color: 'white' }} />
+          <BuildingStorefrontIcon className="w-5 h-5 text-white" />
         </div>
-        <div>
-          <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#f1f5f9', margin: 0 }}>Nueva Bodega</h3>
-          <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0' }}>Configura los detalles de tu nueva bodega</p>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm sm:text-base font-bold text-slate-50 leading-tight">
+            Nueva Bodega
+          </h3>
+          <p className="text-xs text-slate-400 truncate">
+            Configura los detalles de tu nueva bodega
+          </p>
         </div>
       </div>
 
-      <form onSubmit={onCrearBodega} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <form onSubmit={onCrearBodega} className="flex flex-col gap-3 sm:gap-4">
         <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#cbd5e1', marginBottom: '6px' }}>
+          <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 sm:mb-2">
             Nombre de la bodega
           </label>
           <input
             required
             type="text"
+            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 touch-target"
             style={{
-              width: '100%',
-              padding: '8px 12px',
-              fontSize: '14px',
               backgroundColor: '#1e293b',
               border: '1px solid #334155',
-              borderRadius: '8px',
-              color: '#f1f5f9',
-              outline: 'none',
-              transition: 'all 0.3s'
+              color: '#f1f5f9'
             }}
             onFocus={(e) => {
               e.currentTarget.style.borderColor = '#60a5fa';
@@ -58,20 +58,15 @@ export default function CrearBodega({ bodegaForm, setBodegaForm, bodegaLoading, 
         </div>
 
         <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#cbd5e1', marginBottom: '6px' }}>
+          <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5 sm:mb-2">
             Tipo de bodega
           </label>
           <select
+            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 touch-target appearance-none"
             style={{
-              width: '100%',
-              padding: '8px 12px',
-              fontSize: '14px',
               backgroundColor: '#1e293b',
               border: '1px solid #334155',
-              borderRadius: '8px',
-              color: '#f1f5f9',
-              outline: 'none',
-              transition: 'all 0.3s'
+              color: '#f1f5f9'
             }}
             onFocus={(e) => {
               e.currentTarget.style.borderColor = '#60a5fa';
@@ -88,207 +83,115 @@ export default function CrearBodega({ bodegaForm, setBodegaForm, bodegaLoading, 
           </select>
         </div>
 
-        <div style={{
+        <div className="rounded-lg p-3 sm:p-4 border" style={{
           background: 'linear-gradient(to right, rgba(99,102,241,0.1), rgba(168,85,247,0.1))',
-          border: '1px solid #312e81',
-          borderRadius: '8px',
-          padding: '16px'
+          borderColor: '#312e81'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <h4 style={{
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#e2e8f0',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                margin: '0 0 2px 0'
-              }}>
-                <StarIcon style={{ width: '16px', height: '16px', color: '#f59e0b' }} />
-                Bodega Predeterminada
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs sm:text-sm font-semibold text-slate-200 flex items-center gap-1.5 sm:gap-2 mb-1">
+                <StarIcon className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                <span className="truncate">Bodega Predeterminada</span>
               </h4>
-              <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>Esta bodega se usará por defecto en todas las operaciones</p>
+              <p className="text-xs text-slate-400 line-clamp-2">
+                Esta bodega se usará por defecto en todas las operaciones
+              </p>
             </div>
 
-            <label style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
+            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
               <input
                 type="checkbox"
-                style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }}
+                className="sr-only peer"
                 checked={bodegaForm?.es_predeterminada || false}
                 onChange={(e) => setBodegaForm({ ...bodegaForm, es_predeterminada: e.target.checked })}
               />
-              <div style={{
-                position: 'relative',
-                width: '44px',
-                height: '24px',
-                borderRadius: '9999px',
-                transition: 'all 0.3s',
-                backgroundColor: bodegaForm?.es_predeterminada
-                  ? 'linear-gradient(to right, rgb(37,99,235), rgb(59,130,246))'
-                  : '#475569'
+              <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-blue-500" style={{
+                transition: 'all 0.3s'
               }}>
-                <span style={{
-                  position: 'absolute',
-                  top: '2px',
-                  left: '2px',
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '9999px',
-                  backgroundColor: 'white',
-                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transform: bodegaForm?.es_predeterminada ? 'translateX(20px)' : 'translateX(0)',
-                  transition: 'all 0.3s'
-                }}>
-                  {bodegaForm?.es_predeterminada && <StarIcon style={{ width: '12px', height: '12px', color: '#6366f1' }} />}
+                <span className="absolute inset-0 flex items-center justify-end pr-1">
+                  {bodegaForm?.es_predeterminada && <StarIcon className="w-3 h-3 text-indigo-500" />}
                 </span>
               </div>
             </label>
           </div>
         </div>
 
-        <div style={{
+        <div className="rounded-lg p-3 sm:p-4 border" style={{
           background: 'linear-gradient(to right, rgba(16,185,129,0.1), rgba(20,184,166,0.1))',
-          border: '1px solid #065f46',
-          borderRadius: '8px',
-          padding: '16px'
+          borderColor: '#065f46'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#e2e8f0', margin: '0 0 2px 0' }}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs sm:text-sm font-semibold text-slate-200 mb-1">
                 Estado de la bodega
               </h4>
-              <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>Controla si la bodega estará disponible</p>
+              <p className="text-xs text-slate-400">
+                Controla si la bodega estará disponible
+              </p>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#1e293b', borderRadius: '8px', padding: '2px' }}>
+            <div className="flex items-center bg-slate-800 rounded-lg p-1 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setBodegaForm({ ...bodegaForm, estatus: true })}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 touch-target hover:text-slate-200 hover:bg-slate-700/30"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 12px',
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  borderRadius: '6px',
-                  transition: 'all 0.2s',
                   border: 'none',
                   cursor: 'pointer',
                   backgroundColor: bodegaForm?.estatus ? '#10b981' : 'transparent',
                   color: bodegaForm?.estatus ? 'white' : '#94a3b8'
                 }}
-                onMouseEnter={(e) => {
-                  if (!bodegaForm?.estatus) {
-                    e.currentTarget.style.color = '#e2e8f0';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!bodegaForm?.estatus) {
-                    e.currentTarget.style.color = '#94a3b8';
-                  }
-                }}
               >
-                <CheckCircleIcon style={{ width: '14px', height: '14px' }} />
-                Activo
+                <CheckCircleIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Activo</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setBodegaForm({ ...bodegaForm, estatus: false })}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 touch-target hover:text-slate-200 hover:bg-slate-700/30"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 12px',
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  borderRadius: '6px',
-                  transition: 'all 0.2s',
                   border: 'none',
                   cursor: 'pointer',
                   backgroundColor: !bodegaForm?.estatus ? '#f43f5e' : 'transparent',
                   color: !bodegaForm?.estatus ? 'white' : '#94a3b8'
                 }}
-                onMouseEnter={(e) => {
-                  if (bodegaForm?.estatus) {
-                    e.currentTarget.style.color = '#e2e8f0';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (bodegaForm?.estatus) {
-                    e.currentTarget.style.color = '#94a3b8';
-                  }
-                }}
               >
-                <XCircleIcon style={{ width: '14px', height: '14px' }} />
-                Inactivo
+                <XCircleIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Inactivo</span>
               </button>
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '16px', borderTop: '1px solid #1e293b' }}>
+        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t" style={{ borderColor: '#1e293b' }}>
           <button
             type="button"
             onClick={onClose}
+            className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm font-medium rounded-lg border transition-all duration-200 touch-target hover:bg-slate-800"
             style={{
-              padding: '8px 16px',
-              fontSize: '14px',
-              fontWeight: '500',
-              borderRadius: '8px',
-              border: '1px solid #334155',
+              borderColor: '#334155',
               color: '#cbd5e1',
-              backgroundColor: 'transparent',
-              transition: 'all 0.2s',
-              cursor: 'pointer'
+              backgroundColor: 'transparent'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1e293b'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={bodegaLoading}
+            className="px-5 sm:px-8 py-2.5 sm:py-3 text-white text-sm font-semibold rounded-lg transition-all duration-200 touch-target disabled:opacity-60 disabled:cursor-not-allowed hover:scale-[1.02] hover:shadow-lg"
             style={{
-              padding: '8px 20px',
               background: 'linear-gradient(to right, rgb(37,99,235), rgb(59,130,246))',
-              color: 'white',
-              fontSize: '14px',
-              fontWeight: '600',
-              borderRadius: '8px',
-              cursor: bodegaLoading ? 'not-allowed' : 'pointer',
-              opacity: bodegaLoading ? 0.6 : 1,
-              transition: 'all 0.2s',
               border: 'none'
-            }}
-            onMouseEnter={(e) => {
-              if (!bodegaLoading) {
-                e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = 'none';
             }}
           >
             {bodegaLoading ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  border: '2px solid rgba(255,255,255,0.3)',
-                  borderTop: '2px solid white',
-                  borderRadius: '50%',
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" style={{
                   animation: 'spin 1s linear infinite'
                 }}></div>
-                Creando bodega...
+                <span>Creando...</span>
               </div>
             ) : 'Crear bodega'}
           </button>

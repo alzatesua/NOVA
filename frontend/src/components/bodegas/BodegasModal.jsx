@@ -4,6 +4,7 @@ import Modal from '../Modal';
 import BodegasHeader from './BodegasHeader';
 import { SECCIONES } from './constants/secciones';
 import '../../styles/sparkles.css';
+import '../../styles/bodegas-responsive.css';
 
 // Secciones
 import CrearBodega from './sections/CrearBodega';
@@ -565,8 +566,11 @@ export default function BodegasModal({
 
   return (
     <Modal onClose={onClose}>
-      {/* Contenedor principal optimizado */}
-      <div className="relative z-10 flex flex-col" style={{ height: '700px', maxHeight: '85vh' }}>
+      {/* Contenedor principal responsive - altura optimizada para móvil */}
+      <div className="relative z-10 flex flex-col w-full" style={{
+        height: 'auto',
+        minHeight: '300px'
+      }}>
 
         {/* Destellos animados en el modal */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
@@ -590,30 +594,39 @@ export default function BodegasModal({
           <div className="absolute top-[65%] right-[45%] w-3 h-3 rounded-full animate-sparkle8" style={{ backgroundColor: '#22d3ee' }}></div>
         </div>
 
-        {/* Layout principal: Sidebar + Contenido */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar compacto */}
-          <div className="relative z-10 w-14 flex-shrink-0 flex flex-col items-center py-3 space-y-2" style={{ backgroundColor: '#0f172a', borderRight: '1px solid #1e293b' }}>
-            {/* Botón cerrar compacto */}
-            <button
-              onClick={onClose}
-              className="group w-10 h-10 rounded-lg bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center transition-all duration-300 hover:scale-105 shadow-md"
-              type="button"
+        {/* Navegación horizontal optimizada para mobile/tablet - ANTES de todo */}
+        <div className="md:hidden relative z-[100] flex-shrink-0 flex items-center justify-center py-3 px-2 gap-2 w-full" style={{
+          backgroundColor: '#00000000',
+          borderBottom: '2px solid #000000',
+          minHeight: 'clamp(3.5rem, 10vw, 4.5rem)',
+          maxHeight: 'clamp(4rem, 12vw, 5rem)',
+          marginTop: '20px'
+        }}>
+          {/* Botón cerrar para mobile - más compacto */}
+          <button
+            onClick={onClose}
+            className="flex-shrink-0 touch-target rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition-all duration-300 shadow-md"
+            style={{
+              width: 'clamp(2.75rem, 8vw, 3.25rem)',
+              height: 'clamp(2.75rem, 8vw, 3.25rem)'
+            }}
+            type="button"
+          >
+            <svg
+              className="w-5 h-5 sm:w-6 sm:h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg
-                className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
 
-            {/* Separador */}
-            <div className="w-6 h-px" style={{ backgroundColor: '#334155' }}></div>
+          {/* Separador vertical más pequeño */}
+          <div className="w-px h-7 sm:h-8 flex-shrink-0" style={{ backgroundColor: '#475569' }}></div>
 
-            {/* Botones de navegación compactos */}
+          {/* Botones de navegación horizontales - más grandes y visibles */}
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide flex-1 justify-center">
             {SECCIONES.map(section => {
               const Icon = section.icon;
               const isActive = active === section.id;
@@ -622,11 +635,80 @@ export default function BodegasModal({
                 <button
                   key={section.id}
                   onClick={() => handleTabChange(section.id)}
-                  className={`group relative w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                  className={`flex-shrink-0 rounded-lg flex flex-col items-center justify-center transition-all duration-300 border-2 shadow-md ${
+                    isActive
+                      ? `bg-blue-500 text-white scale-105 border-blue-400`
+                      : 'bg-slate-600 hover:bg-slate-500 text-white border-slate-400'
+                  }`}
+                  style={{
+                    width: 'clamp(2.75rem, 9vw, 3.25rem)',
+                    height: 'clamp(2.75rem, 9vw, 3.25rem)',
+                    minWidth: '2.75rem'
+                  }}
+                >
+                  <Icon className={`w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 ${
+                    isActive ? 'scale-110' : ''
+                  }`} />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Layout principal: Sidebar + Contenido */}
+        <div className="flex flex-1 overflow-visible flex-col md:flex-row">
+
+          {/* Sidebar responsive - vertical en desktop, oculto en mobile */}
+          {/* Desktop: sidebar vertical en la izquierda */}
+          <div className="relative z-10 flex-shrink-0 flex flex-col items-center py-3 hidden md:flex" style={{
+            width: 'clamp(3.5rem, 4rem, 5rem)',
+            backgroundColor: '#0f172a',
+            borderRight: '1px solid #1e293b'
+          }}>
+            {/* Contenedor centrado para todos los botones */}
+            <div className="flex-1 flex flex-col justify-center items-center space-y-3">
+              {/* Botón cerrar compacto */}
+              <button
+                onClick={onClose}
+                className="group touch-target rounded-lg bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center transition-all duration-300 hover:scale-105 shadow-md"
+                style={{
+                  width: 'clamp(2.5rem, 3rem, 3.5rem)',
+                  height: 'clamp(2.5rem, 3rem, 3.5rem)'
+                }}
+                type="button"
+              >
+                <svg
+                  className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Separador */}
+              <div className="w-6 h-px" style={{ backgroundColor: '#334155' }}></div>
+
+              {/* Botones de navegación compactos */}
+              <div className="flex flex-col justify-center space-y-2">
+            {SECCIONES.map(section => {
+              const Icon = section.icon;
+              const isActive = active === section.id;
+
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => handleTabChange(section.id)}
+                  className={`group relative touch-target rounded-lg flex items-center justify-center transition-all duration-300 ${
                     isActive
                       ? `bg-gradient-to-br ${section.color} text-white shadow-md`
                       : 'bg-slate-700/60 hover:bg-slate-600/80 text-slate-300 hover:text-white border border-slate-600/40'
                   }`}
+                  style={{
+                    width: 'clamp(2.5rem, 3rem, 3.5rem)',
+                    height: 'clamp(2.5rem, 3rem, 3.5rem)'
+                  }}
                 >
                   {/* Indicador activo */}
                   {isActive && (
@@ -638,44 +720,47 @@ export default function BodegasModal({
                   {/* Efecto glassmorphism en hover */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 rounded-lg"></div>
 
-                  <Icon className={`w-5 h-5 transition-transform duration-300 relative z-10 ${
+                  <Icon className={`w-[30px] h-[30px] transition-transform duration-300 relative z-10 ${
                     isActive ? 'scale-110' : 'group-hover:scale-110'
                   }`} />
 
-                  {/* Tooltip */}
-                  <div className="absolute left-14 ml-2 px-2.5 py-1.5 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none z-50 font-medium" style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }}>
-                    {section.label}
+                  {/* Tooltip - ocultar en touch devices */}
+                  <div className="hidden md:block absolute left-14 ml-2 px-3 py-2 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none z-50" style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }}>
+                    <div className="font-semibold text-sm mb-0.5">{section.label}</div>
+                    <div className="text-slate-400 text-[10px] leading-tight">{section.description}</div>
                     <div className="absolute -left-1.5 top-1/2 transform -translate-y-1/2 w-2 h-2" style={{ backgroundColor: '#0f172a', borderLeft: '1px solid #1e293b', borderTop: '1px solid #1e293b' }}></div>
                   </div>
                 </button>
               );
             })}
+              </div>
+            </div>
           </div>
 
           {/* Área principal de contenido */}
-          <div className="flex-1 flex flex-col relative overflow-hidden" style={{ backgroundColor: '#0B0D26' }}>
-            {/* Header compacto */}
-            <div className="relative z-10 flex-shrink-0 px-4 pt-3 pb-2">
-              <header className="relative rounded-lg p-2.5 border" style={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }}>
-                <div className="flex items-center gap-2">
-                  <div className={`w-1 h-6 rounded-full bg-gradient-to-b transition-all duration-500 ${currentSection?.color} flex-shrink-0`}>
-                    <div className="w-full h-2 bg-white/30 rounded-full animate-pulse"></div>
+          <div className="flex-1 flex flex-col relative overflow-hidden w-full" style={{ backgroundColor: '#0B0D26' }}>
+            {/* Header más compacto en móvil */}
+            <div className="relative z-10 flex-shrink-0 px-2 sm:px-3 md:px-4 pt-1.5 sm:pt-2 md:pt-3 pb-1 sm:pb-1.5 md:pb-2 w-full">
+              <header className="relative rounded-lg p-1.5 sm:p-2 md:p-2.5 border" style={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }}>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className={`w-0.5 h-4 sm:h-5 md:h-6 rounded-full bg-gradient-to-b transition-all duration-500 ${currentSection?.color} flex-shrink-0`}>
+                    <div className="w-full h-1.5 sm:h-2 bg-white/30 rounded-full animate-pulse"></div>
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 text-xs mb-0.5" style={{ color: '#94a3b8' }}>
-                      <span className="px-1.5 py-0.5 rounded-full font-medium" style={{ background: 'linear-gradient(to right, rgba(37,99,235,0.1), rgba(29,78,216,0.1))', color: '#60a5fa' }}>
-                        Gestión de Inventario
+                    <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[10px] mb-0.5" style={{ color: '#94a3b8' }}>
+                      <span className="px-1 sm:px-1.5 py-0.5 rounded-full font-medium text-[8px] sm:text-[9px] md:text-[10px]" style={{ background: 'linear-gradient(to right, rgba(37,99,235,0.1), rgba(29,78,216,0.1))', color: '#60a5fa' }}>
+                        Gestión
                       </span>
-                      <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-2 h-2 sm:w-2.5 sm:w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                      <span className="font-medium text-xs" style={{ color: '#60a5fa' }}>
+                      <span className="font-medium truncate text-[8px] sm:text-[9px] md:text-[10px]" style={{ color: '#60a5fa' }}>
                         {sucursalSel?.nombre || 'Sucursal'}
                       </span>
                     </div>
 
-                    <h6 className="text-sm font-semibold bg-gradient-to-r from-slate-200 to-slate-400 bg-clip-text text-transparent leading-tight">
+                    <h6 className="text-[10px] sm:text-xs md:text-sm font-semibold bg-gradient-to-r from-slate-200 to-slate-400 bg-clip-text text-transparent leading-tight">
                       {currentSection?.label}
                     </h6>
                   </div>
@@ -683,11 +768,11 @@ export default function BodegasModal({
               </header>
             </div>
 
-            {/* Contenido principal optimizado */}
-            <div className="flex-1 relative overflow-y-auto">
-              <div className="h-full px-4 pb-4">
+            {/* Contenido principal responsive con scroll optimizado */}
+            <div className="flex-1 relative overflow-y-auto overflow-x-hidden w-full" style={{ minHeight: 'clamp(200px, 40vh, 400px)' }}>
+              <div className="h-full px-1 sm:px-1.5 md:px-3 lg:px-4 pt-5 sm:pt-1 md:pt-3 lg:pt-4 pb-1 sm:pb-1.5 md:pb-3 lg:pb-4 w-full">
               {/* Contenido con transiciones */}
-              <div className={`relative transition-all duration-300 ${isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
+              <div className={`relative transition-all duration-300 w-full ${isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`} style={{ minHeight: 'clamp(150px, 35vh, 300px)' }}>
                 {active === 'crear-bodega' && (
                   <CrearBodega
                     bodegaForm={bodegaForm}
