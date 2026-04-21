@@ -153,7 +153,7 @@ def obtener_info_tienda(request):
                         cursor.execute(query, [user.id_sucursal_default_id])
                     else:
                         # Traer todas las bodegas de todas las sucursales
-                        query = sql.SQL("SELECT * FROM {} WHERE estatus = TRUE").format(table_identifier)
+                        query = f"SELECT * FROM {tabla} WHERE estatus = TRUE"
                         cursor.execute(query)
                 elif user.rol in ['admin', 'almacen']:
                     # Admin y almacén: filtra por sucursal específica si se envía, si no, por su sucursal default
@@ -171,7 +171,7 @@ def obtener_info_tienda(request):
                         )
                     else:
                         # Si no tiene sucursal default, traer todas
-                        query = sql.SQL("SELECT * FROM {} WHERE estatus = TRUE").format(table_identifier)
+                        query = f"SELECT * FROM {tabla} WHERE estatus = TRUE"
                         cursor.execute(query)
                 elif user.rol in ['vendedor', 'operario']:
                     # Vendedor y operario: solo sus bodegas asignadas de su sucursal
@@ -209,10 +209,12 @@ def obtener_info_tienda(request):
                             [sucursal_id]
                         )
                     else:
-                        query = sql.SQL("SELECT * FROM {} WHERE estatus = TRUE").format(table_identifier)
+                        # Query simple sin filtros - tabla validada con regex
+                        query = f"SELECT * FROM {tabla} WHERE estatus = TRUE"
                         cursor.execute(query)
             else:
-                query = sql.SQL("SELECT * FROM {}").format(table_identifier)
+                # Query simple sin filtros - tabla validada con regex
+                query = f"SELECT * FROM {tabla}"
                 cursor.execute(query)
 
             columns = [col[0] for col in cursor.description]
@@ -493,9 +495,12 @@ def obtener_info_tienda_sin_filtro(request):
             return Response({'error': 'Nombre de tabla inválido'}, status=400)
 
         with connections[alias].cursor() as cursor:
-            # 🔒 SEGURIDAD: Prevenir SQL injection con psycopg2.sql
-            table_identifier = sql.Identifier(tabla)
-            query = sql.SQL("SELECT * FROM {}").format(table_identifier)
+            # 🔒 SEGURIDAD: Prevenir SQL injection - validar nombre de tabla
+            if not re.match(r'^[a-zA-Z0-9_]+$', tabla):
+                return Response({'error': 'Nombre de tabla inválido'}, status=400)
+
+            # Construir query de forma segura sin psycopg2.sql
+            query = f"SELECT * FROM {tabla}"
             cursor.execute(query)
 
             columns = [col[0] for col in cursor.description]

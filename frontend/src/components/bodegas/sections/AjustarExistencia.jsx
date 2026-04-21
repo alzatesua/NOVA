@@ -296,24 +296,31 @@ export default function AjustarExistencia({
   }, [productoEncontrado?.imagen_producto, fullUrl]);
 
   return (
-    <div className="bg-white/90 dark:!bg-slate-900/90 backdrop-blur-sm rounded-xl p-5 border border-white/20 dark:!border-slate-800 shadow-lg">
+    <div className="bg-white/90 dark:!bg-slate-900/90 backdrop-blur-sm rounded-xl p-3 sm:p-4 md:p-5 border border-white/20 dark:!border-slate-800 shadow-lg w-full">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg">
+      <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 md:mb-5">
+        <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg" style={{
+          width: 'clamp(2rem, 5vw, 2.5rem)',
+          height: 'clamp(2rem, 5vw, 2.5rem)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}>
           <SparklesIcon className="w-4 h-4 text-white" />
         </div>
-        <div>
-          <h3 className="text-base font-bold text-slate-800 dark:!text-slate-100">Ajuste de inventario</h3>
-          <p className="text-xs text-slate-600 dark:!text-slate-400">Modifica inventarios con búsqueda inteligente por código de barras</p>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm sm:text-base md:text-lg font-bold text-slate-800 dark:!text-slate-100 leading-tight">Ajuste de inventario</h3>
+          <p className="text-[10px] sm:text-xs text-slate-600 dark:!text-slate-400 line-clamp-1 sm:line-clamp-2">Modifica inventarios con búsqueda inteligente por código de barras</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-6">
           {/* Columna izquierda - Formulario */}
-          <div className="lg:col-span-8 space-y-4">
+          <div className="lg:col-span-8 space-y-3 sm:space-y-4">
             {/* Fila 1: Código de barras y Bodega */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
               <div>
                 <label className="block text-xs font-medium text-slate-700 dark:!text-slate-300 mb-1.5">
                   <MagnifyingGlassIcon className="w-3.5 h-3.5 inline mr-1" />
@@ -395,7 +402,7 @@ export default function AjustarExistencia({
             )}
 
             {/* Fila 2: ID Producto, Selector manual, Ajuste */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:!text-slate-300 mb-1.5">
                   ID del Producto <span className="text-rose-400">*</span>
@@ -491,10 +498,10 @@ export default function AjustarExistencia({
           </div>
 
           {/* Columna derecha - Imagen y resumen */}
-          <div className="lg:col-span-4 space-y-4">
+          <div className="lg:col-span-4 space-y-3 sm:space-y-4">
             {/* Imagen del producto */}
-            <div className="bg-white dark:!bg-slate-800 rounded-lg border border-slate-200 dark:!border-slate-700 p-3">
-              <h5 className="text-xs font-semibold text-slate-700 dark:!text-slate-300 mb-2 text-center">
+            <div className="bg-white dark:!bg-slate-800 rounded-lg border border-slate-200 dark:!border-slate-700 p-2 sm:p-3">
+              <h5 className="text-[10px] sm:text-xs font-semibold text-slate-700 dark:!text-slate-300 mb-1.5 sm:mb-2 text-center">
                 Imagen del Producto
               </h5>
               <div className="w-full aspect-square bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-lg
@@ -524,8 +531,8 @@ export default function AjustarExistencia({
 
             {/* Resumen del ajuste */}
             {productoEncontrado && ajusteForm?.delta !== '' && (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg border border-blue-200 dark:border-blue-700 p-3">
-                <h5 className="text-xs font-semibold text-blue-800 dark:!text-blue-200 mb-2 text-center">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg border border-blue-200 dark:border-blue-700 p-2 sm:p-3">
+                <h5 className="text-[10px] sm:text-xs font-semibold text-blue-800 dark:!text-blue-200 mb-1.5 sm:mb-2 text-center">
                   📊 Resumen del Ajuste
                 </h5>
                 <div className="space-y-2">
@@ -556,12 +563,12 @@ export default function AjustarExistencia({
         </div>
 
         {/* Botones de acción */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:!border-slate-700">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-slate-200 dark:!border-slate-700">
           <button
             type="button"
             onClick={() => handleTabChange('administrar')}
-            className="px-4 py-2 text-slate-700 dark:!text-slate-300 font-medium rounded-lg border border-slate-200 dark:!border-slate-700
-                      hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 text-xs"
+            className="px-3 sm:px-4 py-2 sm:py-2.5 text-slate-700 dark:!text-slate-300 font-medium rounded-lg border border-slate-200 dark:!border-slate-700
+                      hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 text-xs sm:text-sm touch-target"
           >
             Cancelar
           </button>
@@ -574,9 +581,9 @@ export default function AjustarExistencia({
               ajusteForm?.delta === '' ||
               Number.isNaN(Number(ajusteForm?.delta))
             }
-            className="px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold
+            className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold
                       rounded-lg shadow-md shadow-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/40
-                      hover:scale-105 disabled:opacity-60 disabled:hover:scale-100 transition-all duration-200 text-xs"
+                      hover:scale-105 disabled:opacity-60 disabled:hover:scale-100 transition-all duration-200 text-xs sm:text-sm touch-target"
           >
             {ajusteLoading ? (
               <div className="flex items-center gap-2">

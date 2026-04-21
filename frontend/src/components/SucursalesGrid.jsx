@@ -443,7 +443,7 @@ export default function SucursalesGrid() {
             {filteredSucursales.map((suc) => (
               <div
                 key={suc.id}
-                className="bg-white dark:!bg-slate-900 rounded-xl shadow p-5 flex flex-col h-full cursor-pointer hover:shadow-xl hover:shadow-blue-500/20 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-300 ease-out border border-slate-200 dark:!border-slate-700 hover:border-blue-400 dark:hover:!border-blue-500 ring-1 ring-slate-200 dark:!ring-slate-700 group"
+                className="bg-white dark:!bg-slate-900 rounded-xl shadow p-5 flex flex-col h-full cursor-pointer hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300 ease-out border border-slate-200 dark:!border-slate-700 hover:border-blue-400 dark:hover:!border-blue-500 ring-1 ring-slate-200 dark:!ring-slate-700 group"
               >
                 {/* Header de la tarjeta */}
                 <div className="mb-4 pb-3 border-b border-slate-200 dark:!border-slate-700 text-center">
@@ -480,7 +480,7 @@ export default function SucursalesGrid() {
                       px-2.5 py-1 rounded-full
                       border border-amber-200 dark:!border-amber-500
                       hover:bg-amber-100 dark:hover:bg-amber-900/70
-                      group-hover:scale-110 group-hover:bg-amber-100 dark:group-hover:!bg-amber-800/70
+                      group-hover:bg-amber-100 dark:group-hover:!bg-amber-800/70
                       focus:outline-none focus:ring-2 focus:ring-amber-400 dark:!focus:ring-amber-500 focus:ring-offset-1
                       transition-all duration-300
                       whitespace-nowrap

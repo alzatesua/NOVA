@@ -1,8 +1,8 @@
 // src/components/bodegas/sections/RecibirTraslado.jsx
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 
-import { 
-  ArchiveBoxArrowDownIcon, 
+import {
+  ArchiveBoxArrowDownIcon,
   MagnifyingGlassIcon,
   CheckCircleIcon,
   ClockIcon,
@@ -13,21 +13,18 @@ import {
   Squares2X2Icon,
   CubeIcon
 } from '@heroicons/react/24/solid';
+import '../../../styles/bodegas-responsive.css';
 
-export default function RecibirTraslado({ 
-  recibirForm, 
-  setRecibirForm, 
-  recibirLoading, 
-  onRecibirTraslado, 
+export default function RecibirTraslado({
+  recibirForm,
+  setRecibirForm,
+  recibirLoading,
+  onRecibirTraslado,
   onClose,
   bodegas = [],
-  productos = [],
   trasladosDisponibles = [],
-  isLoadingProductos = false,
-  isLoadingBodegas = false,
   isLoadingTraslados = false,
   errorTraslados = null,
-  currentUserId = null,
   // Props para selección múltiple
   trasladosSeleccionados = [],
   setTrasladosSeleccionados,
@@ -181,82 +178,84 @@ export default function RecibirTraslado({
     : (recibirForm?.trasladoId ? 1 : 0);
 
   return (
-    <div className="rounded-2xl shadow-xl border overflow-hidden" style={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }}>
-      {/* Header */}
-      <div className="p-6 text-white" style={{ background: 'linear-gradient(to right, #2563eb, #3b82f6)' }}>
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-            <ArchiveBoxArrowDownIcon className="w-6 h-6" />
+    <div className="rounded-2xl shadow-xl border overflow-hidden w-full" style={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }}>
+      {/* Header responsive */}
+      <div className="p-3 sm:p-4 md:p-5 lg:p-6 text-white" style={{ background: 'linear-gradient(to right, #2563eb, #3b82f6)' }}>
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+          <div className="p-2 sm:p-2.5 md:p-3 bg-white/20 rounded-xl backdrop-blur-sm" style={{
+            width: 'clamp(2.5rem, 6vw, 3.5rem)',
+            height: 'clamp(2.5rem, 6vw, 3.5rem)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <ArchiveBoxArrowDownIcon className="w-5 h-5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6" />
           </div>
-          <div className="flex-1">
-            <h3 className="text-2xl font-bold">Recibir Traslado</h3>
-            <p className="mt-1" style={{ color: 'rgba(219, 234, 254, 0.8)' }}>
-              Acepta y procesa traslados que han sido enviados a tu bodega
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold leading-tight">
+              Recibir Traslado
+            </h3>
+            <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm line-clamp-2" style={{ color: 'rgba(219, 234, 254, 0.8)' }}>
+              Acepta traslados entrantes y actualiza el inventario
             </p>
           </div>
         </div>
       </div>
 
-      <form ref={formRef} onSubmit={manejarEnvio} className="p-6 space-y-6">
+      <form ref={formRef} onSubmit={manejarEnvio} className="p-3 sm:p-4 md:p-5 lg:p-6 space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6">
 
-        {/* Selector de modo */}
+        {/* Selector de modo responsive */}
         <div className="flex gap-2 p-1 rounded-xl" style={{ backgroundColor: '#1e293b' }}>
           <button
             type="button"
             onClick={() => setModoSeleccion('manual')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-              modoSeleccion === 'manual'
-                ? 'shadow-sm'
-                : ''
+            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all touch-target ${
+              modoSeleccion === 'manual' ? 'shadow-sm' : 'hover:bg-slate-700'
             }`}
             style={{
               backgroundColor: modoSeleccion === 'manual' ? '#0f172a' : 'transparent',
               color: modoSeleccion === 'manual' ? '#e2e8f0' : '#94a3b8'
             }}
-            onMouseEnter={(e) => {if(modoSeleccion !== 'manual') e.currentTarget.style.backgroundColor = '#334155';}}
-            onMouseLeave={(e) => {if(modoSeleccion !== 'manual') e.currentTarget.style.backgroundColor = 'transparent';}}
           >
             <DocumentTextIcon className="w-4 h-4" />
-            Ingreso Manual
+            <span className="hidden xs:inline">Ingreso Manual</span>
+            <span className="xs:hidden">Manual</span>
           </button>
           <button
             type="button"
             onClick={() => setModoSeleccion('lista')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-              modoSeleccion === 'lista'
-                ? 'shadow-sm'
-                : ''
+            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all touch-target ${
+              modoSeleccion === 'lista' ? 'shadow-sm' : 'hover:bg-slate-700'
             }`}
             style={{
               backgroundColor: modoSeleccion === 'lista' ? '#0f172a' : 'transparent',
               color: modoSeleccion === 'lista' ? '#e2e8f0' : '#94a3b8'
             }}
-            onMouseEnter={(e) => {if(modoSeleccion !== 'lista') e.currentTarget.style.backgroundColor = '#334155';}}
-            onMouseLeave={(e) => {if(modoSeleccion !== 'lista') e.currentTarget.style.backgroundColor = 'transparent';}}
           >
             <MagnifyingGlassIcon className="w-4 h-4" />
-            Seleccionar de Lista
+            <span className="hidden xs:inline">Seleccionar de Lista</span>
+            <span className="xs:hidden">Lista</span>
           </button>
         </div>
 
         {modoSeleccion === 'manual' ? (
-          /* Modo Manual */
-          <div className="space-y-4">
-            <div className="rounded-xl p-4 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
-              <div className="flex items-start gap-3">
-                <InformationCircleIcon className="w-5 h-5 mt-0.5" style={{ color: '#3b82f6' }} />
-                <div>
-                  <h4 className="font-semibold mb-1" style={{ color: '#1e40af' }}>Ingreso Manual</h4>
-                  <p className="text-sm" style={{ color: '#1d4ed8' }}>
+          /* Modo Manual responsive */
+          <div className="space-y-3 sm:space-y-4">
+            <div className="rounded-xl p-3 sm:p-4 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
+              <div className="flex items-start gap-2 sm:gap-3">
+                <InformationCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" style={{ color: '#3b82f6' }} />
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold mb-1 text-sm sm:text-base" style={{ color: '#1e40af' }}>Ingreso Manual</h4>
+                  <p className="text-xs sm:text-sm" style={{ color: '#1d4ed8' }}>
                     Ingresa manualmente el ID del traslado que deseas recibir.
-                    Asegúrate de que el traslado haya sido enviado previamente.
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-semibold" style={{ color: '#cbd5e1' }}>
+              <label className="block text-xs sm:text-sm font-semibold" style={{ color: '#cbd5e1' }}>
                 ID del Traslado *
               </label>
               <input
@@ -264,113 +263,99 @@ export default function RecibirTraslado({
                 value={recibirForm?.trasladoId || ''}
                 onChange={(e) => manejarSeleccionTraslado(e.target.value)}
                 placeholder="Ejemplo: 12345"
-                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 transition-all"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl focus:outline-none focus:ring-2 transition-all text-sm touch-target"
                 style={{ backgroundColor: '#1e293b', border: '2px solid #334155', color: '#e2e8f0' }}
                 required
               />
-              <p className="text-xs" style={{ color: '#64748b' }}>
+              <p className="text-[10px] sm:text-xs" style={{ color: '#64748b' }}>
                 Ingresa el número de ID del traslado que quieres recibir
               </p>
             </div>
           </div>
         ) : (
-          /* Modo Lista */
-          <div className="space-y-4">
+          /* Modo Lista responsive */
+          <div className="space-y-3 sm:space-y-4">
             {/* Barra de búsqueda y toggle múltiple */}
-            <div className="flex gap-3">
-              <div className="relative flex-1">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#64748b' }} />
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <div className="relative flex-1 min-w-0">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#64748b' }} />
                 <input
                   type="text"
                   value={filtro}
                   onChange={(e) => setFiltro(e.target.value)}
-                  placeholder="Buscar por ID, bodega, producto..."
-                  className="w-full pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 transition-all"
+                  placeholder="Buscar por ID, bodega..."
+                  className="w-full pl-9 sm:pl-10 pr-8 sm:pr-4 py-2.5 sm:py-3 rounded-xl focus:outline-none focus:ring-2 transition-all text-sm"
                   style={{ backgroundColor: '#1e293b', border: '1px solid #334155', color: '#e2e8f0' }}
                 />
                 {filtro && (
                   <button
                     type="button"
                     onClick={() => setFiltro('')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                    className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 touch-target hover:text-slate-300 transition-colors"
                     style={{ color: '#64748b' }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = '#94a3b8'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = '#64748b'}
                   >
-                    <XCircleIcon className="w-5 h-5" />
+                    <XCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 )}
               </div>
               <button
                 type="button"
                 onClick={toggleSeleccionMultiple}
-                className="px-4 py-3 rounded-xl border-2 font-medium transition-all flex items-center gap-2"
+                className="px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 font-medium transition-all flex items-center justify-center gap-1.5 sm:gap-2 touch-target text-xs sm:text-sm whitespace-nowrap hover:bg-slate-800 hover:border-slate-600"
                 style={{
                   backgroundColor: seleccionandoMultiple ? 'rgba(168, 85, 247, 0.1)' : '#0f172a',
                   borderColor: seleccionandoMultiple ? '#a855f7' : '#334155',
                   color: seleccionandoMultiple ? '#a855f7' : '#cbd5e1'
                 }}
-                onMouseEnter={(e) => {
-                  if(!seleccionandoMultiple) {
-                    e.currentTarget.style.backgroundColor = '#1e293b';
-                    e.currentTarget.style.borderColor = '#475569';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if(!seleccionandoMultiple) {
-                    e.currentTarget.style.backgroundColor = '#0f172a';
-                    e.currentTarget.style.borderColor = '#334155';
-                  }
-                }}
               >
-                <Squares2X2Icon className="w-5 h-5" />
-                {seleccionandoMultiple ? 'Múltiple' : 'Simple'}
+                <Squares2X2Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>{seleccionandoMultiple ? 'Múltiple' : 'Simple'}</span>
               </button>
             </div>
 
-            {/* Estadísticas */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="rounded-lg p-4 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
-                <div className="text-2xl font-bold" style={{ color: '#3b82f6' }}>{trasladosParaRecibir.length}</div>
-                <div className="text-sm" style={{ color: '#60a5fa' }}>Disponibles</div>
+            {/* Estadísticas responsive */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+              <div className="rounded-lg p-2.5 sm:p-4 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
+                <div className="text-xl sm:text-2xl font-bold" style={{ color: '#3b82f6' }}>{trasladosParaRecibir.length}</div>
+                <div className="text-[10px] sm:text-sm" style={{ color: '#60a5fa' }}>Disponibles</div>
               </div>
-              <div className="rounded-lg p-4 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
-                <div className="text-2xl font-bold" style={{ color: '#3b82f6' }}>
+              <div className="rounded-lg p-2.5 sm:p-4 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
+                <div className="text-xl sm:text-2xl font-bold" style={{ color: '#3b82f6' }}>
                   {trasladosParaRecibir.filter(t => esReciente(t.enviado_en || t.creado_en)).length}
                 </div>
-                <div className="text-sm" style={{ color: '#60a5fa' }}>Recientes</div>
+                <div className="text-[10px] sm:text-sm" style={{ color: '#60a5fa' }}>Recientes</div>
               </div>
-              <div className="rounded-lg p-4 border" style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)', borderColor: 'rgba(168, 85, 247, 0.2)' }}>
-                <div className="text-2xl font-bold" style={{ color: '#a855f7' }}>{totalSeleccionados}</div>
-                <div className="text-sm" style={{ color: '#c084fc' }}>Seleccionados</div>
+              <div className="rounded-lg p-2.5 sm:p-4 border" style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)', borderColor: 'rgba(168, 85, 247, 0.2)' }}>
+                <div className="text-xl sm:text-2xl font-bold" style={{ color: '#a855f7' }}>{totalSeleccionados}</div>
+                <div className="text-[10px] sm:text-sm" style={{ color: '#c084fc' }}>Seleccionados</div>
               </div>
             </div>
 
-            {/* Lista de traslados */}
-            <div className="border rounded-xl overflow-hidden max-h-[500px] overflow-y-auto" style={{ borderColor: '#1e293b' }}>
+            {/* Lista de traslados responsive */}
+            <div className="border rounded-xl overflow-hidden max-h-[400px] sm:max-h-[500px] overflow-y-auto" style={{ borderColor: '#1e293b' }}>
               {isLoadingTraslados ? (
-                <div className="p-8 text-center">
+                <div className="p-6 sm:p-8 text-center">
                   <div className="inline-flex items-center gap-3">
-                    <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: '#334155', borderTopColor: '#22c55e' }}></div>
-                    <span style={{ color: '#94a3b8' }}>Cargando traslados disponibles...</span>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 rounded-full animate-spin" style={{ borderColor: '#334155', borderTopColor: '#22c55e' }}></div>
+                    <span className="text-sm" style={{ color: '#94a3b8' }}>Cargando traslados disponibles...</span>
                   </div>
                 </div>
               ) : errorTraslados ? (
-                <div className="p-8 text-center">
-                  <div className="rounded-lg p-4 border" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)', color: '#dc2626' }}>
-                    <ExclamationTriangleIcon className="w-8 h-8 mx-auto mb-2" />
-                    <h4 className="font-semibold mb-2">Error al cargar traslados</h4>
-                    <p className="text-sm">
+                <div className="p-6 sm:p-8 text-center">
+                  <div className="rounded-lg p-3 sm:p-4 border mx-auto max-w-md" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)', color: '#dc2626' }}>
+                    <ExclamationTriangleIcon className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" />
+                    <h4 className="font-semibold mb-2 text-sm sm:text-base">Error al cargar traslados</h4>
+                    <p className="text-xs sm:text-sm">
                       {typeof errorTraslados === 'string' ? errorTraslados : 'Ocurrió un error inesperado.'}
                     </p>
                   </div>
                 </div>
               ) : !trasladosParaRecibir.length ? (
-                <div className="p-8 text-center">
+                <div className="p-6 sm:p-8 text-center">
                   <div style={{ color: '#64748b' }}>
-                    <ArchiveBoxArrowDownIcon className="w-12 h-12 mx-auto mb-3" style={{ color: '#475569' }} />
-                    <h4 className="font-medium mb-2">No hay traslados disponibles</h4>
-                    <p className="text-sm">
+                    <ArchiveBoxArrowDownIcon className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3" style={{ color: '#475569' }} />
+                    <h4 className="font-medium mb-2 text-sm sm:text-base">No hay traslados disponibles</h4>
+                    <p className="text-xs sm:text-sm">
                       {filtro
                         ? "No se encontraron traslados que coincidan con tu búsqueda."
                         : "No tienes traslados pendientes de recibir en este momento."
@@ -405,80 +390,78 @@ export default function RecibirTraslado({
                     return (
                       <div
                         key={String(traslado.id)}
-                        className="transition-colors"
+                        className="transition-colors hover:bg-slate-800"
                         style={{ borderBottom: '1px solid #1e293b' }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1e293b'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
                         <div
                           onClick={() => manejarSeleccionTraslado(traslado.id)}
-                          className={`p-4 cursor-pointer ${seleccionado ? 'border-l-4' : ''} ${reciente ? '' : ''}`}
+                          className={`p-3 sm:p-4 cursor-pointer ${seleccionado ? 'border-l-4' : ''}`}
                           style={{
                             borderLeftColor: seleccionado ? '#22c55e' : 'transparent',
                             backgroundColor: seleccionado ? 'rgba(59, 130, 246, 0.1)' : (reciente ? 'rgba(59, 130, 246, 0.05)' : 'transparent')
                           }}
                         >
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-3 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
                               {seleccionandoMultiple ? (
                                 <input
                                   type="checkbox"
                                   checked={seleccionado}
                                   onChange={() => manejarSeleccionTraslado(traslado.id)}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="mt-1.5 w-4 h-4 rounded focus:ring-2"
+                                  className="mt-1 w-4 h-4 rounded focus:ring-2 flex-shrink-0"
                                   style={{ backgroundColor: '#1e293b', border: '2px solid #334155' }}
                                 />
                               ) : (
                                 <div
-                                  className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0`}
+                                  className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full mt-1 flex-shrink-0`}
                                   style={{ backgroundColor: seleccionado ? '#3b82f6' : '#475569' }}
                                 />
                               )}
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-semibold" style={{ color: '#e2e8f0' }}>
-                                    Traslado #{traslado.id}
+                                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                  <span className="font-semibold text-xs sm:text-sm" style={{ color: '#e2e8f0' }}>
+                                    #{traslado.id}
                                   </span>
                                   {reciente && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
+                                    <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-xs border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
                                       Reciente
                                     </span>
                                   )}
                                   {traslado.usar_bodega_transito && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs border" style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)', color: '#a855f7', borderColor: 'rgba(168, 85, 247, 0.2)' }}>
-                                      Con tránsito
+                                    <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-xs border" style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)', color: '#a855f7', borderColor: 'rgba(168, 85, 247, 0.2)' }}>
+                                      Tránsito
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-sm mt-1" style={{ color: '#cbd5e1' }}>
+                                <div className="text-[10px] sm:text-xs sm:text-sm mt-0.5 sm:mt-1" style={{ color: '#cbd5e1' }}>
                                   <span className="font-medium">{obtenerNombreBodega(traslado.bodega_origen_id)}</span>
-                                  <span className="mx-2">→</span>
+                                  <span className="mx-1 sm:mx-2">→</span>
                                   <span className="font-medium">{obtenerNombreBodega(traslado.bodega_destino_id)}</span>
                                 </div>
-                                <div className="flex items-center gap-4 mt-2 text-sm">
-                                  <div className="flex items-center gap-1" style={{ color: '#cbd5e1' }}>
-                                    <CubeIcon className="w-4 h-4" />
-                                    <span>{totalProductos} producto{totalProductos !== 1 ? 's' : ''}</span>
+                                <div className="flex items-center gap-2 sm:gap-4 mt-1.5 sm:mt-2 text-[9px] sm:text-xs">
+                                  <div className="flex items-center gap-0.5 sm:gap-1" style={{ color: '#cbd5e1' }}>
+                                    <CubeIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                                    <span>{totalProductos} prod{totalProductos !== 1 ? 's' : ''}</span>
                                   </div>
                                   <div style={{ color: '#94a3b8' }}>
-                                    Total: {totalCantidad} unidad{totalCantidad !== 1 ? 'es' : ''}
+                                    Total: {totalCantidad} un{totalCantidad !== 1 ? 's' : ''}
                                   </div>
                                 </div>
                                 {traslado.observaciones && (
-                                  <div className="text-sm mt-1 truncate" style={{ color: '#94a3b8' }}>
+                                  <div className="text-[9px] sm:text-xs mt-1 truncate" style={{ color: '#94a3b8' }}>
                                     {traslado.observaciones}
                                   </div>
                                 )}
                               </div>
                             </div>
-                            <div className="text-right ml-4 flex-shrink-0 flex flex-col gap-2">
-                              <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs border" style={estadoStyle}>
-                                <estadoInfo.icono className="w-3 h-3" />
-                                {estadoInfo.texto}
+                            <div className="text-right flex-shrink-0 flex flex-col gap-1.5 sm:gap-2">
+                              <div className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-xs border" style={estadoStyle}>
+                                <estadoInfo.icono className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                <span className="hidden xs:inline">{estadoInfo.texto}</span>
                               </div>
                               {fechaEnvio && (
-                                <div className="text-xs" style={{ color: '#94a3b8' }}>
+                                <div className="text-[9px] sm:text-xs" style={{ color: '#94a3b8' }}>
                                   {toRelative(fechaEnvio)}
                                 </div>
                               )}
@@ -488,17 +471,17 @@ export default function RecibirTraslado({
 
                         {/* Detalles expandibles */}
                         {mostrarDetalles === traslado.id && traslado.lineas?.length > 0 && (
-                          <div className="px-4 pb-4 border-t" style={{ backgroundColor: '#1e293b', borderColor: '#334155' }}>
-                            <div className="text-xs font-semibold mb-2 mt-3" style={{ color: '#cbd5e1' }}>
+                          <div className="px-3 sm:px-4 pb-3 sm:pb-4 border-t" style={{ backgroundColor: '#1e293b', borderColor: '#334155' }}>
+                            <div className="text-[10px] sm:text-xs font-semibold mb-1.5 sm:mb-2 mt-2 sm:mt-3" style={{ color: '#cbd5e1' }}>
                               Productos en este traslado:
                             </div>
                             <div className="space-y-1">
                               {traslado.lineas.map((linea, idx) => (
-                                <div key={idx} className="flex justify-between items-center text-sm py-1">
-                                  <span style={{ color: '#e2e8f0' }}>{linea.producto_nombre || `Producto ${linea.producto}`}</span>
-                                  <div className="flex items-center gap-3" style={{ color: '#cbd5e1' }}>
-                                    <span>Cantidad: {linea.cantidad}</span>
-                                    <span style={{ color: '#f59e0b' }}>Pendiente: {linea.pendiente_por_recibir || 0}</span>
+                                <div key={idx} className="flex justify-between items-center text-[10px] sm:text-xs py-1">
+                                  <span className="truncate flex-1 mr-2" style={{ color: '#e2e8f0' }}>{linea.producto_nombre || `Producto ${linea.producto}`}</span>
+                                  <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0" style={{ color: '#cbd5e1' }}>
+                                    <span>Cant: {linea.cantidad}</span>
+                                    <span style={{ color: '#f59e0b' }}>Pend: {linea.pendiente_por_recibir || 0}</span>
                                   </div>
                                 </div>
                               ))}
@@ -514,12 +497,10 @@ export default function RecibirTraslado({
                               e.stopPropagation();
                               setMostrarDetalles(mostrarDetalles === traslado.id ? null : traslado.id);
                             }}
-                            className="w-full px-4 py-2 text-xs transition-colors border-t"
+                            className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-[9px] sm:text-xs transition-colors border-t touch-target hover:text-slate-200 hover:bg-slate-800"
                             style={{ color: '#94a3b8', borderColor: '#1e293b' }}
-                            onMouseEnter={(e) => { e.currentTarget.style.color = '#e2e8f0'; e.currentTarget.style.backgroundColor = '#1e293b'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.backgroundColor = 'transparent'; }}
                           >
-                            {mostrarDetalles === traslado.id ? '▲ Ocultar productos' : '▼ Ver productos'}
+                            {mostrarDetalles === traslado.id ? '▲ Ocultar' : '▼ Ver productos'}
                           </button>
                         )}
                       </div>
@@ -531,11 +512,11 @@ export default function RecibirTraslado({
 
             {/* Resumen de selección */}
             {totalSeleccionados > 0 && (
-              <div className="rounded-lg p-4 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CheckCircleIcon className="w-5 h-5" style={{ color: '#3b82f6' }} />
-                    <span className="text-sm font-medium" style={{ color: '#3b82f6' }}>
+              <div className="rounded-lg p-2.5 sm:p-4 border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: '#3b82f6' }} />
+                    <span className="text-xs sm:text-sm font-medium truncate" style={{ color: '#3b82f6' }}>
                       {seleccionandoMultiple
                         ? `${totalSeleccionados} traslado${totalSeleccionados !== 1 ? 's' : ''} seleccionado${totalSeleccionados !== 1 ? 's' : ''}`
                         : `Traslado #${recibirForm.trasladoId} seleccionado`
@@ -546,12 +527,10 @@ export default function RecibirTraslado({
                     <button
                       type="button"
                       onClick={() => setTrasladosSeleccionados([])}
-                      className="text-xs underline transition-colors"
+                      className="text-[10px] sm:text-xs underline transition-colors flex-shrink-0 touch-target hover:text-blue-700"
                       style={{ color: '#2563eb' }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = '#1d4ed8'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = '#2563eb'}
                     >
-                      Limpiar selección
+                      Limpiar
                     </button>
                   )}
                 </div>
@@ -560,35 +539,31 @@ export default function RecibirTraslado({
           </div>
         )}
 
-        {/* Footer con botones */}
-        <div className="flex justify-end gap-3 pt-6 border-t" style={{ borderColor: '#1e293b' }}>
+        {/* Footer con botones responsive */}
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-2.5 md:gap-3 pt-3 sm:pt-4 md:pt-5 lg:pt-6 border-t" style={{ borderColor: '#1e293b' }}>
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-3 font-medium border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all"
+            className="px-4 sm:px-5 md:px-6 py-2.5 sm:py-2.5 md:py-3 text-xs sm:text-sm font-medium border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all touch-target hover:bg-slate-700 hover:border-slate-600"
             style={{ color: '#cbd5e1', backgroundColor: 'transparent', borderColor: '#334155' }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#334155'; e.currentTarget.style.borderColor = '#475569'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = '#334155'; }}
           >
             Cerrar
           </button>
           <button
             type="submit"
             disabled={recibirLoading || totalSeleccionados === 0}
-            className="px-8 py-3 text-white font-semibold rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-2.5 md:py-3 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all touch-target hover:bg-gradient-to-r hover:from-green-600 hover:to-green-500"
             style={{ background: 'linear-gradient(to right, #2563eb, #3b82f6)' }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #16a34a, #22c55e)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #2563eb, #3b82f6)'}
           >
             {recibirLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                Recibiendo...
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Recibiendo...</span>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <ArchiveBoxArrowDownIcon className="w-5 h-5" />
-                Recibir {seleccionandoMultiple && totalSeleccionados > 1 ? `${totalSeleccionados} traslados` : 'traslado'}
+              <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                <ArchiveBoxArrowDownIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Recibir {seleccionandoMultiple && totalSeleccionados > 1 ? `${totalSeleccionados} traslados` : 'traslado'}</span>
               </div>
             )}
           </button>

@@ -1,0 +1,254 @@
+/**
+ * SISTEMA DE DISEÑO RESPONSIVE - BODEGAS
+ * ========================================
+ * Variables CSS para espaciados, tipografía y breakpoints escalables
+ * Mobile-first approach con fluid typography
+ */
+
+:root {
+  /* ============================================
+     BREAKPOINTS (mobile-first)
+     ============================================ */
+  --bp-mobile-sm: 20rem;   /* 320px  - iPhone SE, Android compactos */
+  --bp-mobile-md: 30rem;   /* 480px  - Mobile estándar */
+  --bp-mobile-lg: 48rem;   /* 768px  - Tablet portrait */
+  --bp-tablet-lg: 64rem;   /* 1024px - Tablet landscape / laptop pequeño */
+  --bp-desktop: 80rem;     /* 1280px - Desktop estándar */
+  --bp-desktop-lg: 96rem;  /* 1536px - Desktop grande / 2K */
+  --bp-desktop-xl: 120rem; /* 1920px - Ultra-wide / 4K */
+
+  /* ============================================
+     ESPACIADOS ESCALABLES (clamp-based)
+     ============================================ */
+  /* Espaciados base que escalan con viewport */
+  --space-xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);   /* 4px - 8px */
+  --space-sm: clamp(0.5rem, 0.4rem + 0.5vw, 1rem);       /* 8px - 16px */
+  --space-md: clamp(0.75rem, 0.6rem + 0.75vw, 1.5rem);   /* 12px - 24px */
+  --space-lg: clamp(1rem, 0.8rem + 1vw, 2rem);           /* 16px - 32px */
+  --space-xl: clamp(1.5rem, 1.2rem + 1.5vw, 3rem);       /* 24px - 48px */
+  --space-2xl: clamp(2rem, 1.6rem + 2vw, 4rem);          /* 32px - 64px */
+
+  /* Espaciados específicos para componentes de bodegas */
+  --bodegas-padding-sm: clamp(0.75rem, 0.6rem + 0.75vw, 1.25rem);
+  --bodegas-padding-md: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+  --bodegas-padding-lg: clamp(1.25rem, 1rem + 1.25vw, 2rem);
+  --bodegas-padding-xl: clamp(1.5rem, 1.2rem + 1.5vw, 2.5rem);
+
+  /* Gap para grids y flexbox */
+  --gap-xs: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem);
+  --gap-sm: clamp(0.75rem, 0.6rem + 0.75vw, 1rem);
+  --gap-md: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+  --gap-lg: clamp(1.25rem, 1rem + 1.25vw, 2rem);
+
+  /* ============================================
+     TIPOGRAFÍA FLUIDA
+     ============================================ */
+  /* Tamaños de fuente con clamp() para escalado suave */
+  --text-xs-fluid: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);   /* 12px - 14px */
+  --text-sm-fluid: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);      /* 14px - 16px */
+  --text-base-fluid: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);      /* 16px - 18px */
+  --text-lg-fluid: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);     /* 18px - 20px */
+  --text-xl-fluid: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);      /* 20px - 24px */
+  --text-2xl-fluid: clamp(1.5rem, 1.25rem + 1.25vw, 2rem);       /* 24px - 32px */
+  --text-3xl-fluid: clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem);   /* 30px - 40px */
+
+  /* Font weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* ============================================
+     TOUCH TARGETS (mínimo 44px para mobile)
+     ============================================ */
+  --touch-target-min: clamp(2.75rem, 2.5rem + 1.25vw, 3.5rem);  /* 44px - 56px */
+  --touch-target-sm: clamp(2.5rem, 2.25rem + 1.25vw, 3rem);      /* 40px - 48px */
+  --touch-target-md: clamp(2.75rem, 2.5rem + 1.25vw, 3.5rem);    /* 44px - 56px */
+
+  /* ============================================
+     BORDER RADIUS ESCALABLE
+     ============================================ */
+  --radius-sm: clamp(0.375rem, 0.3rem + 0.375vw, 0.5rem);     /* 6px - 8px */
+  --radius-md: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem);        /* 8px - 12px */
+  --radius-lg: clamp(0.75rem, 0.6rem + 0.75vw, 1rem);         /* 12px - 16px */
+  --radius-xl: clamp(1rem, 0.8rem + 1vw, 1.25rem);            /* 16px - 20px */
+  --radius-2xl: clamp(1.25rem, 1rem + 1.25vw, 1.5rem);        /* 20px - 24px */
+
+  /* ============================================
+     ALTURAS DE MODAL ESCALABLES
+     ============================================ */
+  --modal-height-sm: clamp(400px, 50vh, 600px);
+  --modal-height-md: clamp(500px, 70vh, 800px);
+  --modal-height-lg: clamp(600px, 85vh, 900px);
+
+  /* ============================================
+     SIDEBAR WIDTHS
+     ============================================ */
+  --sidebar-width-collapsed: clamp(3.5rem, 3rem + 2.5vw, 5rem);  /* 56px - 80px */
+  --sidebar-width-expanded: clamp(14rem, 12rem + 10vw, 20rem);   /* 224px - 320px */
+
+  /* ============================================
+     TRANSITION DURATIONS (para touch)
+     ============================================ */
+  --transition-fast: 150ms;
+  --transition-base: 200ms;
+  --transition-slow: 300ms;
+
+  /* ============================================
+     Z-INDEX SCALE
+     ============================================ */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* ============================================
+   MEDIA QUERIES (para referencia en JS)
+   ============================================ */
+/* Mobile pequeño: 320px - 480px */
+@media (min-width: 20rem) and (max-width: 30rem) {
+  :root {
+    --bodegas-container-padding: var(--space-sm);
+  }
+}
+
+/* Mobile estándar: 481px - 767px */
+@media (min-width: 30.0625rem) and (max-width: 47.9375rem) {
+  :root {
+    --bodegas-container-padding: var(--space-md);
+  }
+}
+
+/* Tablet portrait: 768px - 1023px */
+@media (min-width: 48rem) and (max-width: 63.9375rem) {
+  :root {
+    --bodegas-container-padding: var(--space-md);
+  }
+}
+
+/* Tablet landscape / laptop pequeño: 1024px - 1279px */
+@media (min-width: 64rem) and (max-width: 79.9375rem) {
+  :root {
+    --bodegas-container-padding: var(--space-lg);
+  }
+}
+
+/* Desktop estándar: 1280px - 1535px */
+@media (min-width: 80rem) and (max-width: 95.9375rem) {
+  :root {
+    --bodegas-container-padding: var(--space-lg);
+  }
+}
+
+/* Desktop grande / 2K: 1536px - 1919px */
+@media (min-width: 96rem) and (max-width: 119.9375rem) {
+  :root {
+    --bodegas-container-padding: var(--space-xl);
+  }
+}
+
+/* Ultra-wide / 4K: 1920px+ */
+@media (min-width: 120rem) {
+  :root {
+    --bodegas-container-padding: var(--space-xl);
+    --text-base-fluid: clamp(1rem, 0.8rem + 1vw, 1.25rem);
+  }
+}
+
+/* ============================================
+   UTILIDADES PARA TOUCH
+   ============================================ */
+@media (hover: none) and (pointer: coarse) {
+  /* Dispositivos táctiles */
+  :root {
+    --transition-base: 250ms;
+    --transition-slow: 400ms;
+  }
+
+  /* Aumentar áreas de toque en dispositivos móviles */
+  .touch-target {
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+  }
+
+  /* Mejorar transiciones en touch */
+  button, a, .clickable {
+    transition: all var(--transition-base) ease-out;
+  }
+}
+
+/* ============================================
+   OPTIMIZACIONES PARA ORIENTACIÓN
+   ============================================ */
+/* Landscape en móviles */
+@media (max-width: 63.9375rem) and (orientation: landscape) {
+  :root {
+    --modal-height-md: clamp(350px, 90vh, 600px);
+  }
+}
+
+/* Portrait en tablets */
+@media (min-width: 48rem) and (max-width: 63.9375rem) and (orientation: portrait) {
+  :root {
+    --sidebar-width-collapsed: 4rem;
+  }
+}
+
+/* ============================================
+   CLASES UTILITARIAS
+   ============================================ */
+.bodegas-container {
+  padding: var(--bodegas-container-padding);
+}
+
+.text-fluid-xs { font-size: var(--text-xs-fluid); }
+.text-fluid-sm { font-size: var(--text-sm-fluid); }
+.text-fluid-base { font-size: var(--text-base-fluid); }
+.text-fluid-lg { font-size: var(--text-lg-fluid); }
+.text-fluid-xl { font-size: var(--text-xl-fluid); }
+.text-fluid-2xl { font-size: var(--text-2xl-fluid); }
+
+.touch-friendly {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+}
+
+.gap-scalable {
+  gap: var(--gap-md);
+}
+
+.padding-scalable {
+  padding: var(--bodegas-padding-md);
+}
+
+/* ============================================
+   ANIMACIONES SUAVES PARA RESPONSIVE
+   ============================================ */
+@media (prefers-reduced-motion: no-preference) {
+  .smooth-scale {
+    transition: transform var(--transition-base) ease-out;
+  }
+
+  .smooth-scale:hover {
+    transform: scale(1.05);
+  }
+
+  .smooth-scale:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Deshabilitar animaciones si el usuario prefiere */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

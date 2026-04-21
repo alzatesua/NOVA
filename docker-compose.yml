@@ -8,8 +8,9 @@ services:
       POSTGRES_PASSWORD: zuleta18
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # PUERTO COMENTADO POR SEGURIDAD - No exponer PostgreSQL públicamente
+    # ports:
+    #   - "5432:5432"
     networks:
       - nova_network
     healthcheck:
@@ -82,6 +83,34 @@ services:
         reservations:
           cpus: '1'
           memory: 1G
+
+  # Backend desarrollo con auto-recarga
+  backend-dev:
+    build: ./backend
+    container_name: nova-backend-dev
+    env_file:
+      - ./backend/.env
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/1
+      - DEBUG=1
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - staticfiles:/app/staticfiles
+      - ./backend/media:/app/media
+    networks:
+      - nova_network
+    ports:
+      - "8001:8000"
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    profiles:
+      - dev
+    restart: unless-stopped
 
   backend2:
     build: ./backend
@@ -188,8 +217,17 @@ services:
       - /etc/letsencrypt/live/nova.dagi.co/fullchain.pem:/etc/ssl/certs/fullchain.pem
       - /etc/letsencrypt/live/nova.dagi.co/privkey.pem:/etc/ssl/private/privkey.pem
       - /var/www/certbot:/var/www/certbot
+      - /etc/letsencrypt/live/cobrappx.online/fullchain.pem:/etc/ssl/certs/cobrappx_fullchain.pem
+      - /etc/letsencrypt/live/cobrappx.online/privkey.pem:/etc/ssl/private/cobrappx_privkey.pem
+      - /etc/letsencrypt/live/admin.cobrappx.online/fullchain.pem:/etc/ssl/certs/admin_cobrappx_fullchain.pem
+      - /etc/letsencrypt/live/admin.cobrappx.online/privkey.pem:/etc/ssl/private/admin_cobrappx_privkey.pem
+      - /etc/letsencrypt/live/cliente.cobrappx.online/fullchain.pem:/etc/ssl/certs/cliente_cobrappx_fullchain.pem
+      - /etc/letsencrypt/live/cliente.cobrappx.online/privkey.pem:/etc/ssl/private/cliente_cobrappx_privkey.pem
+      - /etc/letsencrypt/live/cliente.cobrappx.online/fullchain.pem:/etc/ssl/certs/wildcard_cliente_fullchain.pem
+      - /etc/letsencrypt/live/cliente.cobrappx.online/privkey.pem:/etc/ssl/private/wildcard_cliente_privkey.pem
     networks:
       - nova_network
+      - cliente_cobrappx_network
     deploy:
       resources:
         limits:
@@ -207,3 +245,5 @@ volumes:
 networks:
   nova_network:
     driver: bridge
+  cliente_cobrappx_network:
+    external: true

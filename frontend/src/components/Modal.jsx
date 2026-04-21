@@ -4,69 +4,45 @@ import { createPortal } from 'react-dom';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 
 export default function Modal({ children, onClose }) {
-  // Prevenir propagación de scroll dentro del modal
-  const handleWheel = (e) => {
-    const target = e.currentTarget;
-    const isScrollingDown = e.deltaY > 0;
-    const isAtBottom = target.scrollHeight - target.scrollTop <= target.clientHeight;
-    const isAtTop = target.scrollTop === 0;
-
-    // Si estamos en el top y scrolleamos hacia arriba, o en el bottom y scrolleamos hacia abajo
-    if ((isAtTop && !isScrollingDown) || (isAtBottom && isScrollingDown)) {
-      e.preventDefault();
-    }
-  };
-
   // Prevenir scroll en el backdrop
   const handleBackdropClick = (e) => {
     e.stopPropagation();
     onClose();
   };
 
-  // Prevenir propagación de eventos de touch/scroll
-  const handleTouchMove = (e) => {
-    const target = e.currentTarget;
-    const isScrollingDown = e.touches[0].clientY < (e.touches[1]?.clientY || 0);
-    const isAtBottom = target.scrollHeight - target.scrollTop <= target.clientHeight;
-    const isAtTop = target.scrollTop === 0;
-
-    if ((isAtTop && !isScrollingDown) || (isAtBottom && isScrollingDown)) {
-      e.preventDefault();
-    }
+  // Prevenir propagación de eventos dentro del modal
+  const handleModalClick = (e) => {
+    e.stopPropagation();
   };
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4"
+      className="fixed inset-0 z-50 bg-black bg-opacity-50"
       role="dialog"
       aria-modal="true"
       onClick={handleBackdropClick}
-      onWheel={e => e.stopPropagation()}
-      onTouchMove={e => e.stopPropagation()}
       style={{ backdropFilter: 'blur(4px)' }}
     >
       <div
         className="
           relative
-          rounded-2xl
+          rounded-none
+          sm:rounded-2xl
           shadow-2xl
-          w-full
-          max-w-sm
-          sm:max-w-2xl
-          md:max-w-5xl
-          lg:max-w-screen-xl
-          xl:max-w-screen-2xl
-          max-h-[85vh]
+          w-screen
+          h-screen
+          sm:absolute
+          sm:inset-0
+          sm:inset-x-0
+          sm:inset-y-0
           overflow-y-auto
         "
         style={{
           backgroundColor: '#0B0D26',
-          border: '1px solid',
+          border: 'sm:1px solid',
           borderColor: '#1a1d3d'
         }}
-        onClick={e => e.stopPropagation()}
-        onWheel={handleWheel}
-        onTouchMove={handleTouchMove}
+        onClick={handleModalClick}
       >
         {/* Estilos para animaciones de destellos */}
         <style>{`
@@ -135,18 +111,7 @@ export default function Modal({ children, onClose }) {
         </div>
 
         {/* Contenido */}
-        <div className="relative z-10 p-4 sm:p-5 lg:p-6">
-          {/* CERRAR */}
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute top-3 sm:top-4 right-3 sm:right-4 p-1 rounded-full transition-opacity hover:opacity-70 focus:outline-none"
-            style={{ color: '#94a3b8' }}
-            aria-label="Cerrar"
-          >
-            <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-          </button>
-
+        <div className="relative z-10 p-0 sm:p-0 md:p-0 lg:p-0 h-full sm:h-auto overflow-y-auto w-full">
           {children}
         </div>
       </div>
