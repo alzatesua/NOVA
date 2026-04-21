@@ -257,11 +257,6 @@ Este proyecto es software propietario. Todos los derechos reservados.
 
 - **Equipo Nova** - Desarrollo inicial
 
-## Soporte
-
-Para soporte técnico, contactar:
-- Email: support@nova.dagi.co
-- Web: https://nova.dagi.co
 
 ---
 
