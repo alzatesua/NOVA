@@ -300,8 +300,8 @@ export default function AjustarExistencia({
       {/* Header */}
       <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 md:mb-5">
         <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg" style={{
-          width: 'clamp(2rem, 5vw, 2.5rem)',
-          height: 'clamp(2rem, 5vw, 2.5rem)',
+          width: 'calc(clamp(2rem, 5vw, 2.5rem) + 10px)',
+          height: 'calc(clamp(2rem, 5vw, 2.5rem) + 10px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -310,7 +310,7 @@ export default function AjustarExistencia({
           <SparklesIcon className="w-4 h-4 text-white" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm sm:text-base md:text-lg font-bold text-slate-800 dark:!text-slate-100 leading-tight">Ajuste de inventario</h3>
+          <h3 className="text-sm sm:text-base md:text-lg font-bold text-slate-800 dark:!text-slate-100 leading-tight" style={{ marginTop: '10px' }}>Ajuste de inventario</h3>
           <p className="text-[10px] sm:text-xs text-slate-600 dark:!text-slate-400 line-clamp-1 sm:line-clamp-2">Modifica inventarios con búsqueda inteligente por código de barras</p>
         </div>
       </div>

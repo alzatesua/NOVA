@@ -201,7 +201,7 @@ export default function RealizarTraslado({
           <ArrowPathRoundedSquareIcon className="w-5 h-5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-base sm:text-lg md:text-xl font-bold leading-tight" style={{ color: '#e2e8f0' }}>
+          <h3 className="text-base sm:text-lg md:text-xl font-bold leading-tight" style={{ color: '#e2e8f0', marginTop: '20px' }}>
             {mostrarOpcionRecibir ? 'Gestión de Traslados' : 'Realizar Traslado'}
           </h3>
           <p className="text-xs sm:text-sm line-clamp-2" style={{ color: '#94a3b8' }}>

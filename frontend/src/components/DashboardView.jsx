@@ -421,7 +421,7 @@ export default function DashboardView() {
             grid-template-columns: repeat(2, 1fr) !important;
           }
         }
-        @media (max-width: 480px) {
+        @media (max-width: 480px) {DashboardView
           .login-stats-grid {
             grid-template-columns: 1fr !important;
           }

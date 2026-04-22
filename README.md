@@ -1,17 +1,17 @@
-# 🛍️ Nova - Sistema de Gestión Comercial Multi-Tenant
+# Nova - Sistema de Gestión Comercial Multi-Tenant
 
 **Nova** es un sistema ERP/comercial completo diseñado para la gestión integral de tiendas y puntos de venta, con arquitectura **multi-tenant** que permite a cada tienda operar con su base de datos independiente de forma totalmente aislada.
 
-## 🎯 Características Principales
+## Características Principales
 
-### 💼 Gestión de Inventario y Bodegas
+### Gestión de Inventario y Bodegas
 - **Múltiples bodegas y sucursales** - Gestión completa de ubicaciones de inventario
 - **Traslados entre bodegas** - Transferencia de productos con control de stock
 - **Control de stock en tiempo real** - Actualización inmediata de existencias
 - **Kardex de movimientos** - Historial completo de movimientos de productos
 - **Interfaz responsive** - Optimizado para móviles, tablets y desktop
 
-### 🧾 Facturación POS (Punto de Venta)
+### Facturación POS (Punto de Venta)
 - **Facturación electrónica completa** - Sistema POS robusto
 - **Múltiples formas de pago** - Efectivo, tarjeta crédito/débito, transferencias
 - **Gestión de clientes** - Personas naturales y jurídicas
@@ -19,23 +19,23 @@
 - **Impresión de tickets** - Formatos térmicos (58mm/80mm)
 - **Anulación de facturas** - Con reversión automática de stock
 
-### 🏪 Gestión Multi-Tenant
+### Gestión Multi-Tenant
 - **Aislamiento completo** - Cada tienda con su propia base de datos
 - **Subdominios por tienda** - Identificación automática del tenant
 - **Usuarios y permisos** - Control de acceso por tienda
 
-### 🔐 Autenticación y Seguridad
+### Autenticación y Seguridad
 - **JWT tokens** - Con renovación automática
 - **Historial de login** - Auditoría de accesos
 - **Middleware de seguridad** - Protección XSS
 - **Validaciones robustas** - Prevención de SQL injection
 
-### 📊 Dashboard y Analíticas
+### Dashboard y Analíticas
 - **Métricas de ventas** - Datos en tiempo real
 - **Gráficos interactivos** - Visualización de datos
 - **Exportación de datos** - Excel/PDF
 
-## 🏗️ Arquitectura Técnica
+## Arquitectura Técnica
 
 ### Backend
 - **Framework:** Django 5.1.5 + Django REST Framework
@@ -57,7 +57,7 @@
 - **Alta disponibilidad:** Múltiples instancias backend
 - **Capacidad:** Optimizado para 65,000 peticiones simultáneas
 
-## 📱 Módulos del Sistema
+## Módulos del Sistema
 
 | Módulo | Descripción |
 |--------|-------------|
@@ -72,7 +72,7 @@
 | **Contacto** | Gestión de contactos |
 | **E-commerce** | Productos para tienda online |
 
-## 🚀 Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 ### Backend
 ```
@@ -101,7 +101,7 @@
 - Let's Encrypt (SSL)
 ```
 
-## 📦 Instalación
+## Instalación
 
 ### Requisitos Previos
 - Docker y Docker Compose
@@ -156,7 +156,7 @@ REDIS_URL=redis://redis:6379/1
 VITE_API_URL=https://nova.dagi.co/api
 ```
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 nova/
@@ -178,7 +178,7 @@ nova/
 └── README.md             # Este archivo
 ```
 
-## 🌐 API Endpoints
+## API Endpoints
 
 ### Autenticación
 - `POST /api/auth/login/` - Iniciar sesión
@@ -195,7 +195,7 @@ nova/
 - `POST /api/traslados/crear/` - Crear traslado
 - `POST /api/traslados/{id}/recibir/` - Recibir traslado
 
-## 📊 Características Técnicas Destacadas
+## Características Técnicas Destacadas
 
 ### Multi-Tenant Database Architecture
 - Cada tienda tiene su propia base de datos PostgreSQL
@@ -221,7 +221,7 @@ nova/
 - Validaciones a nivel backend
 - Transacciones atómicas
 
-## 🧪 Testing
+## Testing
 
 ### Ejecutar tests backend
 ```bash
@@ -234,14 +234,14 @@ cd frontend
 npm test
 ```
 
-## 📈 Métricas de Rendimiento
+## Métricas de Rendimiento
 
 - **Capacidad simultánea:** 65,000 usuarios
 - **Tiempo de respuesta:** < 200ms (promedio)
 - **Uptime:** 99.9%
 - **Disponibilidad:** Alta disponibilidad con múltiples instancias
 
-## 🤝 Contribución
+## Contribución
 
 1. Fork el proyecto
 2. Crear rama feature (`git checkout -b feature/NuevaFeature`)
@@ -249,15 +249,15 @@ npm test
 4. Push a la rama (`git push origin feature/NuevaFeature`)
 5. Abrir Pull Request
 
-## 📝 Licencia
+## Licencia
 
 Este proyecto es software propietario. Todos los derechos reservados.
 
-## 👥 Autores
+## Autores
 
 - **Equipo Nova** - Desarrollo inicial
 
-## 📞 Soporte
+## Soporte
 
 Para soporte técnico, contactar:
 - Email: support@nova.dagi.co

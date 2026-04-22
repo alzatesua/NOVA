@@ -1,8 +1,6 @@
 # Python
 __pycache__/
 *.pyc
-.env
-.env.*
 venv/
 
 # Django
@@ -14,9 +12,27 @@ staticfiles/
 node_modules/
 build/
 
+# Environment & secrets
+.env
+.env.*
+*.env
+
 # Docker
+docker-compose.yml
+docker-compose.dev.yml.example
 *.log
+
+# Config files
+*.conf
+
+# Claude & scripts
+.claude/
+*.sh
+
+# Database dumps
+*.sql
 
 # OS
 .DS_Store
-
+# Docs internos
+[A-Z]*.md

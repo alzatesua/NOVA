@@ -266,6 +266,7 @@ export default function Navbar({ rol: propRol, onViewChange, onLogout, currentVi
               src="/logo-nova.png"
               alt="Nova"
               className="inline-block cursor-pointer"
+              onClick={() => onViewChange('dashboard')}
               style={{
                 width: '120px',
                 height: 'auto',
