@@ -262,3 +262,10 @@ Este proyecto es software propietario. Todos los derechos reservados.
 
 **Última actualización:** Abril 2026  
 **Versión:** 1.0.0
+
+
+## 💖 Support
+
+If you enjoy this project, consider supporting my work:
+
+[![GitHub Sponsors](https://img.shields.io/badge/GitHub_Sponsors-💖_Sponsor-ff69b4)](https://github.com/sponsors/alzatesua)
